@@ -15,4 +15,10 @@ func init() {
 	if e != nil {
 		log.Fatalln("连接 Mysql 失败:", e)
 	}
+
+	if e = DB.AutoMigrate(
+		&LoginRecord{},
+	); e != nil {
+		log.Fatalln("AutoMigration failed:", e)
+	}
 }
