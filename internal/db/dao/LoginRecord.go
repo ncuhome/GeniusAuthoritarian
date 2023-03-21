@@ -5,7 +5,7 @@ import "gorm.io/gorm"
 type LoginRecord struct {
 	ID        uint `gorm:"primarykey"`
 	CreatedAt int64
-	Name      string
+	Name      string `gorm:"not null"`
 	Referer   string
 	Target    string
 }

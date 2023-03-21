@@ -18,6 +18,7 @@ func init() {
 
 	if e = DB.AutoMigrate(
 		&LoginRecord{},
+		&SiteWhiteList{},
 	); e != nil {
 		log.Fatalln("AutoMigration failed:", e)
 	}
