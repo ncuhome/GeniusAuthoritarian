@@ -1,5 +1,12 @@
 package main
 
-func main() {
+import (
+	"github.com/ncuhome/GeniusAuthoritarian/internal/router"
+	log "github.com/sirupsen/logrus"
+)
 
+func main() {
+	if e := router.E.Run(":80"); e != nil {
+		log.Fatalln("启动监听失败:", e)
+	}
 }
