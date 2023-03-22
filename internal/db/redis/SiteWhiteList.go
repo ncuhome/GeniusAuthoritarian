@@ -12,6 +12,7 @@ type SiteWhiteListHelper struct {
 	key string
 }
 
+// Add 自动剔除重复值，并发 99% 安全
 func (a SiteWhiteListHelper) Add(data ...string) error {
 	return Client.SAdd(context.Background(), a.key, data).Err()
 }
