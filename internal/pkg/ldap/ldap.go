@@ -46,12 +46,14 @@ func (c Client) PasswordModify(cn, oldPassword, newPassword string) error {
 	return e
 }
 
-func (c Client) Create(cn, sn, password string) error {
+func (c Client) Create(cn, sn, password string, ou []string) error {
 	req := ldap.NewAddRequest(c.UserIdentify(cn), nil)
 	req.Attribute("objectClass", []string{"top", "person", "organizationalPerson", "inetOrgPerson"})
 	req.Attribute("cn", []string{cn})
 	req.Attribute("sn", []string{sn})
-	req.Attribute("ou", []string{"中心组", "研发组"})
+	if ou != nil {
+		req.Attribute("ou", ou)
+	}
 	encryptPwd, e := c.GenerateSSHA(password)
 	if e != nil {
 		return e
