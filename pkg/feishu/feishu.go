@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"github.com/Mmx233/tool"
 	"net/http"
+	"net/url"
 )
 
 func New(ClientID, Secret string, client *http.Client) *FsLogin {
@@ -48,6 +49,14 @@ func (f FsLogin) tenantAccessToken() (string, error) {
 	}
 
 	return data.TenantAccessToken, nil
+}
+
+func (f FsLogin) LoginLink(state string) string {
+	return fmt.Sprintf(
+		"https://open.feishu.cn/open-apis/authen/v1/user_auth_page_beta?app_id=%s&redirect_uri=https%%3A%%2F%%2Fv.ncuos.com%%2Fapi%%2Fpublic%%2Flogin%%2Ffeishu%%2F&state=%s",
+		f.ClientID,
+		url.QueryEscape(state),
+	)
 }
 
 func (f FsLogin) GetUserAccessToken(code string) (*OAuth2AccessTokenResp, bool, error) {

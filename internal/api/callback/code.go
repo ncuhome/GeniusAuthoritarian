@@ -4,6 +4,8 @@ const (
 	cErrForm uint8 = iota + 1
 	cErrSiteNotAllow
 	cErrDBOperation
+	cErrRemoteOperationFailed
+	cErrUnauthorized
 )
 
 var (
@@ -21,5 +23,15 @@ var (
 		Code:       cErrDBOperation,
 		Msg:        "数据库操作失败，请反馈后端同学修复",
 		HttpStatus: 500,
+	}
+	ErrRemoteOperationFailed = &Msg{
+		Code:       cErrRemoteOperationFailed,
+		Msg:        "远程操作异常，请稍候重试",
+		HttpStatus: 500,
+	}
+	ErrUnauthorized = &Msg{
+		Code:       cErrUnauthorized,
+		Msg:        "身份校验失败，权限不足",
+		HttpStatus: 401,
 	}
 )
