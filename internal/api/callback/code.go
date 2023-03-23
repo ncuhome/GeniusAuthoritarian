@@ -26,7 +26,7 @@ var (
 	}
 	ErrRemoteOperationFailed = &Msg{
 		Code:       cErrRemoteOperationFailed,
-		Msg:        "远程操作异常，请稍候重试",
+		Msg:        "远程调用异常，请稍候重试",
 		HttpStatus: 500,
 	}
 	ErrUnauthorized = &Msg{

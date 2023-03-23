@@ -27,12 +27,9 @@ func FeishuLogin(c *gin.Context) {
 		return
 	}
 
-	_, valid, e := util.Feishu.GetUserAccessToken(f.Code)
+	_, e := util.Feishu.GetUser(f.Code)
 	if e != nil {
 		callback.Error(c, callback.ErrRemoteOperationFailed)
-		return
-	} else if !valid {
-		callback.Error(c, callback.ErrUnauthorized)
 		return
 	}
 
