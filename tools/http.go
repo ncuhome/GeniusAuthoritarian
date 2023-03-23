@@ -1,4 +1,4 @@
-package util
+package tools
 
 import (
 	"github.com/Mmx233/tool"

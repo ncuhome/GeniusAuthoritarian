@@ -84,15 +84,12 @@ func (f FsLogin) GetUserAccessToken(code string) (*OAuth2AccessTokenResp, bool, 
 	return &data, data.Code == 0, nil
 }
 
-func (f FsLogin) GetFeishuUserInfo(userAccessToken string) (*UserInfo, error) {
+func (f FsLogin) GetFeishuUserInfo(userAccessToken, userOpenID string) (*UserInfoResp, error) {
 	res, e := f.Http.GetRequest(&tool.DoHttpReq{
-		Url: "https://open.feishu.cn/connect/qrconnect/oauth2/user_info/",
+		Url: "https://open.feishu.cn/open-apis/contact/v3/users/" + userOpenID,
 		Header: map[string]interface{}{
 			"Authorization": "Bearer " + userAccessToken,
 		},
-		Query:  nil,
-		Body:   nil,
-		Cookie: nil,
 	})
 	if e != nil {
 		return nil, e
@@ -104,6 +101,6 @@ func (f FsLogin) GetFeishuUserInfo(userAccessToken string) (*UserInfo, error) {
 		return nil, fmt.Errorf("server return http status %d", res.StatusCode)
 	}
 
-	var data UserInfo
+	var data UserInfoResp
 	return &data, json.NewDecoder(res.Body).Decode(&data)
 }

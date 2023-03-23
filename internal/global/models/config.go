@@ -6,13 +6,19 @@ import (
 )
 
 type Config struct {
-	Mysql mysql.Config
-	Redis redis.Config
-	Ldap  Ldap
+	Mysql  mysql.Config
+	Redis  redis.Config
+	Ldap   Ldap
+	Feishu Feishu
 }
 
 type Ldap struct {
 	Addr     string // example: ldap://ldap.example.com:389
 	AdminCN  string
 	AdminPWD string
+}
+
+type Feishu struct {
+	ClientID string
+	Secret   string
 }
