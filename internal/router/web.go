@@ -5,6 +5,7 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/gorilla/websocket"
 	"github.com/ncuhome/GeniusAuthoritarian/internal/global"
+	"github.com/ncuhome/GeniusAuthoritarian/internal/util"
 	"github.com/ncuhome/GeniusAuthoritarian/tools"
 	"github.com/ncuhome/GeniusAuthoritarian/web"
 	log "github.com/sirupsen/logrus"
@@ -80,7 +81,7 @@ func frontendLocalDevHandler(c *gin.Context) {
 			header[k] = v[0]
 		}
 	}
-	res, e := tools.Http.Request(c.Request.Method, &tool.DoHttpReq{
+	res, e := util.Http.Request(c.Request.Method, &tool.DoHttpReq{
 		Url:    "http://127.0.0.1:5173" + c.Request.URL.Path,
 		Header: header,
 		Query:  query,

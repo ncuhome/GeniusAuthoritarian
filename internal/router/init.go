@@ -8,6 +8,7 @@ import (
 var E *gin.Engine
 
 func init() {
+	gin.SetMode(gin.ReleaseMode)
 	E = gin.Default()
 
 	router.Api(E.Group("/api"))
