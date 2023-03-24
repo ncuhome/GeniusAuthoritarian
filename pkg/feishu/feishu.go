@@ -14,6 +14,7 @@ func New(ClientID, Secret string, client *http.Client) *FsLogin {
 		appID:  ClientID,
 		secret: Secret,
 		Http:   tool.NewHttpTool(client),
+		tenant: newTenant(),
 	}
 }
 
@@ -21,9 +22,15 @@ type FsLogin struct {
 	appID  string
 	secret string
 	Http   *tool.Http
+
+	tenant *tenantTokenCache
 }
 
-func (f FsLogin) tenantAccessToken() (string, error) {
+func (f FsLogin) loadTenantAccessToken() (string, error) {
+	if token, exist := f.tenant.Load(); exist {
+		return token, nil
+	}
+
 	res, e := f.Http.PostRequest(&tool.DoHttpReq{
 		Url: "https://open.feishu.cn/open-apis/auth/v3/tenant_access_token/internal",
 		Body: map[string]string{
@@ -47,6 +54,8 @@ func (f FsLogin) tenantAccessToken() (string, error) {
 		return "", fmt.Errorf("server return http status %d", res.StatusCode)
 	}
 
+	f.tenant.Set(data.TenantAccessToken, data.Expire)
+
 	return data.TenantAccessToken, nil
 }
 
@@ -59,7 +68,7 @@ func (f FsLogin) LoginLink(state string) string {
 }
 
 func (f FsLogin) GetUser(code string) (*FsUser, error) {
-	tenantToken, e := f.tenantAccessToken()
+	tenantToken, e := f.loadTenantAccessToken()
 	if e != nil {
 		return nil, e
 	}
