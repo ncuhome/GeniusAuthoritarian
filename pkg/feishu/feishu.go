@@ -2,7 +2,6 @@ package feishu
 
 import (
 	"encoding/json"
-	"errors"
 	"fmt"
 	"github.com/Mmx233/tool"
 	"net/http"
@@ -18,6 +17,7 @@ func New(ClientID, Secret string, client *http.Client) *Fs {
 	}
 }
 
+// Fs 飞书缩写
 type Fs struct {
 	appID  string
 	secret string
@@ -39,7 +39,7 @@ func (f Fs) doRequest(Method string, data interface{}, opt *tool.DoHttpReq) erro
 	if e = json.NewDecoder(res.Body).Decode(container); e != nil {
 		return e
 	} else if container.Code != 0 {
-		return errors.New(container.Msg)
+		return fmt.Errorf("feishu api: %s", container.Msg)
 	}
 
 	if res.StatusCode > 299 {
@@ -70,7 +70,7 @@ func (f Fs) loadTenantAccessToken() (string, error) {
 	if e = json.NewDecoder(res.Body).Decode(&data); e != nil {
 		return "", e
 	} else if data.Code != 0 {
-		return "", errors.New(data.Msg)
+		return "", fmt.Errorf("feishu api: %s", data.Msg)
 	}
 
 	if res.StatusCode > 299 {
@@ -95,7 +95,6 @@ func (f Fs) GetUser(code string) (*FsUser, error) {
 	if e != nil {
 		return nil, e
 	}
-
 	var data FsUser
 	data.fs = f
 	return &data, f.doRequest("POST", &data, &tool.DoHttpReq{
@@ -111,12 +110,28 @@ func (f Fs) GetUser(code string) (*FsUser, error) {
 	})
 }
 
-/*func (f Fs) LoadDepartmentList() (map[string]interface{}, error) {
+func (f Fs) LoadDepartmentList() (map[string]string, error) {
 	tenantToken, e := f.loadTenantAccessToken()
 	if e != nil {
 		return nil, e
 	}
+	var data ListDepartmentResp
+	if e = f.doRequest("GET", &data, &tool.DoHttpReq{
+		Url: "https://open.feishu.cn/open-apis/contact/v3/departments/0/children",
+		Header: map[string]interface{}{
+			"Authorization": "Bearer " + tenantToken,
+			"Content-Type":  "application/json",
+		},
+		Query: map[string]interface{}{
+			"page_size": 40,
+		},
+	}); e != nil {
+		return nil, e
+	}
 
-	return nil, nil
+	var m = make(map[string]string, len(data.Items))
+	for _, v := range data.Items {
+		m[v.OpenDepartmentId] = v.Name
+	}
+	return m, nil
 }
-*/
