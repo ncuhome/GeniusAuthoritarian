@@ -10,6 +10,7 @@ type Config struct {
 	Redis  redis.Config
 	Ldap   Ldap
 	Feishu Feishu
+	Jwt    Jwt
 }
 
 type Ldap struct {
@@ -21,4 +22,8 @@ type Ldap struct {
 type Feishu struct {
 	ClientID string
 	Secret   string
+}
+
+type Jwt struct {
+	SignKey string
 }
