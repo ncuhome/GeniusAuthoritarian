@@ -40,7 +40,7 @@ func GenerateRefreshToken(name string, groups []string, valid time.Duration) (st
 
 func GenerateAuthToken(valid time.Duration) (string, error) {
 	now := time.Now()
-	id, e := redis.Jwt.NewAuthPoint(now.Unix())
+	id, e := redis.Jwt.NewAuthPoint(now.Unix(), valid)
 	if e != nil {
 		return "", e
 	}
