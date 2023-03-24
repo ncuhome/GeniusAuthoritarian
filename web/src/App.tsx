@@ -1,3 +1,4 @@
+import {BrowserRouter, Route, Routes} from "react-router-dom";
 import {Toaster} from "react-hot-toast";
 
 export default function App() {
@@ -9,5 +10,10 @@ export default function App() {
                 color: '#fff',
             },
         }}/>
+        <BrowserRouter>
+            <Routes>
+                <Route index element={undefined} />
+            </Routes>
+        </BrowserRouter>
     </>
 }
