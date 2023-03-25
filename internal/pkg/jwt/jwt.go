@@ -27,10 +27,11 @@ func ParseToken[C jwt.Claims](token string, target C) (claims C, valid bool, e e
 	return
 }
 
-func GenerateRefreshToken(name string, groups []string, valid time.Duration) (string, error) {
+// GenerateRefreshToken 生成有效期 15 天的 Refresh Token
+func GenerateRefreshToken(name string, groups []string) (string, error) {
 	return GenerateToken(&RefreshToken{
 		RegisteredClaims: jwt.RegisteredClaims{
-			ExpiresAt: jwt.NewNumericDate(time.Now().Add(valid)),
+			ExpiresAt: jwt.NewNumericDate(time.Now().Add(time.Hour * 24 * 15)),
 			IssuedAt:  jwt.NewNumericDate(time.Now()),
 		},
 		Name:   name,
@@ -38,8 +39,10 @@ func GenerateRefreshToken(name string, groups []string, valid time.Duration) (st
 	})
 }
 
-func GenerateAuthToken(valid time.Duration) (string, error) {
+// GenerateAuthToken 生成有效期 5 分钟的校验 Token
+func GenerateAuthToken() (string, error) {
 	now := time.Now()
+	valid := time.Minute * 5
 	id, e := redis.Jwt.NewAuthPoint(now.Unix(), valid)
 	if e != nil {
 		return "", e
@@ -59,4 +62,8 @@ func ParseRefreshToken(token string) (*RefreshToken, bool, error) {
 
 func ParseAuth(token string) (*AuthToken, bool, error) {
 	return ParseToken(token, &AuthToken{})
+}
+
+func DestroyAuthToken(cID uint64) error {
+	return redis.Jwt.DelAuthPoint(cID)
 }

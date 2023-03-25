@@ -3,7 +3,9 @@ package controllers
 import (
 	"github.com/gin-gonic/gin"
 	"github.com/ncuhome/GeniusAuthoritarian/internal/api/callback"
-	"github.com/ncuhome/GeniusAuthoritarian/internal/util"
+	"github.com/ncuhome/GeniusAuthoritarian/internal/api/models/response"
+	"github.com/ncuhome/GeniusAuthoritarian/internal/pkg/feishu"
+	"github.com/ncuhome/GeniusAuthoritarian/internal/pkg/jwt"
 )
 
 func GoFeishuLogin(c *gin.Context) {
@@ -15,7 +17,7 @@ func GoFeishuLogin(c *gin.Context) {
 		return
 	}
 
-	c.Redirect(302, util.Feishu.LoginLink(f.Callback))
+	c.Redirect(302, feishu.Api.LoginLink(f.Callback))
 }
 
 func FeishuLogin(c *gin.Context) {
@@ -27,17 +29,31 @@ func FeishuLogin(c *gin.Context) {
 		return
 	}
 
-	user, e := util.Feishu.GetUser(f.Code)
+	user, e := feishu.Api.GetUser(f.Code)
 	if e != nil {
 		callback.Error(c, callback.ErrRemoteOperationFailed)
 		return
 	}
 
-	/*token, e := auth.Jwt.GenerateToken(time.Hour * 24 * 7)
+	userInfo, e := user.Info()
 	if e != nil {
-		callback.Error(c, msg.InnerErr, e)
+		callback.Error(c, callback.ErrRemoteOperationFailed)
 		return
 	}
 
-	callback.Success(c, token)*/
+	groups := feishu.Departments.MultiSearch(userInfo.User.DepartmentIds)
+	if len(groups) == 0 {
+		callback.Error(c, callback.ErrFindUnit)
+		return
+	}
+
+	refreshToken, e := jwt.GenerateRefreshToken(user.Name, groups)
+	if e != nil {
+		callback.Error(c, callback.ErrUnexpected)
+		return
+	}
+
+	callback.Success(c, response.LoginSuccess{
+		RefreshToken: refreshToken,
+	})
 }

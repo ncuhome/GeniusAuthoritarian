@@ -36,3 +36,7 @@ func (a *JwtHelper) VerifyAuthPoint(id uint64, unix int64) (bool, error) {
 	}
 	return v == fmt.Sprint(unix), nil
 }
+
+func (a *JwtHelper) DelAuthPoint(id uint64) error {
+	return Client.Del(context.Background(), a.authPointKey(id)).Err()
+}

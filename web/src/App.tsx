@@ -1,6 +1,8 @@
 import {BrowserRouter, Route, Routes} from "react-router-dom";
 import {Toaster} from "react-hot-toast";
 
+import {Home} from './pages'
+
 export default function App() {
     return <>
         <Toaster toastOptions={{
@@ -12,7 +14,7 @@ export default function App() {
         }}/>
         <BrowserRouter>
             <Routes>
-                <Route index element={undefined} />
+                <Route index element={<Home/>} />
             </Routes>
         </BrowserRouter>
     </>

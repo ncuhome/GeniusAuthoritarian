@@ -109,3 +109,14 @@ func (d *fsDepartments) Search(id string) (string, bool) {
 	n, ok := d.m[id]
 	return n, ok
 }
+
+func (d *fsDepartments) MultiSearch(id []string) []string {
+	var r []string
+	for _, i := range id {
+		v, ok := d.Search(i)
+		if ok {
+			r = append(r, v)
+		}
+	}
+	return r
+}

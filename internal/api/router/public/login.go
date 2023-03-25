@@ -8,5 +8,5 @@ import (
 func routerLogin(G *gin.RouterGroup) {
 	feishu := G.Group("feishu")
 	feishu.GET("/", controllers.GoFeishuLogin)
-	feishu.POST("/")
+	feishu.POST("/", controllers.FeishuLogin)
 }

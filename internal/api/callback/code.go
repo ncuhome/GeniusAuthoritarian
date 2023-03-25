@@ -6,6 +6,8 @@ const (
 	cErrDBOperation
 	cErrRemoteOperationFailed
 	cErrUnauthorized
+	cErrFindUnit
+	cErrUnexpected
 )
 
 var (
@@ -33,5 +35,15 @@ var (
 		Code:       cErrUnauthorized,
 		Msg:        "身份校验失败，权限不足",
 		HttpStatus: 401,
+	}
+	ErrFindUnit = &Msg{
+		Code:       cErrFindUnit,
+		Msg:        "找不到对应身份组",
+		HttpStatus: 401,
+	}
+	ErrUnexpected = &Msg{
+		Code:       cErrUnexpected,
+		Msg:        "发生预期外错误，，请反馈后端同学",
+		HttpStatus: 500,
 	}
 )
