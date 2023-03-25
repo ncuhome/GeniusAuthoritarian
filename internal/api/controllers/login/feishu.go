@@ -3,7 +3,7 @@ package controllers
 import (
 	"github.com/gin-gonic/gin"
 	"github.com/ncuhome/GeniusAuthoritarian/internal/api/callback"
-	"github.com/ncuhome/GeniusAuthoritarian/internal/api/models/response"
+	"github.com/ncuhome/GeniusAuthoritarian/internal/pkg/cookie"
 	"github.com/ncuhome/GeniusAuthoritarian/internal/pkg/feishu"
 	"github.com/ncuhome/GeniusAuthoritarian/internal/pkg/jwt"
 )
@@ -53,7 +53,6 @@ func FeishuLogin(c *gin.Context) {
 		return
 	}
 
-	callback.Success(c, response.LoginSuccess{
-		RefreshToken: refreshToken,
-	})
+	cookie.SetRefreshToken(c, refreshToken)
+	callback.Default(c)
 }
