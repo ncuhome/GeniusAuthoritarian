@@ -6,24 +6,25 @@ import (
 )
 
 type Config struct {
-	Mysql  mysql.Config
-	Redis  redis.Config
-	Ldap   Ldap
-	Feishu Feishu
-	Jwt    Jwt
+	Mysql  mysql.Config `yaml:"mysql"`
+	Redis  redis.Config `yaml:"redis"`
+	Ldap   Ldap         `yaml:"ldap"`
+	Feishu Feishu       `yaml:"feishu"`
+	Jwt    Jwt          `yaml:"jwt"`
 }
 
 type Ldap struct {
-	Addr     string // example: ldap://ldap.example.com:389
-	AdminCN  string
-	AdminPWD string
+	// example: ldap://ldap.example.com:389
+	Addr     string `yaml:"addr"`
+	AdminCN  string `yaml:"adminCN"`
+	AdminPWD string `yaml:"adminPWD"`
 }
 
 type Feishu struct {
-	ClientID string
-	Secret   string
+	ClientID string `yaml:"clientID"`
+	Secret   string `yaml:"secret"`
 }
 
 type Jwt struct {
-	SignKey string
+	SignKey string `yaml:"signKey"`
 }
