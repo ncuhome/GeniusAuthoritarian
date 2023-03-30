@@ -17,16 +17,18 @@ func init() {
 		log.Fatalln("载入飞书部门失败:", e)
 	}
 	_, e = agent.AddRegular(&agent.Event{
-		T: "",
+		T: "0 5 * * *",
 		E: func() {
 			e := Departments.LoadRelation()
 			if e != nil {
 				log.Errorf("更新飞书部门异常: %v", e)
+				return
 			}
+			log.Infoln("飞书部门已刷新")
 		},
 	})
 	if e != nil {
-		log.Fatalln("添加飞书部门定时更新任务失败:", e)
+		log.Panicln("添加飞书部门定时更新任务失败:", e)
 	}
 }
 
