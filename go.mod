@@ -4,6 +4,7 @@ go 1.20
 
 require (
 	github.com/Mmx233/EnvConfig v0.0.2
+	github.com/Mmx233/config v0.1.0
 	github.com/Mmx233/tool v0.6.9
 	github.com/gin-gonic/gin v1.9.0
 	github.com/go-ldap/ldap/v3 v3.4.4
@@ -18,7 +19,6 @@ require (
 
 require (
 	github.com/Azure/go-ntlmssp v0.0.0-20220621081337-cb9428e4ac1e // indirect
-	github.com/Mmx233/config v0.0.9 // indirect
 	github.com/bytedance/sonic v1.8.0 // indirect
 	github.com/cespare/xxhash/v2 v2.1.2 // indirect
 	github.com/chenzhuoyu/base64x v0.0.0-20221115062448-fe3a3abad311 // indirect
