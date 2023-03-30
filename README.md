@@ -4,7 +4,9 @@
 
 ## :wrench: 程序调试
 
-首先需要运行  `mysql`、`redis`、`ldap`
+首先准备环境：  `mysql`、`redis`、`ldap`
+
+ldap 需要配置 `DOMAIN` 为 `ncuos.com`，`ORGANISATION` 为 `NCUHOME`
 
 预先准备：
 
