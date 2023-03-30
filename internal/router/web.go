@@ -15,7 +15,7 @@ import (
 )
 
 func frontendRouterCheck(c *gin.Context) bool {
-	return strings.HasPrefix(c.Request.URL.Path, "/api")
+	return !strings.HasPrefix(c.Request.URL.Path, "/api")
 }
 
 func frontendLocalDevHandler(c *gin.Context) {
