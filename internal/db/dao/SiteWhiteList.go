@@ -5,7 +5,7 @@ import "gorm.io/gorm"
 type SiteWhiteList struct {
 	ID           uint `gorm:"primarykey"`
 	CreatedAt    int64
-	DomainSuffix string `gorm:"not null;uniqueIndex"`
+	DomainSuffix string `gorm:"not null;uniqueIndex;type:varchar(50)"`
 }
 
 func (a *SiteWhiteList) Insert(db *gorm.DB) error {
