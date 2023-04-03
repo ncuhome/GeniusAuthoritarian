@@ -12,7 +12,7 @@ export const Home:FC = ()=>{
         }
     }}>
         <Box sx={{
-            width: '40%'
+            width: '20rem'
         }}>
             <ShowBar/>
         </Box>
