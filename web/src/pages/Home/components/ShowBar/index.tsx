@@ -21,6 +21,16 @@ export const ShowBar: FC = () => {
                 width: '15rem'
             }
         }}><img src={logo} alt={"家园工作室"}/></Box>
+        <Box sx={{
+            flexGrow: 1,
+            display: 'flex',
+            justifyContent: 'center',
+            alignItems: 'center',
+            boxSizing: 'border-box',
+            padding: '4rem'
+        }}>
+            {/*不知道放什么*/}
+        </Box>
     </Stack>
 }
 export default ShowBar

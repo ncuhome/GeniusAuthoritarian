@@ -1,7 +1,7 @@
 import {FC} from "react";
 
 import {Box, Stack} from "@mui/material"
-import {ShowBar} from "./components";
+import {ShowBar, LoginForm} from "./components";
 
 export const Home:FC = ()=>{
     return <Stack flexDirection={'row'} sx={{
@@ -17,9 +17,14 @@ export const Home:FC = ()=>{
             <ShowBar/>
         </Box>
         <Box sx={{
-            flexGrow: 1
+            flexGrow: 1,
+            display: 'flex',
+            justifyContent: 'center',
+            alignItems: 'center',
+            padding: '2rem 3rem',
+            boxSizing: 'border-box',
         }}>
-
+            <LoginForm/>
         </Box>
     </Stack>
 }
