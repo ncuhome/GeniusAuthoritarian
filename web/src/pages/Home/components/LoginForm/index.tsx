@@ -1,6 +1,9 @@
 import {FC} from "react";
 
-import {Stack, Box, Typography} from "@mui/material";
+import feishu from '@/assets/img/login/feishu.png'
+
+import {Stack, Box, Typography, ListItem, ListItemButton, ListItemText, ListItemIcon,
+    List} from "@mui/material";
 
 export const LoginForm:FC = ()=>{
     return <Box sx={{
@@ -16,7 +19,20 @@ export const LoginForm:FC = ()=>{
             minWidth: '100%',
             textAlign: 'center'
         }} justifyContent={'center'}>
-            <Typography variant={'h4'}>登录</Typography>
+            <Typography variant={'h4'} sx={{
+                marginBottom: '2rem'
+            }}>登录</Typography>
+
+            <List>
+                <ListItem disablePadding divider>
+                    <ListItemButton>
+                        <ListItemIcon><img style={{
+                            width: '1.8rem'
+                        }} src={feishu}/></ListItemIcon>
+                        <ListItemText primary={`飞书`} />
+                    </ListItemButton>
+                </ListItem>
+            </List>
         </Stack>
     </Box>
 }
