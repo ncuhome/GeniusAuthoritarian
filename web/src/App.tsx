@@ -3,6 +3,14 @@ import {Toaster} from "react-hot-toast";
 
 import {Home} from './pages'
 
+import { ThemeProvider, createTheme } from '@mui/material/styles';
+import CssBaseline from '@mui/material/CssBaseline';
+const darkTheme = createTheme({
+    palette: {
+        mode: 'dark',
+    },
+});
+
 export default function App() {
     return <>
         <Toaster toastOptions={{
@@ -12,10 +20,12 @@ export default function App() {
                 color: '#fff',
             },
         }}/>
-        <BrowserRouter>
-            <Routes>
-                <Route index element={<Home/>} />
-            </Routes>
-        </BrowserRouter>
+        <ThemeProvider theme={darkTheme}>
+            <BrowserRouter>
+                <Routes>
+                    <Route index element={<Home/>} />
+                </Routes>
+            </BrowserRouter>
+        </ThemeProvider>
     </>
 }
