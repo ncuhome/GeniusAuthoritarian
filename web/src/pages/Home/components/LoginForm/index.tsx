@@ -13,8 +13,8 @@ export const LoginForm:FC = ()=>{
         maxWidth: '100%',
         overflowY: 'auto',
         padding: '2rem 3rem',
-        boxShadow: '0 0 10px 0 #343434',
-        borderRadius: '1.2rem',
+        boxShadow: '0 0 4px 0 #343434',
+        borderRadius: '0.45rem',
     }}>
         <Stack sx={{
             minWidth: '100%',
