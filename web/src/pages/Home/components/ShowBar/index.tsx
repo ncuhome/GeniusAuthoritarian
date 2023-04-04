@@ -1,5 +1,6 @@
 import {FC} from "react";
 import logo from '@/assets/img/logo-lg.png'
+import bkg from '@/assets/img/bkg.png'
 
 import {Stack, Box} from "@mui/material";
 
@@ -27,9 +28,11 @@ export const ShowBar: FC = () => {
             justifyContent: 'center',
             alignItems: 'center',
             boxSizing: 'border-box',
-            padding: '4rem'
+            overflow: 'hidden'
         }}>
-            {/*不知道放什么*/}
+            <img style={{
+                maxWidth: '85%',
+            }} src={bkg} alt={'看板 MuSiMie'} title={"“走，上工！”"} />
         </Box>
     </Stack>
 }
