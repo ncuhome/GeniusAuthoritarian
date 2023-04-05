@@ -6,7 +6,7 @@ import (
 	"github.com/ncuhome/GeniusAuthoritarian/internal/api/router/public"
 )
 
-func Api(G *gin.RouterGroup) {
+func ApiV1(G *gin.RouterGroup) {
 	G.Use(middlewares.SiteFilter)
 
 	public.Router(G.Group("public"))
