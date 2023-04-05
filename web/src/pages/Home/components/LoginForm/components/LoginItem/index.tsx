@@ -6,11 +6,12 @@ interface Props {
     logo:string
     text:string
     disableDivider?:boolean
+    onClick: ()=>void
 }
 
-export const LoginItem:FC<Props> = ({logo,text,disableDivider})=>{
+export const LoginItem:FC<Props> = ({logo,text,disableDivider, onClick})=>{
     return <ListItem disablePadding divider={!disableDivider}>
-    <ListItemButton>
+    <ListItemButton onClick={onClick}>
         <ListItemIcon><img style={{
             width: '1.8rem'
         }} src={logo} alt={text}/></ListItemIcon>
