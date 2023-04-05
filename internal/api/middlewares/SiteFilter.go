@@ -8,6 +8,10 @@ import (
 )
 
 func SiteFilter(c *gin.Context) {
+	if c.Request.Method == "GET" {
+		return
+	}
+
 	ref, ok := c.GetQuery("referer")
 	if !ok || ref == "" {
 		callback.ErrorWithTip(c, callback.ErrSiteNotAllow, "授权参数缺失")
