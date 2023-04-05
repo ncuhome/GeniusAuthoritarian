@@ -1,20 +1,22 @@
 import axios from "axios";
 
-export const BaseURL = `${location.protocol}://${location.host}/api/`
+export const BaseURL = `/api/`
 export const BaseUrlV1 = `${BaseURL}v1/`
-
 
 const apiV1 = axios.create({
     baseURL: BaseUrlV1
 })
-apiV1.interceptors.response.use(undefined, (err:any):any=>{
-    if(err.name==="CanceledError") {
-        return new Promise(() => {})
+apiV1.interceptors.response.use(undefined, (err:any)=>{
+    switch (true) {
+        case err.name==="CanceledError":
+            break
+        case !err||!err.response||!err.response.data:
+            err.msg="网络异常，请检查网络设置"
+            break
+        default:
+            err.msg=err.response.data.msg
     }
-    if(!err)err={}
-    if(!err.response)err.response={}
-    if(!err.response.data)err.response.data={code:-1}
-    return err
+    return Promise.reject(err)
 })
 
 
