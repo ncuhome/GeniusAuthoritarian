@@ -8,7 +8,7 @@ import (
 	"github.com/ncuhome/GeniusAuthoritarian/internal/pkg/jwt"
 )
 
-func GoFeishuLogin(c *gin.Context) {
+func FeishuLoginLink(c *gin.Context) {
 	var f struct {
 		Callback string `json:"callback" form:"callback" binding:"required,uri"`
 	}
@@ -17,7 +17,9 @@ func GoFeishuLogin(c *gin.Context) {
 		return
 	}
 
-	c.Redirect(302, feishu.Api.LoginLink(f.Callback))
+	callback.Success(c, gin.H{
+		"url": feishu.Api.LoginLink(f.Callback),
+	})
 }
 
 func FeishuLogin(c *gin.Context) {
