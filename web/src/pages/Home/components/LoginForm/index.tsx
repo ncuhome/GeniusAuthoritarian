@@ -1,5 +1,6 @@
 import {FC} from "react";
-
+import {useNavigate} from "react-router-dom";
+import {useQuery, useMount} from "@hooks";
 import feishuLogo from '@/assets/img/login/feishu.png'
 import dingLogo from '@/assets/img/login/ding.png'
 
@@ -10,14 +11,23 @@ import {GetFeishuLoginUrl} from "@api/v1/login";
 import toast from "react-hot-toast";
 
 export const LoginForm:FC = ()=>{
+    const nav=useNavigate()
+    const [target]=useQuery('target', '')
+
     async function goFeishuLogin() {
         try {
-            const url=await GetFeishuLoginUrl("https://dashboard.ncuos.com/")
+            const url=await GetFeishuLoginUrl(target)
             window.open(url,'_blank')
         } catch ({msg}) {
             if(msg)toast.error(msg as string)
         }
     }
+
+    useMount(()=>{
+        if(!target){
+            //todo 跳转至错误页面
+        }
+    })
 
     return <Box sx={{
         backgroundColor: '#343434',
