@@ -11,7 +11,7 @@ apiV1.interceptors.response.use(undefined, (err:any)=>{
         case err.name==="CanceledError":
             break
         case !err||!err.response||!err.response.data:
-            err.msg="网络异常，请检查网络设置"
+            err.msg="网络异常"
             break
         default:
             err.msg=err.response.data.msg

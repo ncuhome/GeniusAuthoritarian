@@ -6,7 +6,19 @@ import dingLogo from '@/assets/img/login/ding.png'
 import {Stack, Box, Typography, List} from "@mui/material";
 import {LoginItem} from './components'
 
+import {GetFeishuLoginUrl} from "@api/v1/login";
+import toast from "react-hot-toast";
+
 export const LoginForm:FC = ()=>{
+    async function goFeishuLogin() {
+        try {
+            const url=await GetFeishuLoginUrl("https://dashboard.ncuos.com/")
+            window.open(url,'_blank')
+        } catch ({msg}) {
+            if(msg)toast.error(msg as string)
+        }
+    }
+
     return <Box sx={{
         backgroundColor: '#343434',
         width: '25rem',
@@ -25,8 +37,8 @@ export const LoginForm:FC = ()=>{
             }}>登录</Typography>
 
             <List>
-                <LoginItem logo={feishuLogo} text={'飞书'}/>
-                <LoginItem logo={dingLogo} text={'钉钉'} disableDivider/>
+                <LoginItem logo={feishuLogo} text={'飞书'} onClick={goFeishuLogin}/>
+                <LoginItem logo={dingLogo} text={'钉钉'} onClick={()=>{}} disableDivider/>
             </List>
         </Stack>
     </Box>

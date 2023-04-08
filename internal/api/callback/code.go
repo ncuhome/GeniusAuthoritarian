@@ -18,7 +18,7 @@ var (
 	}
 	ErrSiteNotAllow = &Msg{
 		Code:       cErrSiteNotAllow,
-		Msg:        "该站点不在授权范围，请联系管理员添加",
+		Msg:        "目标站点不在授权范围，请联系管理员添加",
 		HttpStatus: 403,
 	}
 	ErrDBOperation = &Msg{

@@ -4,6 +4,7 @@ import (
 	"github.com/ncuhome/GeniusAuthoritarian/internal/db/dao"
 	"github.com/ncuhome/GeniusAuthoritarian/internal/db/redis"
 	"gorm.io/gorm"
+	"net/url"
 	"strings"
 )
 
@@ -38,4 +39,13 @@ func (a SiteWhiteListSrv) Exist(domain string) (bool, error) {
 		}
 	}
 	return false, nil
+}
+
+func (a SiteWhiteListSrv) CheckUrl(link string) (bool, error) {
+	u, e := url.Parse(link)
+	if e != nil {
+		return false, e
+	}
+
+	return a.Exist(u.Hostname())
 }

@@ -6,6 +6,7 @@ import (
 	"github.com/ncuhome/GeniusAuthoritarian/internal/pkg/cookie"
 	"github.com/ncuhome/GeniusAuthoritarian/internal/pkg/feishu"
 	"github.com/ncuhome/GeniusAuthoritarian/internal/pkg/jwt"
+	"github.com/ncuhome/GeniusAuthoritarian/internal/service"
 )
 
 func FeishuLoginLink(c *gin.Context) {
@@ -14,6 +15,14 @@ func FeishuLoginLink(c *gin.Context) {
 	}
 	if e := c.ShouldBind(&f); e != nil {
 		callback.Error(c, callback.ErrForm)
+		return
+	}
+
+	if ok, e := service.SiteWhiteList.CheckUrl(f.Callback); e != nil {
+		callback.Error(c, callback.ErrDBOperation)
+		return
+	} else if !ok {
+		callback.Error(c, callback.ErrSiteNotAllow)
 		return
 	}
 

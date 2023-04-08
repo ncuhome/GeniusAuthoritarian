@@ -84,7 +84,7 @@ func (f Fs) loadTenantAccessToken() (string, error) {
 
 func (f Fs) LoginLink(state string) string {
 	return fmt.Sprintf(
-		"https://open.feishu.cn/open-apis/authen/v1/user_auth_page_beta?app_id=%s&redirect_uri=https%%3A%%2F%%2Fv.ncuos.com%%2Fapi%%2Fpublic%%2Flogin%%2Ffeishu%%2F&state=%s",
+		"https://open.feishu.cn/open-apis/authen/v1/user_auth_page_beta?app_id=%s&redirect_uri=https%%3A%%2F%%2Fv.ncuos.com%%2Ffeishu%%2F&state=%s",
 		f.appID,
 		url.QueryEscape(state),
 	)
