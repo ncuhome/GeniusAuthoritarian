@@ -14,8 +14,10 @@ export const Error:FC = ()=>{
     }}>
         <Box sx={{
             display: 'flex',
-            "&>svg": {
-                fontSize: '25rem',
+            "& svg": {
+                borderStyle: 'solid',
+                borderRadius: '50%',
+                fontSize: '12rem',
                 animation: 'error-page-fork .5s ease',
                 animationFillMode: 'forwards'
             }
