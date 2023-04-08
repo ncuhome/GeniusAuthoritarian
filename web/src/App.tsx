@@ -1,10 +1,9 @@
 import {BrowserRouter, Route, Routes} from "react-router-dom";
 import {Toaster} from "react-hot-toast";
 
-import {Home} from './pages'
+import {Home, Error} from './pages'
 
 import { ThemeProvider, createTheme } from '@mui/material/styles';
-import CssBaseline from '@mui/material/CssBaseline';
 const darkTheme = createTheme({
     palette: {
         mode: 'dark',
@@ -24,6 +23,7 @@ export default function App() {
             <BrowserRouter>
                 <Routes>
                     <Route index element={<Home/>} />
+                    <Route path={'error'} element={<Error/>} />
                 </Routes>
             </BrowserRouter>
         </ThemeProvider>

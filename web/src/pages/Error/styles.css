@@ -1,0 +1,17 @@
+@keyframes error-page-fork {
+    0% {
+        color: #ff5757;
+        transform: rotate(-60deg);
+    }
+    50% {
+        color: #fb2828;
+        transform: rotate(20deg);
+    }
+    75% {
+        transform: rotate(-10deg);
+    }
+    100% {
+        color: #fb2828;
+        transform: rotate(0deg);
+    }
+}
