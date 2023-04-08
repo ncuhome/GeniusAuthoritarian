@@ -23,7 +23,9 @@ export const Error:FC = ()=>{
             justifyContent: 'center',
         }}>
             <Box sx={{
-                height: '15.5rem',
+                display: 'flex',
+                alignItems: 'center',
+                height: '17rem',
                 "& svg": {
                     borderStyle: 'solid',
                     borderRadius: '50%',
