@@ -21,7 +21,8 @@
         "@components/*": ["./src/components/*"],
         "@hooks": ["./src/hooks"],
         "@api/*": ["./src/network/api/*"],
-      }
+        "@util/*": ["./src/util/*"]
+    }
     },
   "include": ["src"],
   "references": [{ "path": "./tsconfig.node.json" }]
