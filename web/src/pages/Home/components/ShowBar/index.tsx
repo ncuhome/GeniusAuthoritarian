@@ -2,15 +2,13 @@ import {FC} from "react";
 import logo from '@/assets/img/logo-lg.png'
 import bkg from '@/assets/img/bkg.png'
 
-import {Stack, Box} from "@mui/material";
+import {Stack, Box, Paper} from "@mui/material";
 
 export const ShowBar: FC = () => {
     return <Stack sx={{
         height: '100%',
         width: '100%',
-        boxShadow: '0 0 15px 0 #343434',
-        backgroundColor: '#343434'
-    }}>
+    }} component={Paper} elevation={5}>
         <Box sx={{
             padding: '2.5rem 4rem',
             display: 'flex',

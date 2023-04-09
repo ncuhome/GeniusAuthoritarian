@@ -7,7 +7,7 @@ import dingLogo from '@/assets/img/login/ding.png'
 
 import {ThrowError} from "@util/nav";
 
-import {Stack, Box, Typography, List} from "@mui/material";
+import {Stack, Box, Typography, List, Paper} from "@mui/material";
 import {LoginItem} from './components'
 
 import {GetFeishuLoginUrl} from "@api/v1/login";
@@ -32,19 +32,17 @@ export const LoginForm:FC = ()=>{
     })
 
     return <Box sx={{
-        backgroundColor: '#343434',
         width: '25rem',
         maxWidth: '100%',
         overflowY: 'auto',
         padding: '2rem 3rem',
-        boxShadow: '0 0 3px 0 #343434',
         borderRadius: '0.4rem',
-    }}>
+    }} component={Paper} elevation={5}>
         <Stack sx={{
             minWidth: '100%',
             textAlign: 'center'
         }} justifyContent={'center'}>
-            <Typography variant={'h4'} sx={{
+            <Typography variant={'h5'} sx={{
                 marginBottom: '2rem'
             }}>登录</Typography>
 
