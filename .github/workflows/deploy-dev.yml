@@ -21,9 +21,7 @@ jobs:
           echo VERSION=${URL}:${GITHUB_REF/refs\/tags\//} >> $GITHUB_OUTPUT
 
       - name: Build Site
-        run: |
-          pnpm i
-          pnpm run build
+        run: cd web && pnpm i && pnpm run build
 
       - name: Build Binary
         env:
