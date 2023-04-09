@@ -20,6 +20,11 @@ jobs:
           echo LATEST=${URL}:latest >> $GITHUB_OUTPUT
           echo VERSION=${URL}:${GITHUB_REF/refs\/tags\//} >> $GITHUB_OUTPUT
 
+      - name: Build Site
+        run: |
+          pnpm i
+          pnpm run build
+
       - name: Build Binary
         env:
           GOPRIVATE: github.com/MultiMx
