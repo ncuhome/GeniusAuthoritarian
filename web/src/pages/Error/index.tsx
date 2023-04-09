@@ -21,25 +21,31 @@ export const Error:FC = ()=>{
             flexDirection: 'column',
             textAlign: 'center',
             justifyContent: 'center',
+            "&>*": {
+                marginBottom: '1rem!important'
+            },
         }}>
             <Box sx={{
                 display: 'flex',
+                justifyContent: 'center',
                 alignItems: 'center',
-                height: '17rem',
                 "& svg": {
                     borderStyle: 'solid',
                     borderRadius: '50%',
-                    fontSize: '12rem',
+                    fontSize: '8rem',
                     animation: 'error-page-fork .5s ease',
                     animationFillMode: 'forwards',
+                    boxSizing: 'border-box'
                 }
             }}>
                 <ClearRounded/>
             </Box>
-            <Typography variant={'h4'}>{title}</Typography>
+            <Typography variant={'h4'} sx={{
+                fontWeight: 600,
+                letterSpacing: '0.25rem'
+            }}>{title}</Typography>
             {content?<Typography sx={{
                 color: '#999',
-                marginTop: '0.4rem',
                 wordBreak: 'break-all',
             }}>{content}</Typography>:undefined}
         </Box>
