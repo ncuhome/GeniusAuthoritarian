@@ -44,7 +44,7 @@ jobs:
         uses: MultiMx/K8sSetImageAction@v0.2
         with:
           backend: 'https://rancher.ncuhome.club'
-          token: ${{ secrets.CATTLE_TOKEN }}
+          token: ${{ secrets.CATTLE_TOKEN_LOCAL }}
           namespace: 'genius-auth'
           deployment: 'core'
           image: ${{ steps.image.outputs.VERSION }}
