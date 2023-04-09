@@ -24,7 +24,7 @@ jobs:
         env:
           GOPRIVATE: github.com/MultiMx
           CGO_ENABLED: 0
-        run: go build -gcflags=-trimpath=$GOPATH -asmflags=-trimpath=$GOPATH -ldflags '-extldflags "-static" -s -w' -o runner
+        run: go build -gcflags=-trimpath=$GOPATH -asmflags=-trimpath=$GOPATH -ldflags '-extldflags "-static" -s -w' -o runner ./cmd/GeniusAuthoritarian
 
       - name: Build the Docker image
         run: |
