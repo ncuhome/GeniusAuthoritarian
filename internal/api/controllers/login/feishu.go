@@ -27,7 +27,7 @@ func FeishuLoginLink(c *gin.Context) {
 	}
 
 	callback.Success(c, gin.H{
-		"url": feishu.Api.LoginLink(f.Callback),
+		"url": feishu.Api.LoginLink(c.Request.Host, f.Callback),
 	})
 }
 
