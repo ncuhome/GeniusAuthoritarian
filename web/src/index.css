@@ -19,7 +19,9 @@ body {
   background-color: #242424;
 }
 
-#root,body,html {
+#root,
+body,
+html {
   width: 100%;
   height: 100%;
 }

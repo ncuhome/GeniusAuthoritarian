@@ -1,5 +1,5 @@
-import {useEffect, EffectCallback} from "react";
+import { useEffect, EffectCallback } from "react";
 
 export const useMount = (callback: EffectCallback) => {
-    useEffect(callback, [])
-}
+  useEffect(callback, []);
+};
