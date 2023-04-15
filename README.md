@@ -19,7 +19,7 @@ ldap 需要配置 `DOMAIN` 为 `ncuos.com`，`ORGANISATION` 为 `NCUHOME`
 + 在 web 目录运行 `pnpm run dev`
 + 在 Goland 启动运行配置项
 
-## :paperclips: 使用
+## :gear: 使用
 
 ### 前端调用
 
@@ -34,6 +34,8 @@ window.open('https://v.ncuos.com/?target=https://example.ncuos.com/login', '_sel
 其中 `target` 为前端回调页面 url，登录系统会对域名进行白名单校验，可以附带自定义 path、query 或 hash
 
 ### 后端调用
+
+Golang 项目可以选择直接调用 Client [ncuhome/GeniusAuthoritarianClient](https://github.com/ncuhome/GeniusAuthoritarianClient)
 
 先接收到前端传来的 `token`，此为一次性身份校验令牌
 
