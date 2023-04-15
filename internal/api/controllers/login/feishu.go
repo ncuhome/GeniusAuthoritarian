@@ -6,6 +6,7 @@ import (
 	"github.com/ncuhome/GeniusAuthoritarian/internal/pkg/feishu"
 	"github.com/ncuhome/GeniusAuthoritarian/internal/pkg/jwt"
 	"github.com/ncuhome/GeniusAuthoritarian/internal/service"
+	log "github.com/sirupsen/logrus"
 	"net/url"
 )
 
@@ -69,12 +70,14 @@ func FeishuLogin(c *gin.Context) {
 
 	token, e := jwt.GenerateAuthToken()
 	if e != nil {
+		log.Debugln("jwt generate failed:", e)
 		callback.Error(c, callback.ErrUnexpected)
 		return
 	}
 
 	callbackUrl, e := url.Parse(f.Callback)
 	if e != nil {
+		log.Debugln(e)
 		callback.Error(c, callback.ErrUnexpected)
 		return
 	}
