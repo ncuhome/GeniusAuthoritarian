@@ -6,6 +6,6 @@ export function ThrowError(
   content?: string
 ) {
   let target = `/error?title=${encodeURI(title)}`;
-  if (content) target += encodeURI(content);
+  if (content) target += "&content=" + encodeURI(content);
   nav(target);
 }
