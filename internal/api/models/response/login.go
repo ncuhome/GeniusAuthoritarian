@@ -1,5 +1,5 @@
 package response
 
-type LoginSuccess struct {
-	RefreshToken string `json:"refresh_token"`
+type VerifyTokenSuccess struct {
+	Groups []string `json:"groups"`
 }
