@@ -13,15 +13,16 @@ export async function GetFeishuLoginUrl(target: string): Promise<string> {
   return url;
 }
 
-export async function FeishuLogin(code: string): Promise<string> {
+export async function FeishuLogin(code: string, callback: string): Promise<string> {
   const {
     data: {
-      data: {token},
+      data: {token, callback: callbackUrl},
     },
   } = await apiV1.post("public/login/feishu/", {
     data: {
       code,
+      callback,
     },
   });
-  return token
+  return callbackUrl
 }
