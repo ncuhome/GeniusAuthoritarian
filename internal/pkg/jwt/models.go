@@ -11,5 +11,6 @@ type RefreshToken struct {
 type AuthToken struct {
 	jwt.RegisteredClaims
 	ID     uint64   `json:"id"`
+	Name   string   `json:"name"`
 	Groups []string `json:"groups"`
 }

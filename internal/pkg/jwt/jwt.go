@@ -40,7 +40,7 @@ func GenerateRefreshToken(name string, groups []string) (string, error) {
 }
 
 // GenerateAuthToken 生成有效期 5 分钟的校验 Token
-func GenerateAuthToken(groups []string) (string, error) {
+func GenerateAuthToken(name string, groups []string) (string, error) {
 	now := time.Now()
 	valid := time.Minute * 5
 	id, e := redis.Jwt.NewAuthPoint(now.Unix(), valid)
@@ -53,6 +53,7 @@ func GenerateAuthToken(groups []string) (string, error) {
 			IssuedAt:  jwt.NewNumericDate(now),
 		},
 		ID:     id,
+		Name:   name,
 		Groups: groups,
 	})
 }

@@ -68,7 +68,7 @@ func FeishuLogin(c *gin.Context) {
 		return
 	}
 
-	token, e := jwt.GenerateAuthToken(groups)
+	token, e := jwt.GenerateAuthToken(userInfo.User.Name, groups)
 	if e != nil {
 		log.Debugln("jwt generate failed:", e)
 		callback.Error(c, callback.ErrUnexpected)
