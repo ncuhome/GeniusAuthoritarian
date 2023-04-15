@@ -3,7 +3,7 @@ package feishu
 import (
 	"github.com/ncuhome/GeniusAuthoritarian/internal/global"
 	"github.com/ncuhome/GeniusAuthoritarian/internal/pkg/agent"
-	"github.com/ncuhome/GeniusAuthoritarian/internal/util"
+	"github.com/ncuhome/GeniusAuthoritarian/pkg/departments"
 	"github.com/ncuhome/GeniusAuthoritarian/pkg/feishu"
 	"github.com/ncuhome/GeniusAuthoritarian/tools"
 	log "github.com/sirupsen/logrus"
@@ -41,32 +41,32 @@ type fsDepartmentsRelation struct {
 
 var fsDepartmentsRelationMap = []fsDepartmentsRelation{
 	{
-		keywords:   []string{util.UDev},
-		department: util.UDev,
+		keywords:   []string{departments.UDev},
+		department: departments.UDev,
 	},
 	{
-		keywords:   []string{util.UAdm, "HR", "管理线"},
-		department: util.UAdm,
+		keywords:   []string{departments.UAdm, "HR", "管理线"},
+		department: departments.UAdm,
 	},
 	{
-		keywords:   []string{util.UCe, "发展"},
-		department: util.UCe,
+		keywords:   []string{departments.UCe, "发展"},
+		department: departments.UCe,
 	},
 	{
-		keywords:   []string{util.UDes, "视觉"},
-		department: util.UDes,
+		keywords:   []string{departments.UDes, "视觉"},
+		department: departments.UDes,
 	},
 	{
-		keywords:   []string{util.UOp},
-		department: util.UOp,
+		keywords:   []string{departments.UOp},
+		department: departments.UOp,
 	},
 	{
-		keywords:   []string{util.UGame},
-		department: util.UGame,
+		keywords:   []string{departments.UGame},
+		department: departments.UGame,
 	},
 	{
-		keywords:   []string{util.UPm},
-		department: util.UPm,
+		keywords:   []string{departments.UPm},
+		department: departments.UPm,
 	},
 }
 

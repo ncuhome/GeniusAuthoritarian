@@ -1,4 +1,4 @@
-package util
+package departments
 
 const (
 	UDev  = "研发"
