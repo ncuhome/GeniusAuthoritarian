@@ -23,5 +23,11 @@ func (a SiteWhiteListHelper) Load() ([]string, error) {
 	if cmd.Err() != nil {
 		return nil, cmd.Err()
 	}
-	return t, cmd.ScanSlice(&t)
+	if e := cmd.ScanSlice(&t); e != nil {
+		return nil, e
+	}
+	if len(t) == 0 {
+		return nil, Nil
+	}
+	return t, nil
 }
