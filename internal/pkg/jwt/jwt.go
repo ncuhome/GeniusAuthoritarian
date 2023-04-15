@@ -61,7 +61,19 @@ func ParseRefreshToken(token string) (*RefreshToken, bool, error) {
 }
 
 func ParseAuth(token string) (*AuthToken, bool, error) {
-	return ParseToken(token, &AuthToken{})
+	claims, valid, e := ParseToken(token, &AuthToken{})
+	if e != nil || !valid {
+		return claims, false, e
+	}
+
+	valid, e = redis.Jwt.VerifyAuthPoint(claims.ID, claims.IssuedAt.Unix())
+	if e != nil {
+		if e == redis.Nil {
+			return claims, false, nil
+		}
+		return claims, false, e
+	}
+	return claims, valid, nil
 }
 
 func DestroyAuthToken(cID uint64) error {
