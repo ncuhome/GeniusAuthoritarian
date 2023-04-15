@@ -19,7 +19,7 @@ export const LoginForm: FC = () => {
   async function goFeishuLogin() {
     try {
       const url = await GetFeishuLoginUrl(target);
-      window.open(url, "_blank");
+      window.open(url, "_self");
     } catch ({ msg }) {
       if (msg) toast.error(msg as string);
     }
