@@ -10,7 +10,7 @@ import (
 var key = []byte(global.Config.Jwt.SignKey)
 
 func GenerateToken(claims jwt.Claims) (string, error) {
-	return jwt.NewWithClaims(jwt.SigningMethodEdDSA, claims).SignedString(key)
+	return jwt.NewWithClaims(jwt.SigningMethodHS256, claims).SignedString(key)
 }
 
 func ParseToken[C jwt.Claims](token string, target C) (claims C, valid bool, e error) {
