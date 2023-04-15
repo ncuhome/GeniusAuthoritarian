@@ -40,7 +40,7 @@ func GenerateRefreshToken(name string, groups []string) (string, error) {
 }
 
 // GenerateAuthToken 生成有效期 5 分钟的校验 Token
-func GenerateAuthToken() (string, error) {
+func GenerateAuthToken(groups []string) (string, error) {
 	now := time.Now()
 	valid := time.Minute * 5
 	id, e := redis.Jwt.NewAuthPoint(now.Unix(), valid)
@@ -52,7 +52,8 @@ func GenerateAuthToken() (string, error) {
 			ExpiresAt: jwt.NewNumericDate(now.Add(valid)),
 			IssuedAt:  jwt.NewNumericDate(now),
 		},
-		ID: id,
+		ID:     id,
+		Groups: groups,
 	})
 }
 
@@ -60,6 +61,7 @@ func ParseRefreshToken(token string) (*RefreshToken, bool, error) {
 	return ParseToken(token, &RefreshToken{})
 }
 
+// ParseAuth 解析后自动销毁
 func ParseAuth(token string) (*AuthToken, bool, error) {
 	claims, valid, e := ParseToken(token, &AuthToken{})
 	if e != nil || !valid {
@@ -73,7 +75,7 @@ func ParseAuth(token string) (*AuthToken, bool, error) {
 		}
 		return claims, false, e
 	}
-	return claims, valid, nil
+	return claims, valid, DestroyAuthToken(claims.ID)
 }
 
 func DestroyAuthToken(cID uint64) error {
