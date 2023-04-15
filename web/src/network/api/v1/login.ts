@@ -19,10 +19,8 @@ export async function FeishuLogin(code: string, callback: string): Promise<strin
       data: {token, callback: callbackUrl},
     },
   } = await apiV1.post("public/login/feishu/", {
-    data: {
-      code,
-      callback,
-    },
+    code,
+    callback,
   });
   return callbackUrl
 }
