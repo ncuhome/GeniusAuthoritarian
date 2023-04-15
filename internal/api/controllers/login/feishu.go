@@ -6,6 +6,7 @@ import (
 	"github.com/ncuhome/GeniusAuthoritarian/internal/pkg/feishu"
 	"github.com/ncuhome/GeniusAuthoritarian/internal/pkg/jwt"
 	"github.com/ncuhome/GeniusAuthoritarian/internal/service"
+	"net/url"
 )
 
 func FeishuLoginLink(c *gin.Context) {
@@ -32,10 +33,19 @@ func FeishuLoginLink(c *gin.Context) {
 
 func FeishuLogin(c *gin.Context) {
 	var f struct {
-		Code string `json:"code" form:"code" binding:"required"`
+		Code     string `json:"code" form:"code" binding:"required"`
+		Callback string `json:"callback" form:"callback" binding:"required,uri"`
 	}
 	if e := c.ShouldBind(&f); e != nil {
 		callback.Error(c, callback.ErrForm)
+		return
+	}
+
+	if ok, e := service.SiteWhiteList.CheckUrl(f.Callback); e != nil {
+		callback.Error(c, callback.ErrDBOperation)
+		return
+	} else if !ok {
+		callback.Error(c, callback.ErrSiteNotAllow)
 		return
 	}
 
@@ -63,7 +73,17 @@ func FeishuLogin(c *gin.Context) {
 		return
 	}
 
+	callbackUrl, e := url.Parse(f.Callback)
+	if e != nil {
+		callback.Error(c, callback.ErrUnexpected)
+		return
+	}
+	callbackQuery := callbackUrl.Query()
+	callbackQuery.Set("token", token)
+	callbackUrl.RawQuery = callbackQuery.Encode()
+
 	callback.Success(c, gin.H{
-		"token": token,
+		"token":    token,
+		"callback": callbackUrl.String(),
 	})
 }
