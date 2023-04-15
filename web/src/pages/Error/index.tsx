@@ -1,23 +1,24 @@
-import { FC } from "react";
-import { useQuery } from "@hooks";
+import {FC} from "react";
+import {useLocation} from "react-router-dom";
 import "./styles.css";
 
 import { Box, Typography } from "@mui/material";
 import { ClearRounded } from "@mui/icons-material";
 
 export const Error: FC = () => {
-  const [title] = useQuery("title", "未知错误");
-  const [content] = useQuery("content", "");
+    const loc = useLocation()
+    const title = loc.state?.title ?? "未知错误"
+    const content = loc.state?.content ?? ""
 
-  return (
-    <Box
-      sx={{
-        height: "100%",
-        width: "100%",
-        display: "flex",
-        justifyContent: "center",
-        alignItems: "center",
-      }}
+    return (
+        <Box
+            sx={{
+                height: "100%",
+                width: "100%",
+                display: "flex",
+                justifyContent: "center",
+                alignItems: "center",
+            }}
     >
       <Box
         sx={{
