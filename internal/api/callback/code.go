@@ -43,7 +43,7 @@ var (
 	}
 	ErrUnexpected = &Msg{
 		Code:       cErrUnexpected,
-		Msg:        "发生预期外错误，，请反馈后端同学",
+		Msg:        "发生预期外错误，请反馈后端同学",
 		HttpStatus: 500,
 	}
 )
