@@ -9,12 +9,13 @@ import (
 )
 
 func New(ClientID, Secret string, client *http.Client) *Fs {
-	return &Fs{
+	fs := &Fs{
 		appID:  ClientID,
 		secret: Secret,
 		Http:   tool.NewHttpTool(client),
-		tenant: newTenant(),
 	}
+	fs.tenant = NewTenant(fs)
+	return fs
 }
 
 // Fs 飞书缩写
@@ -23,7 +24,7 @@ type Fs struct {
 	secret string
 	Http   *tool.Http
 
-	tenant *tenantTokenCache
+	tenant *TenantToken
 }
 
 func (f Fs) doRequest(Method string, data interface{}, opt *tool.DoHttpReq) error {
@@ -49,11 +50,7 @@ func (f Fs) doRequest(Method string, data interface{}, opt *tool.DoHttpReq) erro
 	return nil
 }
 
-func (f Fs) loadTenantAccessToken() (string, error) {
-	if token, exist := f.tenant.Load(); exist {
-		return token, nil
-	}
-
+func (f Fs) GetTenantAccessToken() (*TenantAccessTokenResp, error) {
 	res, e := f.Http.PostRequest(&tool.DoHttpReq{
 		Url: "https://open.feishu.cn/open-apis/auth/v3/tenant_access_token/internal",
 		Body: map[string]string{
@@ -62,24 +59,21 @@ func (f Fs) loadTenantAccessToken() (string, error) {
 		},
 	})
 	if e != nil {
-		return "", e
+		return nil, e
 	}
 	defer res.Body.Close()
 
 	var data TenantAccessTokenResp
 	if e = json.NewDecoder(res.Body).Decode(&data); e != nil {
-		return "", e
+		return nil, e
 	} else if data.Code != 0 {
-		return "", fmt.Errorf("feishu api: %s", data.Msg)
+		return nil, fmt.Errorf("feishu api: %s", data.Msg)
 	}
 
 	if res.StatusCode > 299 {
-		return "", fmt.Errorf("server return http status %d", res.StatusCode)
+		return nil, fmt.Errorf("server return http status %d", res.StatusCode)
 	}
-
-	f.tenant.Set(data.TenantAccessToken, data.Expire)
-
-	return data.TenantAccessToken, nil
+	return &data, nil
 }
 
 func (f Fs) LoginLink(selfDomain, state string) string {
@@ -91,7 +85,7 @@ func (f Fs) LoginLink(selfDomain, state string) string {
 }
 
 func (f Fs) GetUser(code string) (*FsUser, error) {
-	tenantToken, e := f.loadTenantAccessToken()
+	tenantToken, e := f.tenant.Load()
 	if e != nil {
 		return nil, e
 	}
@@ -111,7 +105,7 @@ func (f Fs) GetUser(code string) (*FsUser, error) {
 }
 
 func (f Fs) LoadDepartmentList() (map[string]string, error) {
-	tenantToken, e := f.loadTenantAccessToken()
+	tenantToken, e := f.tenant.Load()
 	if e != nil {
 		return nil, e
 	}
