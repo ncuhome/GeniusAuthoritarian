@@ -21,6 +21,12 @@ ldap 需要配置 `DOMAIN` 为 `ncuos.com`，`ORGANISATION` 为 `NCUHOME`
 
 ## :gear: 使用
 
+### 为开放服务非入侵式添加鉴权
+
+目前只支持注入不跨域集群服务，见 [GeniusAuthoritarianGate](https://github.com/ncuhome/GeniusAuthoritarianGate)
+
+将会占用路径 `/login`，cookie `token`
+
 ### 前端调用
 
 需要先创建一个页面接收回调信息，回调页面需要处理 Query param `token`，然后用这个 token 请求自己项目后端的登录接口拿第二个 `token`
