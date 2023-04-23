@@ -1,4 +1,4 @@
-import {FC} from "react";
+import {FC, useMemo} from "react";
 import {useLocation} from "react-router-dom";
 import "./styles.css";
 
@@ -7,8 +7,8 @@ import { ClearRounded } from "@mui/icons-material";
 
 export const Error: FC = () => {
     const loc = useLocation()
-    const title = loc.state?.title ?? "未知错误"
-    const content = loc.state?.content ?? ""
+    const title = useMemo(() => (loc.state && loc.state.title) ? loc.state.title : "未知错误", [loc.state])
+    const content = useMemo(() => (loc.state && loc.state.content) ? loc.state.content : "", [loc.state])
 
     return (
         <Box
