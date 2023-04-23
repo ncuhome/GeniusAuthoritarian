@@ -7,8 +7,8 @@ import { ClearRounded } from "@mui/icons-material";
 
 export const Error: FC = () => {
     const loc = useLocation()
-    const title = useMemo(() => (loc.state && loc.state.title) ? loc.state.title : "未知错误", [loc.state])
-    const content = useMemo(() => (loc.state && loc.state.content) ? loc.state.content : "", [loc.state])
+    const title = useMemo(() => loc.state?.title || "未知错误", [loc.state])
+    const content = useMemo(() => loc.state?.content || "", [loc.state])
 
     return (
         <Box
