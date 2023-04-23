@@ -7,5 +7,5 @@ type UserGroups struct {
 	User User `gorm:"foreignKey:UID;constraint:OnDelete:CASCADE"`
 	// Group.ID
 	GID   uint  `gorm:"index;index:user_group_idx,unique;not null;column:gid"`
-	Group Group `gorm:"foreignKey:GID;constraint:RESTRICT"`
+	Group Group `gorm:"foreignKey:GID;constraint:OnDelete:RESTRICT"`
 }
