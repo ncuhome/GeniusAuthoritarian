@@ -7,7 +7,14 @@
     <title>家园工作室 - 交通枢纽</title>
   </head>
   <body>
-    <div id="root"></div>
-    <script type="module" src="/src/main.tsx"></script>
+  <div id="root"></div>
+  <script>
+    window.onerror = (e, source, lineno, colno) => {
+      alert(e);
+      alert(source + ':' + lineno);
+      alert(colno)
+    }
+  </script>
+  <script type="module" src="/src/main.tsx"></script>
   </body>
 </html>
