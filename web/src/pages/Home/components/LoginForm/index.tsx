@@ -26,9 +26,16 @@ export const LoginForm: FC = () => {
   }
 
   useMount(() => {
-    if (!target) {
-      ThrowError(nav, "请求不合法");
-    }
+      if (!target) {
+          ThrowError(nav, "请求不合法");
+          return
+      }
+
+      switch (true) {
+          case navigator.userAgent.indexOf("Feishu") !== -1:
+              goFeishuLogin();
+              break
+      }
   });
 
   return (
