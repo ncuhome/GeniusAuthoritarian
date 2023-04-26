@@ -118,6 +118,9 @@ func UserSync() error {
 	if e != nil {
 		return e
 	}
+	for _, exUser := range existUsers {
+		reserveData[exUser.Phone].Data = exUser
+	}
 	lens = len(allPhone) - len(existUsers)
 	if lens > 0 {
 		var userToCreate = make([]dao.User, lens)
@@ -146,6 +149,7 @@ func UserSync() error {
 	if len(invalidUsers) > 0 {
 		var invalidUID = make([]uint, len(invalidUsers))
 		for i, user := range invalidUsers {
+			delete(reserveData, user.Phone)
 			invalidUID[i] = user.ID
 		}
 		if e = userSrv.DeleteByIDSlice(invalidUID); e != nil {
