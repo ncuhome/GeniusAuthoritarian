@@ -31,3 +31,18 @@ func (a UserSrv) CreateAll(users []dao.User) error {
 func (a UserSrv) DeleteByIDSlice(id []uint) error {
 	return (&dao.User{}).DeleteByIDSlice(a.DB, id)
 }
+
+func (a UserSrv) UserInfo(phone string) (*dao.User, []dao.Group, error) {
+	var user = dao.User{
+		Phone: phone,
+	}
+	e := user.First(a.DB)
+	if e != nil {
+		return nil, nil, e
+	}
+
+	userGroups, e := (&dao.UserGroups{
+		UID: user.ID,
+	}).GetUserGroupsByUID(a.DB)
+	return &user, userGroups, e
+}

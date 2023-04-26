@@ -57,7 +57,7 @@ func (c Client) GetUserToken(authCode string) (*oauth2_1_0.GetUserTokenResponse,
 
 func (c Client) LoginLink(selfDomain, state string) string {
 	return fmt.Sprintf(
-		"https://oapi.dingtalk.com/connect/qrconnect?appid=%s&response_type=code&scope=snsapi_login&state=%s&redirect_uri=%s",
+		"https://login.dingtalk.com/oauth2/auth?client_id=%s&response_type=code&scope=openid&prompt=consent&state=%s&redirect_uri=%s",
 		c.Config.ClientID,
 		url.QueryEscape(state),
 		url.QueryEscape("https://"+selfDomain+"/dingTalk"),

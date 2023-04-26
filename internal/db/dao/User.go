@@ -16,6 +16,10 @@ func (a *User) InsertAll(tx *gorm.DB, users []User) error {
 	return tx.Create(users).Error
 }
 
+func (a *User) First(tx *gorm.DB) error {
+	return tx.First(a).Error
+}
+
 func (a *User) GetByPhoneSlice(tx *gorm.DB, phone []string) ([]User, error) {
 	var t []User
 	return t, tx.Model(a).Where("phone IN ?", phone).Find(&t).Error
