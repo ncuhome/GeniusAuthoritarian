@@ -121,3 +121,62 @@ func (f Fs) LoadDepartmentList() (*ListDepartmentResp, error) {
 		},
 	})
 }
+
+func (f Fs) doLoadUserListRequest(departmentID, pageToken string, pageSize uint) (*ListUserResp, error) {
+	tenantToken, e := f.tenant.Load()
+	if e != nil {
+		return nil, e
+	}
+	var data ListUserResp
+	query := map[string]interface{}{
+		"department_id": departmentID,
+		"page_size":     pageSize,
+	}
+	if pageToken != "" {
+		query["page_token"] = pageToken
+	}
+	return &data, f.doRequest("GET", &data, &tool.DoHttpReq{
+		Url: "https://open.feishu.cn/open-apis/contact/v3/users",
+		Header: map[string]interface{}{
+			"Authorization": "Bearer " + tenantToken,
+			"Content-Type":  "application/json",
+		},
+		Query: query,
+	})
+}
+func (f Fs) doLoadAllUserListRequest(departmentID string) ([]ListUserContent, error) {
+	const pageSize = 99
+	var r []ListUserContent
+	res, e := f.doLoadUserListRequest(departmentID, "", pageSize)
+	if e != nil {
+		return nil, e
+	}
+	r = res.Items
+	for res.HasMore {
+		res, e = f.doLoadUserListRequest(departmentID, res.PageToken, pageSize)
+		if e != nil {
+			return nil, e
+		}
+		r = append(r, res.Items...)
+	}
+	return r, nil
+}
+
+// LoadUserList map key 为飞书部门 OpenID
+func (f Fs) LoadUserList() (map[string][]ListUserContent, error) {
+	departments, e := f.LoadDepartmentList()
+	if e != nil {
+		return nil, e
+	}
+
+	result := make(map[string][]ListUserContent, len(departments.Items))
+	for _, department := range departments.Items {
+		var list []ListUserContent
+		list, e = f.doLoadAllUserListRequest(department.OpenDepartmentId)
+		if e != nil {
+			return nil, e
+		}
+		result[department.OpenDepartmentId] = list
+	}
+	return result, nil
+}

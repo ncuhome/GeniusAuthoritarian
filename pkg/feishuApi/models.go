@@ -83,3 +83,64 @@ type ListDepartmentResp struct {
 		DepartmentHrbps []string `json:"department_hrbps"`
 	} `json:"items"`
 }
+
+type ListUserContent struct {
+	UnionId       string `json:"union_id"`
+	UserId        string `json:"user_id"`
+	OpenId        string `json:"open_id"`
+	Name          string `json:"name"`
+	EnName        string `json:"en_name"`
+	Email         string `json:"email"`
+	Mobile        string `json:"mobile"`
+	MobileVisible bool   `json:"mobile_visible"`
+	Gender        int    `json:"gender"`
+	Avatar        struct {
+		Avatar72     string `json:"avatar_72"`
+		Avatar240    string `json:"avatar_240"`
+		Avatar640    string `json:"avatar_640"`
+		AvatarOrigin string `json:"avatar_origin"`
+	} `json:"avatar"`
+	Status struct {
+		IsFrozen    bool `json:"is_frozen"`
+		IsResigned  bool `json:"is_resigned"`
+		IsActivated bool `json:"is_activated"`
+	} `json:"status"`
+	DepartmentIds   []string `json:"department_ids"`
+	LeaderUserId    string   `json:"leader_user_id"`
+	City            string   `json:"city"`
+	Country         string   `json:"country"`
+	WorkStation     string   `json:"work_station"`
+	JoinTime        int      `json:"join_time"`
+	IsTenantManager bool     `json:"is_tenant_manager"`
+	EmployeeNo      string   `json:"employee_no"`
+	EmployeeType    int      `json:"employee_type"`
+	Orders          []struct {
+		DepartmentId    string `json:"department_id"`
+		UserOrder       int    `json:"user_order"`
+		DepartmentOrder int    `json:"department_order"`
+	} `json:"orders"`
+	CustomAttrs []struct {
+		Type  string `json:"type"`
+		Id    string `json:"id"`
+		Value struct {
+			Text        string `json:"text"`
+			Url         string `json:"url"`
+			PcUrl       string `json:"pc_url"`
+			OptionValue string `json:"option_value"`
+			Name        string `json:"name"`
+			PictureUrl  string `json:"picture_url"`
+			GenericUser struct {
+				Id   string `json:"id"`
+				Type int    `json:"type"`
+			} `json:"generic_user"`
+		} `json:"value"`
+	} `json:"custom_attrs"`
+	EnterpriseEmail string `json:"enterprise_email"`
+	JobTitle        string `json:"job_title"`
+}
+
+type ListUserResp struct {
+	HasMore   bool              `json:"has_more"`
+	PageToken string            `json:"page_token"`
+	Items     []ListUserContent `json:"items"`
+}
