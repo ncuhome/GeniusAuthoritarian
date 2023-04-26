@@ -62,10 +62,17 @@ func DepartmentSync() error {
 			toDelete = append(toDelete, dbDepartment.ID)
 			continue
 		}
-		if !(paired.Name == dbDepartment.Name && paired.OpenDepartmentId == dbDepartment.OpenDepartmentId) {
+		if paired.Name == dbDepartment.Name && paired.OpenDepartmentId == dbDepartment.OpenDepartmentId {
+			delete(pairedDepartmentsRelations, dbDepartment.GID)
+		} else {
 			toDelete = append(toDelete, dbDepartment.ID)
-			toCreate = append(toCreate, *paired)
 		}
+	}
+	toCreate = make([]dao.FeishuGroups, len(pairedDepartmentsRelations))
+	i := 0
+	for _, department := range pairedDepartmentsRelations {
+		toCreate[i] = *department
+		i++
 	}
 
 	if len(toDelete) != 0 {
