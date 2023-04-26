@@ -77,7 +77,7 @@ func DepartmentSync() error {
 	return srv.Commit().Error
 }
 
-func RunDepartmentSync() error {
+func AddDepartmentSyncCron() error {
 	_, e := agent.AddRegular(&agent.Event{
 		T: "0 5 * * *",
 		E: func() {

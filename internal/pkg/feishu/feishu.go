@@ -12,7 +12,7 @@ func init() {
 		log.Fatalf("同步飞书部门失败: %v", e)
 	}
 
-	if e := RunDepartmentSync(); e != nil {
+	if e := AddDepartmentSyncCron(); e != nil {
 		log.Fatalf("添加定时同步飞书部门任务失败: %v", e)
 	}
 }
