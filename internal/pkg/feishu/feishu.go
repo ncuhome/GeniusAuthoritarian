@@ -10,7 +10,7 @@ import (
 
 func init() {
 	var count int64
-	e := dao.DB.Model(&dao.Group{}).Count(&count).Error
+	e := dao.DB.Model(&dao.FeishuGroups{}).Count(&count).Error
 	if e != nil {
 		log.Fatalln(e)
 	}
