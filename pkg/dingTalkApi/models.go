@@ -1,4 +1,4 @@
-package dingTalk
+package dingTalkApi
 
 type Config struct {
 	ClientID string

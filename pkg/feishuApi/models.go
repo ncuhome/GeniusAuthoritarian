@@ -1,4 +1,4 @@
-package feishu
+package feishuApi
 
 type Resp struct {
 	Code int         `json:"code"`

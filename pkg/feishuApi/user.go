@@ -1,4 +1,4 @@
-package feishu
+package feishuApi
 
 import (
 	"github.com/Mmx233/tool"

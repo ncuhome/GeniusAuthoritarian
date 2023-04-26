@@ -1,4 +1,4 @@
-package feishu
+package feishuApi
 
 import (
 	"sync"

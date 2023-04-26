@@ -2,7 +2,7 @@ package feishu
 
 import (
 	"github.com/ncuhome/GeniusAuthoritarian/internal/global"
-	"github.com/ncuhome/GeniusAuthoritarian/pkg/feishu"
+	"github.com/ncuhome/GeniusAuthoritarian/pkg/feishuApi"
 	"github.com/ncuhome/GeniusAuthoritarian/tools"
 	"log"
 )
@@ -13,4 +13,4 @@ func init() {
 	}
 }
 
-var Api = feishu.New(global.Config.Feishu.ClientID, global.Config.Feishu.Secret, tools.Http.Client)
+var Api = feishuApi.New(global.Config.Feishu.ClientID, global.Config.Feishu.Secret, tools.Http.Client)
