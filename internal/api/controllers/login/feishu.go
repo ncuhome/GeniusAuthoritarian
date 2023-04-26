@@ -10,28 +10,6 @@ import (
 	"net/url"
 )
 
-func FeishuLoginLink(c *gin.Context) {
-	var f struct {
-		Callback string `json:"callback" form:"callback" binding:"required,uri"`
-	}
-	if e := c.ShouldBind(&f); e != nil {
-		callback.Error(c, callback.ErrForm)
-		return
-	}
-
-	if ok, e := service.SiteWhiteList.CheckUrl(f.Callback); e != nil {
-		callback.Error(c, callback.ErrDBOperation)
-		return
-	} else if !ok {
-		callback.Error(c, callback.ErrSiteNotAllow)
-		return
-	}
-
-	callback.Success(c, gin.H{
-		"url": feishu.Api.LoginLink(c.Request.Host, f.Callback),
-	})
-}
-
 func FeishuLogin(c *gin.Context) {
 	var f struct {
 		Code     string `json:"code" form:"code" binding:"required"`

@@ -1,14 +1,16 @@
 package dingTalkApi
 
 import (
+	"fmt"
 	openapi "github.com/alibabacloud-go/darabonba-openapi/v2/client"
 	"github.com/alibabacloud-go/dingtalk/contact_1_0"
 	"github.com/alibabacloud-go/dingtalk/oauth2_1_0"
 	"github.com/alibabacloud-go/tea-utils/v2/service"
 	"github.com/alibabacloud-go/tea/tea"
+	"net/url"
 )
 
-func New(c Config) (*Client, error) {
+func New(c Config) *Client {
 	config := &openapi.Config{
 		Protocol: tea.String("https"),
 		RegionId: tea.String("central"),
@@ -16,19 +18,19 @@ func New(c Config) (*Client, error) {
 
 	oc, e := oauth2_1_0.NewClient(config)
 	if e != nil {
-		return nil, e
+		return nil
 	}
 
 	cc, e := contact_1_0.NewClient(config)
 	if e != nil {
-		return nil, e
+		return nil
 	}
 
 	return &Client{
 		ContactClient: cc,
 		OauthClient:   oc,
 		Config:        c,
-	}, nil
+	}
 }
 
 type Client struct {
@@ -51,4 +53,13 @@ func (c Client) GetUserToken(authCode string) (*oauth2_1_0.GetUserTokenResponse,
 		Code:         &authCode,
 		GrantType:    tea.String("authorization_code"),
 	})
+}
+
+func (c Client) LoginLink(selfDomain, state string) string {
+	return fmt.Sprintf(
+		"https://oapi.dingtalk.com/connect/qrconnect?appid=%s&response_type=code&scope=snsapi_login&state=%s&redirect_uri=%s",
+		c.Config.ClientID,
+		url.QueryEscape(state),
+		url.QueryEscape("https://"+selfDomain+"/dingTalk"),
+	)
 }
