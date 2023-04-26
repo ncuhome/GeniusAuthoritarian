@@ -1,6 +1,7 @@
 package feishu
 
 import (
+	"github.com/Mmx233/daoUtil"
 	"github.com/Mmx233/tool"
 	"github.com/ncuhome/GeniusAuthoritarian/internal/db/dao"
 	"github.com/ncuhome/GeniusAuthoritarian/internal/pkg/GroupOperator"
@@ -17,6 +18,7 @@ func DepartmentSync() error {
 		return e
 	}
 
+	// 匹配所有命中关键词的部门，以组名为索引避免出现多个匹配结果
 	var pairedDepartments = make(map[string]*dao.FeishuGroups, len(departmentList.Items))
 	for _, item := range departmentList.Items {
 		for _, relate := range fsDepartmentsRelationMap {
@@ -34,23 +36,42 @@ func DepartmentSync() error {
 	next:
 	}
 
-	var result = make([]dao.FeishuGroups, len(pairedDepartments))
-	i := 0
+	// 转换为组 ID 为索引的映射
+	var pairedDepartmentsRelations = make(map[uint]*dao.FeishuGroups, len(pairedDepartments))
 	for _, v := range pairedDepartments {
-		result[i] = *v
-		i++
+		pairedDepartmentsRelations[v.GID] = v
 	}
 
+	var toDelete []uint
+	var toCreate []dao.FeishuGroups
 	srv, e := service.FeishuGroups.Begin()
 	if e != nil {
 		return e
 	}
 	defer srv.Rollback()
 
-	if e = srv.DeleteAll(); e != nil {
+	dbFeishuDepartments, e := srv.GetAll(daoUtil.LockForUpdate)
+	if e != nil {
 		return e
 	}
-	if e = srv.CreateAll(result); e != nil {
+
+	// 计算数据库 diff
+	for _, dbDepartment := range dbFeishuDepartments {
+		paired, ok := pairedDepartmentsRelations[dbDepartment.GID]
+		if !ok {
+			toDelete = append(toDelete, dbDepartment.ID)
+			continue
+		}
+		if !(paired.Name == dbDepartment.Name && paired.OpenDepartmentId == dbDepartment.OpenDepartmentId) {
+			toDelete = append(toDelete, dbDepartment.ID)
+			toCreate = append(toCreate, *paired)
+		}
+	}
+
+	if e = srv.DeleteSelected(toDelete); e != nil {
+		return e
+	}
+	if e = srv.CreateAll(toCreate); e != nil {
 		return e
 	}
 	return srv.Commit().Error

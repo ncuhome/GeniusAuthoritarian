@@ -1,6 +1,7 @@
 package service
 
 import (
+	"github.com/Mmx233/daoUtil"
 	"github.com/ncuhome/GeniusAuthoritarian/internal/db/dao"
 	"gorm.io/gorm"
 )
@@ -16,8 +17,12 @@ func (a FeishuGroupsSrv) Begin() (FeishuGroupsSrv, error) {
 	return a, a.Error
 }
 
-func (a FeishuGroupsSrv) DeleteAll() error {
-	return (&dao.FeishuGroups{}).DeleteAll(a.DB)
+func (a FeishuGroupsSrv) GetAll(opts ...daoUtil.ServiceOpt) ([]dao.FeishuGroups, error) {
+	return (&dao.FeishuGroups{}).GetAll(daoUtil.TxOpts(a.DB, opts...))
+}
+
+func (a FeishuGroupsSrv) DeleteSelected(ids []uint) error {
+	return (&dao.FeishuGroups{}).DeleteSelected(a.DB, ids)
 }
 
 func (a FeishuGroupsSrv) CreateAll(data []dao.FeishuGroups) error {

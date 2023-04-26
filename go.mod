@@ -5,6 +5,7 @@ go 1.20
 require (
 	github.com/Mmx233/EnvConfig v0.0.2
 	github.com/Mmx233/config v0.1.0
+	github.com/Mmx233/daoUtil v0.6.1
 	github.com/Mmx233/tool v0.6.9
 	github.com/alibabacloud-go/darabonba-openapi/v2 v2.0.2
 	github.com/alibabacloud-go/dingtalk v1.5.47
@@ -17,7 +18,7 @@ require (
 	github.com/robfig/cron/v3 v3.0.1
 	github.com/sirupsen/logrus v1.9.0
 	gorm.io/driver/mysql v1.4.7
-	gorm.io/gorm v1.24.6
+	gorm.io/gorm v1.25.0
 )
 
 require (

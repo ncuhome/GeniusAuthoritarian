@@ -11,8 +11,13 @@ type FeishuGroups struct {
 	Group Group `gorm:"foreignKey:GID,constraint:RESTRICT"`
 }
 
-func (a *FeishuGroups) DeleteAll(tx *gorm.DB) error {
-	return tx.Unscoped().Delete(&FeishuGroups{}).Error
+func (a *FeishuGroups) GetAll(tx *gorm.DB) ([]FeishuGroups, error) {
+	var t []FeishuGroups
+	return t, tx.Model(a).Find(&t).Error
+}
+
+func (a *FeishuGroups) DeleteSelected(tx *gorm.DB, ids []uint) error {
+	return tx.Delete(a, "ID IN ?", ids).Error
 }
 
 func (a *FeishuGroups) CreateAll(tx *gorm.DB, data []FeishuGroups) error {
