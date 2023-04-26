@@ -68,11 +68,15 @@ func DepartmentSync() error {
 		}
 	}
 
-	if e = srv.DeleteSelected(toDelete); e != nil {
-		return e
+	if len(toDelete) != 0 {
+		if e = srv.DeleteSelected(toDelete); e != nil {
+			return e
+		}
 	}
-	if e = srv.CreateAll(toCreate); e != nil {
-		return e
+	if len(toCreate) != 0 {
+		if e = srv.CreateAll(toCreate); e != nil {
+			return e
+		}
 	}
 	return srv.Commit().Error
 }
