@@ -17,9 +17,9 @@ func init() {
 	}
 
 	if e = DB.AutoMigrate(
+		&User{},
 		&LoginRecord{},
 		&SiteWhiteList{},
-		&User{},
 		&Group{},
 		&UserGroups{},
 		&FeishuGroups{},
