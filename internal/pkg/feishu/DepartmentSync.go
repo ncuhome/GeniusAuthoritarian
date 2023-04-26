@@ -11,7 +11,7 @@ import (
 	"strings"
 )
 
-func GroupSync() error {
+func DepartmentSync() error {
 	departmentList, e := Api.LoadDepartmentList()
 	if e != nil {
 		return e
@@ -56,12 +56,12 @@ func GroupSync() error {
 	return srv.Commit().Error
 }
 
-func RunGroupSync() error {
+func RunDepartmentSync() error {
 	_, e := agent.AddRegular(&agent.Event{
 		T: "0 5 * * *",
 		E: func() {
 			defer tool.Recover()
-			if e := GroupSync(); e != nil {
+			if e := DepartmentSync(); e != nil {
 				log.Errorf("同步飞书部门失败: %v", e)
 			} else {
 				log.Infoln("飞书部门同步成功")

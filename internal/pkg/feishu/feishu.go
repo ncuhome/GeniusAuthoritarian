@@ -8,7 +8,7 @@ import (
 )
 
 func init() {
-	if e := RunGroupSync(); e != nil {
+	if e := RunDepartmentSync(); e != nil {
 		log.Fatalf("添加定时同步飞书部门任务失败: %v", e)
 	}
 }
