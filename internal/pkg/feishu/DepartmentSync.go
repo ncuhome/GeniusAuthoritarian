@@ -88,9 +88,9 @@ func DepartmentSync() error {
 	return srv.Commit().Error
 }
 
-func AddDepartmentSyncCron() error {
+func AddDepartmentSyncCron(spec string) error {
 	_, e := agent.AddRegular(&agent.Event{
-		T: "0 5 * * *",
+		T: spec,
 		E: func() {
 			defer tool.Recover()
 			if e := DepartmentSync(); e != nil {

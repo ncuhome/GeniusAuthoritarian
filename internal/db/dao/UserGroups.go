@@ -12,8 +12,12 @@ type UserGroups struct {
 	Group Group `gorm:"foreignKey:GID;constraint:OnDelete:RESTRICT"`
 }
 
-// GetUserFor 根据指定组 id 范围获取用户所在组
-func (a *UserGroups) GetUserFor(tx *gorm.DB, gid []uint) ([]Group, error) {
+func (a *UserGroups) InsertAll(tx *gorm.DB, data []UserGroups) error {
+	return tx.Create(data).Error
+}
+
+// GetUserGroupsLimited 根据指定组 id 范围获取用户所在组
+func (a *UserGroups) GetUserGroupsLimited(tx *gorm.DB, gid []uint) ([]Group, error) {
 	var groups []Group
 	return groups, tx.Model(&Group{}).
 		Joins("INNER JOIN user_groups ug ON ug.gid=groups.id").
@@ -21,17 +25,11 @@ func (a *UserGroups) GetUserFor(tx *gorm.DB, gid []uint) ([]Group, error) {
 		Find(&groups).Error
 }
 
-// DelUser 删除某用户所有组关系
-func (a *UserGroups) DelUser(tx *gorm.DB) error {
-	return tx.Delete(&UserGroups{}, "uid=?", a.UID).Error
+func (a *UserGroups) GetAll(tx *gorm.DB) ([]UserGroups, error) {
+	var t []UserGroups
+	return t, tx.Find(&t).Error
 }
 
-// AddUser 批量创建用户组关系
-func (a *UserGroups) AddUser(tx *gorm.DB, gid []uint) error {
-	var userGroups = make([]UserGroups, len(gid))
-	for i, id := range gid {
-		userGroups[i].UID = a.UID
-		userGroups[i].GID = id
-	}
-	return tx.Create(userGroups).Error
+func (a *UserGroups) DeleteByIDSlice(tx *gorm.DB, ids []uint) error {
+	return tx.Delete(a, "id IN ?", ids).Error
 }

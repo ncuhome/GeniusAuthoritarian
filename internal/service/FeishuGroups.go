@@ -21,8 +21,12 @@ func (a FeishuGroupsSrv) GetAll(opts ...daoUtil.ServiceOpt) ([]dao.FeishuGroups,
 	return (&dao.FeishuGroups{}).GetAll(daoUtil.TxOpts(a.DB, opts...))
 }
 
+func (a FeishuGroupsSrv) GetByOpenID(openID []string, opts ...daoUtil.ServiceOpt) ([]dao.FeishuGroups, error) {
+	return (&dao.FeishuGroups{}).GetByOpenIDSlice(daoUtil.TxOpts(a.DB, opts...), openID)
+}
+
 func (a FeishuGroupsSrv) DeleteSelected(ids []uint) error {
-	return (&dao.FeishuGroups{}).DeleteSelected(a.DB, ids)
+	return (&dao.FeishuGroups{}).DeleteByIDSlice(a.DB, ids)
 }
 
 func (a FeishuGroupsSrv) CreateAll(data []dao.FeishuGroups) error {
@@ -30,5 +34,5 @@ func (a FeishuGroupsSrv) CreateAll(data []dao.FeishuGroups) error {
 }
 
 func (a FeishuGroupsSrv) Search(openID []string) ([]dao.Group, error) {
-	return (&dao.FeishuGroups{}).GetGroupsByOpenID(a.DB, openID)
+	return (&dao.FeishuGroups{}).GetGroupsByOpenIDSlice(a.DB, openID)
 }
