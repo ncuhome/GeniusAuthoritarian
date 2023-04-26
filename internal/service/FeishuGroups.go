@@ -28,3 +28,7 @@ func (a FeishuGroupsSrv) DeleteSelected(ids []uint) error {
 func (a FeishuGroupsSrv) CreateAll(data []dao.FeishuGroups) error {
 	return (&dao.FeishuGroups{}).CreateAll(a.DB, data)
 }
+
+func (a FeishuGroupsSrv) Search(openID []string) ([]dao.Group, error) {
+	return (&dao.FeishuGroups{}).GetGroupsByOpenID(a.DB, openID)
+}

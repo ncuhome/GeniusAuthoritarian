@@ -1,6 +1,7 @@
 package GroupOperator
 
 import (
+	"fmt"
 	"github.com/ncuhome/GeniusAuthoritarian/internal/db/dao"
 	"github.com/ncuhome/GeniusAuthoritarian/internal/service"
 	"github.com/ncuhome/GeniusAuthoritarian/pkg/departments"
@@ -24,6 +25,8 @@ func init() {
 	if e != nil {
 		log.Fatalf("载入部门 id 关系失败: %v", e)
 	}
+
+	fmt.Println(GroupRelation) //todo
 }
 
 func LoadGroupRelation() error {

@@ -62,13 +62,21 @@ func FeishuLogin(c *gin.Context) {
 		return
 	}
 
-	groups := feishu.Departments.MultiSearch(userInfo.User.DepartmentIds)
-	if len(groups) == 0 {
+	groups, e := service.FeishuGroups.Search(userInfo.User.DepartmentIds)
+	if e != nil {
+		callback.Error(c, callback.ErrDBOperation)
+		return
+	} else if len(groups) == 0 {
 		callback.Error(c, callback.ErrFindUnit)
 		return
 	}
 
-	token, e := jwt.GenerateAuthToken(userInfo.User.Name, groups)
+	var groupSlice = make([]string, len(groups))
+	for i, group := range groups {
+		groupSlice[i] = group.Name
+	}
+
+	token, e := jwt.GenerateAuthToken(userInfo.User.Name, groupSlice)
 	if e != nil {
 		log.Debugln("jwt generate failed:", e)
 		callback.Error(c, callback.ErrUnexpected)
