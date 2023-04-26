@@ -2,6 +2,7 @@ package redis
 
 import (
 	"context"
+	"encoding/json"
 	"fmt"
 	"sync/atomic"
 	"time"
@@ -16,27 +17,51 @@ type JwtHelper struct {
 	id  atomic.Uint64
 }
 
-func (a *JwtHelper) authPointKey(id uint64) string {
+func (a *JwtHelper) loginPointKey(id uint64) string {
 	return a.key + "ap-" + fmt.Sprint(id)
 }
 
-func (a *JwtHelper) NewAuthPoint(unix int64, valid time.Duration) (id uint64, e error) {
+type LoginPoint struct {
+	Unix int64 `json:"unix"`
+	Data json.RawMessage
+}
+
+func (a *JwtHelper) NewLoginPoint(unix int64, valid time.Duration, claims interface{}) (id uint64, e error) {
+	claimsRaw, e := json.Marshal(claims)
+	if e != nil {
+		return 0, e
+	}
+
+	loginPoint := LoginPoint{
+		Unix: unix,
+		Data: claimsRaw,
+	}
+	value, e := json.Marshal(loginPoint)
+	if e != nil {
+		return 0, e
+	}
+
 	id = a.id.Add(1)
-	e = Client.Set(context.Background(), a.authPointKey(id), fmt.Sprint(unix), valid).Err()
+	e = Client.Set(context.Background(), a.loginPointKey(id), value, valid).Err()
 	return
 }
 
-func (a *JwtHelper) VerifyAuthPoint(id uint64, unix int64) (bool, error) {
-	v, e := Client.Get(context.Background(), a.authPointKey(id)).Result()
+func (a *JwtHelper) VerifyLoginPoint(id uint64, unix int64, claims interface{}) (bool, error) {
+	value, e := Client.Get(context.Background(), a.loginPointKey(id)).Result()
 	if e != nil {
 		if e == Nil {
 			e = nil
 		}
 		return false, e
 	}
-	return v == fmt.Sprint(unix), nil
+
+	var loginPoint LoginPoint
+	if e = json.Unmarshal([]byte(value), &loginPoint); e != nil {
+		return false, e
+	}
+	return loginPoint.Unix == unix, json.Unmarshal(loginPoint.Data, claims)
 }
 
-func (a *JwtHelper) DelAuthPoint(id uint64) error {
-	return Client.Del(context.Background(), a.authPointKey(id)).Err()
+func (a *JwtHelper) DelLoginPoint(id uint64) error {
+	return Client.Del(context.Background(), a.loginPointKey(id)).Err()
 }

@@ -8,9 +8,13 @@ type RefreshToken struct {
 	Groups []string `json:"groups"`
 }
 
-type AuthToken struct {
+type LoginToken struct {
 	jwt.RegisteredClaims
-	ID     uint64   `json:"id"`
+	// 无意义 ID
+	ID uint64 `json:"id"`
+}
+
+type LoginTokenClaims struct {
 	Name   string   `json:"name"`
 	Groups []string `json:"groups"`
 }

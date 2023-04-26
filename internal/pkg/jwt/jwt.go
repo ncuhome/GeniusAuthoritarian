@@ -39,22 +39,23 @@ func GenerateRefreshToken(name string, groups []string) (string, error) {
 	})
 }
 
-// GenerateAuthToken 生成有效期 5 分钟的校验 Token
-func GenerateAuthToken(name string, groups []string) (string, error) {
+// GenerateLoginToken 生成有效期 5 分钟的校验 Token
+func GenerateLoginToken(name string, groups []string) (string, error) {
 	now := time.Now()
 	valid := time.Minute * 5
-	id, e := redis.Jwt.NewAuthPoint(now.Unix(), valid)
+	id, e := redis.Jwt.NewLoginPoint(now.Unix(), valid, LoginTokenClaims{
+		Name:   name,
+		Groups: groups,
+	})
 	if e != nil {
 		return "", e
 	}
-	return GenerateToken(&AuthToken{
+	return GenerateToken(&LoginToken{
 		RegisteredClaims: jwt.RegisteredClaims{
 			ExpiresAt: jwt.NewNumericDate(now.Add(valid)),
 			IssuedAt:  jwt.NewNumericDate(now),
 		},
-		ID:     id,
-		Name:   name,
-		Groups: groups,
+		ID: id,
 	})
 }
 
@@ -62,23 +63,24 @@ func ParseRefreshToken(token string) (*RefreshToken, bool, error) {
 	return ParseToken(token, &RefreshToken{})
 }
 
-// ParseAuth 解析后自动销毁
-func ParseAuth(token string) (*AuthToken, bool, error) {
-	claims, valid, e := ParseToken(token, &AuthToken{})
+// ParseLoginToken 解析后自动销毁
+func ParseLoginToken(token string) (*LoginTokenClaims, bool, error) {
+	claims, valid, e := ParseToken(token, &LoginToken{})
 	if e != nil || !valid {
-		return claims, false, e
+		return nil, false, e
 	}
 
-	valid, e = redis.Jwt.VerifyAuthPoint(claims.ID, claims.IssuedAt.Unix())
+	var redisClaims LoginTokenClaims
+	valid, e = redis.Jwt.VerifyLoginPoint(claims.ID, claims.IssuedAt.Unix(), &redisClaims)
 	if e != nil {
 		if e == redis.Nil {
-			return claims, false, nil
+			e = nil
 		}
-		return claims, false, e
+		return nil, false, e
 	}
-	return claims, valid, DestroyAuthToken(claims.ID)
+	return &redisClaims, valid, DestroyAuthToken(claims.ID)
 }
 
 func DestroyAuthToken(cID uint64) error {
-	return redis.Jwt.DelAuthPoint(cID)
+	return redis.Jwt.DelLoginPoint(cID)
 }

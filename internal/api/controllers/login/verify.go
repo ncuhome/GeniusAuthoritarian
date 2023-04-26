@@ -18,7 +18,7 @@ func VerifyToken(c *gin.Context) {
 		return
 	}
 
-	claims, valid, e := jwt.ParseAuth(f.Token)
+	claims, valid, e := jwt.ParseLoginToken(f.Token)
 	if e != nil || !valid {
 		log.Debugln("decode token failed:", e)
 		callback.Error(c, callback.ErrUnauthorized)
