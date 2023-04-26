@@ -7,7 +7,7 @@ import (
 	"time"
 )
 
-func New(conf *Config) (*gorm.DB, error) {
+func New(conf *Config, gormConfig *gorm.Config) (*gorm.DB, error) {
 	//数据库初始化
 	db, e := gorm.Open(mysql.Open(fmt.Sprintf(
 		"%s:%s@tcp(%s:%d)/%s?%s",
@@ -17,9 +17,7 @@ func New(conf *Config) (*gorm.DB, error) {
 		conf.Port,
 		conf.Database,
 		conf.Arg,
-	)), &gorm.Config{
-		SkipDefaultTransaction: true,
-	})
+	)), gormConfig)
 	if e != nil {
 		return nil, e
 	}

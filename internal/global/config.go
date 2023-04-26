@@ -25,4 +25,8 @@ func initConfig() {
 	} else {
 		EnvConfig.Load("", &Config)
 	}
+
+	if DevMode {
+		Config.TraceMode = true
+	}
 }

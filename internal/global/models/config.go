@@ -6,10 +6,11 @@ import (
 )
 
 type Config struct {
-	Mysql  mysql.Config `yaml:"mysql"`
-	Redis  redis.Config `yaml:"redis"`
-	Feishu Feishu       `yaml:"feishu"`
-	Jwt    Jwt          `yaml:"jwt"`
+	Mysql     mysql.Config `yaml:"mysql"`
+	Redis     redis.Config `yaml:"redis"`
+	Feishu    Feishu       `yaml:"feishu"`
+	Jwt       Jwt          `yaml:"jwt"`
+	TraceMode bool         `yaml:"traceMode" config:"omitempty"`
 }
 
 type Feishu struct {
