@@ -104,13 +104,13 @@ func (f Fs) GetUser(code string) (*FsUser, error) {
 	})
 }
 
-func (f Fs) LoadDepartmentList() (map[string]string, error) {
+func (f Fs) LoadDepartmentList() (*ListDepartmentResp, error) {
 	tenantToken, e := f.tenant.Load()
 	if e != nil {
 		return nil, e
 	}
 	var data ListDepartmentResp
-	if e = f.doRequest("GET", &data, &tool.DoHttpReq{
+	return &data, f.doRequest("GET", &data, &tool.DoHttpReq{
 		Url: "https://open.feishu.cn/open-apis/contact/v3/departments/0/children",
 		Header: map[string]interface{}{
 			"Authorization": "Bearer " + tenantToken,
@@ -119,13 +119,5 @@ func (f Fs) LoadDepartmentList() (map[string]string, error) {
 		Query: map[string]interface{}{
 			"page_size": 40,
 		},
-	}); e != nil {
-		return nil, e
-	}
-
-	var m = make(map[string]string, len(data.Items))
-	for _, v := range data.Items {
-		m[v.OpenDepartmentId] = v.Name
-	}
-	return m, nil
+	})
 }
