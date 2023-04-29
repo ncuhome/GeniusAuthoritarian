@@ -53,7 +53,7 @@ func UserSync() error {
 	for k, users := range userData {
 		var lens int
 		for _, user := range users {
-			if !user.Status.IsActivated || user.Status.IsFrozen || user.Status.IsResigned || !user.MobileVisible {
+			if !user.Status.IsActivated || user.Status.IsFrozen || !user.MobileVisible {
 				user.MobileVisible = false
 			} else {
 				lens++
