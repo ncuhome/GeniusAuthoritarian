@@ -137,4 +137,8 @@ var fsDepartmentsRelationMap = []fsDepartmentsRelation{
 		keywords:   []string{departments.UPm},
 		department: departments.UPm,
 	},
+	{
+		keywords:   []string{departments.USenior},
+		department: departments.USenior,
+	},
 }

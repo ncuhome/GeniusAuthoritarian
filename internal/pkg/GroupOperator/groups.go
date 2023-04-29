@@ -15,6 +15,7 @@ var Groups = []string{
 	departments.UAdm,
 	departments.UDes,
 	departments.UCe,
+	departments.USenior,
 }
 
 var GroupRelation map[string]uint
