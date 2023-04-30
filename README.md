@@ -6,7 +6,7 @@
 
 ## :wrench: 项目完整本地调试
 
-首先准备环境：  `mysql`、`redis`
+首先准备环境：`mysql`、`redis`
 
 预先准备：
 

@@ -3,7 +3,8 @@ package dao
 import "gorm.io/gorm"
 
 type User struct {
-	ID    uint   `gorm:"primarykey"`
+	ID uint `gorm:"primarykey"`
+	gorm.DeletedAt
 	Name  string `gorm:"not null"`
 	Phone string `gorm:"not null;uniqueIndex;type:varchar(15)"`
 }
@@ -30,6 +31,6 @@ func (a *User) GetNotInPhoneSlice(tx *gorm.DB, phone []string) ([]User, error) {
 	return t, tx.Model(a).Where("NOT phone IN ?", phone).Find(&t).Error
 }
 
-func (a *User) DeleteByIDSlice(tx *gorm.DB, ids []uint) error {
+func (a *User) FrozeByIDSlice(tx *gorm.DB, ids []uint) error {
 	return tx.Delete(a, "id IN ?", ids).Error
 }
