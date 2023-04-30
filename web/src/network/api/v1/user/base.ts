@@ -27,7 +27,7 @@ apiV1User.interceptors.response.use(undefined, (err: any) => {
   if (err.statusCode && err.statusCode === 401) {
     localStorage.removeItem("token");
     GoLogin();
-    return err;
+    return Promise.reject(err);
   }
   return Promise.reject(apiV1ErrorHandler(err));
 });
