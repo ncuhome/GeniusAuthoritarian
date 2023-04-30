@@ -6,9 +6,7 @@
 
 ## :wrench: 项目完整本地调试
 
-首先准备环境：  `mysql`、`redis`、`ldap`
-
-ldap 需要配置 `DOMAIN` 为 `ncuos.com`，`ORGANISATION` 为 `NCUHOME`
+首先准备环境：  `mysql`、`redis`
 
 预先准备：
 
@@ -84,3 +82,11 @@ groups 的值参考 [departments.go](/pkg/departments/departments.go)
     "msg": "身份校验失败，权限不足"
 }
 ```
+
+## :card_index_dividers: TODO
+
++ [x] ~~对接飞书登录~~
++ [x] ~~对接钉钉登录~~
++ [ ] 添加个人资料管理
++ [ ] 接入 ldap
++ [ ] 添加服务鉴权密钥对
