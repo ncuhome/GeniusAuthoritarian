@@ -1,4 +1,4 @@
-import {FC, useCallback} from "react";
+import { FC, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
 import { createUseQuery, useMount } from "@hooks";
 import { ThrowError } from "@util/nav";
@@ -12,14 +12,14 @@ export const Login: FC = () => {
   const useQuery = createUseQuery();
   const [token] = useQuery("token", "");
 
-  const handleLogin=useCallback(async()=>{
+  const handleLogin = useCallback(async () => {
     try {
-      const authToken=await UserLogin(token)
-      localStorage.setItem("token", authToken)
+      const authToken = await UserLogin(token);
+      localStorage.setItem("token", authToken);
     } catch ({ msg }) {
-      ThrowError(nav, "登录失败", msg as string)
+      if (msg) ThrowError(nav, "登录失败", msg as string);
     }
-  }, [token])
+  }, [token]);
 
   useMount(() => {
     if (token == "") {
@@ -27,7 +27,7 @@ export const Login: FC = () => {
       return;
     }
 
-    handleLogin()
+    handleLogin();
   });
 
   return <OnLogin />;

@@ -9,16 +9,16 @@ import { FeishuLogin } from "@api/v1/login";
 
 export const Feishu: FC = () => {
   const nav = useNavigate();
-  const useQuery= createUseQuery();
+  const useQuery = createUseQuery();
   const [code] = useQuery("code", "");
   const [callback] = useQuery("state", "");
 
   async function login() {
     try {
-      const callbackUrl=await FeishuLogin(code, callback);
-      window.open(callbackUrl, "_self")
+      const callbackUrl = await FeishuLogin(code, callback);
+      window.open(callbackUrl, "_self");
     } catch ({ msg }) {
-      ThrowError(nav, "登录失败", msg as string)
+      if (msg) ThrowError(nav, "登录失败", msg as string);
     }
   }
 

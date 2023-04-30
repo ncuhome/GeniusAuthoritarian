@@ -6,7 +6,7 @@ export const BaseUrlV1 = `${BaseURL}v1/`;
 const apiV1 = axios.create({
   baseURL: BaseUrlV1,
 });
-apiV1.interceptors.response.use(undefined, (err: any) => {
+export function apiV1ErrorHandler(err: any): any {
   switch (true) {
     case err.name === "CanceledError":
       break;
@@ -16,7 +16,10 @@ apiV1.interceptors.response.use(undefined, (err: any) => {
     default:
       err.msg = err.response.data.msg;
   }
-  return Promise.reject(err);
+  return err;
+}
+apiV1.interceptors.response.use(undefined, (err: any) => {
+  return Promise.reject(apiV1ErrorHandler(err));
 });
 
 export { apiV1 };
