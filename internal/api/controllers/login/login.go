@@ -6,6 +6,7 @@ import (
 	"github.com/ncuhome/GeniusAuthoritarian/internal/pkg/jwt"
 	"github.com/ncuhome/GeniusAuthoritarian/internal/service"
 	log "github.com/sirupsen/logrus"
+	"gorm.io/gorm"
 	"net/url"
 )
 
@@ -62,6 +63,10 @@ func Login(userInfo func(c *gin.Context, code string) (phone string)) gin.Handle
 
 		user, groups, e := service.User.UserInfo(userPhone)
 		if e != nil {
+			if e == gorm.ErrRecordNotFound {
+				callback.Error(c, callback.ErrUnauthorized)
+				return
+			}
 			callback.Error(c, callback.ErrDBOperation)
 			return
 		} else if len(groups) == 0 {
