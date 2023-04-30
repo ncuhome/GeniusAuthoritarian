@@ -61,8 +61,10 @@ func Login(userInfo func(c *gin.Context, code string) (phone string)) gin.Handle
 		if e != nil {
 			callback.Error(c, callback.ErrDBOperation)
 			return
+		} else if len(groups) == 0 {
+			callback.Error(c, callback.ErrFindUnit)
+			return
 		}
-
 		var groupSlice = make([]string, len(groups))
 		for i, group := range groups {
 			groupSlice[i] = group.Name

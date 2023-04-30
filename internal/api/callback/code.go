@@ -38,7 +38,7 @@ var (
 	}
 	ErrFindUnit = &Msg{
 		Code:       cErrFindUnit,
-		Msg:        "找不到对应身份组",
+		Msg:        "找不到身份组，请联系管理员处理",
 		HttpStatus: 401,
 	}
 	ErrUnexpected = &Msg{
