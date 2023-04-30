@@ -21,9 +21,9 @@ func (a *User) First(tx *gorm.DB) error {
 	return tx.First(a).Error
 }
 
-func (a *User) GetByPhoneSlice(tx *gorm.DB, phone []string) ([]User, error) {
+func (a *User) GetUnscopedByPhoneSlice(tx *gorm.DB, phone []string) ([]User, error) {
 	var t []User
-	return t, tx.Model(a).Where("phone IN ?", phone).Find(&t).Error
+	return t, tx.Model(a).Unscoped().Where("phone IN ?", phone).Find(&t).Error
 }
 
 func (a *User) GetNotInPhoneSlice(tx *gorm.DB, phone []string) ([]User, error) {
@@ -33,4 +33,8 @@ func (a *User) GetNotInPhoneSlice(tx *gorm.DB, phone []string) ([]User, error) {
 
 func (a *User) FrozeByIDSlice(tx *gorm.DB, ids []uint) error {
 	return tx.Delete(a, "id IN ?", ids).Error
+}
+
+func (a *User) UnfrozeByIDSlice(tx *gorm.DB, ids []uint) error {
+	return tx.Model(a).Unscoped().Where("id IN ?", ids).Update("deleted_at", gorm.Expr("NULL")).Error
 }

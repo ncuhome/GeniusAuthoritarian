@@ -17,7 +17,7 @@ func (a UserGroupsSrv) Begin() (UserGroupsSrv, error) {
 }
 
 func (a UserGroupsSrv) GetAll() ([]dao.UserGroups, error) {
-	return (&dao.UserGroups{}).GetAll(a.DB)
+	return (&dao.UserGroups{}).GetAllUnfrozen(a.DB)
 }
 
 func (a UserGroupsSrv) CreateAll(data []dao.UserGroups) error {

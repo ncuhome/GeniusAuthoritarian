@@ -106,7 +106,7 @@ func UserSync() error {
 		}
 	}
 
-	// 创建不存在的用户，删除不在列表中的用户
+	// 数据库操作：创建不存在的用户，解冻已冻结用户，冻结不在列表中的用户
 	var allPhone = make([]string, len(reserveData))
 	i = 0
 	for phone := range reserveData {
@@ -114,16 +114,20 @@ func UserSync() error {
 		i++
 	}
 	userSrv := service.UserSrv{DB: feishuGroupsSrv.DB}
-	existUsers, e := userSrv.GetUserByPhoneSlice(allPhone)
+	existUsers, e := userSrv.GetUnscopedUserByPhoneSlice(allPhone)
 	if e != nil {
 		return e
 	}
+	lensToCreate := len(allPhone) - len(existUsers)
+	lensToUnfroze := 0
 	for _, exUser := range existUsers {
-		reserveData[exUser.Phone].Data = exUser
+		if exUser.DeletedAt.Valid {
+			lensToUnfroze++
+		}
+		reserveData[exUser.Phone].Data.ID = exUser.ID
 	}
-	lens = len(allPhone) - len(existUsers)
-	if lens > 0 {
-		var userToCreate = make([]dao.User, lens)
+	if lensToCreate > 0 {
+		var userToCreate = make([]dao.User, lensToCreate)
 		i = 0
 		for _, phone := range allPhone {
 			for _, exUser := range existUsers {
@@ -142,6 +146,20 @@ func UserSync() error {
 			reserveData[user.Phone].Data.ID = user.ID
 		}
 	}
+	if lensToUnfroze > 0 {
+		var userToUnfroze = make([]uint, lensToUnfroze)
+		i = 0
+		for _, exUser := range existUsers {
+			if exUser.DeletedAt.Valid {
+				userToUnfroze[i] = exUser.ID
+				i++
+			}
+		}
+		if e = userSrv.UnFrozeByIDSlice(userToUnfroze); e != nil {
+			return e
+		}
+	}
+
 	invalidUsers, e := userSrv.GetUserNotInPhoneSlice(allPhone)
 	if e != nil {
 		return e
@@ -152,12 +170,12 @@ func UserSync() error {
 			delete(reserveData, user.Phone)
 			invalidUID[i] = user.ID
 		}
-		if e = userSrv.DeleteByIDSlice(invalidUID); e != nil {
+		if e = userSrv.FrozeByIDSlice(invalidUID); e != nil {
 			return e
 		}
 	}
 
-	// 同步用户部门关系
+	// 数据库操作：同步用户部门关系
 	userGroupSrv := service.UserGroupsSrv{DB: feishuGroupsSrv.DB}
 	existUserGroups, e := userGroupSrv.GetAll()
 	if e != nil {

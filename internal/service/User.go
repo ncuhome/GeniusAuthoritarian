@@ -16,8 +16,8 @@ func (a UserSrv) Begin() (UserSrv, error) {
 	return a, a.Error
 }
 
-func (a UserSrv) GetUserByPhoneSlice(phone []string) ([]dao.User, error) {
-	return (&dao.User{}).GetByPhoneSlice(a.DB, phone)
+func (a UserSrv) GetUnscopedUserByPhoneSlice(phone []string) ([]dao.User, error) {
+	return (&dao.User{}).GetUnscopedByPhoneSlice(a.DB, phone)
 }
 
 func (a UserSrv) GetUserNotInPhoneSlice(phone []string) ([]dao.User, error) {
@@ -28,8 +28,12 @@ func (a UserSrv) CreateAll(users []dao.User) error {
 	return (&dao.User{}).InsertAll(a.DB, users)
 }
 
-func (a UserSrv) DeleteByIDSlice(id []uint) error {
+func (a UserSrv) FrozeByIDSlice(id []uint) error {
 	return (&dao.User{}).FrozeByIDSlice(a.DB, id)
+}
+
+func (a UserSrv) UnFrozeByIDSlice(id []uint) error {
+	return (&dao.User{}).UnfrozeByIDSlice(a.DB, id)
 }
 
 func (a UserSrv) UserInfo(phone string) (*dao.User, []dao.Group, error) {
