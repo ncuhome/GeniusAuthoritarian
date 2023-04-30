@@ -40,7 +40,7 @@ func (a UserSrv) UserInfo(phone string) (*dao.User, []dao.Group, error) {
 	var user = dao.User{
 		Phone: phone,
 	}
-	e := user.First(a.DB)
+	e := user.FirstByPhone(a.DB)
 	if e != nil {
 		return nil, nil, e
 	}
