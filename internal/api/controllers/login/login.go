@@ -5,7 +5,6 @@ import (
 	"github.com/ncuhome/GeniusAuthoritarian/internal/api/callback"
 	"github.com/ncuhome/GeniusAuthoritarian/internal/pkg/jwt"
 	"github.com/ncuhome/GeniusAuthoritarian/internal/service"
-	log "github.com/sirupsen/logrus"
 	"gorm.io/gorm"
 	"net/url"
 )
@@ -16,15 +15,15 @@ func GetLoginLink(linkGen func(host, callback string) string) gin.HandlerFunc {
 			Callback string `json:"callback" form:"callback" binding:"required,uri"`
 		}
 		if e := c.ShouldBind(&f); e != nil {
-			callback.Error(c, callback.ErrForm)
+			callback.Error(c, e, callback.ErrForm)
 			return
 		}
 
 		if ok, e := service.SiteWhiteList.CheckUrl(f.Callback); e != nil {
-			callback.Error(c, callback.ErrDBOperation)
+			callback.Error(c, e, callback.ErrDBOperation)
 			return
 		} else if !ok {
-			callback.Error(c, callback.ErrSiteNotAllow)
+			callback.Error(c, e, callback.ErrSiteNotAllow)
 			return
 		}
 
@@ -41,15 +40,15 @@ func Login(userInfo func(c *gin.Context, code string) (phone string)) gin.Handle
 			Callback string `json:"callback" form:"callback" binding:"required,uri"`
 		}
 		if e := c.ShouldBind(&f); e != nil {
-			callback.Error(c, callback.ErrForm)
+			callback.Error(c, e, callback.ErrForm)
 			return
 		}
 
 		if ok, e := service.SiteWhiteList.CheckUrl(f.Callback); e != nil {
-			callback.Error(c, callback.ErrDBOperation)
+			callback.Error(c, e, callback.ErrDBOperation)
 			return
 		} else if !ok {
-			callback.Error(c, callback.ErrSiteNotAllow)
+			callback.Error(c, e, callback.ErrSiteNotAllow)
 			return
 		}
 
@@ -57,20 +56,20 @@ func Login(userInfo func(c *gin.Context, code string) (phone string)) gin.Handle
 		if c.IsAborted() {
 			return
 		} else if userPhone == "" {
-			callback.Error(c, callback.ErrUnexpected)
+			callback.Error(c, nil, callback.ErrUnexpected)
 			return
 		}
 
 		user, groups, e := service.User.UserInfo(userPhone)
 		if e != nil {
 			if e == gorm.ErrRecordNotFound {
-				callback.Error(c, callback.ErrUnauthorized)
+				callback.Error(c, nil, callback.ErrUnauthorized)
 				return
 			}
-			callback.Error(c, callback.ErrDBOperation)
+			callback.Error(c, e, callback.ErrDBOperation)
 			return
 		} else if len(groups) == 0 {
-			callback.Error(c, callback.ErrFindUnit)
+			callback.Error(c, nil, callback.ErrFindUnit)
 			return
 		}
 		var groupSlice = make([]string, len(groups))
@@ -80,15 +79,13 @@ func Login(userInfo func(c *gin.Context, code string) (phone string)) gin.Handle
 
 		callbackUrl, e := url.Parse(f.Callback)
 		if e != nil {
-			log.Debugln(e)
-			callback.Error(c, callback.ErrUnexpected)
+			callback.Error(c, e, callback.ErrUnexpected)
 			return
 		}
 
 		token, e := jwt.GenerateLoginToken(user.ID, user.Name, c.ClientIP(), callbackUrl.Host, groupSlice)
 		if e != nil {
-			log.Debugln("jwt generate failed:", e)
-			callback.Error(c, callback.ErrUnexpected)
+			callback.Error(c, e, callback.ErrUnexpected)
 			return
 		}
 

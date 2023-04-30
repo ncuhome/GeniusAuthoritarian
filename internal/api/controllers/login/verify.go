@@ -6,7 +6,6 @@ import (
 	"github.com/ncuhome/GeniusAuthoritarian/internal/api/models/response"
 	"github.com/ncuhome/GeniusAuthoritarian/internal/pkg/jwt"
 	"github.com/ncuhome/GeniusAuthoritarian/internal/service"
-	log "github.com/sirupsen/logrus"
 )
 
 func VerifyToken(c *gin.Context) {
@@ -15,14 +14,13 @@ func VerifyToken(c *gin.Context) {
 		Groups []string `json:"groups" form:"groups"`
 	}
 	if e := c.ShouldBind(&f); e != nil {
-		callback.Error(c, callback.ErrForm)
+		callback.Error(c, e, callback.ErrForm)
 		return
 	}
 
 	claims, valid, e := jwt.ParseLoginToken(f.Token)
 	if e != nil || !valid {
-		log.Debugln("decode token failed:", e)
-		callback.Error(c, callback.ErrUnauthorized)
+		callback.Error(c, e, callback.ErrUnauthorized)
 		return
 	}
 
@@ -36,7 +34,7 @@ func VerifyToken(c *gin.Context) {
 			}
 		}
 		if len(verifiedGroups) == 0 {
-			callback.Error(c, callback.ErrUnauthorized)
+			callback.Error(c, e, callback.ErrUnauthorized)
 			return
 		}
 		claims.Groups = verifiedGroups
@@ -44,13 +42,13 @@ func VerifyToken(c *gin.Context) {
 
 	loginRecordSrv, e := service.LoginRecord.Begin()
 	if e != nil {
-		callback.Error(c, callback.ErrDBOperation)
+		callback.Error(c, e, callback.ErrDBOperation)
 		return
 	}
 	defer loginRecordSrv.Rollback()
 
 	if e = loginRecordSrv.Add(claims.UID, claims.IP, claims.Target); e != nil || loginRecordSrv.Commit().Error != nil {
-		callback.Error(c, callback.ErrDBOperation)
+		callback.Error(c, e, callback.ErrDBOperation)
 		return
 	}
 

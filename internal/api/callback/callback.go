@@ -3,6 +3,7 @@ package callback
 import (
 	"fmt"
 	"github.com/gin-gonic/gin"
+	log "github.com/sirupsen/logrus"
 )
 
 type Msg struct {
@@ -12,14 +13,15 @@ type Msg struct {
 	HttpStatus int         `json:"-"`
 }
 
-func Error(c *gin.Context, msg *Msg) {
+func Error(c *gin.Context, e error, msg *Msg) {
+	log.Debugln(e)
 	c.JSON(msg.HttpStatus, msg)
 	c.AbortWithStatus(msg.HttpStatus)
 }
 
-func ErrorWithTip(c *gin.Context, msg *Msg, tip any) {
+func ErrorWithTip(c *gin.Context, e error, msg *Msg, tip any) {
 	msg.Msg = fmt.Sprint(tip)
-	Error(c, msg)
+	Error(c, e, msg)
 }
 
 func Success(c *gin.Context, data interface{}) {
