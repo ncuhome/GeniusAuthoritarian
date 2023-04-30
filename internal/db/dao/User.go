@@ -18,7 +18,7 @@ func (a *User) InsertAll(tx *gorm.DB, users []User) error {
 }
 
 func (a *User) FirstByPhone(tx *gorm.DB) error {
-	return tx.Select("phone").First(a).Error
+	return tx.Where(a, "phone").First(a).Error
 }
 
 func (a *User) GetUnscopedByPhoneSlice(tx *gorm.DB, phone []string) ([]User, error) {
