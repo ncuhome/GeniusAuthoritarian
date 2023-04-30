@@ -15,7 +15,7 @@ import {GetFeishuLoginUrl, GetDingTalkLoginUrl} from "@api/v1/login";
 export const LoginForm: FC = () => {
   const nav = useNavigate();
   const useQuery=createUseQuery()
-    const [target] = useQuery("target", "");
+    const [target] = useQuery("target", `https://${location.host}/login`);
 
     async function goFeishuLogin() {
         try {
@@ -36,11 +36,6 @@ export const LoginForm: FC = () => {
     }
 
     useMount(() => {
-        if (!target) {
-            ThrowError(nav, "请求不合法");
-            return;
-        }
-
         switch (true) {
             case navigator.userAgent.indexOf("Feishu") !== -1:
                 goFeishuLogin();

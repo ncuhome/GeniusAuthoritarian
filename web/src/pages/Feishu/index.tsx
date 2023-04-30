@@ -27,7 +27,7 @@ export const Feishu: FC = () => {
       ThrowError(nav, "登录失败", "参数缺失");
       return;
     }
-    login()
+    login();
   });
 
   return <OnLogin />;
