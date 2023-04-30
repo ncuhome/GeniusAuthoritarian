@@ -33,7 +33,7 @@ func GetLoginLink(linkGen func(host, callback string) string) gin.HandlerFunc {
 	}
 }
 
-func Login(userInfo func(c *gin.Context, code string) (phone string)) gin.HandlerFunc {
+func ThirdPartyLogin(userInfo func(c *gin.Context, code string) (phone string)) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		var f struct {
 			Code     string `json:"code" form:"code" binding:"required"`

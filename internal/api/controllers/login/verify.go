@@ -8,6 +8,44 @@ import (
 	"github.com/ncuhome/GeniusAuthoritarian/internal/service"
 )
 
+func doVerifyToken(c *gin.Context, token string, groups []string) *jwt.LoginTokenClaims {
+	claims, valid, e := jwt.ParseLoginToken(token)
+	if e != nil || !valid {
+		callback.Error(c, e, callback.ErrUnauthorized)
+		return nil
+	}
+
+	if len(groups) != 0 {
+		var verifiedGroups []string
+		for _, targetGroup := range groups {
+			for _, existGroup := range claims.Groups {
+				if targetGroup == existGroup {
+					verifiedGroups = append(verifiedGroups, existGroup)
+				}
+			}
+		}
+		if len(verifiedGroups) == 0 {
+			callback.Error(c, e, callback.ErrUnauthorized)
+			return nil
+		}
+		claims.Groups = verifiedGroups
+	}
+
+	loginRecordSrv, e := service.LoginRecord.Begin()
+	if e != nil {
+		callback.Error(c, e, callback.ErrDBOperation)
+		return nil
+	}
+	defer loginRecordSrv.Rollback()
+
+	if e = loginRecordSrv.Add(claims.UID, claims.IP, claims.Target); e != nil || loginRecordSrv.Commit().Error != nil {
+		callback.Error(c, e, callback.ErrDBOperation)
+		return nil
+	}
+
+	return claims
+}
+
 func VerifyToken(c *gin.Context) {
 	var f struct {
 		Token  string   `json:"token" form:"token" binding:"required"`
@@ -18,42 +56,34 @@ func VerifyToken(c *gin.Context) {
 		return
 	}
 
-	claims, valid, e := jwt.ParseLoginToken(f.Token)
-	if e != nil || !valid {
-		callback.Error(c, e, callback.ErrUnauthorized)
-		return
-	}
-
-	if len(f.Groups) != 0 {
-		var verifiedGroups []string
-		for _, targetGroup := range f.Groups {
-			for _, existGroup := range claims.Groups {
-				if targetGroup == existGroup {
-					verifiedGroups = append(verifiedGroups, existGroup)
-				}
-			}
-		}
-		if len(verifiedGroups) == 0 {
-			callback.Error(c, e, callback.ErrUnauthorized)
-			return
-		}
-		claims.Groups = verifiedGroups
-	}
-
-	loginRecordSrv, e := service.LoginRecord.Begin()
-	if e != nil {
-		callback.Error(c, e, callback.ErrDBOperation)
-		return
-	}
-	defer loginRecordSrv.Rollback()
-
-	if e = loginRecordSrv.Add(claims.UID, claims.IP, claims.Target); e != nil || loginRecordSrv.Commit().Error != nil {
-		callback.Error(c, e, callback.ErrDBOperation)
+	claims := doVerifyToken(c, f.Token, f.Groups)
+	if c.IsAborted() {
 		return
 	}
 
 	callback.Success(c, response.VerifyTokenSuccess{
 		Name:   claims.Name,
 		Groups: claims.Groups,
+	})
+}
+
+func Login(c *gin.Context) {
+	var f struct {
+		Token string `json:"token" form:"token" binding:"required"`
+	}
+
+	claims := doVerifyToken(c, f.Token, nil)
+	if c.IsAborted() {
+		return
+	}
+
+	token, e := jwt.GenerateUserToken(claims.UID)
+	if e != nil {
+		callback.Error(c, e, callback.ErrUnexpected)
+		return
+	}
+
+	callback.Success(c, gin.H{
+		"token": token,
 	})
 }

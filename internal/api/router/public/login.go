@@ -6,6 +6,7 @@ import (
 )
 
 func routerLogin(G *gin.RouterGroup) {
+	G.POST("/", controllers.Login) // 个人页面登录
 	G.POST("/verify", controllers.VerifyToken)
 
 	feishu := G.Group("feishu")

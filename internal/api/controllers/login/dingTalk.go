@@ -9,7 +9,7 @@ import (
 
 var DingTalkLoginLink = GetLoginLink(dingTalk.Api.LoginLink)
 
-var DingTalkLogin = Login(func(c *gin.Context, code string) string {
+var DingTalkLogin = ThirdPartyLogin(func(c *gin.Context, code string) string {
 	userToken, e := dingTalk.Api.GetUserToken(code)
 	if e != nil {
 		callback.Error(c, e, callback.ErrRemoteOperationFailed)
