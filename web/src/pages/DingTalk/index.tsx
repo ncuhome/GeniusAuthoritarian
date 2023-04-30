@@ -1,5 +1,5 @@
 import {FC} from "react";
-import {useMount, useQuery} from "@hooks";
+import {useMount, createUseQuery} from "@hooks";
 import {useNavigate} from "react-router-dom";
 import {ThrowError} from "@util/nav";
 
@@ -9,6 +9,7 @@ import {DingTalkLogin} from "@api/v1/login";
 
 export const DingTalk: FC = () => {
     const nav = useNavigate();
+    const useQuery=createUseQuery()
     const [code] = useQuery("authCode", "");
     const [callback] = useQuery("state", "");
 

@@ -1,6 +1,6 @@
 import { FC } from "react";
 import { useNavigate } from "react-router-dom";
-import { useQuery, useMount } from "@hooks";
+import { createUseQuery, useMount } from "@hooks";
 import toast from "react-hot-toast";
 import feishuLogo from "@/assets/img/login/feishu.png";
 import dingLogo from "@/assets/img/login/ding.png";
@@ -14,6 +14,7 @@ import {GetFeishuLoginUrl, GetDingTalkLoginUrl} from "@api/v1/login";
 
 export const LoginForm: FC = () => {
   const nav = useNavigate();
+  const useQuery=createUseQuery()
     const [target] = useQuery("target", "");
 
     async function goFeishuLogin() {
