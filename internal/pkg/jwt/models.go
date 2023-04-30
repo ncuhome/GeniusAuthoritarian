@@ -2,10 +2,10 @@ package jwt
 
 import "github.com/golang-jwt/jwt/v4"
 
-type RefreshToken struct {
+type UserToken struct {
 	jwt.RegisteredClaims
-	Name   string   `json:"name"`
-	Groups []string `json:"groups"`
+	// UID
+	ID uint `json:"id"`
 }
 
 type LoginToken struct {

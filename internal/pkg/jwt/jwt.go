@@ -27,15 +27,14 @@ func ParseToken[C jwt.Claims](token string, target C) (claims C, valid bool, e e
 	return
 }
 
-// GenerateProfileToken 生成有效期 15 天的个人信息访问 Token
-func GenerateProfileToken(name string, groups []string) (string, error) {
-	return GenerateToken(&RefreshToken{
+// GenerateUserToken 生成有效期 15 天的个人信息访问 Token
+func GenerateUserToken(uid uint) (string, error) {
+	return GenerateToken(&UserToken{
 		RegisteredClaims: jwt.RegisteredClaims{
 			ExpiresAt: jwt.NewNumericDate(time.Now().Add(time.Hour * 24 * 15)),
 			IssuedAt:  jwt.NewNumericDate(time.Now()),
 		},
-		Name:   name,
-		Groups: groups,
+		ID: uid,
 	})
 }
 
@@ -62,8 +61,8 @@ func GenerateLoginToken(uid uint, name, ip, target string, groups []string) (str
 	})
 }
 
-func ParseProfileToken(token string) (*RefreshToken, bool, error) {
-	return ParseToken(token, &RefreshToken{})
+func ParseUserToken(token string) (*UserToken, bool, error) {
+	return ParseToken(token, &UserToken{})
 }
 
 // ParseLoginToken 解析后自动销毁
