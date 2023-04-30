@@ -27,8 +27,8 @@ func ParseToken[C jwt.Claims](token string, target C) (claims C, valid bool, e e
 	return
 }
 
-// GenerateRefreshToken 生成有效期 15 天的 Refresh Token
-func GenerateRefreshToken(name string, groups []string) (string, error) {
+// GenerateProfileToken 生成有效期 15 天的个人信息访问 Token
+func GenerateProfileToken(name string, groups []string) (string, error) {
 	return GenerateToken(&RefreshToken{
 		RegisteredClaims: jwt.RegisteredClaims{
 			ExpiresAt: jwt.NewNumericDate(time.Now().Add(time.Hour * 24 * 15)),
@@ -39,7 +39,7 @@ func GenerateRefreshToken(name string, groups []string) (string, error) {
 	})
 }
 
-// GenerateLoginToken 生成有效期 5 分钟的校验 Token
+// GenerateLoginToken 生成有效期 5 分钟的登录校验 Token
 func GenerateLoginToken(name string, groups []string) (string, error) {
 	now := time.Now()
 	valid := time.Minute * 5
@@ -59,7 +59,7 @@ func GenerateLoginToken(name string, groups []string) (string, error) {
 	})
 }
 
-func ParseRefreshToken(token string) (*RefreshToken, bool, error) {
+func ParseProfileToken(token string) (*RefreshToken, bool, error) {
 	return ParseToken(token, &RefreshToken{})
 }
 
