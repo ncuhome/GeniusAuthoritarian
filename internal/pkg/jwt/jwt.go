@@ -40,11 +40,13 @@ func GenerateProfileToken(name string, groups []string) (string, error) {
 }
 
 // GenerateLoginToken 生成有效期 5 分钟的登录校验 Token
-func GenerateLoginToken(name string, groups []string) (string, error) {
+func GenerateLoginToken(uid uint, name, target string, groups []string) (string, error) {
 	now := time.Now()
 	valid := time.Minute * 5
 	id, e := redis.Jwt.NewLoginPoint(now.Unix(), valid, LoginTokenClaims{
+		UID:    uid,
 		Name:   name,
+		Target: target,
 		Groups: groups,
 	})
 	if e != nil {

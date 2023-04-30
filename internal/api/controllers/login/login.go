@@ -5,8 +5,8 @@ import (
 	"github.com/ncuhome/GeniusAuthoritarian/internal/api/callback"
 	"github.com/ncuhome/GeniusAuthoritarian/internal/pkg/jwt"
 	"github.com/ncuhome/GeniusAuthoritarian/internal/service"
-	"github.com/ncuhome/GeniusAuthoritarian/tools"
 	log "github.com/sirupsen/logrus"
+	"net/url"
 )
 
 func GetLoginLink(linkGen func(host, callback string) string) gin.HandlerFunc {
@@ -33,7 +33,7 @@ func GetLoginLink(linkGen func(host, callback string) string) gin.HandlerFunc {
 	}
 }
 
-func Login(userInfo func(c *gin.Context, code string) (name string, groups []string)) gin.HandlerFunc {
+func Login(userInfo func(c *gin.Context, code string) (phone string)) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		var f struct {
 			Code     string `json:"code" form:"code" binding:"required"`
@@ -52,28 +52,43 @@ func Login(userInfo func(c *gin.Context, code string) (name string, groups []str
 			return
 		}
 
-		name, groups := userInfo(c, f.Code)
+		userPhone := userInfo(c, f.Code)
 		if c.IsAborted() {
 			return
 		}
 
-		token, e := jwt.GenerateLoginToken(name, groups)
+		user, groups, e := service.User.UserInfo(userPhone)
 		if e != nil {
-			log.Debugln("jwt generate failed:", e)
-			callback.Error(c, callback.ErrUnexpected)
+			callback.Error(c, callback.ErrDBOperation)
 			return
 		}
 
-		callbackUrl, e := tools.AddTokenToUrlQuery(f.Callback, token)
+		var groupSlice = make([]string, len(groups))
+		for i, group := range groups {
+			groupSlice[i] = group.Name
+		}
+
+		callbackUrl, e := url.Parse(f.Callback)
 		if e != nil {
 			log.Debugln(e)
 			callback.Error(c, callback.ErrUnexpected)
 			return
 		}
 
+		token, e := jwt.GenerateLoginToken(user.ID, user.Name, callbackUrl.Host, groupSlice)
+		if e != nil {
+			log.Debugln("jwt generate failed:", e)
+			callback.Error(c, callback.ErrUnexpected)
+			return
+		}
+
+		callbackQuery := callbackUrl.Query()
+		callbackQuery.Set("token", token)
+		callbackUrl.RawQuery = callbackQuery.Encode()
+
 		callback.Success(c, gin.H{
 			"token":    token,
-			"callback": callbackUrl,
+			"callback": callbackUrl.String(),
 		})
 	}
 }

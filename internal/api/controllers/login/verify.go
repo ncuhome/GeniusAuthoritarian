@@ -5,6 +5,7 @@ import (
 	"github.com/ncuhome/GeniusAuthoritarian/internal/api/callback"
 	"github.com/ncuhome/GeniusAuthoritarian/internal/api/models/response"
 	"github.com/ncuhome/GeniusAuthoritarian/internal/pkg/jwt"
+	"github.com/ncuhome/GeniusAuthoritarian/internal/service"
 	log "github.com/sirupsen/logrus"
 )
 
@@ -39,6 +40,18 @@ func VerifyToken(c *gin.Context) {
 			return
 		}
 		claims.Groups = verifiedGroups
+	}
+
+	loginRecordSrv, e := service.LoginRecord.Begin()
+	if e != nil {
+		callback.Error(c, callback.ErrDBOperation)
+		return
+	}
+	defer loginRecordSrv.Rollback()
+
+	if e = loginRecordSrv.Add(claims.UID, claims.Target); e != nil || loginRecordSrv.Commit().Error != nil {
+		callback.Error(c, callback.ErrDBOperation)
+		return
 	}
 
 	callback.Success(c, response.VerifyTokenSuccess{
