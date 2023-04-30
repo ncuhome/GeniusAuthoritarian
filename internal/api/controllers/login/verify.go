@@ -49,7 +49,7 @@ func VerifyToken(c *gin.Context) {
 	}
 	defer loginRecordSrv.Rollback()
 
-	if e = loginRecordSrv.Add(claims.UID, claims.Target); e != nil || loginRecordSrv.Commit().Error != nil {
+	if e = loginRecordSrv.Add(claims.UID, claims.IP, claims.Target); e != nil || loginRecordSrv.Commit().Error != nil {
 		callback.Error(c, callback.ErrDBOperation)
 		return
 	}

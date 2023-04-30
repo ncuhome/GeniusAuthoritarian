@@ -75,7 +75,7 @@ func Login(userInfo func(c *gin.Context, code string) (phone string)) gin.Handle
 			return
 		}
 
-		token, e := jwt.GenerateLoginToken(user.ID, user.Name, callbackUrl.Host, groupSlice)
+		token, e := jwt.GenerateLoginToken(user.ID, user.Name, c.ClientIP(), callbackUrl.Host, groupSlice)
 		if e != nil {
 			log.Debugln("jwt generate failed:", e)
 			callback.Error(c, callback.ErrUnexpected)

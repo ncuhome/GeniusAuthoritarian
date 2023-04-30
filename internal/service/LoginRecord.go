@@ -16,9 +16,10 @@ func (a LoginRecordSrv) Begin() (*LoginRecordSrv, error) {
 	return &a, a.Error
 }
 
-func (a LoginRecordSrv) Add(uid uint, target string) error {
+func (a LoginRecordSrv) Add(uid uint, ip, target string) error {
 	return (&dao.LoginRecord{
 		UID:    uid,
+		IP:     ip,
 		Target: target,
 	}).Insert(a.DB)
 }
