@@ -55,6 +55,9 @@ func Login(userInfo func(c *gin.Context, code string) (phone string)) gin.Handle
 		userPhone := userInfo(c, f.Code)
 		if c.IsAborted() {
 			return
+		} else if userPhone == "" {
+			callback.Error(c, callback.ErrUnexpected)
+			return
 		}
 
 		user, groups, e := service.User.UserInfo(userPhone)
