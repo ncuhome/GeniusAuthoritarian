@@ -9,12 +9,12 @@ type FeishuGroupModel struct {
 	Name             string `gorm:"not null;unique"`
 	OpenDepartmentId string `gorm:"not null;uniqueInde;type:varchar(255)"`
 	// Group.ID
-	GID uint `gorm:"uniqueIndex;not null;column:gid"`
+	Gid uint `gorm:"uniqueIndex;not null;column:gid"`
 }
 
 type FeishuGroups struct {
 	FeishuGroupModel
-	Group Group `gorm:"foreignKey:GID;constraint:RESTRICT"`
+	Group Group `gorm:"foreignKey:gid;constraint:RESTRICT"`
 }
 
 func (a *FeishuGroups) GetAll(tx *gorm.DB) ([]FeishuGroupModel, error) {

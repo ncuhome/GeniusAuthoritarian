@@ -27,7 +27,7 @@ func DepartmentSync() error {
 					pairedDepartments[relate.department] = &dao.FeishuGroupModel{
 						Name:             item.Name,
 						OpenDepartmentId: item.OpenDepartmentId,
-						GID:              GroupOperator.GroupRelation[relate.department],
+						Gid:              GroupOperator.GroupRelation[relate.department],
 					}
 					goto next
 				}
@@ -39,7 +39,7 @@ func DepartmentSync() error {
 	// 转换为组 ID 为索引的映射
 	var pairedDepartmentsRelations = make(map[uint]*dao.FeishuGroupModel, len(pairedDepartments))
 	for _, v := range pairedDepartments {
-		pairedDepartmentsRelations[v.GID] = v
+		pairedDepartmentsRelations[v.Gid] = v
 	}
 
 	var toDelete []uint
@@ -57,13 +57,13 @@ func DepartmentSync() error {
 
 	// 计算数据库 diff
 	for _, dbDepartment := range dbFeishuDepartments {
-		paired, ok := pairedDepartmentsRelations[dbDepartment.GID]
+		paired, ok := pairedDepartmentsRelations[dbDepartment.Gid]
 		if !ok {
 			toDelete = append(toDelete, dbDepartment.ID)
 			continue
 		}
 		if paired.Name == dbDepartment.Name && paired.OpenDepartmentId == dbDepartment.OpenDepartmentId {
-			delete(pairedDepartmentsRelations, dbDepartment.GID)
+			delete(pairedDepartmentsRelations, dbDepartment.Gid)
 		} else {
 			toDelete = append(toDelete, dbDepartment.ID)
 		}

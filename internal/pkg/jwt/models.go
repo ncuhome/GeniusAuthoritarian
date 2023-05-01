@@ -4,7 +4,7 @@ import "github.com/golang-jwt/jwt/v4"
 
 type UserToken struct {
 	jwt.RegisteredClaims
-	// UID
+	// Uid
 	ID uint `json:"id"`
 }
 
