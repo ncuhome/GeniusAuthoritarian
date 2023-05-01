@@ -37,10 +37,10 @@ func (a *UserGroups) GetUserGroupsLimited(tx *gorm.DB, groups []string) ([]Group
 
 func (a *UserGroups) GetAllUnfrozen(tx *gorm.DB) ([]UserGroups, error) {
 	var t []UserGroups
-	return t, tx.Model(a).Joins("users u ON u.id=user_groups.uid").
+	return t, tx.Model(a).Omit(clause.Associations).Joins("users u ON u.id=user_groups.uid").
 		Where("u.deleted_at IS NULL").Find(&t).Error
 }
 
 func (a *UserGroups) DeleteByIDSlice(tx *gorm.DB, ids []uint) error {
-	return tx.Omit(clause.Associations).Delete(a, "id IN ?", ids).Error
+	return tx.Model(a).Omit(clause.Associations).Delete(a, "id IN ?", ids).Error
 }

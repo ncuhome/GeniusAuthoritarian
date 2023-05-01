@@ -36,5 +36,5 @@ func (a *FeishuGroups) GetGroupsByOpenIDSlice(tx *gorm.DB, openID []string) ([]G
 
 func (a *FeishuGroups) GetByOpenIDSlice(tx *gorm.DB, openID []string) ([]FeishuGroups, error) {
 	var t []FeishuGroups
-	return t, tx.Where("open_department_id IN ?", openID).Find(&t).Error
+	return t, tx.Omit(clause.Associations).Where("open_department_id IN ?", openID).Find(&t).Error
 }
