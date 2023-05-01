@@ -10,7 +10,7 @@ type LoginRecord struct {
 	CreatedAt int64
 	// User.ID
 	UID    uint   `gorm:"not null;index;column:uid"`
-	User   *User  `gorm:"foreignKey:UID;constraint:OnDelete:CASCADE"`
+	User   User   `gorm:"foreignKey:UID;constraint:OnDelete:CASCADE"`
 	Target string `gorm:"not null"`
 	IP     string
 }
