@@ -10,16 +10,16 @@ type UserGroupsWithForeignKey struct {
 	Group      Group `gorm:"foreignKey:GID;constraint:OnDelete:RESTRICT"`
 }
 
+func (a *UserGroupsWithForeignKey) TableName() string {
+	return "user_groups"
+}
+
 type UserGroups struct {
 	ID uint `gorm:"primarykey"`
 	// User.ID
 	UID uint `gorm:"index;index:user_group_idx,unique;not null;column:uid;"`
 	// Group.ID
 	GID uint `gorm:"index;index:user_group_idx,unique;not null;column:gid"`
-}
-
-func (a *UserGroups) TableName() string {
-	return "user_groups"
 }
 
 func (a *UserGroups) InsertAll(tx *gorm.DB, data []UserGroups) error {
