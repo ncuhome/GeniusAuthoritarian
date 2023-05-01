@@ -44,8 +44,9 @@ func (a *UserGroups) GetUserGroupsLimited(tx *gorm.DB, groups []string) ([]Group
 
 func (a *UserGroups) GetAllUnfrozen(tx *gorm.DB) ([]UserGroups, error) {
 	var t []UserGroups
-	return t, tx.Model(a).Joins("INNER JOIN users u ON u.id=user_groups.uid").
-		Where("u.deleted_at IS NULL").Find(&t).Error
+	return t, tx.Model(a).
+		Joins("INNER JOIN users u ON u.id=user_groups.uid AND u.deleted_at IS NULL").
+		Find(&t).Error
 }
 
 func (a *UserGroups) DeleteByIDSlice(tx *gorm.DB, ids []uint) error {
