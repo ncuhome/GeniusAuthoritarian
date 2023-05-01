@@ -7,4 +7,6 @@ import (
 
 func Router(G *gin.RouterGroup) {
 	G.Use(middlewares.UserAuth)
+
+	/*profile := G.Group("profile")*/
 }
