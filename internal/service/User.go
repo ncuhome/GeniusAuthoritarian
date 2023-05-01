@@ -46,7 +46,9 @@ func (a UserSrv) UserInfo(phone string) (*dao.User, []dao.Group, error) {
 	}
 
 	userGroups, e := (&dao.UserGroups{
-		UID: user.ID,
+		UserGroupModel: dao.UserGroupModel{
+			UID: user.ID,
+		},
 	}).GetUserGroupsByUID(a.DB)
 	return &user, userGroups, e
 }

@@ -18,8 +18,10 @@ func (a LoginRecordSrv) Begin() (*LoginRecordSrv, error) {
 
 func (a LoginRecordSrv) Add(uid uint, ip, target string) error {
 	return (&dao.LoginRecord{
-		UID:    uid,
-		IP:     ip,
-		Target: target,
+		LoginRecordModel: dao.LoginRecordModel{
+			UID:    uid,
+			IP:     ip,
+			Target: target,
+		},
 	}).Insert(a.DB)
 }

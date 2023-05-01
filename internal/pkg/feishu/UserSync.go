@@ -181,7 +181,7 @@ func UserSync() error {
 	if e != nil {
 		return e
 	}
-	var userGroupsToAdd []dao.UserGroups
+	var userGroupsToAdd []dao.UserGroupModel
 	var userGroupsToDelete []uint
 	var exUserGroupMap = make(map[uint][]uint, len(reserveData))
 	for _, exUserGroup := range existUserGroups {
@@ -197,7 +197,7 @@ func UserSync() error {
 					}
 				}
 			}
-			userGroupsToAdd = append(userGroupsToAdd, dao.UserGroups{
+			userGroupsToAdd = append(userGroupsToAdd, dao.UserGroupModel{
 				UID: user.Data.ID,
 				GID: userDepartment,
 			})

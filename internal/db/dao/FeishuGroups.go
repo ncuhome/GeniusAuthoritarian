@@ -2,29 +2,32 @@ package dao
 
 import (
 	"gorm.io/gorm"
-	"gorm.io/gorm/clause"
 )
 
-type FeishuGroups struct {
+type FeishuGroupModel struct {
 	ID               uint   `gorm:"primarykey"`
 	Name             string `gorm:"not null;unique"`
 	OpenDepartmentId string `gorm:"not null;uniqueInde;type:varchar(255)"`
 	// Group.ID
-	GID   uint  `gorm:"uniqueIndex;not null;column:gid"`
+	GID uint `gorm:"uniqueIndex;not null;column:gid"`
+}
+
+type FeishuGroups struct {
+	FeishuGroupModel
 	Group Group `gorm:"foreignKey:GID;constraint:RESTRICT"`
 }
 
-func (a *FeishuGroups) GetAll(tx *gorm.DB) ([]FeishuGroups, error) {
-	var t []FeishuGroups
+func (a *FeishuGroups) GetAll(tx *gorm.DB) ([]FeishuGroupModel, error) {
+	var t []FeishuGroupModel
 	return t, tx.Model(a).Find(&t).Error
 }
 
 func (a *FeishuGroups) DeleteByIDSlice(tx *gorm.DB, ids []uint) error {
-	return tx.Omit(clause.Associations).Delete(a, "ID IN ?", ids).Error
+	return tx.Delete(a, "ID IN ?", ids).Error
 }
 
-func (a *FeishuGroups) CreateAll(tx *gorm.DB, data []FeishuGroups) error {
-	return tx.Omit(clause.Associations).Create(data).Error
+func (a *FeishuGroups) CreateAll(tx *gorm.DB, data []FeishuGroupModel) error {
+	return tx.Model(a).Create(data).Error
 }
 
 func (a *FeishuGroups) GetGroupsByOpenIDSlice(tx *gorm.DB, openID []string) ([]Group, error) {
@@ -34,7 +37,7 @@ func (a *FeishuGroups) GetGroupsByOpenIDSlice(tx *gorm.DB, openID []string) ([]G
 		Where("fg.open_department_id IN ?", openID).Find(&t).Error
 }
 
-func (a *FeishuGroups) GetByOpenIDSlice(tx *gorm.DB, openID []string) ([]FeishuGroups, error) {
-	var t []FeishuGroups
-	return t, tx.Omit(clause.Associations).Where("open_department_id IN ?", openID).Find(&t).Error
+func (a *FeishuGroups) GetByOpenIDSlice(tx *gorm.DB, openID []string) ([]FeishuGroupModel, error) {
+	var t []FeishuGroupModel
+	return t, tx.Where("open_department_id IN ?", openID).Find(&t).Error
 }
