@@ -19,15 +19,15 @@ func DepartmentSync() error {
 	}
 
 	// 匹配所有命中关键词的部门，以组名为索引避免出现多个匹配结果
-	var pairedDepartments = make(map[string]*dao.FeishuGroupModel, len(departmentList.Items))
+	var pairedDepartments = make(map[string]*dao.FeishuGroups, len(departmentList.Items))
 	for _, item := range departmentList.Items {
 		for _, relate := range fsDepartmentsRelationMap {
 			for _, keyword := range relate.keywords {
 				if strings.Contains(item.Name, keyword) {
-					pairedDepartments[relate.department] = &dao.FeishuGroupModel{
+					pairedDepartments[relate.department] = &dao.FeishuGroups{
 						Name:             item.Name,
 						OpenDepartmentId: item.OpenDepartmentId,
-						Gid:              GroupOperator.GroupRelation[relate.department],
+						GID:              GroupOperator.GroupRelation[relate.department],
 					}
 					goto next
 				}
@@ -37,13 +37,13 @@ func DepartmentSync() error {
 	}
 
 	// 转换为组 ID 为索引的映射
-	var pairedDepartmentsRelations = make(map[uint]*dao.FeishuGroupModel, len(pairedDepartments))
+	var pairedDepartmentsRelations = make(map[uint]*dao.FeishuGroups, len(pairedDepartments))
 	for _, v := range pairedDepartments {
-		pairedDepartmentsRelations[v.Gid] = v
+		pairedDepartmentsRelations[v.GID] = v
 	}
 
 	var toDelete []uint
-	var toCreate []dao.FeishuGroupModel
+	var toCreate []dao.FeishuGroups
 	srv, e := service.FeishuGroups.Begin()
 	if e != nil {
 		return e
@@ -57,18 +57,18 @@ func DepartmentSync() error {
 
 	// 计算数据库 diff
 	for _, dbDepartment := range dbFeishuDepartments {
-		paired, ok := pairedDepartmentsRelations[dbDepartment.Gid]
+		paired, ok := pairedDepartmentsRelations[dbDepartment.GID]
 		if !ok {
 			toDelete = append(toDelete, dbDepartment.ID)
 			continue
 		}
 		if paired.Name == dbDepartment.Name && paired.OpenDepartmentId == dbDepartment.OpenDepartmentId {
-			delete(pairedDepartmentsRelations, dbDepartment.Gid)
+			delete(pairedDepartmentsRelations, dbDepartment.GID)
 		} else {
 			toDelete = append(toDelete, dbDepartment.ID)
 		}
 	}
-	toCreate = make([]dao.FeishuGroupModel, len(pairedDepartmentsRelations))
+	toCreate = make([]dao.FeishuGroups, len(pairedDepartmentsRelations))
 	i := 0
 	for _, department := range pairedDepartmentsRelations {
 		toCreate[i] = *department

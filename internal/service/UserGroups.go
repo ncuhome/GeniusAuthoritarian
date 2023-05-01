@@ -16,11 +16,11 @@ func (a UserGroupsSrv) Begin() (UserGroupsSrv, error) {
 	return a, a.Error
 }
 
-func (a UserGroupsSrv) GetAll() ([]dao.UserGroupModel, error) {
+func (a UserGroupsSrv) GetAll() ([]dao.UserGroups, error) {
 	return (&dao.UserGroups{}).GetAllUnfrozen(a.DB)
 }
 
-func (a UserGroupsSrv) CreateAll(data []dao.UserGroupModel) error {
+func (a UserGroupsSrv) CreateAll(data []dao.UserGroups) error {
 	return (&dao.UserGroups{}).InsertAll(a.DB, data)
 }
 

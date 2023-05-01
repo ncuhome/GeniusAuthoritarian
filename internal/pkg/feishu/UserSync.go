@@ -35,7 +35,7 @@ func UserSync() error {
 	}
 	var validGroupsMap = make(map[string]uint, len(validGroups))
 	for _, group := range validGroups {
-		validGroupsMap[group.OpenDepartmentId] = group.Gid
+		validGroupsMap[group.OpenDepartmentId] = group.GID
 	}
 	var invalidOpenID []string
 	for k := range userData {
@@ -181,11 +181,11 @@ func UserSync() error {
 	if e != nil {
 		return e
 	}
-	var userGroupsToAdd []dao.UserGroupModel
+	var userGroupsToAdd []dao.UserGroups
 	var userGroupsToDelete []uint
 	var exUserGroupMap = make(map[uint][]uint, len(reserveData))
 	for _, exUserGroup := range existUserGroups {
-		exUserGroupMap[exUserGroup.Uid] = append(exUserGroupMap[exUserGroup.Uid], exUserGroup.Gid)
+		exUserGroupMap[exUserGroup.UID] = append(exUserGroupMap[exUserGroup.UID], exUserGroup.GID)
 	}
 	for _, user := range reserveData {
 		for _, userDepartment := range user.Departments {
@@ -197,9 +197,9 @@ func UserSync() error {
 					}
 				}
 			}
-			userGroupsToAdd = append(userGroupsToAdd, dao.UserGroupModel{
-				Uid: user.Data.ID,
-				Gid: userDepartment,
+			userGroupsToAdd = append(userGroupsToAdd, dao.UserGroups{
+				UID: user.Data.ID,
+				GID: userDepartment,
 			})
 		nextUserDepartment:
 		}
