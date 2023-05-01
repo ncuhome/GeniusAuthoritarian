@@ -1,19 +1,22 @@
 package dao
 
-import "gorm.io/gorm"
+import (
+	"gorm.io/gorm"
+	"gorm.io/gorm/clause"
+)
 
 type UserGroups struct {
 	ID uint `gorm:"primarykey"`
 	// User.ID
 	UID  uint `gorm:"index;index:user_group_idx,unique;not null;column:uid;"`
-	User User `gorm:"-;foreignKey:UID;constraint:OnDelete:CASCADE"`
+	User User `gorm:"foreignKey:UID;constraint:OnDelete:CASCADE"`
 	// Group.ID
 	GID   uint  `gorm:"index;index:user_group_idx,unique;not null;column:gid"`
-	Group Group `gorm:"-;foreignKey:GID;constraint:OnDelete:RESTRICT"`
+	Group Group `gorm:"foreignKey:GID;constraint:OnDelete:RESTRICT"`
 }
 
 func (a *UserGroups) InsertAll(tx *gorm.DB, data []UserGroups) error {
-	return tx.Create(data).Error
+	return tx.Omit(clause.Associations).Create(data).Error
 }
 
 func (a *UserGroups) GetUserGroupsByUID(tx *gorm.DB) ([]Group, error) {
@@ -34,9 +37,10 @@ func (a *UserGroups) GetUserGroupsLimited(tx *gorm.DB, groups []string) ([]Group
 
 func (a *UserGroups) GetAllUnfrozen(tx *gorm.DB) ([]UserGroups, error) {
 	var t []UserGroups
-	return t, tx.Model(a).Joins("users u ON u.id=user_groups.uid").Where("u.deleted_at IS NULL").Find(&t).Error
+	return t, tx.Model(a).Joins("users u ON u.id=user_groups.uid").
+		Where("u.deleted_at IS NULL").Find(&t).Error
 }
 
 func (a *UserGroups) DeleteByIDSlice(tx *gorm.DB, ids []uint) error {
-	return tx.Delete(a, "id IN ?", ids).Error
+	return tx.Omit(clause.Associations).Delete(a, "id IN ?", ids).Error
 }

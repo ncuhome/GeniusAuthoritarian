@@ -1,6 +1,9 @@
 package dao
 
-import "gorm.io/gorm"
+import (
+	"gorm.io/gorm"
+	"gorm.io/gorm/clause"
+)
 
 type FeishuGroups struct {
 	ID               uint   `gorm:"primarykey"`
@@ -8,7 +11,7 @@ type FeishuGroups struct {
 	OpenDepartmentId string `gorm:"not null;uniqueInde;type:varchar(255)"`
 	// Group.ID
 	GID   uint  `gorm:"uniqueIndex;not null;column:gid"`
-	Group Group `gorm:"-;foreignKey:GID;constraint:RESTRICT"`
+	Group Group `gorm:"foreignKey:GID;constraint:RESTRICT"`
 }
 
 func (a *FeishuGroups) GetAll(tx *gorm.DB) ([]FeishuGroups, error) {
@@ -17,11 +20,11 @@ func (a *FeishuGroups) GetAll(tx *gorm.DB) ([]FeishuGroups, error) {
 }
 
 func (a *FeishuGroups) DeleteByIDSlice(tx *gorm.DB, ids []uint) error {
-	return tx.Delete(a, "ID IN ?", ids).Error
+	return tx.Omit(clause.Associations).Delete(a, "ID IN ?", ids).Error
 }
 
 func (a *FeishuGroups) CreateAll(tx *gorm.DB, data []FeishuGroups) error {
-	return tx.Create(data).Error
+	return tx.Omit(clause.Associations).Create(data).Error
 }
 
 func (a *FeishuGroups) GetGroupsByOpenIDSlice(tx *gorm.DB, openID []string) ([]Group, error) {
