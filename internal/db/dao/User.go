@@ -1,6 +1,9 @@
 package dao
 
-import "gorm.io/gorm"
+import (
+	"github.com/ncuhome/GeniusAuthoritarian/internal/db/dto"
+	"gorm.io/gorm"
+)
 
 type User struct {
 	ID uint `gorm:"primarykey"`
@@ -19,6 +22,14 @@ func (a *User) InsertAll(tx *gorm.DB, users []User) error {
 
 func (a *User) FirstByPhone(tx *gorm.DB) error {
 	return tx.First(a, "phone=?", a.Phone).Error
+}
+
+func (a *User) FirstProfile(tx *gorm.DB) (*dto.UserProfile, error) {
+	var t dto.UserProfile
+	return &t, tx.Model(a).Select("users.*,ua.id as avatar_id").
+		Where("users.id=?", a.ID).
+		Joins("LEFT JOIN user_avatars ua ON ua.uid=users.id").
+		First(&t).Error
 }
 
 func (a *User) GetUnscopedByPhoneSlice(tx *gorm.DB, phone []string) ([]User, error) {

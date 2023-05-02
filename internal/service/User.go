@@ -2,6 +2,7 @@ package service
 
 import (
 	"github.com/ncuhome/GeniusAuthoritarian/internal/db/dao"
+	"github.com/ncuhome/GeniusAuthoritarian/internal/db/dto"
 	"gorm.io/gorm"
 )
 
@@ -49,4 +50,8 @@ func (a UserSrv) UserInfo(phone string) (*dao.User, []dao.Group, error) {
 		UID: user.ID,
 	}).GetUserGroupsByUID(a.DB)
 	return &user, userGroups, e
+}
+
+func (a UserSrv) UserProfile(uid uint) (*dto.UserProfile, error) {
+	return (&dao.User{ID: uid}).FirstProfile(a.DB)
 }
