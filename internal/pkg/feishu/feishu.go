@@ -5,7 +5,7 @@ import (
 	"github.com/ncuhome/GeniusAuthoritarian/internal/global"
 	"github.com/ncuhome/GeniusAuthoritarian/pkg/feishuApi"
 	"github.com/ncuhome/GeniusAuthoritarian/tools"
-	"log"
+	log "github.com/sirupsen/logrus"
 )
 
 func init() {
@@ -26,6 +26,9 @@ func init() {
 		var sync = UserSyncProcessor{}
 		if e = sync.Run(); e != nil {
 			log.Fatalf("同步飞书用户失败: %v", e)
+		} else {
+			log.Infoln("飞书用户列表已同步")
+			sync.PrintSyncResult()
 		}
 	}
 

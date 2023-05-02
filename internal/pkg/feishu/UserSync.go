@@ -9,10 +9,20 @@ import (
 	"github.com/ncuhome/GeniusAuthoritarian/pkg/feishuApi"
 	log "github.com/sirupsen/logrus"
 	"gorm.io/gorm"
+	"time"
 )
 
 type UserSyncProcessor struct {
 	tx *gorm.DB
+
+	cost time.Duration
+
+	createdUser  int
+	unFrozenUser int
+	frozenUser   int
+
+	createdUserGroup int
+	deletedUserGroup int
 }
 
 type RelatedUserInfo struct {
@@ -21,6 +31,8 @@ type RelatedUserInfo struct {
 }
 
 func (a *UserSyncProcessor) Run() error {
+	var startAt = time.Now()
+
 	GroupOpenIdToFeishuUserSliceMap, e := a.downloadUserList()
 	if e != nil {
 		return e
@@ -51,7 +63,13 @@ func (a *UserSyncProcessor) Run() error {
 		return e
 	}
 
+	a.cost = time.Now().Sub(startAt)
 	return nil
+}
+
+func (a *UserSyncProcessor) PrintSyncResult() {
+	log.Infof("耗时 %dms，创建用户 %d 个，解冻用户 %d 个，冻结用户 %d 个，添加用户组 %d 个，移除用户组 %d 个",
+		a.cost.Milliseconds(), a.createdUser, a.frozenUser, a.unFrozenUser, a.createdUserGroup, a.deletedUserGroup)
 }
 
 func (a *UserSyncProcessor) downloadUserList() (map[string][]feishuApi.ListUserContent, error) {
@@ -162,16 +180,15 @@ func (a *UserSyncProcessor) doSyncUsers(reserveData map[string]*RelatedUserInfo)
 	if e != nil {
 		return e
 	}
-	lensToCreate := len(allPhone) - len(existUsers)
-	lensToUnfroze := 0
+	a.createdUser = len(allPhone) - len(existUsers)
 	for _, exUser := range existUsers {
 		if exUser.DeletedAt.Valid {
-			lensToUnfroze++
+			a.unFrozenUser++
 		}
 		reserveData[exUser.Phone].Data.ID = exUser.ID
 	}
-	if lensToCreate > 0 {
-		var userToCreate = make([]dao.User, lensToCreate)
+	if a.createdUser > 0 {
+		var userToCreate = make([]dao.User, a.createdUser)
 		i = 0
 		for _, phone := range allPhone {
 			for _, exUser := range existUsers {
@@ -190,8 +207,8 @@ func (a *UserSyncProcessor) doSyncUsers(reserveData map[string]*RelatedUserInfo)
 			reserveData[user.Phone].Data.ID = user.ID
 		}
 	}
-	if lensToUnfroze > 0 {
-		var userToUnfroze = make([]uint, lensToUnfroze)
+	if a.unFrozenUser > 0 {
+		var userToUnfroze = make([]uint, a.unFrozenUser)
 		i = 0
 		for _, exUser := range existUsers {
 			if exUser.DeletedAt.Valid {
@@ -217,6 +234,7 @@ func (a *UserSyncProcessor) doSyncUsers(reserveData map[string]*RelatedUserInfo)
 		if e = userSrv.FrozeByIDSlice(invalidUID); e != nil {
 			return e
 		}
+		a.frozenUser = len(invalidUID)
 	}
 	return nil
 }
@@ -264,11 +282,13 @@ func (a *UserSyncProcessor) doSyncUserGroups(reserveData map[string]*RelatedUser
 		if e = userGroupSrv.CreateAll(userGroupsToAdd); e != nil {
 			return e
 		}
+		a.createdUserGroup = len(userGroupsToAdd)
 	}
 	if len(userGroupsToDelete) > 0 {
 		if e = userGroupSrv.DeleteByIDSlice(userGroupsToDelete); e != nil {
 			return e
 		}
+		a.deletedUserGroup = len(userGroupsToDelete)
 	}
 	return nil
 }
@@ -283,6 +303,7 @@ func AddUserSyncCron(spec string) error {
 				log.Errorf("同步飞书用户列表失败: %v", e)
 			} else {
 				log.Infoln("飞书用户列表同步成功")
+				sync.PrintSyncResult()
 			}
 		},
 	})
