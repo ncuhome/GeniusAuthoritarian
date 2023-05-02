@@ -23,7 +23,8 @@ func init() {
 		log.Fatalln(e)
 	}
 	if count == 0 {
-		if e = UserSync(); e != nil {
+		var sync = UserSyncProcessor{}
+		if e = sync.Run(); e != nil {
 			log.Fatalf("同步飞书用户失败: %v", e)
 		}
 	}
