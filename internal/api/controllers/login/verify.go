@@ -6,11 +6,9 @@ import (
 	"github.com/ncuhome/GeniusAuthoritarian/internal/api/models/response"
 	"github.com/ncuhome/GeniusAuthoritarian/internal/pkg/jwt"
 	"github.com/ncuhome/GeniusAuthoritarian/internal/service"
-	log "github.com/sirupsen/logrus"
 )
 
 func doVerifyToken(c *gin.Context, token string, groups []string) *jwt.LoginTokenClaims {
-	log.Debugln(token)
 	claims, valid, e := jwt.ParseLoginToken(token)
 	if e != nil || !valid {
 		callback.Error(c, e, callback.ErrUnauthorized)
@@ -72,6 +70,10 @@ func VerifyToken(c *gin.Context) {
 func Login(c *gin.Context) {
 	var f struct {
 		Token string `json:"token" form:"token" binding:"required"`
+	}
+	if e := c.ShouldBind(&f); e != nil {
+		callback.Error(c, e, callback.ErrForm)
+		return
 	}
 
 	claims := doVerifyToken(c, f.Token, nil)
