@@ -1,7 +1,7 @@
 import { BrowserRouter, Route, Routes } from "react-router-dom";
 import { Toaster } from "react-hot-toast";
 
-import { Home, Error, Feishu, DingTalk, Login } from "./pages";
+import {Home, Error, Feishu, DingTalk, Login, User} from "./pages";
 
 import { ThemeProvider, createTheme } from "@mui/material/styles";
 const darkTheme = createTheme({
@@ -29,7 +29,8 @@ export default function App() {
             <Route path={"error"} element={<Error />} />
             <Route path={"feishu"} element={<Feishu />} />
             <Route path={"dingTalk"} element={<DingTalk />} />
-            <Route path={"login"} element={<Login />} />
+              <Route path={"login"} element={<Login/>}/>
+              <Route path={"user"} element={<User/>}/>
           </Routes>
         </BrowserRouter>
       </ThemeProvider>
