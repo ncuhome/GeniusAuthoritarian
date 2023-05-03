@@ -6,9 +6,7 @@ export async function UserLogin(token: string): Promise<string> {
       data: { token: authToken },
     },
   } = await apiV1.post("public/login/", {
-    data: {
-      token,
-    },
+    token,
   });
   return authToken;
 }
