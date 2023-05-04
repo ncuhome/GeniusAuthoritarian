@@ -6,8 +6,8 @@ import (
 
 type UserGroupsWithForeignKey struct {
 	UserGroups `gorm:"embedded"`
-	User       User  `gorm:"foreignKey:UID;constraint:OnDelete:CASCADE"`
-	Group      Group `gorm:"foreignKey:GID;constraint:OnDelete:RESTRICT"`
+	User       User  `gorm:"-;foreignKey:UID;constraint:OnDelete:CASCADE"`
+	Group      Group `gorm:"-;foreignKey:GID;constraint:OnDelete:RESTRICT"`
 }
 
 func (a *UserGroupsWithForeignKey) TableName() string {

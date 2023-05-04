@@ -6,7 +6,7 @@ import (
 
 type FeishuGroupsWithForeignKey struct {
 	FeishuGroups `gorm:"embedded"`
-	Group        Group `gorm:"foreignKey:GID;constraint:RESTRICT"`
+	Group        Group `gorm:"-;foreignKey:GID;constraint:RESTRICT"`
 }
 
 func (a *FeishuGroupsWithForeignKey) TableName() string {
