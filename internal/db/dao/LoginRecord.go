@@ -6,7 +6,7 @@ import (
 
 type LoginRecordWithForeignKey struct {
 	LoginRecord `gorm:"embedded"`
-	User        User `gorm:"foreignKey:UID;constraint:OnDelete:CASCADE"`
+	User        User `gorm:"-;foreignKey:UID;constraint:OnDelete:CASCADE"`
 }
 
 func (a *LoginRecordWithForeignKey) TableName() string {
