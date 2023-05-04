@@ -14,7 +14,8 @@ func (a *UserAvatarWithForeignKey) TableName() string {
 type UserAvatar struct {
 	ID uint `gorm:"primarykey"`
 	// User.ID
-	UID uint `gorm:"column:uid;not null;uniqueIndex"`
+	UID      uint   `gorm:"column:uid;not null;uniqueIndex"`
+	FileType string `gorm:"not null"`
 }
 
 func (a *UserAvatar) Insert(tx *gorm.DB) error {
