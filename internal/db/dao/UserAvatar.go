@@ -21,3 +21,7 @@ type UserAvatar struct {
 func (a *UserAvatar) Insert(tx *gorm.DB) error {
 	return tx.Create(a).Error
 }
+
+func (a *UserAvatar) DelForUser(tx *gorm.DB) *gorm.DB {
+	return tx.Where(a, "uid").Delete(a)
+}
