@@ -8,4 +8,4 @@ export * from "./DingTalk";
 
 export * from "./Login";
 
-export * from "./User"
+export * from "./User";

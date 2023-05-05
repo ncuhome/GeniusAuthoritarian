@@ -17,7 +17,7 @@ export const Login: FC = () => {
     try {
       const authToken = await UserLogin(token);
       localStorage.setItem("token", authToken);
-      nav("/user/")
+      nav("/user/");
     } catch ({ msg }) {
       if (msg) ThrowError(nav, "登录失败", msg as string);
     }

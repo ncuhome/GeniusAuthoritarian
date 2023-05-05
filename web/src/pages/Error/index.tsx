@@ -1,24 +1,24 @@
-import {FC, useMemo} from "react";
-import {useLocation} from "react-router-dom";
+import { FC, useMemo } from "react";
+import { useLocation } from "react-router-dom";
 import "./styles.css";
 
 import { Box, Typography } from "@mui/material";
 import { ClearRounded } from "@mui/icons-material";
 
 export const Error: FC = () => {
-    const loc = useLocation()
-    const title = useMemo(() => loc.state?.title || "未知错误", [loc.state])
-    const content = useMemo(() => loc.state?.content || "", [loc.state])
+  const loc = useLocation();
+  const title = useMemo(() => loc.state?.title || "未知错误", [loc.state]);
+  const content = useMemo(() => loc.state?.content || "", [loc.state]);
 
-    return (
-        <Box
-            sx={{
-                height: "100%",
-                width: "100%",
-                display: "flex",
-                justifyContent: "center",
-                alignItems: "center",
-            }}
+  return (
+    <Box
+      sx={{
+        height: "100%",
+        width: "100%",
+        display: "flex",
+        justifyContent: "center",
+        alignItems: "center",
+      }}
     >
       <Box
         sx={{

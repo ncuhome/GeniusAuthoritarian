@@ -10,38 +10,38 @@ import { ThrowError } from "@util/nav";
 import { Stack, Box, Typography, List, Paper } from "@mui/material";
 import { LoginItem } from "./components";
 
-import {GetFeishuLoginUrl, GetDingTalkLoginUrl} from "@api/v1/login";
+import { GetFeishuLoginUrl, GetDingTalkLoginUrl } from "@api/v1/login";
 
 export const LoginForm: FC = () => {
   const nav = useNavigate();
-  const useQuery=createUseQuery()
-    const [target] = useQuery("target", `https://${location.host}/login`);
+  const useQuery = createUseQuery();
+  const [target] = useQuery("target", `https://${location.host}/login`);
 
-    async function goFeishuLogin() {
-        try {
-            const url = await GetFeishuLoginUrl(target);
-            window.open(url, "_self");
-        } catch ({msg}) {
-            if (msg) toast.error(msg as string);
-        }
+  async function goFeishuLogin() {
+    try {
+      const url = await GetFeishuLoginUrl(target);
+      window.open(url, "_self");
+    } catch ({ msg }) {
+      if (msg) toast.error(msg as string);
     }
+  }
 
-    async function goDingTalkLogin() {
-        try {
-            const url = await GetDingTalkLoginUrl(target);
-            window.open(url, "_self");
-        } catch ({msg}) {
-            if (msg) toast.error(msg as string);
-        }
+  async function goDingTalkLogin() {
+    try {
+      const url = await GetDingTalkLoginUrl(target);
+      window.open(url, "_self");
+    } catch ({ msg }) {
+      if (msg) toast.error(msg as string);
     }
+  }
 
-    useMount(() => {
-        switch (true) {
-            case navigator.userAgent.indexOf("Feishu") !== -1:
-                goFeishuLogin();
-                break;
-        }
-    });
+  useMount(() => {
+    switch (true) {
+      case navigator.userAgent.indexOf("Feishu") !== -1:
+        goFeishuLogin();
+        break;
+    }
+  });
 
   return (
     <Box
@@ -74,10 +74,10 @@ export const LoginForm: FC = () => {
         <List>
           <LoginItem logo={feishuLogo} text={"飞书"} onClick={goFeishuLogin} />
           <LoginItem
-              logo={dingLogo}
-              text={"钉钉"}
-              onClick={goDingTalkLogin}
-              disableDivider
+            logo={dingLogo}
+            text={"钉钉"}
+            onClick={goDingTalkLogin}
+            disableDivider
           />
         </List>
       </Stack>

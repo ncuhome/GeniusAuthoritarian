@@ -5,5 +5,5 @@ export function ThrowError(
   title: string,
   content?: string
 ) {
-  nav("/error", {state: {title, content}});
+  nav("/error", { state: { title, content } });
 }

@@ -1,19 +1,19 @@
 @media screen and (max-width: 900px) {
-    .show-bar {
-        display: none;
-    }
+  .show-bar {
+    display: none;
+  }
 
-    .login-form {
-        padding: unset !important;
-    }
+  .login-form {
+    padding: unset !important;
+  }
 
-    .login-form > div {
-        padding: 4rem 10%;
-        box-sizing: border-box;
-        width: 100%;
-        height: 100%;
-        box-shadow: unset;
-        background-color: unset;
-        background-image: unset;
-    }
+  .login-form > div {
+    padding: 4rem 10%;
+    box-sizing: border-box;
+    width: 100%;
+    height: 100%;
+    box-shadow: unset;
+    background-color: unset;
+    background-image: unset;
+  }
 }
