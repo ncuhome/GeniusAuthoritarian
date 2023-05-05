@@ -3,7 +3,6 @@ package oss
 import (
 	"github.com/aliyun/aliyun-oss-go-sdk/oss"
 	"io"
-	"path"
 	"time"
 )
 
@@ -30,18 +29,18 @@ type Storage struct {
 
 func (a *Storage) NewDir(childDir string) *Storage {
 	var dir = *a
-	dir.path = path.Join(dir.path, childDir)
+	dir.path = dir.path + childDir + "/"
 	return &dir
 }
 
 func (a *Storage) Put(name string, reader io.Reader, options ...oss.Option) error {
-	return a.b.PutObject(path.Join(a.path, name), reader, options...)
+	return a.b.PutObject(a.path+name, reader, options...)
 }
 
 func (a *Storage) Del(name string, options ...oss.Option) error {
-	return a.b.DeleteObject(path.Join(a.path, name), options...)
+	return a.b.DeleteObject(a.path+name, options...)
 }
 
 func (a *Storage) SignGetUrl(name string, exprIn time.Duration, options ...oss.Option) (string, error) {
-	return a.b.SignURL(path.Join(a.path, name), oss.HTTPGet, int64(exprIn.Seconds()), options...)
+	return a.b.SignURL(a.path+name, oss.HTTPGet, int64(exprIn.Seconds()), options...)
 }
