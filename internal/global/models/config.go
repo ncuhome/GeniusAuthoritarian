@@ -27,3 +27,13 @@ type DingTalk struct {
 type Jwt struct {
 	SignKey string `yaml:"signKey"`
 }
+
+type Aliyun struct {
+	AccessKey string `yaml:"accessKey"`
+	SecretKey string `yaml:"secretKey"`
+	Oss       `yaml:"oss"`
+}
+
+type Oss struct {
+	Endpoint string `yaml:"endpoint"`
+}
