@@ -20,8 +20,9 @@ func Error(c *gin.Context, e error, msg *Msg) {
 }
 
 func ErrorWithTip(c *gin.Context, e error, msg *Msg, tip any) {
-	msg.Msg = fmt.Sprint(tip)
-	Error(c, e, msg)
+	tipMsg := *msg
+	tipMsg.Msg = fmt.Sprint(tip)
+	Error(c, e, &tipMsg)
 }
 
 func Success(c *gin.Context, data interface{}) {
