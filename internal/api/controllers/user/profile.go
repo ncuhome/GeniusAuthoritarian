@@ -15,12 +15,3 @@ func ProfileData(c *gin.Context) {
 	}
 	callback.Success(c, profile)
 }
-
-func SetAvatar(c *gin.Context) {
-	file, e := c.FormFile("file")
-	if e != nil {
-		callback.Error(c, e, callback.ErrForm)
-		return
-	}
-
-}

@@ -10,7 +10,6 @@ type Config struct {
 	Redis     redis.Config `yaml:"redis"`
 	Feishu    Feishu       `yaml:"feishu"`
 	DingTalk  DingTalk     `yaml:"dingTalk"`
-	Aliyun    Aliyun       `yaml:"aliyun"`
 	Jwt       Jwt          `yaml:"jwt"`
 	TraceMode bool         `yaml:"traceMode" config:"omitempty"`
 }
@@ -27,15 +26,4 @@ type DingTalk struct {
 
 type Jwt struct {
 	SignKey string `yaml:"signKey"`
-}
-
-type Aliyun struct {
-	AccessKey string `yaml:"accessKey"`
-	SecretKey string `yaml:"secretKey"`
-	Oss       `yaml:"oss"`
-}
-
-type Oss struct {
-	Endpoint string `yaml:"endpoint"`
-	Bucket   string `yaml:"bucket"`
 }
