@@ -63,7 +63,7 @@ func ThirdPartyLogin(userInfo func(c *gin.Context, code string) (phone string)) 
 		user, groups, e := service.User.UserInfo(userPhone)
 		if e != nil {
 			if e == gorm.ErrRecordNotFound {
-				callback.Error(c, nil, callback.ErrUnauthorized)
+				callback.ErrorWithTip(c, nil, callback.ErrUnauthorized, "没有找到角色，请尝试使用其他登录方式或联系管理页")
 				return
 			}
 			callback.Error(c, e, callback.ErrDBOperation)
