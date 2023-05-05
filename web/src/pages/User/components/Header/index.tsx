@@ -1,15 +1,15 @@
-import { FC, useCallback } from "react";
-import { useNavigate } from "react-router-dom";
+import {FC} from "react";
+import {useNavigate} from "react-router-dom";
 import logo from "@/assets/img/logo-lg.png";
 
-import { Box, Stack, Paper } from "@mui/material";
+import {Box, Stack, Paper} from "@mui/material";
 
 export const Header: FC = () => {
-  const nav = useNavigate();
+    const nav = useNavigate();
 
-  const handleGoHome = useCallback(() => nav("/user/"), [nav]);
+    const handleGoHome = () => nav("/user/");
 
-  return (
+    return (
     <Stack
       sx={{
         px: "3rem",
