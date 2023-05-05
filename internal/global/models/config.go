@@ -10,6 +10,7 @@ type Config struct {
 	Redis     redis.Config `yaml:"redis"`
 	Feishu    Feishu       `yaml:"feishu"`
 	DingTalk  DingTalk     `yaml:"dingTalk"`
+	Aliyun    Aliyun       `yaml:"aliyun"`
 	Jwt       Jwt          `yaml:"jwt"`
 	TraceMode bool         `yaml:"traceMode" config:"omitempty"`
 }
@@ -36,4 +37,5 @@ type Aliyun struct {
 
 type Oss struct {
 	Endpoint string `yaml:"endpoint"`
+	Bucket   string `yaml:"bucket"`
 }
