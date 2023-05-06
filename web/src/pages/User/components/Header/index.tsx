@@ -21,8 +21,6 @@ export const Header: FC<Props> = ({
 }) => {
   const nav = useNavigate();
 
-  const handleGoHome = () => nav("/user/");
-
   return (
     <Stack
       id={"user-nav"}
@@ -44,9 +42,8 @@ export const Header: FC<Props> = ({
             height: "60%",
           },
         }}
-        onClick={handleGoHome}
       >
-        <img src={logo} alt={""} />
+        <img src={logo} alt={"NCUHOME"} />
       </Box>
 
       <Tabs value={currentTab} textColor="inherit">
