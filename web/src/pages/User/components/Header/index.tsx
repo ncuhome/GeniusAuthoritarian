@@ -1,16 +1,24 @@
-import {FC} from "react";
-import {useNavigate} from "react-router-dom";
+import { FC } from "react";
+import { useNavigate } from "react-router-dom";
 import logo from "@/assets/img/logo-lg.png";
+import "./styles.css";
 
-import {Box, Stack, Paper} from "@mui/material";
+import { Box, Stack, Paper, Tabs, Tab, Typography } from "@mui/material";
 
-export const Header: FC = () => {
-    const nav = useNavigate();
+interface Props {
+  routers: { [name: string]: string };
+  currentTab?: string;
+}
 
-    const handleGoHome = () => nav("/user/");
+export const Header: FC<Props> = ({ routers, currentTab }) => {
+  const nav = useNavigate();
 
-    return (
+  const handleGoHome = () => nav("/user/");
+
+  return (
     <Stack
+      id={"user-nav"}
+      flexDirection={"row"}
       sx={{
         px: "3rem",
         height: "inherit",
@@ -23,6 +31,7 @@ export const Header: FC = () => {
           height: "100%",
           display: "flex",
           alignItems: "center",
+          marginRight: "3rem",
           "&>img": {
             height: "60%",
           },
@@ -31,6 +40,21 @@ export const Header: FC = () => {
       >
         <img src={logo} alt={""} />
       </Box>
+
+      <Tabs
+        value={currentTab}
+        textColor="inherit"
+      >
+        {Object.keys(routers).map((name) => (
+          <Tab
+            key={name}
+            label={<Typography variant={"subtitle1"}>{name}</Typography>}
+            value={name}
+            onClick={() => nav(routers[name])}
+            disableRipple
+          />
+        ))}
+      </Tabs>
     </Stack>
   );
 };

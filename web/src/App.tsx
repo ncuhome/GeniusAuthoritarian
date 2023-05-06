@@ -45,7 +45,7 @@ export default function App() {
             <Route path={"feishu"} element={<Feishu />} />
             <Route path={"dingTalk"} element={<DingTalk />} />
             <Route path={"login"} element={<Login />} />
-            <Route path={"user"} element={<User />} />
+            <Route path={"user/*"} element={<User />} />
           </Routes>
         </BrowserRouter>
       </ThemeProvider>
