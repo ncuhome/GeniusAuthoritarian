@@ -1,8 +1,8 @@
 import { FC, ReactNode, useState } from "react";
 import { Routes, Route } from "react-router-dom";
 
-import { Navigation } from "./pages";
-import { PageNotFound } from "@components";
+import {Navigation, Profile} from "./pages";
+import {PageNotFound} from "@components";
 import { Header } from "./components";
 import { Box, Stack } from "@mui/material";
 
@@ -11,8 +11,8 @@ const UserRouters: Array<{
   path: string;
   element: ReactNode;
 }> = [
-  { name: "导航", path: "", element: <Navigation /> },
-  { name: "个人资料", path: "profile", element: undefined },
+  {name: "导航", path: "", element: <Navigation/>},
+  {name: "个人资料", path: "profile", element: <Profile/>},
 ];
 
 export const User: FC = () => {
