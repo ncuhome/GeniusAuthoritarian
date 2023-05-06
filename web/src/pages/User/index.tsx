@@ -1,27 +1,37 @@
-import { FC, useMemo } from "react";
-import { Routes, Route, useMatch } from "react-router-dom";
+import { FC, ReactNode, useMemo } from "react";
+import { Routes, Route, useMatch, PathRouteProps } from "react-router-dom";
 
 import { PageNotFound } from "@components";
 import { Header } from "./components";
 import { Box, Stack } from "@mui/material";
 
-const routerTabs = {
-  导航: "",
-  个人资料: "profile",
-} as { [key: string]: string };
+const routerTabs = [
+  { name: "导航", path: "", element: undefined },
+  { name: "个人资料", path: "profile", element: undefined },
+] as Array<{
+  name: string;
+  path: string;
+  element: ReactNode;
+}>;
 
 export const User: FC = () => {
   const match = useMatch("/user/:path");
   const currentTab = useMemo(() => {
-    const keys = Object.keys(routerTabs);
-    if (!match) return keys[0];
-    for (let i = 0; i < keys.length; i++) {
-      if (match.params.path === routerTabs[keys[i]]) {
-        return keys[i];
+    if (!match) return 0;
+    for (let i = 0; i < routerTabs.length; i++) {
+      if (match.params.path === routerTabs[i].path) {
+        return i;
       }
     }
-    return keys[0];
+    return 0;
   }, [match]);
+  const routeElements = useMemo(
+    () =>
+      routerTabs.map((tab) => (
+        <Route key={tab.path} path={tab.path} element={tab.element} />
+      )),
+    []
+  );
 
   return (
     <Stack
@@ -45,6 +55,7 @@ export const User: FC = () => {
         }}
       >
         <Routes>
+          {routeElements}
           <Route path={"*"} element={<PageNotFound />} />
         </Routes>
       </Box>

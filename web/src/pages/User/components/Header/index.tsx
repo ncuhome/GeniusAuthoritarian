@@ -6,8 +6,11 @@ import "./styles.css";
 import { Box, Stack, Paper, Tabs, Tab, Typography } from "@mui/material";
 
 interface Props {
-  routers: { [name: string]: string };
-  currentTab?: string;
+  routers: Array<{
+      name:string
+      path:string
+  }>;
+  currentTab: number;
 }
 
 export const Header: FC<Props> = ({ routers, currentTab }) => {
@@ -45,12 +48,12 @@ export const Header: FC<Props> = ({ routers, currentTab }) => {
         value={currentTab}
         textColor="inherit"
       >
-        {Object.keys(routers).map((name) => (
+        {routers.map((r, index) => (
           <Tab
-            key={name}
-            label={<Typography variant={"subtitle1"}>{name}</Typography>}
-            value={name}
-            onClick={() => nav(routers[name])}
+            key={r.name}
+            label={<Typography variant={"subtitle1"}>{r.name}</Typography>}
+            value={index}
+            onClick={() => nav(r.path)}
             disableRipple
           />
         ))}
