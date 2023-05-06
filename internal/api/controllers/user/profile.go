@@ -8,10 +8,15 @@ import (
 )
 
 func ProfileData(c *gin.Context) {
-	profile, e := service.User.UserProfile(tools.GetUID(c))
+	uid := tools.GetUID(c)
+	profile, e := service.User.UserProfile(uid)
 	if e != nil {
 		callback.Error(c, e, callback.ErrDBOperation)
 		return
 	}
-	callback.Success(c, profile)
+	loginRecord, e := service.LoginRecord.UserHistory(uid, 10)
+	callback.Success(c, gin.H{
+		"user":        profile,
+		"loginRecord": loginRecord,
+	})
 }
