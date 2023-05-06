@@ -14,18 +14,20 @@ const darkTheme = createTheme({
 
 export default function App() {
   useMount(() => {
-    // Ncuhome
-    console.log(
-      atob(
-        "IF8gIF8gIF9fXyBfICAgXyBfICBfICBfX18gIF9fICBfXyBfX18gCnwgXHwgfC8gX198IHwgfCB8IHx8IHwvIF8gXHwgIFwvICB8IF9ffAp8IC5gIHwgKF9ffCB8X3wgfCBfXyB8IChfKSB8IHxcL3wgfCBffCAKfF98XF98XF9fX3xcX19fL3xffHxffFxfX18vfF98ICB8X3xfX198"
-      )
-    );
-    // Mmx
-    console.log(
-      atob(
-        "ICAgX19fX18gICAgICAgICAgICAgICAgICAKICAvICAgICBcICAgX19fX18gX19fICBfX18KIC8gIFwgLyAgXCAvICAgICBcXCAgXC8gIC8KLyAgICBZICAgIFwgIFkgWSAgXD4gICAgPCAKXF9fX198X18gIC9fX3xffCAgL19fL1xfIFwKICAgICAgICBcLyAgICAgIFwvICAgICAgXC8="
-      )
-    );
+    if (import.meta.env.MODE === "production") {
+      // Ncuhome
+      console.log(
+        atob(
+          "IF8gIF8gIF9fXyBfICAgXyBfICBfICBfX18gIF9fICBfXyBfX18gCnwgXHwgfC8gX198IHwgfCB8IHx8IHwvIF8gXHwgIFwvICB8IF9ffAp8IC5gIHwgKF9ffCB8X3wgfCBfXyB8IChfKSB8IHxcL3wgfCBffCAKfF98XF98XF9fX3xcX19fL3xffHxffFxfX18vfF98ICB8X3xfX198"
+        )
+      );
+      // Mmx
+      console.log(
+        atob(
+          "ICAgX19fX18gICAgICAgICAgICAgICAgICAKICAvICAgICBcICAgX19fX18gX19fICBfX18KIC8gIFwgLyAgXCAvICAgICBcXCAgXC8gIC8KLyAgICBZICAgIFwgIFkgWSAgXD4gICAgPCAKXF9fX198X18gIC9fX3xffCAgL19fL1xfIFwKICAgICAgICBcLyAgICAgIFwvICAgICAgXC8="
+        )
+      );
+    }
   });
   return (
     <>
