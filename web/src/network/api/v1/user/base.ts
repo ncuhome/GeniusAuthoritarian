@@ -5,7 +5,7 @@ function GoLogin() {
   window.location.href = "/";
 }
 
-const apiV1User = axios.create({
+export const apiV1User = axios.create({
   baseURL: BaseUrlV1 + "user/",
 });
 apiV1User.interceptors.request.use((req) => {
