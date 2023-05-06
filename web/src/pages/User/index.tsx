@@ -1,5 +1,5 @@
-import { FC, ReactNode, useMemo } from "react";
-import { Routes, Route, useMatch, PathRouteProps } from "react-router-dom";
+import { FC, ReactNode, useMemo, useState } from "react";
+import { Routes, Route } from "react-router-dom";
 
 import { PageNotFound } from "@components";
 import { Header } from "./components";
@@ -15,16 +15,15 @@ const routerTabs = [
 }>;
 
 export const User: FC = () => {
-  const match = useMatch("/user/:path");
-  const currentTab = useMemo(() => {
-    if (!match) return 0;
+  const [currentTab, setCurrentTab] = useState<number>(() => {
+    const matchPath = window.location.pathname.replace("/user/", "");
     for (let i = 0; i < routerTabs.length; i++) {
-      if (match.params.path === routerTabs[i].path) {
+      if (matchPath === routerTabs[i].path) {
         return i;
       }
     }
     return 0;
-  }, [match]);
+  });
   const routeElements = useMemo(
     () =>
       routerTabs.map((tab) => (
@@ -47,7 +46,11 @@ export const User: FC = () => {
           height: "3.5rem",
         }}
       >
-        <Header routers={routerTabs} currentTab={currentTab} />
+        <Header
+          routers={routerTabs}
+          currentTab={currentTab}
+          onChangeTab={setCurrentTab}
+        />
       </Box>
       <Box
         sx={{

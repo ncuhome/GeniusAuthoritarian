@@ -7,13 +7,18 @@ import { Box, Stack, Paper, Tabs, Tab, Typography } from "@mui/material";
 
 interface Props {
   routers: Array<{
-      name:string
-      path:string
+    name: string;
+    path: string;
   }>;
   currentTab: number;
+  onChangeTab: (index: number) => void;
 }
 
-export const Header: FC<Props> = ({ routers, currentTab }) => {
+export const Header: FC<Props> = ({
+  routers,
+  currentTab,
+  onChangeTab: handleChangeTab,
+}) => {
   const nav = useNavigate();
 
   const handleGoHome = () => nav("/user/");
@@ -44,16 +49,16 @@ export const Header: FC<Props> = ({ routers, currentTab }) => {
         <img src={logo} alt={""} />
       </Box>
 
-      <Tabs
-        value={currentTab}
-        textColor="inherit"
-      >
+      <Tabs value={currentTab} textColor="inherit">
         {routers.map((r, index) => (
           <Tab
             key={r.name}
             label={<Typography variant={"subtitle1"}>{r.name}</Typography>}
             value={index}
-            onClick={() => nav(r.path)}
+            onClick={() => {
+              handleChangeTab(index);
+              nav(r.path);
+            }}
             disableRipple
           />
         ))}
