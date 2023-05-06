@@ -3,6 +3,7 @@ import { BrowserRouter, Route, Routes } from "react-router-dom";
 import { Toaster } from "react-hot-toast";
 
 import { Home, Error, Feishu, DingTalk, Login, User } from "./pages";
+import { PageNotFound } from "@components";
 
 import { ThemeProvider, createTheme } from "@mui/material/styles";
 const darkTheme = createTheme({
@@ -46,6 +47,7 @@ export default function App() {
             <Route path={"dingTalk"} element={<DingTalk />} />
             <Route path={"login"} element={<Login />} />
             <Route path={"user/*"} element={<User />} />
+            <Route path={"*"} element={<PageNotFound />} />
           </Routes>
         </BrowserRouter>
       </ThemeProvider>

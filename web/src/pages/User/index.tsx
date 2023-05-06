@@ -1,8 +1,9 @@
 import { FC, useMemo } from "react";
-import { Routes, useMatch } from "react-router-dom";
+import { Routes, Route, useMatch } from "react-router-dom";
 
+import { PageNotFound } from "@components";
 import { Header } from "./components";
-import { Box } from "@mui/material";
+import { Box, Stack } from "@mui/material";
 
 const routerTabs = {
   导航: "",
@@ -23,7 +24,12 @@ export const User: FC = () => {
   }, [match]);
 
   return (
-    <Box>
+    <Stack
+      sx={{
+        width: "100%",
+        height: "100%",
+      }}
+    >
       <Box
         sx={{
           width: "100%",
@@ -33,7 +39,16 @@ export const User: FC = () => {
       >
         <Header routers={routerTabs} currentTab={currentTab} />
       </Box>
-    </Box>
+      <Box
+        sx={{
+          minHeight: "calc(100% - 3.5rem)",
+        }}
+      >
+        <Routes>
+          <Route path={"*"} element={<PageNotFound />} />
+        </Routes>
+      </Box>
+    </Stack>
   );
 };
 export default User;
