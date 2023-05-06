@@ -1,4 +1,4 @@
-import {apiV1User} from "./base";
+import { apiV1User } from "./base";
 
 export type UserProfile = {
   user: {
@@ -16,7 +16,7 @@ export type UserProfile = {
 
 export async function GetUserProfile(): Promise<UserProfile> {
   const {
-    data: {data},
+    data: { data },
   } = await apiV1User.get("profile/");
   return data;
 }
