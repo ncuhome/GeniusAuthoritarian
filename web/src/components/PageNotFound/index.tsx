@@ -17,12 +17,8 @@ export const PageNotFound: FC = () => {
       justifyContent={"center"}
       alignContent={"center"}
     >
-      <Typography variant={"h3"}>
-        404
-      </Typography>
-        <Typography variant={"h5"}>
-            Not Found
-        </Typography>
+      <Typography variant={"h3"}>404</Typography>
+      <Typography variant={"h5"}>Not Found</Typography>
     </Stack>
   );
 };

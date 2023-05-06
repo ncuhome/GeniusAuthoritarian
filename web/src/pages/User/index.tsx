@@ -1,36 +1,30 @@
-import { FC, ReactNode, useMemo, useState } from "react";
+import { FC, ReactNode, useState } from "react";
 import { Routes, Route } from "react-router-dom";
 
+import { Navigation } from "./pages";
 import { PageNotFound } from "@components";
 import { Header } from "./components";
 import { Box, Stack } from "@mui/material";
 
-const routerTabs = [
-  { name: "导航", path: "", element: undefined },
-  { name: "个人资料", path: "profile", element: undefined },
-] as Array<{
+const UserRouters: Array<{
   name: string;
   path: string;
   element: ReactNode;
-}>;
+}> = [
+  { name: "导航", path: "", element: <Navigation /> },
+  { name: "个人资料", path: "profile", element: undefined },
+];
 
 export const User: FC = () => {
   const [currentTab, setCurrentTab] = useState<number>(() => {
     const matchPath = window.location.pathname.replace("/user/", "");
-    for (let i = 0; i < routerTabs.length; i++) {
-      if (matchPath === routerTabs[i].path) {
+    for (let i = 0; i < UserRouters.length; i++) {
+      if (matchPath === UserRouters[i].path) {
         return i;
       }
     }
     return 0;
   });
-  const routeElements = useMemo(
-    () =>
-      routerTabs.map((tab) => (
-        <Route key={tab.path} path={tab.path} element={tab.element} />
-      )),
-    []
-  );
 
   return (
     <Stack
@@ -47,7 +41,7 @@ export const User: FC = () => {
         }}
       >
         <Header
-          routers={routerTabs}
+          routers={UserRouters}
           currentTab={currentTab}
           onChangeTab={setCurrentTab}
         />
@@ -58,7 +52,9 @@ export const User: FC = () => {
         }}
       >
         <Routes>
-          {routeElements}
+          {UserRouters.map((tab) => (
+            <Route key={tab.path} {...tab} />
+          ))}
           <Route path={"*"} element={<PageNotFound />} />
         </Routes>
       </Box>
