@@ -42,3 +42,7 @@ func (a AppSrv) Exist(appCode string) (bool, error) {
 func (a AppSrv) CheckAppCode(appCode string) (bool, error) {
 	return a.Exist(appCode)
 }
+
+func (a AppSrv) GetCallbackByAppCode(appCode string) (string, error) {
+	return (&dao.App{}).GetCallback(a.DB, appCode)
+}

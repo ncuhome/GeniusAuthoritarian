@@ -22,3 +22,8 @@ func (a *App) Get(tx *gorm.DB) ([]string, error) {
 	var t []string
 	return t, tx.Model(a).Select("app_code").Find(&t).Error
 }
+
+func (a *App) GetCallback(tx *gorm.DB, appCode string) (string, error) {
+	var t string
+	return t, tx.Model(a).Select("callback").Where("app_code = ?", appCode).Find(&t).Error
+}
