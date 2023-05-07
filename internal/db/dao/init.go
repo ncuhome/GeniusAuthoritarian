@@ -28,10 +28,11 @@ func init() {
 		&User{},
 		&SiteWhiteList{},
 		&Group{},
+		&App{},
 		&LoginRecordWithForeignKey{},
 		&UserGroupsWithForeignKey{},
 		&FeishuGroupsWithForeignKey{},
-		&App{},
+		&AppGroupWithForeignKey{},
 	); e != nil {
 		log.Fatalln("AutoMigration failed:", e)
 	}
@@ -40,6 +41,7 @@ func init() {
 		&LoginRecord{},
 		&UserGroups{},
 		&FeishuGroups{},
+		&AppGroup{},
 	); e != nil {
 		log.Fatalln("AutoMigration failed:", e)
 	}
