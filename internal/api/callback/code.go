@@ -3,6 +3,7 @@ package callback
 const (
 	cErrForm uint8 = iota + 1
 	cErrSiteNotAllow
+	cErrAppCodeNotFound
 	cErrDBOperation
 	cErrRemoteOperationFailed
 	cErrUnauthorized
@@ -19,6 +20,11 @@ var (
 	ErrSiteNotAllow = &Msg{
 		Code:       cErrSiteNotAllow,
 		Msg:        "目标站点不在授权范围，请联系管理员添加",
+		HttpStatus: 403,
+	}
+	ErrAppCodeNotFound = &Msg{
+		Code:       cErrAppCodeNotFound,
+		Msg:        "没有找到应用码，请进行应用审批",
 		HttpStatus: 403,
 	}
 	ErrDBOperation = &Msg{
