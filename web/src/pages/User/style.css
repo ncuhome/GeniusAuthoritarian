@@ -1,0 +1,13 @@
+#user .MuiContainer-root {
+    width: 100%;
+    min-height: 100%;
+    display: flex;
+    flex-direction: column;
+}
+
+#user .MuiContainer-root > .MuiBox-root {
+    width: 100%;
+    margin-top: 2rem;
+    box-sizing: border-box;
+    padding: 1rem;
+}

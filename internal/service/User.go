@@ -53,5 +53,5 @@ func (a UserSrv) UserInfo(phone string) (*dao.User, []dao.Group, error) {
 }
 
 func (a UserSrv) UserProfile(uid uint) (*dto.UserProfile, error) {
-	return (&dao.User{ID: uid}).FirstProfile(a.DB)
+	return (&dao.User{ID: uid}).FirstProfileByID(a.DB)
 }

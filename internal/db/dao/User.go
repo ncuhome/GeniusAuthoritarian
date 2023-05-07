@@ -24,12 +24,9 @@ func (a *User) FirstByPhone(tx *gorm.DB) error {
 	return tx.First(a, "phone=?", a.Phone).Error
 }
 
-func (a *User) FirstProfile(tx *gorm.DB) (*dto.UserProfile, error) {
+func (a *User) FirstProfileByID(tx *gorm.DB) (*dto.UserProfile, error) {
 	var t dto.UserProfile
-	return &t, tx.Model(a).Select("users.*,ua.id as avatar_id").
-		Where("users.id=?", a.ID).
-		Joins("LEFT JOIN user_avatars ua ON ua.uid=users.id").
-		First(&t).Error
+	return &t, tx.Model(a).First(&t, "id=?", a.ID).Error
 }
 
 func (a *User) GetUnscopedByPhoneSlice(tx *gorm.DB, phone []string) ([]User, error) {

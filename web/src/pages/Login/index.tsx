@@ -7,16 +7,19 @@ import { OnLogin } from "@components";
 
 import { UserLogin } from "@api/v1/login";
 
+import { useUser } from "@store";
+
 // 用户登录用户中心处理
 export const Login: FC = () => {
   const nav = useNavigate();
   const useQuery = createUseQuery();
   const [token] = useQuery("token", "");
+  const setToken = useUser((state) => state.setToken);
 
   async function handleLogin() {
     try {
       const authToken = await UserLogin(token);
-      localStorage.setItem("token", authToken);
+      setToken(authToken);
       nav("/user/");
     } catch ({ msg }) {
       if (msg) ThrowError(nav, "登录失败", msg as string);

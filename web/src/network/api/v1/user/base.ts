@@ -1,15 +1,17 @@
 import axios from "axios";
 import { BaseUrlV1, apiV1ErrorHandler } from "@api/base";
 
+import { useUser } from "@store";
+
 function GoLogin() {
   window.location.href = "/";
 }
 
-const apiV1User = axios.create({
+export const apiV1User = axios.create({
   baseURL: BaseUrlV1 + "user/",
 });
 apiV1User.interceptors.request.use((req) => {
-  const token = localStorage.getItem("token");
+  const token = useUser.getState().token;
   if (token) {
     req.headers["Authorization"] = token;
   } else {

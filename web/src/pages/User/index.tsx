@@ -1,7 +1,8 @@
 import { FC, ReactNode, useState } from "react";
 import { Routes, Route } from "react-router-dom";
+import "./style.css";
 
-import { Navigation } from "./pages";
+import { Navigation, Profile } from "./pages";
 import { PageNotFound } from "@components";
 import { Header } from "./components";
 import { Box, Stack } from "@mui/material";
@@ -12,7 +13,7 @@ const UserRouters: Array<{
   element: ReactNode;
 }> = [
   { name: "导航", path: "", element: <Navigation /> },
-  { name: "个人资料", path: "profile", element: undefined },
+  { name: "个人资料", path: "profile", element: <Profile /> },
 ];
 
 export const User: FC = () => {
@@ -28,6 +29,7 @@ export const User: FC = () => {
 
   return (
     <Stack
+      id={"user"}
       sx={{
         width: "100%",
         height: "100%",
