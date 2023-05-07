@@ -16,4 +16,5 @@ func (a keys) String() string {
 const (
 	keySiteWhiteList keys = iota
 	keyJwt
+	keyAppCode
 )
