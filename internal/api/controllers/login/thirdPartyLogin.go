@@ -9,26 +9,26 @@ import (
 	"net/url"
 )
 
-func GetLoginLink(linkGen func(host, callback string) string) gin.HandlerFunc {
+func GetLoginLink(linkGen func(host, appCode string) string) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		var f struct {
-			Callback string `json:"callback" form:"callback" binding:"required,uri"`
+			AppCode string `json:"appCode" form:"appCode" binding:"required"`
 		}
 		if e := c.ShouldBind(&f); e != nil {
 			callback.Error(c, e, callback.ErrForm)
 			return
 		}
 
-		if ok, e := service.SiteWhiteList.CheckUrl(f.Callback); e != nil {
+		if ok, e := service.App.CheckAppCode(f.AppCode); e != nil {
 			callback.Error(c, e, callback.ErrDBOperation)
 			return
 		} else if !ok {
-			callback.Error(c, e, callback.ErrSiteNotAllow)
+			callback.Error(c, e, callback.ErrAppCodeNotFound)
 			return
 		}
 
 		callback.Success(c, gin.H{
-			"url": linkGen(c.Request.Host, f.Callback),
+			"url": linkGen(c.Request.Host, f.AppCode),
 		})
 	}
 }
