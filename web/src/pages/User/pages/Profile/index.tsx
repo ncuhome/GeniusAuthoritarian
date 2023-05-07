@@ -1,4 +1,4 @@
-import { FC, PropsWithChildren } from "react";
+import { FC } from "react";
 import { useInterval } from "@hooks";
 import toast from "react-hot-toast";
 import moment from "moment";
@@ -16,6 +16,7 @@ import {
   TableCell,
   TableRow,
   TableHead,
+  Skeleton,
 } from "@mui/material";
 
 import { GetUserProfile } from "@api/v1/user/profile";
@@ -36,22 +37,21 @@ export const Profile: FC = () => {
     }
   }
 
-  const GridTextField: FC<PropsWithChildren & TextFieldProps> = ({
-    children,
-    ...props
-  }) => {
+  const GridTextField: FC<TextFieldProps> = ({ ...props }) => {
     return (
-      <Grid item xs={12} sm={6} /*md={4}*/>
-        <TextField
-          variant={"outlined"}
-          inputProps={{
-            readOnly: true,
-          }}
-          fullWidth
-          {...props}
-        >
-          {children}
-        </TextField>
+      <Grid item xs={12} sm={6} /*md={4}*/ position={"relative"}>
+        {props.value ? (
+          <TextField
+            variant={"outlined"}
+            inputProps={{
+              readOnly: true,
+            }}
+            fullWidth
+            {...props}
+          />
+        ) : (
+          <Skeleton variant={"rounded"} height={56} />
+        )}
       </Grid>
     );
   };
