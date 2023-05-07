@@ -17,3 +17,8 @@ type App struct {
 func (a *App) Insert(tx *gorm.DB) error {
 	return tx.Create(a).Error
 }
+
+func (a *App) Get(tx *gorm.DB) ([]string, error) {
+	var t []string
+	return t, tx.Model(a).Select("app_code").Find(&t).Error
+}
