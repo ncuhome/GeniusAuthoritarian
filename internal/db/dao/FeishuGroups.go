@@ -6,7 +6,7 @@ import (
 
 type FeishuGroupsWithForeignKey struct {
 	FeishuGroups `gorm:"embedded"`
-	Group        Group `gorm:"-;foreignKey:GID;constraint:CASCADE"`
+	Group        Group `gorm:"-;foreignKey:GID;constraint:OnDelete:CASCADE"`
 }
 
 func (a *FeishuGroupsWithForeignKey) TableName() string {
