@@ -31,6 +31,7 @@ export const Header: FC<Props> = ({
       }}
       component={Paper}
       elevation={6}
+      square
     >
       <Box
         sx={{

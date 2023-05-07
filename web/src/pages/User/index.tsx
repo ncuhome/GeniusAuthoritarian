@@ -1,5 +1,6 @@
 import { FC, ReactNode, useState } from "react";
 import { Routes, Route } from "react-router-dom";
+import "./style.css";
 
 import { Navigation, Profile } from "./pages";
 import { PageNotFound } from "@components";
@@ -28,6 +29,7 @@ export const User: FC = () => {
 
   return (
     <Stack
+      id={"user"}
       sx={{
         width: "100%",
         height: "100%",
