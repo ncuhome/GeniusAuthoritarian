@@ -89,6 +89,7 @@ groups 的值参考 [departments.go](/pkg/departments/departments.go)
 
 + [x] ~~对接飞书登录~~
 + [x] ~~对接钉钉登录~~
-+ [ ] 添加个人资料管理
-+ [ ] 接入 ldap
++ [x] ~~添加个人资料管理~~
 + [ ] 添加服务鉴权密钥对
++ [ ] 添加导航支持
++ [ ] 接入 ldap
