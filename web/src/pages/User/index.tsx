@@ -30,10 +30,6 @@ export const User: FC = () => {
   return (
     <Stack
       id={"user"}
-      sx={{
-        width: "100%",
-        height: "100%",
-      }}
     >
       <Box
         sx={{
@@ -50,6 +46,7 @@ export const User: FC = () => {
       </Box>
       <Box
         sx={{
+          overflowY: 'overlay',
           minHeight: "calc(100% - 3.5rem)",
         }}
       >
