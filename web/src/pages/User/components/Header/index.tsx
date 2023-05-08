@@ -26,7 +26,7 @@ export const Header: FC<Props> = ({
       id={"user-nav"}
       flexDirection={"row"}
       sx={{
-        px: "3rem",
+        px: "min(5%, 3rem)",
         height: "inherit",
       }}
       component={Paper}
@@ -36,9 +36,9 @@ export const Header: FC<Props> = ({
       <Box
         sx={{
           height: "100%",
-          display: "flex",
+          display: { xs: "none", sm: "flex" },
           alignItems: "center",
-          marginRight: "3rem",
+          marginRight: "1rem",
           "&>img": {
             height: "60%",
           },
