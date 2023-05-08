@@ -27,7 +27,7 @@ apiV1User.interceptors.request.use((req) => {
 }, undefined);
 apiV1User.interceptors.response.use(undefined, (err: any) => {
   if (err.statusCode && err.statusCode === 401) {
-    localStorage.removeItem("token");
+    useUser.getState().setToken(null);
     GoLogin();
     return Promise.reject(err);
   }

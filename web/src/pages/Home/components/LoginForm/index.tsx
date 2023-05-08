@@ -1,21 +1,25 @@
 import { FC } from "react";
-import { useNavigate } from "react-router-dom";
 import { createUseQuery, useMount } from "@hooks";
+import { useNavigate } from "react-router-dom";
 import toast from "react-hot-toast";
 import feishuLogo from "@/assets/img/login/feishu.png";
 import dingLogo from "@/assets/img/login/ding.png";
-
-import { ThrowError } from "@util/nav";
 
 import { Stack, Box, Typography, List, Paper } from "@mui/material";
 import { LoginItem } from "./components";
 
 import { GetFeishuLoginUrl, GetDingTalkLoginUrl } from "@api/v1/login";
 
+import { useUser } from "@store";
+
 export const LoginForm: FC = () => {
   const nav = useNavigate();
   const useQuery = createUseQuery();
-  const [target] = useQuery("target", `https://${location.host}/login`);
+
+  const loginDashboard = `https://${location.host}/login`;
+  const [target] = useQuery("target", loginDashboard);
+
+  const token = useUser((state) => state.token);
 
   async function goFeishuLogin() {
     try {
@@ -36,6 +40,7 @@ export const LoginForm: FC = () => {
   }
 
   useMount(() => {
+    if (token && target == loginDashboard) nav("/user");
     switch (true) {
       case navigator.userAgent.indexOf("Feishu") !== -1:
         goFeishuLogin();
