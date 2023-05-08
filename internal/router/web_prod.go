@@ -17,7 +17,7 @@ import (
 func calcEtag(d []byte) string {
 	hash := md5.New()
 	hash.Write(d)
-	return fmt.Sprintf("%x", hash.Sum(nil))
+	return fmt.Sprintf("W/\"%x\"", hash.Sum(nil))
 }
 
 func frontendHandler() gin.HandlerFunc {
