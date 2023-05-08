@@ -27,7 +27,7 @@ import { useUser } from "@store";
 export const Profile: FC = () => {
   const [profile] = useUser((state) => [state.profile], shallow);
   const [setProfile] = useUser((state) => [state.setState("profile")], shallow);
-  
+
   const [onRequest, setOnRequest] = useState(true);
 
   const loadProfile = useCallback(async () => {
@@ -91,7 +91,7 @@ export const Profile: FC = () => {
               </TableRow>
             </TableHead>
             <TableBody>
-              {profile.loginRecord.reverse().map((record) => (
+              {profile.loginRecord.map((record) => (
                 <TableRow key={record.id}>
                   <TableCell>
                     {moment(record.createdAt * 1000).format("YYYY/MM/DD hh:mm")}
