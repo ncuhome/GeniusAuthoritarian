@@ -13,7 +13,15 @@
 
 #user .MuiContainer-root > .MuiBox-root {
     width: 100%;
-    margin-top: 2rem;
+    margin: 1rem 0;
     box-sizing: border-box;
     padding: 1rem;
+}
+
+#user .MuiContainer-root > .MuiBox-root:first-child {
+    margin-top: 2rem;
+}
+
+#user .MuiContainer-root > .MuiBox-root:last-child {
+    margin-bottom: 2rem;
 }
