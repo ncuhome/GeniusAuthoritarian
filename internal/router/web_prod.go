@@ -20,17 +20,6 @@ func calcEtag(d []byte) string {
 	return fmt.Sprintf("%x", hash.Sum(nil))
 }
 
-func calcFsEtag(f fs.File) (string, error) {
-	defer f.Close()
-
-	d, e := io.ReadAll(f)
-	if e != nil {
-		return "", e
-	}
-
-	return calcEtag(d), nil
-}
-
 func frontendHandler() gin.HandlerFunc {
 	fe, e := fs.Sub(web.FS, "dist")
 	if e != nil {
@@ -64,6 +53,7 @@ func frontendHandler() gin.HandlerFunc {
 					return
 				}
 				c.Header("Content-Type", "text/html")
+				c.Header("Cache-Control", "no-cache")
 				c.Header("Etag", indexEtag)
 				c.String(200, index)
 				c.Abort()
@@ -76,7 +66,7 @@ func frontendHandler() gin.HandlerFunc {
 		}
 		_ = f.Close()
 
-		c.Header("Cache-Control", "max-age=2592000, immutable")
+		c.Header("Cache-Control", "public, max-age=2592000, immutable")
 		fileServer.ServeHTTP(c.Writer, c.Request)
 		c.Abort()
 	}
