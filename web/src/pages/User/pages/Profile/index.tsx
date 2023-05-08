@@ -1,4 +1,4 @@
-import { FC, useCallback, useState } from "react";
+import { FC, useCallback, useMemo, useState } from "react";
 import { useInterval, useMount } from "@hooks";
 import toast from "react-hot-toast";
 import moment from "moment";
@@ -29,6 +29,11 @@ export const Profile: FC = () => {
   const [setProfile] = useUser((state) => [state.setState("profile")], shallow);
 
   const [onRequest, setOnRequest] = useState(true);
+
+  const userGroups: string = useMemo(() => {
+    if (!profile) return "";
+    return profile.user.groups.map((group) => group.name).join("、");
+  }, [profile]);
 
   const loadProfile = useCallback(async () => {
     setOnRequest(true);
@@ -83,6 +88,7 @@ export const Profile: FC = () => {
         <Grid container spacing={2}>
           <GridTextField label={"姓名"} value={profile?.user.name} />
           <GridTextField label={"电话"} value={profile?.user.phone} />
+          <GridTextField label={"身份组"} value={userGroups} />
         </Grid>
       </Box>
 

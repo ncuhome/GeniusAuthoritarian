@@ -5,6 +5,10 @@ export type UserProfile = {
     id: number;
     name: string;
     phone: string;
+    groups: Array<{
+      id: number;
+      name: string;
+    }>;
   };
   loginRecord: Array<{
     id: number;
