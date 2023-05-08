@@ -82,26 +82,36 @@ export const Profile: FC = () => {
           <Typography variant={"h5"} fontWeight={"bold"} marginBottom={"1rem"}>
             Record
           </Typography>
-          <Table>
-            <TableHead>
-              <TableRow>
-                <TableCell>登录时间</TableCell>
-                <TableCell>目标</TableCell>
-                <TableCell>IP</TableCell>
-              </TableRow>
-            </TableHead>
-            <TableBody>
-              {profile.loginRecord.map((record) => (
-                <TableRow key={record.id}>
-                  <TableCell>
-                    {moment(record.createdAt * 1000).format("YYYY/MM/DD hh:mm")}
-                  </TableCell>
-                  <TableCell>{record.target}</TableCell>
-                  <TableCell>{record.ip}</TableCell>
+          <Box
+            sx={{
+              width: "100%",
+              overflowY: "auto",
+              whiteSpace: "nowrap",
+            }}
+          >
+            <Table>
+              <TableHead>
+                <TableRow>
+                  <TableCell>登录时间</TableCell>
+                  <TableCell>目标</TableCell>
+                  <TableCell>IP</TableCell>
                 </TableRow>
-              ))}
-            </TableBody>
-          </Table>
+              </TableHead>
+              <TableBody>
+                {profile.loginRecord.map((record) => (
+                  <TableRow key={record.id}>
+                    <TableCell>
+                      {moment(record.createdAt * 1000).format(
+                        "YYYY/MM/DD hh:mm"
+                      )}
+                    </TableCell>
+                    <TableCell>{record.target}</TableCell>
+                    <TableCell>{record.ip}</TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
+          </Box>
         </Box>
       ) : undefined}
     </Container>
