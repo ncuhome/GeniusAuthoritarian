@@ -120,7 +120,7 @@ export const Profile: FC = () => {
                   <TableRow key={record.id}>
                     <TableCell>
                       {moment(record.createdAt * 1000).format(
-                        "YYYY/MM/DD hh:mm"
+                        "YYYY/MM/DD HH:mm"
                       )}
                     </TableCell>
                     <TableCell>{record.target}</TableCell>
