@@ -46,12 +46,20 @@ func (a UserSrv) UserInfo(phone string) (*dao.User, []dao.Group, error) {
 		return nil, nil, e
 	}
 
-	userGroups, e := (&dao.UserGroups{
+	var groups []dao.Group
+	return &user, groups, (&dao.UserGroups{
 		UID: user.ID,
-	}).GetUserGroupsByUID(a.DB)
-	return &user, userGroups, e
+	}).GetUserGroupsByUID(a.DB).Find(&groups).Error
 }
 
 func (a UserSrv) UserProfile(uid uint) (*dto.UserProfile, error) {
-	return (&dao.User{ID: uid}).FirstProfileByID(a.DB)
+	profile, e := (&dao.User{ID: uid}).FirstProfileByID(a.DB)
+	if e != nil {
+		return nil, e
+	}
+
+	profile.Groups = make([]dto.Group, 0)
+	return profile, (&dao.UserGroups{
+		UID: uid,
+	}).GetUserGroupsByUID(a.DB).Find(&profile.Groups).Error
 }

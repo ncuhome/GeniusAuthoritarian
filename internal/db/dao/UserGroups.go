@@ -26,11 +26,10 @@ func (a *UserGroups) InsertAll(tx *gorm.DB, data []UserGroups) error {
 	return tx.Model(a).Create(data).Error
 }
 
-func (a *UserGroups) GetUserGroupsByUID(tx *gorm.DB) ([]Group, error) {
-	var t []Group
-	return t, tx.Model(&Group{}).
+func (a *UserGroups) GetUserGroupsByUID(tx *gorm.DB) *gorm.DB {
+	return tx.Model(&Group{}).
 		Joins("INNER JOIN user_groups ug ON ug.gid=groups.id").
-		Where("ug.uid=?", a.UID).Find(&t).Error
+		Where("ug.uid=?", a.UID)
 }
 
 // GetUserGroupsLimited 根据指定组范围获取用户所在组
