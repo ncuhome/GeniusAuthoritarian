@@ -43,10 +43,12 @@ func frontendHandler() gin.HandlerFunc {
 			return
 		}
 
+	checkFile:
 		f, e := fe.Open(strings.TrimPrefix(c.Request.URL.Path, "/"))
 		if e != nil {
 			if _, ok := e.(*fs.PathError); ok && c.Request.URL.Path != IndexPath {
 				c.Request.URL.Path = IndexPath
+				goto checkFile
 			} else {
 				log.Errorln("加载 embed fs 失败:", e)
 				c.AbortWithStatus(500)
