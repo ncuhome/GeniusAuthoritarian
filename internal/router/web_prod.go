@@ -63,6 +63,10 @@ func frontendHandler() gin.HandlerFunc {
 		f, e := fe.Open(strings.TrimPrefix(c.Request.URL.Path, "/"))
 		if e != nil {
 			if _, ok := e.(*fs.PathError); ok {
+				if c.GetHeader("If-None-Match") == indexEtag {
+					c.AbortWithStatus(304)
+					return
+				}
 				c.Header("Content-Type", "text/html")
 				c.Header("Etag", indexEtag)
 				c.String(200, index)
