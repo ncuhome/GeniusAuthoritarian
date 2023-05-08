@@ -55,3 +55,9 @@ func (a UserSrv) UserInfo(phone string) (*dao.User, []dao.Group, error) {
 func (a UserSrv) UserProfile(uid uint) (*dto.UserProfile, error) {
 	return (&dao.User{ID: uid}).FirstProfileByID(a.DB)
 }
+
+func (a UserSrv) UserGroups(uid uint) ([]string, error) {
+	return (&dao.UserGroups{
+		UID: uid,
+	}).GetUserGroupNamesByUID(a.DB)
+}
