@@ -1,5 +1,5 @@
-import { FC } from "react";
-import { useInterval } from "@hooks";
+import { FC, useCallback, useState } from "react";
+import { useInterval, useMount } from "@hooks";
 import toast from "react-hot-toast";
 import moment from "moment";
 
@@ -27,15 +27,19 @@ import { useUser } from "@store";
 export const Profile: FC = () => {
   const [profile] = useUser((state) => [state.profile], shallow);
   const [setProfile] = useUser((state) => [state.setState("profile")], shallow);
+  
+  const [onRequest, setOnRequest] = useState(true);
 
-  async function loadProfile() {
+  const loadProfile = useCallback(async () => {
+    setOnRequest(true);
     try {
       const data = await GetUserProfile();
       setProfile(data);
     } catch ({ msg }) {
       if (msg) toast.error(msg as string);
     }
-  }
+    setOnRequest(false);
+  }, []);
 
   const GridTextField: FC<TextFieldProps> = ({ ...props }) => {
     return (
@@ -56,7 +60,10 @@ export const Profile: FC = () => {
     );
   };
 
-  useInterval(loadProfile, profile ? null : 2000);
+  useInterval(loadProfile, profile && !onRequest ? null : 2000);
+  useMount(() => {
+    loadProfile();
+  });
 
   return (
     <Container>
