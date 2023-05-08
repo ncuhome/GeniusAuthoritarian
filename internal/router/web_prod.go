@@ -25,7 +25,7 @@ func calcEtag(f fs.File) (string, error) {
 
 	hash := md5.New()
 	hash.Write(d)
-	return fmt.Sprintf("%x", hash), nil
+	return fmt.Sprintf("%x", hash.Sum(nil)), nil
 }
 
 func frontendHandler() gin.HandlerFunc {
