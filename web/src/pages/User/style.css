@@ -25,3 +25,7 @@
 #user .MuiContainer-root > .MuiBox-root:last-child {
     margin-bottom: 2rem;
 }
+
+#user .MuiContainer-root > .MuiBox-root > .MuiTypography-h5 + .MuiTypography-subtitle2 {
+    opacity: 0.55;
+}

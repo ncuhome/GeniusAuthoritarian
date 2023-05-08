@@ -79,8 +79,11 @@ export const Profile: FC = () => {
 
       {profile && profile.loginRecord.length ? (
         <Box component={Paper} elevation={5}>
-          <Typography variant={"h5"} fontWeight={"bold"} marginBottom={"1rem"}>
+          <Typography variant={"h5"} fontWeight={"bold"}>
             Record
+          </Typography>
+          <Typography variant={"subtitle2"} marginBottom={"1rem"}>
+            最近十次登录记录
           </Typography>
           <Box
             sx={{
@@ -93,7 +96,7 @@ export const Profile: FC = () => {
               <TableHead>
                 <TableRow>
                   <TableCell>登录时间</TableCell>
-                  <TableCell>目标</TableCell>
+                  <TableCell>站点</TableCell>
                   <TableCell>IP</TableCell>
                 </TableRow>
               </TableHead>
