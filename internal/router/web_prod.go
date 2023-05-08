@@ -12,7 +12,6 @@ import (
 	"io/fs"
 	"net/http"
 	"strings"
-	"sync"
 )
 
 func calcEtag(d []byte) string {
@@ -52,9 +51,6 @@ func frontendHandler() gin.HandlerFunc {
 
 	fileServer := http.StripPrefix("/", http.FileServer(http.FS(fe)))
 
-	var etags = &sync.Map{}
-	etags.Store("/index.html", indexEtag)
-
 	return func(c *gin.Context) {
 		if !frontendRouterCheck(c) {
 			return
@@ -78,27 +74,9 @@ func frontendHandler() gin.HandlerFunc {
 				return
 			}
 		}
+		_ = f.Close()
 
-		etag, ok := etags.Load(c.Request.URL.Path)
-		if ok {
-			_ = f.Close()
-		} else {
-			etag, e = calcFsEtag(f)
-			if e != nil {
-				log.Errorln("计算 etag 失败:", e)
-				c.AbortWithStatus(500)
-				return
-			}
-			etags.Store(c.Request.URL.Path, etag)
-		}
-
-		c.Header("Etag", etag.(string))
-
-		if c.GetHeader("If-None-Match") == etag.(string) {
-			c.AbortWithStatus(304)
-			return
-		}
-
+		c.Header("Cache-Control", "max-age=2592000, immutable")
 		fileServer.ServeHTTP(c.Writer, c.Request)
 		c.Abort()
 	}
