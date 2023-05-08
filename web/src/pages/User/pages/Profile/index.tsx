@@ -51,6 +51,15 @@ export const Profile: FC = () => {
               readOnly: true,
             }}
             fullWidth
+            onClick={async () => {
+              try {
+                await navigator.clipboard.writeText(props.value as string);
+                toast.success("已复制");
+              } catch (e) {
+                console.log(e);
+                toast.error(`复制失败: ${e}`);
+              }
+            }}
             {...props}
           />
         ) : (
