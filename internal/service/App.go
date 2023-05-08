@@ -46,3 +46,7 @@ func (a AppSrv) CheckAppCode(appCode string) (bool, error) {
 func (a AppSrv) GetCallbackByAppCode(appCode string) (string, error) {
 	return (&dao.App{}).GetCallback(a.DB, appCode)
 }
+
+func (a AppSrv) GetSecretByAppCode(appCode string) (string, error) {
+	return (&dao.App{}).GetSecret(a.DB, appCode)
+}
