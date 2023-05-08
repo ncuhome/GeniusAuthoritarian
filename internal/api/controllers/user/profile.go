@@ -15,6 +15,9 @@ func ProfileData(c *gin.Context) {
 		return
 	}
 	loginRecord, e := service.LoginRecord.UserHistory(uid, 10)
+	if e != nil {
+		callback.Error(c, e, callback.ErrDBOperation)
+	}
 	callback.Success(c, gin.H{
 		"user":        profile,
 		"loginRecord": loginRecord,
