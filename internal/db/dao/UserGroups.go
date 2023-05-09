@@ -32,6 +32,13 @@ func (a *UserGroups) GetUserGroupsByUID(tx *gorm.DB) *gorm.DB {
 		Where("ug.uid=?", a.UID)
 }
 
+func (a *UserGroups) GetUserGroupNamesByUID(tx *gorm.DB) ([]string, error) {
+	var t []string
+	return t, tx.Model(&Group{}).Select("name").
+		Joins("INNER JOIN user_groups ug ON ug.gid=groups.id").
+		Where("ug.uid=?", a.UID).Find(&t).Error
+}
+
 // GetUserGroupsLimited 根据指定组范围获取用户所在组
 func (a *UserGroups) GetUserGroupsLimited(tx *gorm.DB, groups []string) ([]Group, error) {
 	var t []Group

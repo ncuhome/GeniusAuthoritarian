@@ -1,5 +1,7 @@
 package dao
 
+import "gorm.io/gorm"
+
 type AppGroupWithForeignKey struct {
 	AppGroup `gorm:"embedded"`
 	App      App   `gorm:"-;foreignKey:AID;constraint:OnDelete:CASCADE"`
@@ -16,4 +18,11 @@ type AppGroup struct {
 	AID uint `gorm:"column:aid;not null;index;index:app_group_idx,unique"`
 	// Group.ID
 	GID uint `gorm:"column:gid;not null;index;index:app_group_idx,unique"`
+}
+
+func (a *AppGroup) GetGroups(tx *gorm.DB, appCode string) ([]string, error) {
+	var t []string
+	return t, tx.Model(&Group{}).Select("groups.name").
+		Joins("INNER JOIN app_groups ag ON ag.gid=groups.id").
+		Where("ag.app_code = ?", appCode).Find(&t).Error
 }
