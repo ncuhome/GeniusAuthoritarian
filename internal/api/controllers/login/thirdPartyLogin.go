@@ -14,19 +14,21 @@ import (
 func GetLoginLink(linkGen func(host, appCode string) string) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		var f struct {
-			AppCode string `json:"appCode" form:"appCode" binding:"required"`
+			AppCode string `json:"appCode" form:"appCode"`
 		}
 		if e := c.ShouldBind(&f); e != nil {
 			callback.Error(c, e, callback.ErrForm)
 			return
 		}
 
-		if ok, e := service.App.CheckAppCode(f.AppCode); e != nil {
-			callback.Error(c, e, callback.ErrDBOperation)
-			return
-		} else if !ok {
-			callback.Error(c, e, callback.ErrAppCodeNotFound)
-			return
+		if f.AppCode != "" {
+			if ok, e := service.App.CheckAppCode(f.AppCode); e != nil {
+				callback.Error(c, e, callback.ErrDBOperation)
+				return
+			} else if !ok {
+				callback.Error(c, e, callback.ErrAppCodeNotFound)
+				return
+			}
 		}
 
 		callback.Success(c, gin.H{
