@@ -5,8 +5,9 @@ import (
 )
 
 type App struct {
-	ID             uint `gorm:"primarykey"`
-	CreatedAt      int64
+	ID        uint `gorm:"primarykey"`
+	CreatedAt int64
+	gorm.DeletedAt
 	Name           string `gorm:"not null"`
 	AppCode        string `gorm:"not null;uniqueIndex;type:varchar(36)"`
 	AppSecret      string `gorm:"not null"`
