@@ -16,23 +16,21 @@ export const LoginForm: FC = () => {
   const nav = useNavigate();
   const useQuery = createUseQuery();
 
-  const loginDashboard = `https://${location.host}/login`;
-  const [target] = useQuery("target", loginDashboard);
+  const [appCode] = useQuery("appCode", "");
 
   const token = useUser((state) => state.token);
 
   async function goFeishuLogin() {
     try {
-      const url = await GetFeishuLoginUrl(target);
+      const url = await GetFeishuLoginUrl(appCode);
       window.open(url, "_self");
     } catch ({ msg }) {
       if (msg) toast.error(msg as string);
     }
   }
-
   async function goDingTalkLogin() {
     try {
-      const url = await GetDingTalkLoginUrl(target);
+      const url = await GetDingTalkLoginUrl(appCode);
       window.open(url, "_self");
     } catch ({ msg }) {
       if (msg) toast.error(msg as string);
@@ -40,7 +38,7 @@ export const LoginForm: FC = () => {
   }
 
   useMount(() => {
-    if (token && target == loginDashboard) nav("/user");
+    if (token && !appCode) nav("/user");
     switch (true) {
       case navigator.userAgent.indexOf("Feishu") !== -1:
         goFeishuLogin();
