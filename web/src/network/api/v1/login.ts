@@ -24,17 +24,14 @@ export async function GetFeishuLoginUrl(appCode: string): Promise<string> {
   return url;
 }
 
-export async function FeishuLogin(
-  code: string,
-  callback: string
-): Promise<string> {
+export async function FeishuLogin(code: string, appCode: string): Promise<string> {
   const {
     data: {
       data: { token, callback: callbackUrl },
     },
   } = await apiV1.post("public/login/feishu/", {
     code,
-    callback,
+    appCode,
   });
   return callbackUrl;
 }
@@ -52,17 +49,14 @@ export async function GetDingTalkLoginUrl(appCode: string): Promise<string> {
   return url;
 }
 
-export async function DingTalkLogin(
-  code: string,
-  callback: string
-): Promise<string> {
+export async function DingTalkLogin(code: string, appCode: string): Promise<string> {
   const {
     data: {
       data: { token, callback: callbackUrl },
     },
   } = await apiV1.post("public/login/dingTalk/", {
     code,
-    callback,
+    appCode,
   });
   return callbackUrl;
 }

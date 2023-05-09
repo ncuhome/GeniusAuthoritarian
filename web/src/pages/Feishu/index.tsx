@@ -11,11 +11,11 @@ export const Feishu: FC = () => {
   const nav = useNavigate();
   const useQuery = createUseQuery();
   const [code] = useQuery("code", "");
-  const [callback] = useQuery("state", "");
+  const [appCode] = useQuery("state", "");
 
   async function login() {
     try {
-      const callbackUrl = await FeishuLogin(code, callback);
+      const callbackUrl = await FeishuLogin(code, appCode);
       window.open(callbackUrl, "_self");
     } catch ({ msg }) {
       if (msg) ThrowError(nav, "登录失败", msg as string);
@@ -23,7 +23,7 @@ export const Feishu: FC = () => {
   }
 
   useMount(() => {
-    if (!code || !callback) {
+    if (!code) {
       ThrowError(nav, "登录失败", "参数缺失");
       return;
     }

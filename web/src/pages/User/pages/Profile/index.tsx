@@ -48,7 +48,7 @@ export const Profile: FC = () => {
 
   const GridTextField: FC<TextFieldProps> = ({ ...props }) => {
     return (
-      <Grid item xs={12} sm={6} /*md={4}*/ position={"relative"}>
+      <Grid item xs={12} sm={6} position={"relative"}>
         {props.value ? (
           <TextField
             variant={"outlined"}
