@@ -24,8 +24,8 @@ var (
 	}
 	ErrAppCodeNotFound = &Msg{
 		Code:       cErrAppCodeNotFound,
-		Msg:        "没有找到应用码，请进行应用审批",
-		HttpStatus: 403,
+		Msg:        "没有找到授权码",
+		HttpStatus: 404,
 	}
 	ErrDBOperation = &Msg{
 		Code:       cErrDBOperation,

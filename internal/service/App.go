@@ -43,10 +43,13 @@ func (a AppSrv) CheckAppCode(appCode string) (bool, error) {
 	return a.Exist(appCode)
 }
 
-func (a AppSrv) GetCallbackByAppCode(appCode string) (string, error) {
-	return (&dao.App{}).GetCallback(a.DB, appCode)
+func (a AppSrv) FistAppForLogin(appCode string) (*dao.App, error) {
+	var t = dao.App{
+		AppCode: appCode,
+	}
+	return &t, t.FirstForLogin(a.DB)
 }
 
 func (a AppSrv) GetSecretByAppCode(appCode string) (string, error) {
-	return (&dao.App{}).GetSecret(a.DB, appCode)
+	return (&dao.App{}).FindSecret(a.DB, appCode)
 }

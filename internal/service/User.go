@@ -37,7 +37,7 @@ func (a UserSrv) UnFrozeByIDSlice(id []uint) error {
 	return (&dao.User{}).UnfrozeByIDSlice(a.DB, id)
 }
 
-func (a UserSrv) UserInfo(phone string) (*dao.User, []dao.Group, error) {
+func (a UserSrv) UserInfoForAppCode(phone, appCode string) (*dao.User, []dao.Group, error) {
 	var user = dao.User{
 		Phone: phone,
 	}
@@ -49,7 +49,7 @@ func (a UserSrv) UserInfo(phone string) (*dao.User, []dao.Group, error) {
 	var groups []dao.Group
 	return &user, groups, (&dao.UserGroups{
 		UID: user.ID,
-	}).GetUserGroupsByUID(a.DB).Find(&groups).Error
+	}).GetUserGroupsForAppCodeByUID(a.DB, appCode).Find(&groups).Error
 }
 
 func (a UserSrv) UserProfile(uid uint) (*dto.UserProfile, error) {

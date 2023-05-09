@@ -32,6 +32,10 @@ func (a *UserGroups) GetUserGroupsByUID(tx *gorm.DB) *gorm.DB {
 		Where("ug.uid=?", a.UID)
 }
 
+func (a *UserGroups) GetUserGroupsForAppCodeByUID(tx *gorm.DB, appCode string) *gorm.DB {
+	return a.GetUserGroupsByUID((&AppGroup{}).GetGroups(tx, appCode))
+}
+
 func (a *UserGroups) GetUserGroupNamesByUID(tx *gorm.DB) ([]string, error) {
 	var t []string
 	return t, tx.Model(&Group{}).Select("name").

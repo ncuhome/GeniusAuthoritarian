@@ -60,7 +60,13 @@ func ThirdPartyLogin(userInfo func(c *gin.Context, code string) (phone string)) 
 			return
 		}
 
-		user, groups, e := service.User.UserInfo(userPhone)
+		appInfo, e := service.App.FistAppForLogin(f.AppCode)
+		if e != nil {
+			callback.Error(c, e, callback.ErrDBOperation)
+			return
+		}
+
+		user, groups, e := service.User.UserInfoForAppCode(userPhone, f.AppCode)
 		if e != nil {
 			if e == gorm.ErrRecordNotFound {
 				callback.ErrorWithTip(c, nil, callback.ErrUnauthorized, "没有找到角色，请尝试使用其他登录方式或联系管理员")
@@ -68,29 +74,22 @@ func ThirdPartyLogin(userInfo func(c *gin.Context, code string) (phone string)) 
 			}
 			callback.Error(c, e, callback.ErrDBOperation)
 			return
-		} else if len(groups) == 0 {
+		} else if len(groups) == 0 && !appInfo.PermitAllGroup {
 			callback.Error(c, nil, callback.ErrFindUnit)
 			return
 		}
 
-		callbackStr, e := service.App.GetCallbackByAppCode(f.AppCode)
+		token, e := jwt.GenerateLoginToken(user.ID, f.AppCode, user.Name, c.ClientIP())
 		if e != nil {
 			callback.Error(c, e, callback.ErrUnexpected)
 			return
 		}
 
-		callbackUrl, e := url.Parse(callbackStr)
+		callbackUrl, e := url.Parse(appInfo.Callback)
 		if e != nil {
 			callback.Error(c, e, callback.ErrUnexpected)
 			return
 		}
-
-		token, e := jwt.GenerateLoginToken(user.ID, user.Name, c.ClientIP())
-		if e != nil {
-			callback.Error(c, e, callback.ErrUnexpected)
-			return
-		}
-
 		callbackQuery := callbackUrl.Query()
 		callbackQuery.Set("token", token)
 		callbackUrl.RawQuery = callbackQuery.Encode()
