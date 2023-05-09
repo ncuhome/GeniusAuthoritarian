@@ -79,7 +79,12 @@ func ThirdPartyLogin(userInfo func(c *gin.Context, code string) (phone string)) 
 			return
 		}
 
-		token, e := jwt.GenerateLoginToken(user.ID, appInfo.ID, user.Name, c.ClientIP())
+		var groupSlice = make([]string, len(groups))
+		for i, g := range groups {
+			groupSlice[i] = g.Name
+		}
+
+		token, e := jwt.GenerateLoginToken(user.ID, appInfo.ID, user.Name, c.ClientIP(), groupSlice)
 		if e != nil {
 			callback.Error(c, e, callback.ErrUnexpected)
 			return

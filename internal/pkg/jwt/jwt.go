@@ -39,7 +39,7 @@ func GenerateUserToken(uid uint) (string, error) {
 }
 
 // GenerateLoginToken 生成有效期 5 分钟的登录校验 Token
-func GenerateLoginToken(uid, appID uint, name, ip string) (string, error) {
+func GenerateLoginToken(uid, appID uint, name, ip string, groups []string) (string, error) {
 	now := time.Now()
 	valid := time.Minute * 5
 	id, e := redis.Jwt.NewLoginPoint(now.Unix(), valid, LoginTokenClaims{

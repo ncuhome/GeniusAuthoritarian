@@ -4,27 +4,23 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/ncuhome/GeniusAuthoritarian/internal/api/callback"
 	"github.com/ncuhome/GeniusAuthoritarian/internal/api/models/response"
+	"github.com/ncuhome/GeniusAuthoritarian/internal/db/dao"
 	"github.com/ncuhome/GeniusAuthoritarian/internal/pkg/jwt"
 	"github.com/ncuhome/GeniusAuthoritarian/internal/service"
 	"github.com/ncuhome/GeniusAuthoritarian/pkg/signature"
+	"gorm.io/gorm"
 	"time"
 )
 
-func doVerifyToken(c *gin.Context, token string) *jwt.LoginTokenClaims {
+func doVerifyToken(c *gin.Context, tx *gorm.DB, token string) *jwt.LoginTokenClaims {
 	claims, valid, e := jwt.ParseLoginToken(token)
 	if e != nil || !valid {
 		callback.Error(c, e, callback.ErrUnauthorized)
 		return nil
 	}
 
-	loginRecordSrv, e := service.LoginRecord.Begin()
-	if e != nil {
-		callback.Error(c, e, callback.ErrDBOperation)
-		return nil
-	}
-	defer loginRecordSrv.Rollback()
-
-	if e = loginRecordSrv.Add(claims.UID, claims.AppID, claims.IP); e != nil || loginRecordSrv.Commit().Error != nil {
+	loginRecordSrv := service.LoginRecordSrv{DB: tx}
+	if e = loginRecordSrv.Add(claims.UID, claims.AppID, claims.IP); e != nil {
 		callback.Error(c, e, callback.ErrDBOperation)
 		return nil
 	}
@@ -44,14 +40,24 @@ func VerifyToken(c *gin.Context) {
 		return
 	}
 
-	now := time.Now().Unix()
-	diff := now - f.TimeStamp
-	if diff > 300 {
-		callback.Error(c, nil, callback.ErrUnauthorized)
+	if time.Now().Sub(time.Unix(f.TimeStamp, 0)) > time.Minute*5 {
+		callback.Error(c, nil, callback.ErrSignatureExpired)
 		return
 	}
 
-	secret, e := service.App.GetSecretByAppCode(f.AppCode)
+	appSrv, e := service.App.Begin()
+	if e != nil {
+		callback.Error(c, e, callback.ErrDBOperation)
+		return
+	}
+	defer appSrv.Rollback()
+
+	claims := doVerifyToken(c, appSrv.DB, f.Token)
+	if c.IsAborted() {
+		return
+	}
+
+	secret, e := appSrv.FirstAppSecret(claims.AppID)
 	if e != nil {
 		callback.Error(c, e, callback.ErrDBOperation)
 		return
@@ -65,26 +71,13 @@ func VerifyToken(c *gin.Context) {
 	if e != nil {
 		callback.Error(c, e, callback.ErrUnexpected)
 		return
-	}
-	if !ok {
+	} else if !ok {
 		callback.Error(c, nil, callback.ErrUnauthorized)
 		return
 	}
 
-	allowedGroups, e := service.AppGroup.GetGroupsByAppCode(f.AppCode)
-	if e != nil {
-		callback.Error(c, e, callback.ErrUnexpected)
-		return
-	}
-
-	callbackUrl, e := service.App.GetCallbackByAppCode(f.AppCode)
-	if e != nil {
+	if e = appSrv.Commit().Error; e != nil {
 		callback.Error(c, e, callback.ErrDBOperation)
-		return
-	}
-
-	claims := doVerifyToken(c, f.Token, callbackUrl, allowedGroups)
-	if c.IsAborted() {
 		return
 	}
 
@@ -103,8 +96,20 @@ func Login(c *gin.Context) {
 		return
 	}
 
-	claims := doVerifyToken(c, f.Token, "", nil)
+	tx := dao.DB.Begin()
+	if tx.Error != nil {
+		callback.Error(c, tx.Error, callback.ErrDBOperation)
+		return
+	}
+	defer tx.Rollback()
+
+	claims := doVerifyToken(c, tx, f.Token)
 	if c.IsAborted() {
+		return
+	}
+
+	if e := tx.Commit().Error; e != nil {
+		callback.Error(c, e, callback.ErrDBOperation)
 		return
 	}
 

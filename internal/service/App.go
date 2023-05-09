@@ -50,6 +50,9 @@ func (a AppSrv) FistAppForLogin(appCode string) (*dao.App, error) {
 	return &t, t.FirstForLogin(a.DB)
 }
 
-func (a AppSrv) GetSecretByAppCode(appCode string) (string, error) {
-	return (&dao.App{}).FindSecret(a.DB, appCode)
+func (a AppSrv) FirstAppSecret(id uint) (string, error) {
+	var t = dao.App{
+		ID: id,
+	}
+	return t.AppSecret, t.FirstAppSecretByID(a.DB)
 }

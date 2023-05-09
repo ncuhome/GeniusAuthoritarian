@@ -15,8 +15,10 @@ type LoginToken struct {
 }
 
 type LoginTokenClaims struct {
-	UID   uint   `json:"uid"`
-	IP    string `json:"ip"`
-	Name  string `json:"name"`
-	AppID uint   `json:"appID"`
+	UID    uint     `json:"uid"`
+	Name   string   `json:"name"`
+	IP     string   `json:"ip"`
+	Groups []string `json:"groups"`
+
+	AppID uint `json:"appID"`
 }
