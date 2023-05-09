@@ -1,9 +1,12 @@
 package service
 
 import (
+	"github.com/Mmx233/tool"
 	"github.com/ncuhome/GeniusAuthoritarian/internal/db/dao"
 	"github.com/ncuhome/GeniusAuthoritarian/internal/db/redis"
 	"gorm.io/gorm"
+	"math/rand"
+	"time"
 )
 
 var App = AppSrv{dao.DB}
@@ -15,6 +18,18 @@ type AppSrv struct {
 func (a AppSrv) Begin() (AppSrv, error) {
 	a.DB = a.DB.Begin()
 	return a, a.Error
+}
+
+func (a AppSrv) New(name, callback string, permitAll bool) (*dao.App, error) {
+	randSrc := rand.NewSource(time.Now().UnixNano())
+	var t = dao.App{
+		Name:           name,
+		AppCode:        tool.RandString(randSrc, 6),
+		AppSecret:      tool.RandString(randSrc, 100),
+		Callback:       callback,
+		PermitAllGroup: permitAll,
+	}
+	return &t, t.Insert(a.DB)
 }
 
 func (a AppSrv) Exist(appCode string) (bool, error) {

@@ -8,7 +8,7 @@ type App struct {
 	ID        uint `gorm:"primarykey"`
 	CreatedAt int64
 	gorm.DeletedAt
-	Name           string `gorm:"not null"`
+	Name           string `gorm:"not null;unique"`
 	AppCode        string `gorm:"not null;uniqueIndex;type:varchar(36)"`
 	AppSecret      string `gorm:"not null"`
 	Callback       string `gorm:"not null"`
