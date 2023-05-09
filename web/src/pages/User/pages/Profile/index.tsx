@@ -76,7 +76,7 @@ export const Profile: FC = () => {
 
   useInterval(loadProfile, profile && !onRequest ? null : 2000);
   useMount(() => {
-    loadProfile();
+    if (!profile) loadProfile();
   });
 
   return (
