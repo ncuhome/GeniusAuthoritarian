@@ -31,5 +31,7 @@ func (a *LoginRecord) Insert(tx *gorm.DB) error {
 
 func (a *LoginRecord) GetByUID(tx *gorm.DB, limit int) ([]dto.LoginRecord, error) {
 	var t = make([]dto.LoginRecord, 0)
-	return t, tx.Model(a).Where(a, "UID").Order("id DESC").Limit(limit).Find(&t).Error
+	return t, tx.Model(a).Where(a, "UID").Select("login_records.*,apps.name as target").
+		Joins("INNER JOIN apps ON apps.id=login_records.aid").
+		Order("login_records.id DESC").Limit(limit).Find(&t).Error
 }
