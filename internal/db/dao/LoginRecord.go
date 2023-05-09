@@ -7,6 +7,7 @@ import (
 
 type LoginRecordWithForeignKey struct {
 	LoginRecord `gorm:"embedded"`
+	App         App  `gorm:"-;foreignKey:AID;constraint:OnDelete:CASCADE"`
 	User        User `gorm:"-;foreignKey:UID;constraint:OnDelete:CASCADE"`
 }
 
@@ -18,9 +19,10 @@ type LoginRecord struct {
 	ID        uint `gorm:"primarykey"`
 	CreatedAt int64
 	// User.ID
-	UID    uint   `gorm:"not null;index;column:uid"`
-	Target string `gorm:"not null"`
-	IP     string
+	UID uint `gorm:"not null;index;column:uid"`
+	IP  string
+	// App.ID
+	AID uint `gorm:"column:aid;not null;index"`
 }
 
 func (a *LoginRecord) Insert(tx *gorm.DB) error {
