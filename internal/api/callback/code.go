@@ -10,6 +10,7 @@ const (
 	cErrFindUnit
 	cErrUnexpected
 	cErrSignatureExpired
+	cErrOperationIllegal
 )
 
 var (
@@ -56,6 +57,11 @@ var (
 	ErrSignatureExpired = &Msg{
 		Code:       cErrSignatureExpired,
 		Msg:        "请求已过期，请重试",
+		HttpStatus: 403,
+	}
+	ErrOperationIllegal = &Msg{
+		Code:       cErrOperationIllegal,
+		Msg:        "操作不合法",
 		HttpStatus: 403,
 	}
 )

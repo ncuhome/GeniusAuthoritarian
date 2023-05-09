@@ -65,9 +65,9 @@ func (a AppSrv) FistAppForLogin(appCode string) (*dao.App, error) {
 	return &t, t.FirstForLogin(a.DB)
 }
 
-func (a AppSrv) FirstAppSecret(id uint) (string, error) {
+func (a AppSrv) FirstAppKeyPair(id uint) (string, string, error) {
 	var t = dao.App{
 		ID: id,
 	}
-	return t.AppSecret, t.FirstAppSecretByID(a.DB)
+	return t.AppCode, t.AppSecret, t.FirstAppKeyPairByID(a.DB)
 }

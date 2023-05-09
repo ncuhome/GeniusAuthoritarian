@@ -57,9 +57,12 @@ func VerifyToken(c *gin.Context) {
 		return
 	}
 
-	secret, e := appSrv.FirstAppSecret(claims.AppID)
+	appCode, appSecret, e := appSrv.FirstAppKeyPair(claims.AppID)
 	if e != nil {
 		callback.Error(c, e, callback.ErrDBOperation)
+		return
+	} else if f.AppCode != appCode {
+		callback.Error(c, nil, callback.ErrOperationIllegal)
 		return
 	}
 
@@ -67,7 +70,7 @@ func VerifyToken(c *gin.Context) {
 		Token:     f.Token,
 		AppCode:   f.AppCode,
 		TimeStamp: f.TimeStamp,
-		AppSecret: secret,
+		AppSecret: appSecret,
 	}) {
 		callback.Error(c, nil, callback.ErrUnauthorized)
 		return
@@ -102,6 +105,9 @@ func Login(c *gin.Context) {
 
 	claims := doVerifyToken(c, tx, f.Token)
 	if c.IsAborted() {
+		return
+	} else if claims.AppID != 0 {
+		callback.Error(c, nil, callback.ErrOperationIllegal)
 		return
 	}
 
