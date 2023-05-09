@@ -11,14 +11,14 @@ export async function UserLogin(token: string): Promise<string> {
   return authToken;
 }
 
-export async function GetFeishuLoginUrl(target: string): Promise<string> {
+export async function GetFeishuLoginUrl(appCode: string): Promise<string> {
   const {
     data: {
       data: { url },
     },
   } = await apiV1.get("public/login/feishu/link", {
     params: {
-      callback: target,
+      appCode,
     },
   });
   return url;
@@ -39,14 +39,14 @@ export async function FeishuLogin(
   return callbackUrl;
 }
 
-export async function GetDingTalkLoginUrl(target: string): Promise<string> {
+export async function GetDingTalkLoginUrl(appCode: string): Promise<string> {
   const {
     data: {
       data: { url },
     },
   } = await apiV1.get("public/login/dingTalk/link", {
     params: {
-      callback: target,
+      appCode,
     },
   });
   return url;
