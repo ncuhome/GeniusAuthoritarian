@@ -22,7 +22,7 @@ type AppGroup struct {
 
 func (a *AppGroup) GetGroups(tx *gorm.DB, appCode string) ([]string, error) {
 	var t []string
-	return t, tx.Model(&Group{}).
+	return t, tx.Model(&Group{}).Select("groups.name").
 		Joins("INNER JOIN app_groups ag ON ag.gid=groups.id").
 		Where("ag.app_code = ?", appCode).Find(&t).Error
 }
