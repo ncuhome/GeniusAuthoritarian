@@ -63,15 +63,12 @@ func VerifyToken(c *gin.Context) {
 		return
 	}
 
-	ok, e := signature.CheckSignature(f.Signature, secret, struct {
-		Token     string
-		AppCode   string
-		TimeStamp int64
-	}{TimeStamp: f.TimeStamp, AppCode: f.AppCode, Token: f.Token})
-	if e != nil {
-		callback.Error(c, e, callback.ErrUnexpected)
-		return
-	} else if !ok {
+	if !signature.Check(f.Signature, &signature.VerifyClaims{
+		Token:     f.Token,
+		AppCode:   f.AppCode,
+		TimeStamp: f.TimeStamp,
+		AppSecret: secret,
+	}) {
 		callback.Error(c, nil, callback.ErrUnauthorized)
 		return
 	}
