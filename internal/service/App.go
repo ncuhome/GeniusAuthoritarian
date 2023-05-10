@@ -34,7 +34,7 @@ func (a AppSrv) New(name, callback string, permitAll bool) (*dao.App, error) {
 	randSrc := rand.NewSource(time.Now().UnixNano())
 	var t = dao.App{
 		Name:           name,
-		AppCode:        tool.RandString(randSrc, 6),
+		AppCode:        tool.RandString(randSrc, 8),
 		AppSecret:      tool.RandString(randSrc, 100),
 		Callback:       callback,
 		PermitAllGroup: permitAll,
