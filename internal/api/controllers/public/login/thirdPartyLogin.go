@@ -18,33 +18,35 @@ const (
 	appFeishu   = "feishu"
 )
 
-func GetLoginLink(c *gin.Context) {
-	var f struct {
-		AppCode string `json:"appCode" form:"appCode"`
+func genLoginLink(c *gin.Context, appCode string) string {
+	switch c.Param("app") {
+	case appFeishu:
+		return feishu.Api.LoginLink(c.Request.Host, appCode)
+	case appDingTalk:
+		return dingTalk.Api.LoginLink(c.Request.Host, appCode)
+	default:
+		callback.Error(c, nil, callback.ErrForm)
+		return ""
 	}
-	if e := c.ShouldBind(&f); e != nil {
-		callback.Error(c, e, callback.ErrForm)
+}
+func GetSelfLoginLink(c *gin.Context) {
+	callback.Success(c, gin.H{
+		"url": genLoginLink(c, ""),
+	})
+}
+func GetLoginLink(c *gin.Context) {
+	appCode := c.Param("appCode")
+
+	if ok, e := service.App.CheckAppCode(appCode); e != nil {
+		callback.Error(c, e, callback.ErrDBOperation)
+		return
+	} else if !ok {
+		callback.Error(c, e, callback.ErrAppCodeNotFound)
 		return
 	}
 
-	if f.AppCode != "" {
-		if ok, e := service.App.CheckAppCode(f.AppCode); e != nil {
-			callback.Error(c, e, callback.ErrDBOperation)
-			return
-		} else if !ok {
-			callback.Error(c, e, callback.ErrAppCodeNotFound)
-			return
-		}
-	}
-
-	var link string
-	switch c.Param("app") {
-	case appFeishu:
-		link = feishu.Api.LoginLink(c.Request.Host, f.AppCode)
-	case appDingTalk:
-		link = dingTalk.Api.LoginLink(c.Request.Host, f.AppCode)
-	default:
-		callback.Error(c, nil, callback.ErrForm)
+	link := genLoginLink(c, appCode)
+	if c.IsAborted() {
 		return
 	}
 
