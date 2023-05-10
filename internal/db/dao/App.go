@@ -24,7 +24,7 @@ func (a *App) FirstForLogin(tx *gorm.DB) error {
 }
 
 func (a *App) FirstAppKeyPairByID(tx *gorm.DB) error {
-	return tx.Model(a).Select("app_code,app_secret").Where(a).First(a).Error
+	return tx.Model(a).Select("app_code,app_secret").Where("id=?", a.ID).First(a).Error
 }
 
 func (a *App) Get(tx *gorm.DB) ([]string, error) {

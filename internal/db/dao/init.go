@@ -38,10 +38,6 @@ func init() {
 	}
 
 	if e = DB.AutoMigrate(
-		&User{},
-		&SiteWhiteList{},
-		&Group{},
-		&App{},
 		&LoginRecord{},
 		&UserGroups{},
 		&FeishuGroups{},
