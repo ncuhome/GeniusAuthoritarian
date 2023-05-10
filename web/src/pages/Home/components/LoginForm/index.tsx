@@ -10,7 +10,7 @@ import { Stack, Box, Typography, List, Paper, Skeleton } from "@mui/material";
 import { LoginItem } from "./components";
 
 import { ErrNetwork } from "@api/base";
-import { GetFeishuLoginUrl, GetDingTalkLoginUrl } from "@api/v1/login";
+import { GetLoginUrl } from "@api/v1/login";
 import { GetAppInfo, AppInfo } from "@api/v1/app";
 
 import { useUser } from "@store";
@@ -26,23 +26,17 @@ export const LoginForm: FC = () => {
   const [appInfo, setAppInfo] = useState<AppInfo | null>(null);
   const [onRequestAppInfo, setOnRequestAppInfo] = useState(true);
 
-  async function goFeishuLogin() {
+  async function goLogin(thirdParty: string) {
     try {
-      const url = await GetFeishuLoginUrl(appCode);
+      const url = await GetLoginUrl(thirdParty, appCode);
       window.open(url, "_self");
     } catch ({ msg }) {
       if (msg) toast.error(msg as string);
     }
   }
 
-  async function goDingTalkLogin() {
-    try {
-      const url = await GetDingTalkLoginUrl(appCode);
-      window.open(url, "_self");
-    } catch ({ msg }) {
-      if (msg) toast.error(msg as string);
-    }
-  }
+  const goFeishuLogin = () => goLogin("feishu");
+  const goDingTalkLogin = () => goLogin("dingTalk");
 
   async function loadAppInfo() {
     setOnRequestAppInfo(true);
