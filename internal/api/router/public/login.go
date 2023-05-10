@@ -10,11 +10,6 @@ func routerLogin(G *gin.RouterGroup) {
 	G.POST("/verify", controllers.VerifyToken)
 
 	thirdParty := G.GET(":app")
-	thirdParty.GET("link", controllers.GetLoginLink)
-
-	feishu := G.Group("feishu")
-	feishu.POST("/", controllers.FeishuLogin)
-
-	dingTalk := G.Group("dingTalk")
-	dingTalk.POST("/", controllers.DingTalkLogin)
+	thirdParty.GET("/link", controllers.GetLoginLink)
+	thirdParty.POST("/", controllers.ThirdPartyLogin)
 }

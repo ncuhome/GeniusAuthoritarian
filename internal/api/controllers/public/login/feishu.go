@@ -6,11 +6,11 @@ import (
 	"github.com/ncuhome/GeniusAuthoritarian/internal/pkg/feishu"
 )
 
-var FeishuLogin = ThirdPartyLogin(func(c *gin.Context, code string) string {
+func loginFeishu(c *gin.Context, code string) string {
 	user, e := feishu.Api.GetUser(code)
 	if e != nil {
 		callback.Error(c, e, callback.ErrRemoteOperationFailed)
 		return ""
 	}
 	return user.Mobile
-})
+}

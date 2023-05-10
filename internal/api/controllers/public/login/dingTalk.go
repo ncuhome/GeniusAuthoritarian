@@ -7,7 +7,7 @@ import (
 	"strings"
 )
 
-var DingTalkLogin = ThirdPartyLogin(func(c *gin.Context, code string) string {
+func loginDingTalk(c *gin.Context, code string) string {
 	userToken, e := dingTalk.Api.GetUserToken(code)
 	if e != nil {
 		callback.Error(c, e, callback.ErrRemoteOperationFailed)
@@ -29,4 +29,4 @@ var DingTalkLogin = ThirdPartyLogin(func(c *gin.Context, code string) string {
 		phone = "+86" + phone
 	}
 	return phone
-})
+}
