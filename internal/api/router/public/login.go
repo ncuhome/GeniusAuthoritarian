@@ -9,11 +9,12 @@ func routerLogin(G *gin.RouterGroup) {
 	G.POST("/", controllers.Login) // 个人页面登录
 	G.POST("/verify", controllers.VerifyToken)
 
+	thirdParty := G.GET(":app")
+	thirdParty.GET("link", controllers.GetLoginLink)
+
 	feishu := G.Group("feishu")
-	feishu.GET("link", controllers.FeishuLoginLink)
 	feishu.POST("/", controllers.FeishuLogin)
 
 	dingTalk := G.Group("dingTalk")
-	dingTalk.GET("link", controllers.DingTalkLoginLink)
 	dingTalk.POST("/", controllers.DingTalkLogin)
 }

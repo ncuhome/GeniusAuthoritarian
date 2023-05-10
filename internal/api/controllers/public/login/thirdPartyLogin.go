@@ -4,36 +4,53 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/ncuhome/GeniusAuthoritarian/internal/api/callback"
 	"github.com/ncuhome/GeniusAuthoritarian/internal/db/dao"
+	"github.com/ncuhome/GeniusAuthoritarian/internal/pkg/dingTalk"
+	"github.com/ncuhome/GeniusAuthoritarian/internal/pkg/feishu"
 	"github.com/ncuhome/GeniusAuthoritarian/internal/pkg/jwt"
 	"github.com/ncuhome/GeniusAuthoritarian/internal/service"
 	"gorm.io/gorm"
 	"net/url"
 )
 
-func GetLoginLink(linkGen func(host, appCode string) string) gin.HandlerFunc {
-	return func(c *gin.Context) {
-		var f struct {
-			AppCode string `json:"appCode" form:"appCode"`
-		}
-		if e := c.ShouldBind(&f); e != nil {
-			callback.Error(c, e, callback.ErrForm)
+// 第三方登录 app 路由名称
+const (
+	appDingTalk = "dingTalk"
+	appFeishu   = "feishu"
+)
+
+func GetLoginLink(c *gin.Context) {
+	var f struct {
+		AppCode string `json:"appCode" form:"appCode"`
+	}
+	if e := c.ShouldBind(&f); e != nil {
+		callback.Error(c, e, callback.ErrForm)
+		return
+	}
+
+	if f.AppCode != "" {
+		if ok, e := service.App.CheckAppCode(f.AppCode); e != nil {
+			callback.Error(c, e, callback.ErrDBOperation)
+			return
+		} else if !ok {
+			callback.Error(c, e, callback.ErrAppCodeNotFound)
 			return
 		}
-
-		if f.AppCode != "" {
-			if ok, e := service.App.CheckAppCode(f.AppCode); e != nil {
-				callback.Error(c, e, callback.ErrDBOperation)
-				return
-			} else if !ok {
-				callback.Error(c, e, callback.ErrAppCodeNotFound)
-				return
-			}
-		}
-
-		callback.Success(c, gin.H{
-			"url": linkGen(c.Request.Host, f.AppCode),
-		})
 	}
+
+	var link string
+	switch c.Param("app") {
+	case appFeishu:
+		link = feishu.Api.LoginLink(c.Request.Host, f.AppCode)
+	case appDingTalk:
+		link = dingTalk.Api.LoginLink(c.Request.Host, f.AppCode)
+	default:
+		callback.Error(c, nil, callback.ErrForm)
+		return
+	}
+
+	callback.Success(c, gin.H{
+		"url": link,
+	})
 }
 
 func ThirdPartyLogin(userInfo func(c *gin.Context, code string) (phone string)) gin.HandlerFunc {

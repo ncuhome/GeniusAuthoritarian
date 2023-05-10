@@ -6,8 +6,6 @@ import (
 	"github.com/ncuhome/GeniusAuthoritarian/internal/pkg/feishu"
 )
 
-var FeishuLoginLink = GetLoginLink(feishu.Api.LoginLink)
-
 var FeishuLogin = ThirdPartyLogin(func(c *gin.Context, code string) string {
 	user, e := feishu.Api.GetUser(code)
 	if e != nil {

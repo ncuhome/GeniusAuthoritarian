@@ -7,8 +7,6 @@ import (
 	"strings"
 )
 
-var DingTalkLoginLink = GetLoginLink(dingTalk.Api.LoginLink)
-
 var DingTalkLogin = ThirdPartyLogin(func(c *gin.Context, code string) string {
 	userToken, e := dingTalk.Api.GetUserToken(code)
 	if e != nil {
