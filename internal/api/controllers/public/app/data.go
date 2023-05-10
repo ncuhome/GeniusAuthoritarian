@@ -5,6 +5,7 @@ import (
 	"github.com/ncuhome/GeniusAuthoritarian/internal/api/callback"
 	"github.com/ncuhome/GeniusAuthoritarian/internal/db/dao"
 	"github.com/ncuhome/GeniusAuthoritarian/internal/service"
+	"net/url"
 )
 
 func AppInfo(c *gin.Context) {
@@ -17,6 +18,7 @@ func AppInfo(c *gin.Context) {
 	}
 
 	var appInfo *dao.App
+	var host string
 	if f.AppCode != "" {
 		if ok, e := service.App.CheckAppCode(f.AppCode); e != nil {
 			callback.Error(c, e, callback.ErrDBOperation)
@@ -32,12 +34,21 @@ func AppInfo(c *gin.Context) {
 			callback.Error(c, e, callback.ErrDBOperation)
 			return
 		}
+
+		callbackUrl, e := url.Parse(appInfo.Callback)
+		if e != nil {
+			callback.Error(c, e, callback.ErrUnexpected)
+			return
+		}
+		host = callbackUrl.Host
 	} else {
-		appInfo = service.App.This(c.Request.Host)
+		appInfo = service.App.This("")
+		host = c.Request.Host
 	}
 
 	callback.Success(c, gin.H{
 		"name":      appInfo.Name,
+		"host":      host,
 		"createdAt": appInfo.CreatedAt,
 	})
 }
