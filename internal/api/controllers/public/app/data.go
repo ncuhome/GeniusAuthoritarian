@@ -3,7 +3,7 @@ package controllers
 import (
 	"github.com/gin-gonic/gin"
 	"github.com/ncuhome/GeniusAuthoritarian/internal/api/callback"
-	"github.com/ncuhome/GeniusAuthoritarian/internal/db/dao"
+	"github.com/ncuhome/GeniusAuthoritarian/internal/global"
 	"github.com/ncuhome/GeniusAuthoritarian/internal/service"
 	"net/url"
 )
@@ -17,8 +17,7 @@ func AppInfo(c *gin.Context) {
 		return
 	}
 
-	var appInfo *dao.App
-	var host string
+	var appName, appHost string
 	if f.AppCode != "" {
 		if ok, e := service.App.CheckAppCode(f.AppCode); e != nil {
 			callback.Error(c, e, callback.ErrDBOperation)
@@ -28,8 +27,7 @@ func AppInfo(c *gin.Context) {
 			return
 		}
 
-		var e error
-		appInfo, e = service.App.FistAppForLogin(f.AppCode)
+		appInfo, e := service.App.FistAppForLogin(f.AppCode)
 		if e != nil {
 			callback.Error(c, e, callback.ErrDBOperation)
 			return
@@ -40,15 +38,16 @@ func AppInfo(c *gin.Context) {
 			callback.Error(c, e, callback.ErrUnexpected)
 			return
 		}
-		host = callbackUrl.Host
+
+		appName = appInfo.Name
+		appHost = callbackUrl.Host
 	} else {
-		appInfo = service.App.This("")
-		host = c.Request.Host
+		appName = global.ThisAppName
+		appHost = c.Request.Host
 	}
 
 	callback.Success(c, gin.H{
-		"name":      appInfo.Name,
-		"host":      host,
-		"createdAt": appInfo.CreatedAt,
+		"name": appName,
+		"host": appHost,
 	})
 }

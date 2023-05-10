@@ -5,6 +5,7 @@ import (
 	"github.com/Mmx233/tool"
 	"github.com/ncuhome/GeniusAuthoritarian/internal/db/dao"
 	"github.com/ncuhome/GeniusAuthoritarian/internal/db/redis"
+	"github.com/ncuhome/GeniusAuthoritarian/internal/global"
 	"gorm.io/gorm"
 	"math/rand"
 	"time"
@@ -23,7 +24,7 @@ func (a AppSrv) Begin() (AppSrv, error) {
 
 func (a AppSrv) This(host string) *dao.App {
 	return &dao.App{
-		Name:           "统一鉴权控制系统",
+		Name:           global.ThisAppName,
 		Callback:       fmt.Sprintf("https://%s/login", host),
 		PermitAllGroup: true,
 	}

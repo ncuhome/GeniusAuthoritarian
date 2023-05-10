@@ -3,7 +3,6 @@ import { apiV1 } from "@api/base";
 export type AppInfo = {
   name: string;
   host: string
-  createdAt: number;
 };
 
 export async function GetAppInfo(appCode: string): Promise<AppInfo> {
