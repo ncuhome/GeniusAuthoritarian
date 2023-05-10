@@ -18,6 +18,7 @@ const (
 	appFeishu   = "feishu"
 )
 
+// 生成登录地址
 func genLoginLink(c *gin.Context, appCode string) string {
 	switch c.Param("app") {
 	case appFeishu:
@@ -29,11 +30,15 @@ func genLoginLink(c *gin.Context, appCode string) string {
 		return ""
 	}
 }
+
+// GetSelfLoginLink 获取登录控制系统地址
 func GetSelfLoginLink(c *gin.Context) {
 	callback.Success(c, gin.H{
 		"url": genLoginLink(c, ""),
 	})
 }
+
+// GetLoginLink 获取登录指定 APP 地址
 func GetLoginLink(c *gin.Context) {
 	appCode := c.Param("appCode")
 
@@ -55,6 +60,7 @@ func GetLoginLink(c *gin.Context) {
 	})
 }
 
+// 根据前端传来的 code 获取用户电话号码
 func loadUserPhone(c *gin.Context, code string) string {
 	switch c.Param("app") {
 	case appDingTalk:
@@ -66,6 +72,8 @@ func loadUserPhone(c *gin.Context, code string) string {
 		return ""
 	}
 }
+
+// 根据数据完成请求响应
 func callThirdPartyLoginResult(c *gin.Context, user *dao.User, appInfo *dao.App, groups []dao.Group, ip string) {
 	var groupSlice = make([]string, len(groups))
 	for i, g := range groups {
@@ -92,6 +100,8 @@ func callThirdPartyLoginResult(c *gin.Context, user *dao.User, appInfo *dao.App,
 		"callback": callbackUrl.String(),
 	})
 }
+
+// ThirdPartySelfLogin 校验第三方登录回调结果，生成控制系统回调链接
 func ThirdPartySelfLogin(c *gin.Context) {
 	var f struct {
 		Code string `json:"code" form:"code" binding:"required"`
@@ -119,6 +129,8 @@ func ThirdPartySelfLogin(c *gin.Context) {
 
 	callThirdPartyLoginResult(c, user, appInfo, nil, c.ClientIP())
 }
+
+// ThirdPartyLogin 校验第三方登录回调结果，生成目标 APP 回调链接
 func ThirdPartyLogin(c *gin.Context) {
 	var f struct {
 		Code string `json:"code" form:"code" binding:"required"`

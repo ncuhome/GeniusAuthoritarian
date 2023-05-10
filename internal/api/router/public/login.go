@@ -10,10 +10,10 @@ func routerLogin(G *gin.RouterGroup) {
 	G.POST("/verify", controllers.VerifyToken)
 
 	thirdParty := G.Group(":app")
-	thirdParty.POST("/", controllers.ThirdPartySelfLogin)
+	thirdParty.POST("/", controllers.ThirdPartySelfLogin) // 登录鉴权控制系统
 	thirdParty.POST("/:appCode", controllers.ThirdPartyLogin)
 
 	thirdPartyLink := thirdParty.Group("link")
-	thirdPartyLink.GET("/", controllers.GetSelfLoginLink)
+	thirdPartyLink.GET("/", controllers.GetSelfLoginLink) // 登录鉴权控制系统
 	thirdPartyLink.GET("/:appCode", controllers.GetLoginLink)
 }
