@@ -3,7 +3,7 @@ name: 'Deploy Dev'
 on:
   push:
     tags:
-      - v**
+      - v**beta**
 
 jobs:
   DeployDev:

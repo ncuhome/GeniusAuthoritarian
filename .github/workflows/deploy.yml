@@ -41,7 +41,7 @@ jobs:
           docker push ${{ steps.image.outputs.VERSION }}
           docker push ${{ steps.image.outputs.LATEST }}
 
-      - name: Update Deployment
+      - name: Update Production Deployment
         uses: MultiMx/K8sSetImageAction@v0.2
         with:
           backend: 'https://rancher.ncuos.com'
@@ -50,3 +50,11 @@ jobs:
           deployment: 'core'
           image: ${{ steps.image.outputs.VERSION }}
 
+      - name: Update Develop Deployment
+        uses: MultiMx/K8sSetImageAction@v0.2
+        with:
+          backend: 'https://rancher.ncuhome.club'
+          token: ${{ secrets.CATTLE_TOKEN_LOCAL }}
+          namespace: 'genius-auth'
+          deployment: 'core'
+          image: ${{ steps.image.outputs.VERSION }}
