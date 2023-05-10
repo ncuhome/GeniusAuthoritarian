@@ -34,7 +34,6 @@ export async function Login(
     },
   } = await apiV1.post(`public/login/${thirdParty}/${appCode}`, {
     code,
-    appCode,
   });
   return callbackUrl;
 }
