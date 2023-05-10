@@ -1,7 +1,6 @@
 package controllers
 
 import (
-	"fmt"
 	"github.com/gin-gonic/gin"
 	"github.com/ncuhome/GeniusAuthoritarian/internal/api/callback"
 	"github.com/ncuhome/GeniusAuthoritarian/internal/db/dao"
@@ -75,11 +74,7 @@ func ThirdPartyLogin(userInfo func(c *gin.Context, code string) (phone string)) 
 				return
 			}
 		} else {
-			appInfo = &dao.App{
-				Name:           "统一鉴权控制系统",
-				Callback:       fmt.Sprintf("https://%s/login", c.Request.Host),
-				PermitAllGroup: true,
-			}
+			appInfo = service.App.This(c.Request.Host)
 		}
 
 		var user *dao.User

@@ -1,6 +1,7 @@
 package service
 
 import (
+	"fmt"
 	"github.com/Mmx233/tool"
 	"github.com/ncuhome/GeniusAuthoritarian/internal/db/dao"
 	"github.com/ncuhome/GeniusAuthoritarian/internal/db/redis"
@@ -18,6 +19,14 @@ type AppSrv struct {
 func (a AppSrv) Begin() (AppSrv, error) {
 	a.DB = a.DB.Begin()
 	return a, a.Error
+}
+
+func (a AppSrv) This(host string) *dao.App {
+	return &dao.App{
+		Name:           "统一鉴权控制系统",
+		Callback:       fmt.Sprintf("https://%s/login", host),
+		PermitAllGroup: true,
+	}
 }
 
 func (a AppSrv) New(name, callback string, permitAll bool) (*dao.App, error) {

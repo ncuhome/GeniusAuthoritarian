@@ -2,7 +2,7 @@ package public
 
 import (
 	"github.com/gin-gonic/gin"
-	controllers "github.com/ncuhome/GeniusAuthoritarian/internal/api/controllers/login"
+	controllers "github.com/ncuhome/GeniusAuthoritarian/internal/api/controllers/public/login"
 )
 
 func routerLogin(G *gin.RouterGroup) {
