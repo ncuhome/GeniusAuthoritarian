@@ -52,7 +52,7 @@ func (f Fs) doRequest(Method string, data interface{}, opt *tool.DoHttpReq) erro
 
 func (f Fs) GetTenantAccessToken() (*TenantAccessTokenResp, error) {
 	res, e := f.Http.PostRequest(&tool.DoHttpReq{
-		Url: "https://open.feishu.cn/open-apis/auth/v3/tenant_access_token/internal",
+		Url: GetTenantAccessTokenUrl,
 		Body: map[string]string{
 			"app_id":     f.appID,
 			"app_secret": f.secret,
@@ -77,11 +77,12 @@ func (f Fs) GetTenantAccessToken() (*TenantAccessTokenResp, error) {
 }
 
 func (f Fs) LoginLink(selfDomain, state string) string {
-	return fmt.Sprintf(
-		"https://open.feishu.cn/open-apis/authen/v1/user_auth_page_beta?app_id=%s&redirect_uri=https%%3A%%2F%%2F"+selfDomain+"%%2Ffeishu%%2F&state=%s",
+	redirectUri := "https://" + selfDomain + "/feishu/"
+
+	return fmt.Sprintf(LarkLoginUrl,
 		f.appID,
 		url.QueryEscape(state),
-	)
+		url.QueryEscape(redirectUri))
 }
 
 func (f Fs) GetUser(code string) (*FsUser, error) {
@@ -92,7 +93,7 @@ func (f Fs) GetUser(code string) (*FsUser, error) {
 	var data FsUser
 	data.fs = f
 	return &data, f.doRequest("POST", &data, &tool.DoHttpReq{
-		Url: "https://open.feishu.cn/open-apis/authen/v1/access_token",
+		Url: GetUserUrl,
 		Header: map[string]interface{}{
 			"Authorization": "Bearer " + tenantToken,
 			"Content-Type":  "application/json",
@@ -111,7 +112,7 @@ func (f Fs) LoadDepartmentList() (*ListDepartmentResp, error) {
 	}
 	var data ListDepartmentResp
 	return &data, f.doRequest("GET", &data, &tool.DoHttpReq{
-		Url: "https://open.feishu.cn/open-apis/contact/v3/departments/0/children",
+		Url: ListDepartmentUrl,
 		Header: map[string]interface{}{
 			"Authorization": "Bearer " + tenantToken,
 			"Content-Type":  "application/json",
@@ -136,7 +137,7 @@ func (f Fs) doLoadUserListRequest(departmentID, pageToken string, pageSize uint)
 		query["page_token"] = pageToken
 	}
 	return &data, f.doRequest("GET", &data, &tool.DoHttpReq{
-		Url: "https://open.feishu.cn/open-apis/contact/v3/users",
+		Url: ListUsersUrl,
 		Header: map[string]interface{}{
 			"Authorization": "Bearer " + tenantToken,
 			"Content-Type":  "application/json",

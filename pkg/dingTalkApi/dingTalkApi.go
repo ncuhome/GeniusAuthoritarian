@@ -56,10 +56,11 @@ func (c Client) GetUserToken(authCode string) (*oauth2_1_0.GetUserTokenResponse,
 }
 
 func (c Client) LoginLink(selfDomain, state string) string {
+	redirectUri := "https://" + selfDomain + "/dingTalk"
 	return fmt.Sprintf(
-		"https://login.dingtalk.com/oauth2/auth?client_id=%s&response_type=code&scope=openid&prompt=consent&state=%s&redirect_uri=%s",
+		DingTalkLoginUrl,
 		c.Config.ClientID,
 		url.QueryEscape(state),
-		url.QueryEscape("https://"+selfDomain+"/dingTalk"),
+		url.QueryEscape(redirectUri),
 	)
 }

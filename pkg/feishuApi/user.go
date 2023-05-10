@@ -1,6 +1,7 @@
 package feishuApi
 
 import (
+	"fmt"
 	"github.com/Mmx233/tool"
 )
 
@@ -30,7 +31,7 @@ type FsUser struct {
 func (u FsUser) Info() (*UserInfoResp, error) {
 	var data UserInfoResp
 	return &data, u.fs.doRequest("GET", &data, &tool.DoHttpReq{
-		Url: "https://open.feishu.cn/open-apis/contact/v3/users/" + u.OpenId,
+		Url: fmt.Sprintf(GetUserInfoUrl, u.OpenId),
 		Header: map[string]interface{}{
 			"Authorization": "Bearer " + u.AccessToken,
 		},
