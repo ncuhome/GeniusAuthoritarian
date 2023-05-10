@@ -33,6 +33,8 @@
 
 ## :gear: 使用
 
+需要先申请鉴权密钥对，相关功能开发中，暂未开放申请
+
 ### 为开放服务非入侵式添加鉴权
 
 目前只支持注入不跨域集群服务，见 [GeniusAuthoritarianGate](https://github.com/ncuhome/GeniusAuthoritarianGate)
@@ -41,12 +43,12 @@
 
 ### 前端调用
 
-需要先创建一个页面接收回调信息，回调页面需要处理 Query param `token`，然后用这个 token 请求自己项目后端的登录接口拿第二个 `token`
+需要先创建一个页面接收回调信息，回调页面需要处理 Query param `token`，然后用这个 token 请求自己项目后端的登录接口获取正式登录状态
 
 调用示例：
 
 ```
-window.open('https://v.ncuos.com/?target=https://example.ncuos.com/login', '_self')
+window.open('https://v.ncuos.com/?appCode=YourAppCode', '_self')
 ```
 
 其中 `target` 为前端回调页面 url，登录系统会对域名进行白名单校验，可以附带自定义 path、query 或 hash
@@ -63,14 +65,16 @@ POST `https://v.ncuos.com/api/v1/public/login/verify`
 
 Form:
 
-| key    | type     | required |
-|--------|----------|----------|
-| token  | string   | √        |
-| groups | []string | x        |
+| key       | type   | required | desc      |
+|-----------|--------|----------|-----------|
+| token     | string | √        |           |
+| appCode   | string | √        |           |
+| timeStamp | int64  | √        | unix 时间，秒 |
+| signature | string | √        | 请求签名      |
 
-当 groups 为空时，接口会返回用户所在所有组。当 groups 不为空时，接口返回匹配结果，无匹配值将会导致登陆失败
+`signature` 的计算方法是，在表单对象中加入 `appSecret`，去掉 `signature`，再将整个对象按键名排序，将键名和键值用 `=` 连接，不同项中间用 `&` 连接之后得到一个字符串，如：`key1=value1&key2=value2`，计算 `sha256` 值。
 
-groups 的值参考 [departments.go](/pkg/departments/departments.go)
+注意不要把 `appSecret` 当表单值放入请求传出。
 
 成功：
 
@@ -78,6 +82,7 @@ groups 的值参考 [departments.go](/pkg/departments/departments.go)
 {
   "code": 0,
   "data": {
+    "name": "孙翔宇",
     "groups": [
       "研发",
       "中心"
