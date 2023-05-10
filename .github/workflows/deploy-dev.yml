@@ -25,6 +25,7 @@ jobs:
 
       - name: Build Binary
         env:
+          GOPRIVATE: github.com/ncuhome
           CGO_ENABLED: 0
         run: go build -gcflags=-trimpath=$GOPATH -asmflags=-trimpath=$GOPATH -ldflags '-extldflags "-static" -s -w' -o runner ./cmd/GeniusAuthoritarian
 

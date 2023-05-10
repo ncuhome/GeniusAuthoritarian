@@ -7,7 +7,7 @@ import (
 	"github.com/ncuhome/GeniusAuthoritarian/internal/db/dao"
 	"github.com/ncuhome/GeniusAuthoritarian/internal/pkg/jwt"
 	"github.com/ncuhome/GeniusAuthoritarian/internal/service"
-	"github.com/ncuhome/GeniusAuthoritarian/pkg/signature"
+	"github.com/ncuhome/GeniusAuthoritarianClient/pkg/signature"
 	"gorm.io/gorm"
 	"time"
 )
