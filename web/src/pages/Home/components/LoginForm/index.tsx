@@ -4,10 +4,12 @@ import { useNavigate } from "react-router-dom";
 import toast from "react-hot-toast";
 import feishuLogo from "@/assets/img/login/feishu.png";
 import dingLogo from "@/assets/img/login/ding.png";
+import { ThrowError } from "@util/nav";
 
 import { Stack, Box, Typography, List, Paper, Skeleton } from "@mui/material";
 import { LoginItem } from "./components";
 
+import { ErrNetwork } from "@api/base";
 import { GetFeishuLoginUrl, GetDingTalkLoginUrl } from "@api/v1/login";
 import { GetAppInfo, AppInfo } from "@api/v1/app";
 
@@ -48,7 +50,13 @@ export const LoginForm: FC = () => {
       const data = await GetAppInfo(appCode);
       setAppInfo(data);
     } catch ({ msg }) {
-      if (msg) toast.error(msg as string);
+      if (msg) {
+        if (msg === ErrNetwork) {
+          toast.error(msg);
+        } else {
+          ThrowError(nav, "登录对象异常", msg as string);
+        }
+      }
     }
     setOnRequestAppInfo(false);
   }
