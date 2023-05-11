@@ -5,7 +5,18 @@ import "./style.css";
 import { Navigation, Profile } from "./pages";
 import { PageNotFound } from "@components";
 import { Header } from "./components";
-import { Box, Stack } from "@mui/material";
+import {
+  Box,
+  Stack,
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogActions,
+  Button,
+} from "@mui/material";
+
+import { shallow } from "zustand/shallow";
+import { useUser } from "@store";
 
 const UserRouters: Array<{
   name: string;
@@ -26,11 +37,13 @@ export const User: FC = () => {
     }
     return 0;
   });
+  const [dialog, openDialog] = useUser(
+    (state) => [state.dialog, state.openDialog],
+    shallow
+  );
 
   return (
-    <Stack
-      id={"user"}
-    >
+    <Stack id={"user"}>
       <Box
         sx={{
           width: "100%",
@@ -46,7 +59,7 @@ export const User: FC = () => {
       </Box>
       <Box
         sx={{
-          overflowY: 'overlay',
+          overflowY: "overlay",
           minHeight: "calc(100% - 3.5rem)",
         }}
       >
@@ -57,6 +70,24 @@ export const User: FC = () => {
           <Route path={"*"} element={<PageNotFound />} />
         </Routes>
       </Box>
+
+      <Dialog
+        sx={{ "& .MuiDialog-paper": { width: "60%", maxHeight: 435 } }}
+        maxWidth="xs"
+        open={openDialog}
+        onClose={() => dialog.callback(false)}
+      >
+        <DialogTitle>{dialog.title}</DialogTitle>
+        {dialog.content ? (
+          <DialogContent>{dialog.content}</DialogContent>
+        ) : null}
+        <DialogActions>
+          <Button autoFocus onClick={() => dialog.callback(false)}>
+            取消
+          </Button>
+          <Button onClick={() => dialog.callback(true)}>确认</Button>
+        </DialogActions>
+      </Dialog>
     </Stack>
   );
 };
