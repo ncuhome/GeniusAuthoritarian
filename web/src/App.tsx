@@ -1,11 +1,16 @@
+import { lazy } from "react";
 import { useMount } from "@hooks";
 import { BrowserRouter, Route, Routes } from "react-router-dom";
 import { Toaster } from "react-hot-toast";
 
-import { Home, Error, Feishu, DingTalk, Login, User } from "./pages";
+const User = lazy(() => import("./pages/User"));
+import { Home, Error, Feishu, DingTalk, Login } from "./pages";
 import { PageNotFound } from "@components";
 
+import { Suspense } from "@components";
+
 import { ThemeProvider, createTheme } from "@mui/material/styles";
+
 const darkTheme = createTheme({
   palette: {
     mode: "dark",
@@ -48,7 +53,14 @@ export default function App() {
             <Route path={"feishu"} element={<Feishu />} />
             <Route path={"dingTalk"} element={<DingTalk />} />
             <Route path={"login"} element={<Login />} />
-            <Route path={"user/*"} element={<User />} />
+            <Route
+              path={"user/*"}
+              element={
+                <Suspense>
+                  <User />
+                </Suspense>
+              }
+            />
             <Route path={"*"} element={<PageNotFound />} />
           </Routes>
         </BrowserRouter>
