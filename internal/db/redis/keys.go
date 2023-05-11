@@ -17,4 +17,5 @@ const (
 	_keySiteWhiteList keys = iota
 	keyJwt
 	keyAppCode
+	keyUserJwt
 )
