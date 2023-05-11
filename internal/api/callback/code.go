@@ -11,6 +11,7 @@ const (
 	cErrUnexpected
 	cErrSignatureExpired
 	cErrOperationIllegal
+	cErrInsufficientPermissions
 )
 
 var (
@@ -62,6 +63,11 @@ var (
 	ErrOperationIllegal = &Msg{
 		Code:       cErrOperationIllegal,
 		Msg:        "操作不合法",
+		HttpStatus: 403,
+	}
+	ErrInsufficientPermissions = &Msg{
+		Code:       cErrInsufficientPermissions,
+		Msg:        "缺少对应身份组权限",
 		HttpStatus: 403,
 	}
 )
