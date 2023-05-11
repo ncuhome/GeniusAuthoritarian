@@ -28,13 +28,14 @@ func ParseToken[C jwt.Claims](token string, target C) (claims C, valid bool, e e
 }
 
 // GenerateUserToken 生成有效期 15 天的个人信息访问 Token
-func GenerateUserToken(uid uint) (string, error) {
+func GenerateUserToken(uid uint, groups []string) (string, error) {
 	return GenerateToken(&UserToken{
 		RegisteredClaims: jwt.RegisteredClaims{
 			ExpiresAt: jwt.NewNumericDate(time.Now().Add(time.Hour * 24 * 15)),
 			IssuedAt:  jwt.NewNumericDate(time.Now()),
 		},
-		ID: uid,
+		ID:     uid,
+		Groups: groups,
 	})
 }
 

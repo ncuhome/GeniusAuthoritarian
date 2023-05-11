@@ -4,8 +4,9 @@ import "github.com/golang-jwt/jwt/v4"
 
 type UserToken struct {
 	jwt.RegisteredClaims
-	// Uid
-	ID uint `json:"id"`
+	// dao.User.ID
+	ID     uint     `json:"id"`
+	Groups []string `json:"groups,omitempty"`
 }
 
 type LoginToken struct {

@@ -122,7 +122,7 @@ func Login(c *gin.Context) {
 		return
 	}
 
-	token, e := jwt.GenerateUserToken(claims.UID)
+	token, e := jwt.GenerateUserToken(claims.UID, groups)
 	if e != nil {
 		callback.Error(c, e, callback.ErrUnexpected)
 		return
