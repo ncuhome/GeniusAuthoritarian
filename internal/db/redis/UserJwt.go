@@ -25,12 +25,12 @@ func (a UserJwtHelper) Set(uid uint, token string, valid time.Duration) error {
 }
 
 func (a UserJwtHelper) Pair(uid uint, token string) (bool, error) {
-	result := Client.Get(context.Background(), a.userKey(uid))
-	if e := result.Err(); e != nil {
+	value, e := Client.Get(context.Background(), a.userKey(uid)).Result()
+	if e != nil {
 		if e == Nil {
 			e = nil
 		}
 		return false, e
 	}
-	return result.String() == token[:a.storeLength], nil
+	return value == token[:a.storeLength], nil
 }
