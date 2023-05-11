@@ -111,7 +111,13 @@ func Login(c *gin.Context) {
 		return
 	}
 
-	if e := tx.Commit().Error; e != nil {
+	groups, e := (service.UserGroupsSrv{DB: tx}).GetForUser(claims.UID)
+	if e != nil {
+		callback.Error(c, e, callback.ErrDBOperation)
+		return
+	}
+
+	if e = tx.Commit().Error; e != nil {
 		callback.Error(c, e, callback.ErrDBOperation)
 		return
 	}
@@ -123,6 +129,7 @@ func Login(c *gin.Context) {
 	}
 
 	callback.Success(c, gin.H{
-		"token": token,
+		"token":  token,
+		"groups": groups,
 	})
 }
