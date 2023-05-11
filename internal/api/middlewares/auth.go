@@ -19,5 +19,5 @@ func UserAuth(c *gin.Context) {
 		return
 	}
 
-	c.Set("Uid", claims.ID)
+	c.Set("user", claims.ID)
 }

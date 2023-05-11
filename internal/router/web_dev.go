@@ -5,7 +5,7 @@ package router
 import (
 	gateway "github.com/Mmx233/Gateway/v2"
 	"github.com/gin-gonic/gin"
-	"github.com/ncuhome/GeniusAuthoritarian/tools"
+	"github.com/ncuhome/GeniusAuthoritarian/internal/tools"
 	log "github.com/sirupsen/logrus"
 	"net/http"
 )

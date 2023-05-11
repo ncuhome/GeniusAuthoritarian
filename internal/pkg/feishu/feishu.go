@@ -3,8 +3,8 @@ package feishu
 import (
 	"github.com/ncuhome/GeniusAuthoritarian/internal/db/dao"
 	"github.com/ncuhome/GeniusAuthoritarian/internal/global"
+	"github.com/ncuhome/GeniusAuthoritarian/internal/tools"
 	"github.com/ncuhome/GeniusAuthoritarian/pkg/feishuApi"
-	"github.com/ncuhome/GeniusAuthoritarian/tools"
 	log "github.com/sirupsen/logrus"
 )
 
