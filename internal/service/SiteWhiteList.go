@@ -2,7 +2,6 @@ package service
 
 import (
 	"github.com/ncuhome/GeniusAuthoritarian/internal/db/dao"
-	"github.com/ncuhome/GeniusAuthoritarian/internal/db/redis"
 	"gorm.io/gorm"
 	"net/url"
 	"strings"
@@ -20,17 +19,9 @@ func (a SiteWhiteListSrv) Begin() (*SiteWhiteListSrv, error) {
 }
 
 func (a SiteWhiteListSrv) Exist(domain string) (bool, error) {
-	list, e := redis.SiteWhiteList.Load()
+	list, e := (&dao.SiteWhiteList{}).Get(a.DB)
 	if e != nil {
-		if e == redis.Nil {
-			list, e = (&dao.SiteWhiteList{}).Get(a.DB)
-			if e != nil {
-				return false, e
-			}
-			_ = redis.SiteWhiteList.Add(list...)
-		} else {
-			return false, e
-		}
+		return false, e
 	}
 
 	for _, v := range list {
