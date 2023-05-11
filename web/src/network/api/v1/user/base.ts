@@ -1,15 +1,19 @@
-import axios from "axios";
+import axios, { AxiosError } from "axios";
 import { BaseUrlV1, apiV1ErrorHandler } from "@api/base";
 
 import { useUser } from "@store";
 
 function GoLogin() {
   window.location.href = "/";
+  console.log(4);
 }
 
 export function Logout() {
+  console.log(1);
   useUser.getState().setAuth(null);
+  console.log(2);
   GoLogin();
+  console.log(3);
 }
 
 export const apiV1User = axios.create({
@@ -30,8 +34,9 @@ apiV1User.interceptors.request.use((req) => {
   }
   return req;
 }, undefined);
-apiV1User.interceptors.response.use(undefined, (err: any) => {
-  if (err.statusCode && err.statusCode === 401) {
+apiV1User.interceptors.response.use(undefined, (err: AxiosError) => {
+  console.log(err);
+  if (err.response?.status === 401) {
     Logout();
     return Promise.reject(err);
   }

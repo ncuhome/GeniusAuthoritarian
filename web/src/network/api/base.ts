@@ -1,4 +1,4 @@
-import axios from "axios";
+import axios, { AxiosError } from "axios";
 
 export const BaseURL = `/api/`;
 export const BaseUrlV1 = `${BaseURL}v1/`;
@@ -21,7 +21,8 @@ export function apiV1ErrorHandler(err: any): any {
   }
   return err;
 }
-apiV1.interceptors.response.use(undefined, (err: any) => {
+
+apiV1.interceptors.response.use(undefined, (err: AxiosError) => {
   return Promise.reject(apiV1ErrorHandler(err));
 });
 
