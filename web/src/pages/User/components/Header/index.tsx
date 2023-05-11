@@ -16,6 +16,8 @@ import { LogoutRounded } from "@mui/icons-material";
 
 import { Logout } from "@api/v1/user/base";
 
+import { useUser } from "@store";
+
 interface Props {
   routers: Array<{
     name: string;
@@ -31,6 +33,8 @@ export const Header: FC<Props> = ({
   onChangeTab: handleChangeTab,
 }) => {
   const nav = useNavigate();
+
+  const setDialog = useUser((state) => state.setDialog);
 
   return (
     <Stack
@@ -79,7 +83,16 @@ export const Header: FC<Props> = ({
         </Tabs>
 
         <Stack flexDirection={"row"} alignItems={"center"}>
-          <IconButton onClick={Logout}>
+          <IconButton
+            onClick={() =>
+              setDialog({
+                title: "注销登录",
+                callback: (ok) => {
+                  if (ok) Logout();
+                },
+              })
+            }
+          >
             <LogoutRounded />
           </IconButton>
         </Stack>
