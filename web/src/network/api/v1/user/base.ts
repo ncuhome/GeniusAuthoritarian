@@ -27,7 +27,7 @@ apiV1User.interceptors.request.use((req) => {
 }, undefined);
 apiV1User.interceptors.response.use(undefined, (err: any) => {
   if (err.statusCode && err.statusCode === 401) {
-    useUser.getState().setToken(null);
+    useUser.getState().setAuth(null);
     GoLogin();
     return Promise.reject(err);
   }

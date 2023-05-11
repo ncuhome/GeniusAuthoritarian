@@ -12,15 +12,18 @@ export async function GetLoginUrl(
   return url;
 }
 
-export async function UserLogin(token: string): Promise<string> {
+export type UserLoginResult = {
+  token: string;
+  groups: string[];
+};
+
+export async function UserLogin(token: string): Promise<UserLoginResult> {
   const {
-    data: {
-      data: { token: authToken },
-    },
+    data: { data },
   } = await apiV1.post("public/login/", {
     token,
   });
-  return authToken;
+  return data;
 }
 
 export async function Login(

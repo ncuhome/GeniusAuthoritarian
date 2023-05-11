@@ -14,12 +14,12 @@ export const Login: FC = () => {
   const nav = useNavigate();
   const useQuery = createUseQuery();
   const [token] = useQuery("token", "");
-  const setToken = useUser((state) => state.setToken);
+  const setAuth = useUser((state) => state.setAuth);
 
   async function handleLogin() {
     try {
-      const authToken = await UserLogin(token);
-      setToken(authToken);
+      const res = await UserLogin(token);
+      setAuth(res.token, res.groups);
       nav("/user/");
     } catch ({ msg }) {
       if (msg) ThrowError(nav, "登录失败", msg as string);
