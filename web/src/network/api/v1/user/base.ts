@@ -7,6 +7,11 @@ function GoLogin() {
   window.location.href = "/";
 }
 
+export function Logout() {
+  useUser.getState().setAuth(null);
+  GoLogin();
+}
+
 export const apiV1User = axios.create({
   baseURL: BaseUrlV1 + "user/",
 });
@@ -27,8 +32,7 @@ apiV1User.interceptors.request.use((req) => {
 }, undefined);
 apiV1User.interceptors.response.use(undefined, (err: any) => {
   if (err.statusCode && err.statusCode === 401) {
-    useUser.getState().setAuth(null);
-    GoLogin();
+    Logout();
     return Promise.reject(err);
   }
   return Promise.reject(apiV1ErrorHandler(err));
