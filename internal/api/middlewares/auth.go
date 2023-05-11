@@ -3,6 +3,7 @@ package middlewares
 import (
 	"github.com/gin-gonic/gin"
 	"github.com/ncuhome/GeniusAuthoritarian/internal/api/callback"
+	"github.com/ncuhome/GeniusAuthoritarian/internal/db/redis"
 	"github.com/ncuhome/GeniusAuthoritarian/internal/pkg/jwt"
 )
 
@@ -19,5 +20,14 @@ func UserAuth(c *gin.Context) {
 		return
 	}
 
-	c.Set("user", claims.ID)
+	valid, e = redis.UserJwt.Pair(claims.ID, token)
+	if e != nil {
+		callback.Error(c, e, callback.ErrUnexpected)
+		return
+	} else if !valid {
+		callback.Error(c, nil, callback.ErrUnauthorized)
+		return
+	}
+
+	c.Set("user", claims)
 }

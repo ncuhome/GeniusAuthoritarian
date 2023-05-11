@@ -5,6 +5,7 @@ import (
 	"github.com/ncuhome/GeniusAuthoritarian/internal/api/callback"
 	"github.com/ncuhome/GeniusAuthoritarian/internal/api/models/response"
 	"github.com/ncuhome/GeniusAuthoritarian/internal/db/dao"
+	"github.com/ncuhome/GeniusAuthoritarian/internal/db/redis"
 	"github.com/ncuhome/GeniusAuthoritarian/internal/pkg/jwt"
 	"github.com/ncuhome/GeniusAuthoritarian/internal/service"
 	"github.com/ncuhome/GeniusAuthoritarianClient/pkg/signature"
@@ -124,6 +125,11 @@ func Login(c *gin.Context) {
 
 	token, e := jwt.GenerateUserToken(claims.UID, groups)
 	if e != nil {
+		callback.Error(c, e, callback.ErrUnexpected)
+		return
+	}
+
+	if e = redis.UserJwt.Set(claims.UID, token, time.Hour*24*15); e != nil {
 		callback.Error(c, e, callback.ErrUnexpected)
 		return
 	}
