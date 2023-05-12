@@ -1,5 +1,6 @@
 import { create } from "zustand";
 import { UserProfile } from "@api/v1/user/profile";
+import { App } from "@api/v1/user/app";
 
 type DialogProps = {
   title: string;
@@ -15,6 +16,7 @@ interface UserState {
   dialog: DialogProps;
 
   profile: UserProfile | null;
+  apps: App[] | null;
 
   setAuth: (token: string | null, groups?: string[]) => void;
   setDialog: (props: DialogProps) => void;
@@ -32,6 +34,7 @@ export const useUser = create<UserState>()((set) => ({
   dialog: { title: "", callback: () => null },
 
   profile: null,
+  apps: null,
 
   setAuth: (token, groups) => {
     if (token) localStorage.setItem("token", token);
