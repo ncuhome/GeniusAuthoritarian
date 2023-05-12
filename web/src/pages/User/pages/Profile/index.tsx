@@ -21,12 +21,11 @@ import {
 
 import { GetUserProfile } from "@api/v1/user/profile";
 
-import { shallow } from "zustand/shallow";
 import { useUser } from "@store";
 
 export const Profile: FC = () => {
-  const [profile] = useUser((state) => [state.profile], shallow);
-  const [setProfile] = useUser((state) => [state.setState("profile")], shallow);
+  const profile = useUser((state) => state.profile);
+  const setProfile = useUser((state) => state.setState("profile"));
 
   const [onRequest, setOnRequest] = useState(true);
 
@@ -74,9 +73,10 @@ export const Profile: FC = () => {
     );
   };
 
-  useInterval(loadProfile, profile && !onRequest ? null : 2000);
+  useInterval(loadProfile, profile || onRequest ? null : 2000);
   useMount(() => {
     if (!profile) loadProfile();
+    else setOnRequest(false);
   });
 
   return (
