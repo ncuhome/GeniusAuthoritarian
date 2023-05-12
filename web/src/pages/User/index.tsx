@@ -2,7 +2,7 @@ import { FC, ReactNode, useMemo, useState } from "react";
 import { Routes, Route } from "react-router-dom";
 import "./style.css";
 
-import { Navigation, Profile } from "./pages";
+import { Navigation, Profile, App } from "./pages";
 import { PageNotFound } from "@components";
 import { Header } from "./components";
 import {
@@ -32,7 +32,7 @@ const BaseUserRouters: RouterElement[] = [
 const UserRoutersExtra: {
   [name: string]: RouterElement[];
 } = {
-  研发: [{ name: "应用管理", path: "app", element: <PageNotFound /> }],
+  研发: [{ name: "应用管理", path: "app", element: <App /> }],
 };
 
 export const User: FC = () => {
