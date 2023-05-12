@@ -11,3 +11,5 @@ export * from "./useKeyDown";
 export * from "./useEventListener";
 
 export * from "./useQuery";
+
+export * from "./useToast";
