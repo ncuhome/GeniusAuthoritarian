@@ -1,4 +1,4 @@
-import { FC, ReactNode, useState } from "react";
+import { FC, ReactNode, useMemo, useState } from "react";
 import { Routes, Route } from "react-router-dom";
 import "./style.css";
 
@@ -18,16 +18,38 @@ import {
 import { shallow } from "zustand/shallow";
 import { useUser } from "@store";
 
-const UserRouters: Array<{
+type RouterElement = {
   name: string;
   path: string;
   element: ReactNode;
-}> = [
+};
+
+const BaseUserRouters: RouterElement[] = [
   { name: "导航", path: "", element: <Navigation /> },
   { name: "个人资料", path: "profile", element: <Profile /> },
 ];
 
+const UserRoutersExtra: {
+  [name: string]: RouterElement[];
+} = {
+  研发: [{ name: "应用管理", path: "app", element: <PageNotFound /> }],
+};
+
 export const User: FC = () => {
+  const [dialog, openDialog] = useUser(
+    (state) => [state.dialog, state.openDialog],
+    shallow
+  );
+  const groups = useUser((state) => state.groups);
+
+  const UserRouters = useMemo<RouterElement[]>(() => {
+    let routers = BaseUserRouters;
+    for (let i = 0; i < groups.length; i++) {
+      if (UserRoutersExtra[groups[i]])
+        routers = routers.concat(UserRoutersExtra[groups[i]]);
+    }
+    return routers;
+  }, [groups]);
   const [currentTab, setCurrentTab] = useState<number>(() => {
     const matchPath = window.location.pathname.replace("/user/", "");
     for (let i = 0; i < UserRouters.length; i++) {
@@ -37,10 +59,6 @@ export const User: FC = () => {
     }
     return 0;
   });
-  const [dialog, openDialog] = useUser(
-    (state) => [state.dialog, state.openDialog],
-    shallow
-  );
 
   return (
     <Stack id={"user"}>
