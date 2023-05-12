@@ -86,11 +86,8 @@ export const Profile: FC = () => {
 
   return (
     <Container>
-      <Block>
-        <Typography variant={"h5"} fontWeight={"bold"} marginBottom={"1rem"}>
-          Profile
-        </Typography>
-        <Grid container spacing={2}>
+      <Block title={"Profile"}>
+        <Grid container spacing={2} marginTop={"0"}>
           <GridTextField label={"姓名"} value={profile?.user.name} />
           <GridTextField label={"电话"} value={profile?.user.phone} />
           <GridTextField label={"身份组"} value={userGroups} />
@@ -98,15 +95,10 @@ export const Profile: FC = () => {
       </Block>
 
       {profile && profile.loginRecord.length ? (
-        <Block>
-          <Typography variant={"h5"} fontWeight={"bold"}>
-            Record
-          </Typography>
-          <Typography variant={"subtitle2"} marginBottom={"1rem"}>
-            最近十次登录记录
-          </Typography>
+        <Block title={"Record"} subtitle={"最近十次登录记录"}>
           <Box
             sx={{
+              marginTop: "0.5rem",
               width: "100%",
               overflowY: "auto",
               whiteSpace: "nowrap",
