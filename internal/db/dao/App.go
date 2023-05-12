@@ -39,7 +39,11 @@ func (a *App) FirstAppKeyPairByID(tx *gorm.DB) error {
 	return tx.Model(a).Select("app_code,app_secret").Where("id=?", a.ID).First(a).Error
 }
 
-func (a *App) Get(tx *gorm.DB) ([]string, error) {
+func (a *App) GetAppCode(tx *gorm.DB) ([]string, error) {
 	var t []string
 	return t, tx.Model(a).Select("app_code").Find(&t).Error
+}
+
+func (a *App) GetByUID(tx *gorm.DB) *gorm.DB {
+	return tx.Model(a).Omit("app_secret").Where("uid=?", a.UID)
 }

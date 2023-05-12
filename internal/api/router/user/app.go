@@ -10,4 +10,5 @@ import (
 func routerApp(G *gin.RouterGroup) {
 	G.Use(middlewares.LimitGroup([]string{departments.UDev}))
 	G.POST("/", controllers.ApplyApp)
+	G.GET("/", controllers.ListOwnedApp)
 }

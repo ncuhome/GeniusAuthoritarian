@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"github.com/Mmx233/tool"
 	"github.com/ncuhome/GeniusAuthoritarian/internal/db/dao"
+	"github.com/ncuhome/GeniusAuthoritarian/internal/db/dto"
 	"github.com/ncuhome/GeniusAuthoritarian/internal/db/redis"
 	"github.com/ncuhome/GeniusAuthoritarian/internal/global"
 	"gorm.io/gorm"
@@ -47,7 +48,7 @@ func (a AppSrv) Exist(appCode string) (bool, error) {
 	list, e := redis.AppCode.Load()
 	if e != nil {
 		if e == redis.Nil {
-			list, e = (&dao.App{}).Get(a.DB)
+			list, e = (&dao.App{}).GetAppCode(a.DB)
 			if e != nil {
 				return false, e
 			}
@@ -85,4 +86,9 @@ func (a AppSrv) FirstAppKeyPair(id uint) (string, string, error) {
 
 func (a AppSrv) NameExist(name string) (bool, error) {
 	return (&dao.App{Name: name}).NameExist(a.DB)
+}
+
+func (a AppSrv) GetUserOwnedApp(uid uint) ([]dto.AppShow, error) {
+	var t = make([]dto.AppShow, 0)
+	return t, (&dao.App{UID: uid}).GetByUID(a.DB).Order("id DESC").Find(&t).Error
 }
