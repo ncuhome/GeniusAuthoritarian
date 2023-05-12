@@ -1,5 +1,5 @@
 import { FC, useCallback, useMemo, useState } from "react";
-import { useInterval, useMount } from "@hooks";
+import { useInterval, useMount, useLoadingToast } from "@hooks";
 import toast from "react-hot-toast";
 import moment from "moment";
 
@@ -34,13 +34,17 @@ export const Profile: FC = () => {
     return profile.user.groups.map((group) => group.name).join("、");
   }, [profile]);
 
+  const [loadProfileFailedToast, closeLoadProfileFailedToast] =
+    useLoadingToast();
+
   const loadProfile = useCallback(async () => {
     setOnRequest(true);
     try {
       const data = await GetUserProfile();
       setProfile(data);
+      closeLoadProfileFailedToast("Profile Loaded");
     } catch ({ msg }) {
-      if (msg) toast.error(msg as string);
+      if (msg) loadProfileFailedToast(msg as string);
     }
     setOnRequest(false);
   }, []);

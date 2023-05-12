@@ -1,16 +1,14 @@
 import { useRef } from "react";
-import toast, { Renderable } from "react-hot-toast";
+import toast, { ToastOptions } from "react-hot-toast";
 
-export function useToast() {
+export function useLoadingToast() {
   const id = useRef<string | null>(null);
 
-  const showToast = (msg: string, icon?: Renderable) => {
+  const showToast = (msg: string, options?: ToastOptions) => {
     if (id.current) {
       toast.loading(msg, { id: id.current });
     } else {
-      id.current = toast.loading(msg, {
-        icon: icon,
-      });
+      id.current = toast.loading(msg, options);
     }
   };
   const closeToast = (msg: string, success = true) => {
