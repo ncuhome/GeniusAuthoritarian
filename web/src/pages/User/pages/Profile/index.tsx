@@ -3,6 +3,7 @@ import { useInterval, useMount, useLoadingToast } from "@hooks";
 import toast from "react-hot-toast";
 import moment from "moment";
 
+import { Block } from "@/pages/User/components";
 import {
   Container,
   Box,
@@ -85,7 +86,7 @@ export const Profile: FC = () => {
 
   return (
     <Container>
-      <Box component={Paper} elevation={5}>
+      <Block>
         <Typography variant={"h5"} fontWeight={"bold"} marginBottom={"1rem"}>
           Profile
         </Typography>
@@ -94,10 +95,10 @@ export const Profile: FC = () => {
           <GridTextField label={"电话"} value={profile?.user.phone} />
           <GridTextField label={"身份组"} value={userGroups} />
         </Grid>
-      </Box>
+      </Block>
 
       {profile && profile.loginRecord.length ? (
-        <Box component={Paper} elevation={5}>
+        <Block>
           <Typography variant={"h5"} fontWeight={"bold"}>
             Record
           </Typography>
@@ -134,7 +135,7 @@ export const Profile: FC = () => {
               </TableBody>
             </Table>
           </Box>
-        </Box>
+        </Block>
       ) : undefined}
     </Container>
   );
