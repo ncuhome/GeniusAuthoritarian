@@ -1,5 +1,5 @@
 import { FC, useState } from "react";
-import { createUseQuery, useMount, useInterval } from "@hooks";
+import { createUseQuery, useMount, useInterval, useLoadingToast } from "@hooks";
 import { useNavigate } from "react-router-dom";
 import toast from "react-hot-toast";
 import feishuLogo from "@/assets/img/login/feishu.png";
@@ -26,6 +26,8 @@ export const LoginForm: FC = () => {
   const [appInfo, setAppInfo] = useState<AppInfo | null>(null);
   const [onRequestAppInfo, setOnRequestAppInfo] = useState(true);
 
+  const [loadAppInfoToast, closeAppInfoToast] = useLoadingToast();
+
   async function goLogin(thirdParty: string) {
     try {
       const url = await GetLoginUrl(thirdParty, appCode);
@@ -43,10 +45,11 @@ export const LoginForm: FC = () => {
     try {
       const data = await GetAppInfo(appCode);
       setAppInfo(data);
+      closeAppInfoToast("App Info Loaded");
     } catch ({ msg }) {
       if (msg) {
         if (msg === ErrNetwork) {
-          toast.error(msg);
+          loadAppInfoToast(msg);
         } else {
           ThrowError(nav, "登录对象异常", msg as string);
         }
