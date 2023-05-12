@@ -30,10 +30,11 @@ func (a AppSrv) This(host string) *dao.App {
 	}
 }
 
-func (a AppSrv) New(name, callback string, permitAll bool) (*dao.App, error) {
+func (a AppSrv) New(uid uint, name, callback string, permitAll bool) (*dao.App, error) {
 	randSrc := rand.NewSource(time.Now().UnixNano())
 	var t = dao.App{
 		Name:           name,
+		UID:            uid,
 		AppCode:        tool.RandString(randSrc, 8),
 		AppSecret:      tool.RandString(randSrc, 100),
 		Callback:       callback,
@@ -80,4 +81,8 @@ func (a AppSrv) FirstAppKeyPair(id uint) (string, string, error) {
 		ID: id,
 	}
 	return t.AppCode, t.AppSecret, t.FirstAppKeyPairByID(a.DB)
+}
+
+func (a AppSrv) NameExist(name string) (bool, error) {
+	return (&dao.App{Name: name}).NameExist(a.DB)
 }

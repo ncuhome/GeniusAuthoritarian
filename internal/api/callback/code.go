@@ -12,6 +12,7 @@ const (
 	cErrSignatureExpired
 	cErrOperationIllegal
 	cErrInsufficientPermissions
+	cErrAlreadyExist
 )
 
 var (
@@ -69,5 +70,10 @@ var (
 		Code:       cErrInsufficientPermissions,
 		Msg:        "缺少对应身份组权限",
 		HttpStatus: 403,
+	}
+	ErrAlreadyExist = &Msg{
+		Code:       cErrAlreadyExist,
+		Msg:        "目标已存在",
+		HttpStatus: 400,
 	}
 )

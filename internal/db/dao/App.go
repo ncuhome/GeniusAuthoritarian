@@ -15,7 +15,7 @@ type App struct {
 	gorm.DeletedAt
 	// User.ID 拥有者
 	UID            uint   `gorm:"column:uid;index"`
-	Name           string `gorm:"not null;unique"`
+	Name           string `gorm:"not null;uniqueIndex;type:varchar(30)"`
 	AppCode        string `gorm:"not null;uniqueIndex;type:varchar(36)"`
 	AppSecret      string `gorm:"not null"`
 	Callback       string `gorm:"not null"`
@@ -24,6 +24,11 @@ type App struct {
 
 func (a *App) Insert(tx *gorm.DB) error {
 	return tx.Create(a).Error
+}
+
+func (a *App) NameExist(tx *gorm.DB) (bool, error) {
+	var t bool
+	return t, tx.Model(a).Select("1").Where("name=?", a.Name).Limit(1).Find(&t).Error
 }
 
 func (a *App) FirstForLogin(tx *gorm.DB) error {
