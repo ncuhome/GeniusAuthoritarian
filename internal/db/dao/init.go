@@ -28,7 +28,7 @@ func init() {
 		&User{},
 		&SiteWhiteList{},
 		&Group{},
-		&App{},
+		&AppWithForeignKey{},
 		&LoginRecordWithForeignKey{},
 		&UserGroupsWithForeignKey{},
 		&FeishuGroupsWithForeignKey{},
@@ -38,6 +38,7 @@ func init() {
 	}
 
 	if e = DB.AutoMigrate(
+		&App{},
 		&LoginRecord{},
 		&UserGroups{},
 		&FeishuGroups{},

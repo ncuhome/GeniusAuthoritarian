@@ -4,10 +4,17 @@ import (
 	"gorm.io/gorm"
 )
 
+type AppWithForeignKey struct {
+	App  `gorm:"embedded"`
+	User User `gorm:"-;foreignKey:UID;constraint:OnDelete:SET NULL"`
+}
+
 type App struct {
 	ID        uint `gorm:"primarykey"`
 	CreatedAt int64
 	gorm.DeletedAt
+	// User.ID 拥有者
+	UID            uint   `gorm:"column:uid;index"`
 	Name           string `gorm:"not null;unique"`
 	AppCode        string `gorm:"not null;uniqueIndex;type:varchar(36)"`
 	AppSecret      string `gorm:"not null"`
