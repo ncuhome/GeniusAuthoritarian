@@ -41,7 +41,7 @@ export const Profile: FC = () => {
     try {
       const data = await GetUserProfile();
       setProfile(data);
-      closeLoadProfileFailedToast("Profile Loaded");
+      closeLoadProfileFailedToast();
     } catch ({ msg }) {
       if (msg) loadProfileFailedToast(msg as string);
     }

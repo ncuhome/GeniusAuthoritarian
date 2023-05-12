@@ -45,7 +45,7 @@ export const LoginForm: FC = () => {
     try {
       const data = await GetAppInfo(appCode);
       setAppInfo(data);
-      closeAppInfoToast("App Info Loaded");
+      closeAppInfoToast();
     } catch ({ msg }) {
       if (msg) {
         if (msg === ErrNetwork) {
