@@ -1,4 +1,4 @@
-import { FC, useRef, useState } from "react";
+import { FC, useRef, useState, useEffect } from "react";
 import { useLoadingToast, useMount, useInterval } from "@hooks";
 import toast from "react-hot-toast";
 
@@ -11,12 +11,15 @@ import {
   FormControlLabel,
   Stack,
   Button,
+  Collapse,
+  Skeleton,
 } from "@mui/material";
 
 import { GetOwnedAppList, ApplyApp } from "@api/v1/user/app";
+import { ListGroups } from "@api/v1/user/group";
 
 import { shallow } from "zustand/shallow";
-import { useUser, useAppForm } from "@store";
+import { useUser, useAppForm, useGroup } from "@store";
 
 export const App: FC = () => {
   const apps = useUser((state) => state.apps);
@@ -28,28 +31,41 @@ export const App: FC = () => {
   const nameInput = useRef<HTMLInputElement | null>(null);
   const callbackInput = useRef<HTMLInputElement | null>(null);
 
-  const [name, callback, permitAll, nameError, callbackError] = useAppForm(
-    (state) => [
-      state.name,
-      state.callback,
-      state.permitAll,
-      state.nameError,
-      state.callbackError,
-    ],
-    shallow
-  );
-  const [setName, setCallback, setPermitAll, setNameError, setCallbackError] =
+  const [name, callback, permitAll, permitGroups, nameError, callbackError] =
     useAppForm(
       (state) => [
-        state.setState("name"),
-        state.setState("callback"),
-        state.setState("permitAll"),
-        state.setState("nameError"),
-        state.setState("callbackError"),
+        state.name,
+        state.callback,
+        state.permitAll,
+        state.permitGroups,
+        state.nameError,
+        state.callbackError,
       ],
       shallow
     );
-  const [resetForm] = useAppForm((state) => [state.reset], shallow);
+  const [
+    setName,
+    setCallback,
+    setPermitAll,
+    setPermitGroups,
+    setNameError,
+    setCallbackError,
+  ] = useAppForm(
+    (state) => [
+      state.setState("name"),
+      state.setState("callback"),
+      state.setState("permitAll"),
+      state.setState("permitGroups"),
+      state.setState("nameError"),
+      state.setState("callbackError"),
+    ],
+    shallow
+  );
+  const resetForm = useAppForm((state) => state.reset);
+
+  const groups = useGroup((state) => state.groups);
+  const setGroups = useGroup((state) => state.setState("groups"));
+  const onRequestGroups = useRef(false);
 
   async function loadApps() {
     setOnRequestApps(true);
@@ -63,7 +79,18 @@ export const App: FC = () => {
     setOnRequestApps(false);
   }
 
-  function checkForm(): boolean {
+  async function loadGroups() {
+    onRequestGroups.current = true;
+    try {
+      const data = await ListGroups();
+      setGroups(data);
+    } catch ({ msg }) {
+      if (msg) toast.error(msg as string);
+    }
+    onRequestGroups.current = false;
+  }
+
+  async function checkForm(): Promise<boolean> {
     if (!name) {
       setNameError(true);
       toast.error("应用名称不能为空");
@@ -87,7 +114,7 @@ export const App: FC = () => {
   }
 
   async function createApp() {
-    if (!checkForm()) return;
+    if (!(await checkForm())) return;
     try {
       const data = await ApplyApp(name, callback, permitAll);
       setApps([data, ...apps!]);
@@ -97,6 +124,13 @@ export const App: FC = () => {
       if (msg) toast.error(msg as string);
     }
   }
+
+  useEffect(() => {
+    if (!permitAll) {
+      if (onRequestGroups.current) return;
+      loadGroups();
+    }
+  }, [permitAll]);
 
   useInterval(loadApps, !apps && !onRequestApps ? 2000 : null);
   useMount(() => {
@@ -128,7 +162,7 @@ export const App: FC = () => {
               onChange={(e) => setCallback(e.target.value)}
             />
           </Grid>
-          <Grid item xs={12} sm={6}>
+          <Grid item xs={12}>
             <FormControlLabel
               control={
                 <Checkbox
@@ -138,6 +172,23 @@ export const App: FC = () => {
               }
               label="允许所有成员使用"
             />
+          </Grid>
+          <Grid
+            item
+            xs={6}
+            sx={{
+              transition: "all ease-out 0.3s",
+              py: permitAll ? "0!important" : undefined,
+              opacity: permitAll ? "0" : undefined,
+            }}
+          >
+            <Collapse in={!permitAll}>
+              {groups ? (
+                <TextField label={"授权身份组"} fullWidth />
+              ) : (
+                <Skeleton variant={"rounded"} width={"100%"} height={56} />
+              )}
+            </Collapse>
           </Grid>
         </Grid>
 
