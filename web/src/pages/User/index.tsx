@@ -1,8 +1,11 @@
-import { FC, ReactNode, useMemo, useState } from "react";
+import { FC, ReactNode, useMemo, useState, lazy } from "react";
 import { Routes, Route } from "react-router-dom";
 import "./style.css";
 
-import { Navigation, Profile, App } from "./pages";
+const App = lazy(() => import("./pages/App"));
+import { Navigation, Profile } from "./pages";
+
+import { Suspense } from "@components";
 import { PageNotFound } from "@components";
 import { Header } from "./components";
 import {
@@ -32,12 +35,22 @@ const BaseUserRouters: RouterElement[] = [
 const UserRoutersExtra: {
   [name: string]: RouterElement[];
 } = {
-  研发: [{ name: "应用管理", path: "app", element: <App /> }],
+  研发: [
+    {
+      name: "应用管理",
+      path: "app",
+      element: (
+        <Suspense>
+          <App />
+        </Suspense>
+      ),
+    },
+  ],
 };
 
 export const User: FC = () => {
-  const [dialog, openDialog] = useUser(
-    (state) => [state.dialog, state.openDialog],
+  const [dialog, openDialog, dialogResolver] = useUser(
+    (state) => [state.dialog, state.openDialog, state.dialogResolver],
     shallow
   );
   const groups = useUser((state) => state.groups);
@@ -93,17 +106,17 @@ export const User: FC = () => {
         sx={{ "& .MuiDialog-paper": { width: "60%", maxHeight: 435 } }}
         maxWidth="xs"
         open={openDialog}
-        onClose={() => dialog.callback(false)}
+        onClose={() => dialogResolver?.(false)}
       >
         <DialogTitle>{dialog.title}</DialogTitle>
         {dialog.content ? (
           <DialogContent>{dialog.content}</DialogContent>
         ) : null}
         <DialogActions>
-          <Button autoFocus onClick={() => dialog.callback(false)}>
+          <Button autoFocus onClick={() => dialogResolver?.(false)}>
             取消
           </Button>
-          <Button onClick={() => dialog.callback(true)}>确认</Button>
+          <Button onClick={() => dialogResolver?.(true)}>确认</Button>
         </DialogActions>
       </Dialog>
     </Stack>
