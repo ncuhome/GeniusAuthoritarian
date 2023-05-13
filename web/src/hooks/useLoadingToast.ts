@@ -1,4 +1,5 @@
 import { useRef } from "react";
+import { useMount } from "./useMount";
 import toast, { ToastOptions } from "react-hot-toast";
 
 type fnShowToast = (msg: string, options?: ToastOptions) => void;
@@ -16,7 +17,7 @@ export function useLoadingToast() {
     else id.current = toast.loading(msg, options);
   };
 
-  function closeToast(msg?: string, success: boolean = true) {
+  const closeToast = (msg?: string, success: boolean = true) => {
     if (!id.current) return;
 
     if (!msg) toast.dismiss(id.current);
@@ -24,7 +25,11 @@ export function useLoadingToast() {
     else toast.error(msg, { id: id.current });
 
     id.current = null;
-  }
+  };
+
+  useMount(() => {
+    return () => closeToast();
+  });
 
   return [showToast, closeToast];
 }
