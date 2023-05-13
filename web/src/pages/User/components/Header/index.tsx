@@ -84,14 +84,12 @@ export const Header: FC<Props> = ({
 
         <Stack flexDirection={"row"} alignItems={"center"}>
           <IconButton
-            onClick={() =>
-              setDialog({
+            onClick={async () => {
+              const ok = await setDialog({
                 title: "注销登录",
-                callback: (ok) => {
-                  if (ok) Logout();
-                },
-              })
-            }
+              });
+              if (ok) Logout();
+            }}
           >
             <LogoutRounded />
           </IconButton>

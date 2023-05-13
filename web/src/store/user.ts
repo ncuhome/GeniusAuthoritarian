@@ -5,7 +5,6 @@ import { App } from "@api/v1/user/app";
 type DialogProps = {
   title: string;
   content?: string;
-  callback: (ok: boolean) => void;
 };
 
 interface UserState {
@@ -14,12 +13,13 @@ interface UserState {
 
   openDialog: boolean;
   dialog: DialogProps;
+  dialogResolver?: (ok: boolean) => void;
 
   profile: UserProfile | null;
   apps: App[] | null;
 
   setAuth: (token: string | null, groups?: string[]) => void;
-  setDialog: (props: DialogProps) => void;
+  setDialog: (props: DialogProps) => Promise<boolean>;
 
   setState: <T extends keyof UserState>(
     key: T
@@ -31,7 +31,7 @@ export const useUser = create<UserState>()((set) => ({
   groups: localStorage.getItem("groups")?.split(",") || [],
 
   openDialog: false,
-  dialog: { title: "", callback: () => null },
+  dialog: { title: "" },
 
   profile: null,
   apps: null,
@@ -46,15 +46,16 @@ export const useUser = create<UserState>()((set) => ({
     }
     set({ token, groups });
   },
-  setDialog: (props) => {
-    const callback = props.callback;
-    props.callback = (ok) => {
-      callback(ok);
-      set({ openDialog: false });
-    };
-    set({
-      dialog: props,
-      openDialog: true,
+  setDialog: async (props): Promise<boolean> => {
+    return new Promise((resolve) => {
+      set({
+        dialog: props,
+        dialogResolver: (ok: boolean) => {
+          resolve(ok);
+          set({ openDialog: false, dialogResolver: undefined });
+        },
+        openDialog: true,
+      });
     });
   },
 
