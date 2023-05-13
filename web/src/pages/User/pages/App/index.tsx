@@ -1,5 +1,5 @@
 import { FC, useRef, useState, useEffect } from "react";
-import { useLoadingToast, useMount, useInterval } from "@hooks";
+import { useLoadingToast, useMount, useInterval, useTimeout } from "@hooks";
 import toast from "react-hot-toast";
 
 import { Block } from "@/pages/User/components";
@@ -69,6 +69,7 @@ export const App: FC = () => {
     shallow
   );
   const resetForm = useAppForm((state) => state.reset);
+  const [showSelectGroups, setShowSelectGroups] = useState(!permitAll);
 
   const groups = useGroup((state) => state.groups);
   const setGroups = useGroup((state) => state.setState("groups"));
@@ -140,8 +141,10 @@ export const App: FC = () => {
     }
   }
 
+  useTimeout(() => setShowSelectGroups(false), permitAll ? 300 : null);
   useEffect(() => {
     if (!permitAll) {
+      setShowSelectGroups(true);
       if (onRequestGroups.current) return;
       loadGroups();
     }
@@ -190,14 +193,17 @@ export const App: FC = () => {
           </Grid>
           <Grid
             item
-            xs={6}
+            xs={12}
+            sm={6}
             sx={{
-              transition: "all ease-out 0.3s",
+              transition: `padding .3s ease-out${
+                permitAll ? " .3s" : ""
+              }, opacity 0.3s ease-out${permitAll ? "" : " .3s"}`,
               py: permitAll ? "0!important" : undefined,
               opacity: permitAll ? "0" : undefined,
             }}
           >
-            <Collapse in={!permitAll}>
+            <Collapse in={showSelectGroups}>
               {groups ? (
                 <FormControl fullWidth>
                   <InputLabel>授权身份组</InputLabel>
