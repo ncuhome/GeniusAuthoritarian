@@ -22,7 +22,7 @@ export async function ApplyApp(
   name: string,
   callback: string,
   permitAll: boolean,
-  permitGroups?: string[]
+  permitGroups?: number[]
 ): Promise<AppNew> {
   const {
     data: { data },
