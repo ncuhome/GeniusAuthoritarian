@@ -13,6 +13,7 @@ const (
 	cErrOperationIllegal
 	cErrInsufficientPermissions
 	cErrAlreadyExist
+	cErrGroupNotFound
 )
 
 var (
@@ -75,5 +76,10 @@ var (
 		Code:       cErrAlreadyExist,
 		Msg:        "目标已存在",
 		HttpStatus: 400,
+	}
+	ErrGroupNotFound = &Msg{
+		Code:       cErrGroupNotFound,
+		Msg:        "找不到匹配身份组",
+		HttpStatus: 404,
 	}
 )

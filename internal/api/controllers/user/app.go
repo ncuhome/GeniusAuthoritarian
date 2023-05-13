@@ -12,9 +12,10 @@ import (
 
 func ApplyApp(c *gin.Context) {
 	var f struct {
-		Name      string `json:"name" form:"name" binding:"required,max=20"`
-		Callback  string `json:"callback" form:"callback" binding:"url,required"`
-		PermitAll bool   `json:"permitAll" form:"permitAll"`
+		Name         string   `json:"name" form:"name" binding:"required,max=20"`
+		Callback     string   `json:"callback" form:"callback" binding:"url,required"`
+		PermitAll    bool     `json:"permitAll" form:"permitAll"`
+		PermitGroups []string `json:"permitGroups" form:"permitGroups"`
 	}
 	if e := c.ShouldBind(&f); e != nil {
 		callback.Error(c, e, callback.ErrForm)
@@ -60,6 +61,15 @@ func ApplyApp(c *gin.Context) {
 	if e != nil {
 		callback.Error(c, e, callback.ErrDBOperation)
 		return
+	}
+
+	if !f.PermitAll && len(f.PermitGroups) != 0 {
+		appGroupSrv := service.AppGroupSrv{DB: appSrc.DB}
+
+		if e = appGroupSrv.BindForApp(newApp.ID, f.PermitGroups); e != nil {
+			callback.Error(c, e, callback.ErrDBOperation)
+			return
+		}
 	}
 
 	if e = redis.AppCode.Add(newApp.AppCode); e != nil || appSrc.Commit().Error != nil {

@@ -13,6 +13,10 @@ func (a *Group) GetAll(tx *gorm.DB) ([]Group, error) {
 	return t, tx.Model(a).Find(&t).Error
 }
 
+func (a *Group) GetByNames(tx *gorm.DB, groups ...string) *gorm.DB {
+	return tx.Model(a).Where("name IN ?", groups)
+}
+
 func (a *Group) CreateGroups(tx *gorm.DB, groups []string) ([]Group, error) {
 	var targetGroups = make([]Group, len(groups))
 	for i, groupName := range groups {
