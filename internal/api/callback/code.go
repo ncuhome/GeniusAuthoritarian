@@ -24,7 +24,7 @@ var (
 	}
 	ErrSiteNotAllow = &Msg{
 		Code:       cErrSiteNotAllow,
-		Msg:        "目标站点不在授权范围，请联系管理员添加",
+		Msg:        "回调站点不在白名单内，请联系管理员添加",
 		HttpStatus: 403,
 	}
 	ErrAppCodeNotFound = &Msg{

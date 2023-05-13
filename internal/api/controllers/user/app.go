@@ -7,6 +7,7 @@ import (
 	"github.com/ncuhome/GeniusAuthoritarian/internal/db/redis"
 	"github.com/ncuhome/GeniusAuthoritarian/internal/service"
 	"github.com/ncuhome/GeniusAuthoritarian/internal/tools"
+	"gorm.io/gorm"
 	"net/url"
 )
 
@@ -67,6 +68,10 @@ func ApplyApp(c *gin.Context) {
 		appGroupSrv := service.AppGroupSrv{DB: appSrc.DB}
 
 		if e = appGroupSrv.BindForApp(newApp.ID, f.PermitGroups); e != nil {
+			if e == gorm.ErrRecordNotFound {
+				callback.Error(c, nil, callback.ErrGroupNotFound)
+				return
+			}
 			callback.Error(c, e, callback.ErrDBOperation)
 			return
 		}
