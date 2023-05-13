@@ -21,6 +21,7 @@ const initialAppForm: AppFormState = {
   name: "",
   callback: "",
   permitAll: false,
+  permitGroups: undefined,
 
   nameError: false,
   callbackError: false,
