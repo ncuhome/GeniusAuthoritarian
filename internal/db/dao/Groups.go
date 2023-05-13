@@ -8,9 +8,8 @@ type Group struct {
 	Name string `gorm:"not null;uniqueIndex;type:varchar(10)"`
 }
 
-func (a *Group) GetAll(tx *gorm.DB) ([]Group, error) {
-	var t []Group
-	return t, tx.Model(a).Find(&t).Error
+func (a *Group) GetAll(tx *gorm.DB) *gorm.DB {
+	return tx.Model(a)
 }
 
 func (a *Group) GetByNames(tx *gorm.DB, groups ...string) *gorm.DB {

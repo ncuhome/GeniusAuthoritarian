@@ -4,6 +4,7 @@ interface AppFormState {
   name: string;
   callback: string;
   permitAll: boolean;
+  permitGroups?: string[],
 
   nameError: boolean;
   callbackError: boolean;
