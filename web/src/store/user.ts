@@ -1,10 +1,11 @@
+import { ReactNode } from "react";
 import { create } from "zustand";
 import { UserProfile } from "@api/v1/user/profile";
 import { App } from "@api/v1/user/app";
 
 type DialogProps = {
   title: string;
-  content?: string;
+  content?: ReactNode;
 };
 
 interface UserState {
@@ -22,7 +23,7 @@ interface UserState {
   setDialog: (props: DialogProps) => Promise<boolean>;
 
   setState: <T extends keyof UserState>(
-    key: T
+      key: T
   ) => (value: UserState[T]) => void;
 }
 

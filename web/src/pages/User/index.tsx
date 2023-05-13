@@ -113,9 +113,7 @@ export const User: FC = () => {
           <DialogContent>{dialog.content}</DialogContent>
         ) : null}
         <DialogActions>
-          <Button autoFocus onClick={() => dialogResolver?.(false)}>
-            取消
-          </Button>
+          <Button onClick={() => dialogResolver?.(false)}>取消</Button>
           <Button onClick={() => dialogResolver?.(true)}>确认</Button>
         </DialogActions>
       </Dialog>
