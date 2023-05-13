@@ -25,6 +25,10 @@ export async function ApplyApp(
 ): Promise<AppNew> {
   const {
     data: { data },
-  } = await apiV1User.post("app/");
+  } = await apiV1User.post("app/", {
+    name,
+    callback,
+    permitAll,
+  });
   return data;
 }
