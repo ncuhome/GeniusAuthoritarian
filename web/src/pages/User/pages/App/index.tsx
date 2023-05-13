@@ -30,6 +30,7 @@ import { useUser, useAppForm, useGroup } from "@store";
 export const App: FC = () => {
   const apps = useUser((state) => state.apps);
   const setApps = useUser((state) => state.setState("apps"));
+  const setDialog = useUser((state) => state.setDialog);
 
   const [onRequestApps, setOnRequestApps] = useState(true);
   const [loadAppsToast, closeAppsToast] = useLoadingToast();
@@ -114,6 +115,14 @@ export const App: FC = () => {
       return false;
     } else {
       setCallbackError(false);
+    }
+
+    if (!permitAll && (!permitGroups || permitGroups.length === 0)) {
+      const yes = await setDialog({
+        title: "警告",
+        content: "您没有授权任何身份组使用，你确定要继续创建吗",
+      });
+      if (!yes) return false;
     }
 
     return true;
