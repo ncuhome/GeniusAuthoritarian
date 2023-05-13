@@ -12,10 +12,10 @@ import (
 
 func ApplyApp(c *gin.Context) {
 	var f struct {
-		Name         string   `json:"name" form:"name" binding:"required,max=20"`
-		Callback     string   `json:"callback" form:"callback" binding:"url,required"`
-		PermitAll    bool     `json:"permitAll" form:"permitAll"`
-		PermitGroups []string `json:"permitGroups" form:"permitGroups"`
+		Name         string `json:"name" form:"name" binding:"required,max=20"`
+		Callback     string `json:"callback" form:"callback" binding:"url,required"`
+		PermitAll    bool   `json:"permitAll" form:"permitAll"`
+		PermitGroups []uint `json:"permitGroups" form:"permitGroups"`
 	}
 	if e := c.ShouldBind(&f); e != nil {
 		callback.Error(c, e, callback.ErrForm)

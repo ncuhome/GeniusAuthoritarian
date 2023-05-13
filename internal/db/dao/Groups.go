@@ -12,8 +12,8 @@ func (a *Group) GetAll(tx *gorm.DB) *gorm.DB {
 	return tx.Model(a)
 }
 
-func (a *Group) GetByNames(tx *gorm.DB, groups ...string) *gorm.DB {
-	return tx.Model(a).Where("name IN ?", groups)
+func (a *Group) GetByNames(tx *gorm.DB, groups ...uint) *gorm.DB {
+	return tx.Model(a).Where("id IN ?", groups)
 }
 
 func (a *Group) CreateGroups(tx *gorm.DB, groups []string) ([]Group, error) {
