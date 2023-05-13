@@ -21,7 +21,8 @@ export type AppNew = {
 export async function ApplyApp(
   name: string,
   callback: string,
-  permitAll: boolean
+  permitAll: boolean,
+  permitGroups?: string[]
 ): Promise<AppNew> {
   const {
     data: { data },
@@ -29,6 +30,7 @@ export async function ApplyApp(
     name,
     callback,
     permitAll,
+    permitGroups,
   });
   return data;
 }
