@@ -13,6 +13,12 @@ import {
   Button,
   Collapse,
   Skeleton,
+  FormControl,
+  InputLabel,
+  MenuItem,
+  Select,
+  OutlinedInput,
+  ListItemText,
 } from "@mui/material";
 
 import { GetOwnedAppList, ApplyApp } from "@api/v1/user/app";
@@ -184,7 +190,31 @@ export const App: FC = () => {
           >
             <Collapse in={!permitAll}>
               {groups ? (
-                <TextField label={"授权身份组"} fullWidth />
+                <FormControl fullWidth>
+                  <InputLabel>授权身份组</InputLabel>
+                  <Select
+                    multiple
+                    value={permitGroups || []}
+                    onChange={({ target: { value } }) =>
+                      setPermitGroups(
+                        typeof value === "string" ? value.split(",") : value
+                      )
+                    }
+                    input={<OutlinedInput label="授权身份组" />}
+                    renderValue={(selected) => selected.join(", ")}
+                  >
+                    {groups.map((group) => (
+                      <MenuItem key={group.id} value={group.name}>
+                        <Checkbox
+                          checked={
+                            (permitGroups?.indexOf(group.name) ?? -2) > -1
+                          }
+                        />
+                        <ListItemText primary={group.name} />
+                      </MenuItem>
+                    ))}
+                  </Select>
+                </FormControl>
               ) : (
                 <Skeleton variant={"rounded"} width={"100%"} height={56} />
               )}
