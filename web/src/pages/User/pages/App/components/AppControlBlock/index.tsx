@@ -12,6 +12,7 @@ import {
   TableCell,
   TableBody,
   Stack,
+  CircularProgress,
 } from "@mui/material";
 
 import { DeleteForeverOutlined } from "@mui/icons-material";
@@ -47,8 +48,16 @@ export const AppControlBlock: FC = () => {
 
   return (
     <Block title={"App"}>
-      <Paper sx={{ width: "100%", overflowX: "auto", marginTop: "1.3rem" }}>
-        <TableContainer sx={{ maxHeight: 440 }}>
+      <Paper
+        sx={{
+          width: "100%",
+          overflowX: "auto",
+          marginTop: "1.3rem",
+        }}
+      >
+        <TableContainer
+          sx={{ height: 440, display: "flex", flexDirection: "column" }}
+        >
           <Table stickyHeader aria-label="sticky table">
             <TableHead>
               <TableRow>
@@ -81,6 +90,17 @@ export const AppControlBlock: FC = () => {
               ))}
             </TableBody>
           </Table>
+          <Stack
+            sx={{
+              flexGrow: 1,
+              width: "100%",
+              display: apps ? "none" : null,
+            }}
+            justifyContent={"center"}
+            alignItems={"center"}
+          >
+            <CircularProgress />
+          </Stack>
         </TableContainer>
       </Paper>
     </Block>
