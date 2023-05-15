@@ -14,6 +14,7 @@ import {
   TableBody,
   Stack,
   CircularProgress,
+  Typography,
 } from "@mui/material";
 
 import { DeleteForeverOutlined } from "@mui/icons-material";
@@ -114,12 +115,22 @@ export const AppControlBlock: FC = () => {
             sx={{
               flexGrow: 1,
               width: "100%",
-              display: apps ? "none" : null,
+              display: apps && apps.length > 0 ? "none" : null,
             }}
             justifyContent={"center"}
             alignItems={"center"}
           >
-            <CircularProgress />
+            {apps ? (
+              <Typography
+                variant={"h5"}
+                fontWeight={"bold"}
+                sx={{ opacity: 0.5 }}
+              >
+                NO DATA
+              </Typography>
+            ) : (
+              <CircularProgress />
+            )}
           </Stack>
         </TableContainer>
       </Paper>
