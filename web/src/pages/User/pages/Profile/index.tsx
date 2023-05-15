@@ -56,6 +56,9 @@ export const Profile: FC = () => {
             variant={"outlined"}
             inputProps={{
               readOnly: true,
+              style: {
+                cursor: "default",
+              },
             }}
             fullWidth
             onClick={async () => {
