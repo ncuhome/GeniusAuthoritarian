@@ -1,6 +1,7 @@
 package dao
 
 import (
+	"github.com/ncuhome/GeniusAuthoritarian/internal/db/dto"
 	"gorm.io/gorm"
 )
 
@@ -20,6 +21,10 @@ type App struct {
 	AppSecret      string `gorm:"not null"`
 	Callback       string `gorm:"not null"`
 	PermitAllGroup bool
+}
+
+func (a *App) sqlGetForActionByUID(tx *gorm.DB) *gorm.DB {
+	return tx.Model(a).Omit("app_secret").Where("uid=?", a.UID)
 }
 
 func (a *App) Insert(tx *gorm.DB) error {
@@ -44,6 +49,12 @@ func (a *App) GetAppCode(tx *gorm.DB) ([]string, error) {
 	return t, tx.Model(a).Select("app_code").Find(&t).Error
 }
 
-func (a *App) GetByUID(tx *gorm.DB) *gorm.DB {
-	return tx.Model(a).Omit("app_secret").Where("uid=?", a.UID)
+func (a *App) GetByUIDForAction(tx *gorm.DB) ([]App, error) {
+	var t []App
+	return t, a.sqlGetForActionByUID(tx).Find(&t).Error
+}
+
+func (a *App) GetByUIDForShow(tx *gorm.DB) ([]dto.AppShow, error) {
+	var t = make([]dto.AppShow, 0)
+	return t, a.sqlGetForActionByUID(tx).Order("id DESC").Find(&t).Error
 }

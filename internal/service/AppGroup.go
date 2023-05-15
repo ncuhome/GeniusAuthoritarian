@@ -17,8 +17,7 @@ func (a AppGroupSrv) Begin() (AppGroupSrv, error) {
 }
 
 func (a AppGroupSrv) BindForApp(aid uint, groups []uint) error {
-	var groupIds []uint
-	e := (&dao.Group{}).GetByNames(a.DB, groups...).Select("id").Find(&groupIds).Error
+	groupIds, e := (&dao.Group{}).GetIdsByIds(a.DB, groups...)
 	if e != nil {
 		return e
 	} else if len(groupIds) != len(groups) {

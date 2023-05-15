@@ -1,6 +1,7 @@
 package dao
 
 import (
+	"github.com/ncuhome/GeniusAuthoritarian/internal/db/dto"
 	"gorm.io/gorm"
 )
 
@@ -37,8 +38,13 @@ func (a *UserGroups) InsertAll(tx *gorm.DB, data []UserGroups) error {
 	return tx.Model(a).Create(data).Error
 }
 
+func (a *UserGroups) GetUserGroupsForShowByUID(tx *gorm.DB) ([]dto.Group, error) {
+	var t = make([]dto.Group, 0)
+	return t, a.sqlGetUserGroupsByUID(tx).Find(&t).Error
+}
+
 func (a *UserGroups) GetUserGroupsForAppCodeByUID(tx *gorm.DB, appCode string) *gorm.DB {
-	appGroupsTx := (&AppGroup{}).GetGroups(tx, appCode).Select("groups.name")
+	appGroupsTx := (&AppGroup{}).sqlGetGroupsByAppCode(tx, appCode).Select("groups.name")
 	return a.sqlGetUserGroupsByUID(appGroupsTx)
 }
 

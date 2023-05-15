@@ -62,8 +62,8 @@ func (a UserSrv) UserProfile(uid uint) (*dto.UserProfile, error) {
 		return nil, e
 	}
 
-	profile.Groups = make([]dto.Group, 0)
-	return profile, (&dao.UserGroups{
+	profile.Groups, e = (&dao.UserGroups{
 		UID: uid,
-	}).GetUserGroupsByUID(a.DB).Find(&profile.Groups).Error
+	}).GetUserGroupsForShowByUID(a.DB)
+	return profile, e
 }

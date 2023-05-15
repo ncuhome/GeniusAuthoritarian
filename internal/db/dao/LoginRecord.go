@@ -26,7 +26,7 @@ type LoginRecord struct {
 	AID uint `gorm:"column:aid;not null;index"`
 }
 
-func (a *LoginRecord) JoinApps(tx *gorm.DB) *gorm.DB {
+func (a *LoginRecord) sqlJoinApps(tx *gorm.DB) *gorm.DB {
 	return tx.Joins("INNER JOIN apps ON apps.id=login_records.aid")
 }
 
@@ -37,7 +37,7 @@ func (a *LoginRecord) Insert(tx *gorm.DB) error {
 func (a *LoginRecord) GetByUID(tx *gorm.DB, limit int) ([]dto.LoginRecord, error) {
 	var t = make([]dto.LoginRecord, 0)
 	tx = tx.Model(a).Where(a, "UID").Select("login_records.*,IFNULL(apps.name,?) as target", global.ThisAppName)
-	tx = a.JoinApps(tx)
+	tx = a.sqlJoinApps(tx)
 	tx = tx.Order("login_records.id DESC").Limit(limit)
 	return t, tx.Find(&t).Error
 }

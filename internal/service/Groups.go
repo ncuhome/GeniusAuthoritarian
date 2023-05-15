@@ -18,13 +18,11 @@ func (a GroupsSrv) Begin() (GroupsSrv, error) {
 }
 
 func (a GroupsSrv) LoadGroups() ([]dao.Group, error) {
-	var t []dao.Group
-	return t, (&dao.Group{}).GetAll(a.DB).Find(&t).Error
+	return (&dao.Group{}).GetAll(a.DB)
 }
 
 func (a GroupsSrv) LoadGroupsForShow() ([]dto.Group, error) {
-	var t = make([]dto.Group, 0)
-	return t, (&dao.Group{}).GetAll(a.DB).Find(&t).Error
+	return (&dao.Group{}).GetAllForShow(a.DB)
 }
 
 func (a GroupsSrv) CreateGroups(groups []string) ([]dao.Group, error) {

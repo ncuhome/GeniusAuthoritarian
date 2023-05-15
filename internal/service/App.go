@@ -89,13 +89,12 @@ func (a AppSrv) NameExist(name string) (bool, error) {
 }
 
 func (a AppSrv) GetUserOwnedApp(uid uint) ([]dto.AppShowDetail, error) {
-	var t = make([]dto.AppShowDetail, 0)
-	e := (&dao.App{UID: uid}).GetByUID(a.DB).Order("id DESC").Find(&t).Error
+	apps, e := (&dao.App{UID: uid}).GetByUIDForShow(a.DB)
 	if e != nil {
 		return nil, e
 	}
 
-	if len(t) > 0 {
+	if len(apps) > 0 {
 		var groups []dto.Group
 		(&dao.AppGroup{}).GetGroups()
 

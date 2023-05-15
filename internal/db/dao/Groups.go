@@ -1,6 +1,9 @@
 package dao
 
-import "gorm.io/gorm"
+import (
+	"github.com/ncuhome/GeniusAuthoritarian/internal/db/dto"
+	"gorm.io/gorm"
+)
 
 // Group 该模型仅用于添加数据库约束，请勿用于创建含写入操作的 CRUD 接口
 type Group struct {
@@ -25,12 +28,23 @@ func (a *Group) sqlJoinFeishuGroups(tx *gorm.DB) *gorm.DB {
 	return tx.Joins("INNER JOIN feishu_groups ON feishu_groups.gid=groups.id")
 }
 
-func (a *Group) GetAll(tx *gorm.DB) *gorm.DB {
-	return tx.Model(a)
+func (a *Group) sqlGetByIds(tx *gorm.DB, ids ...uint) *gorm.DB {
+	return tx.Model(a).Where("id IN ?", ids)
 }
 
-func (a *Group) GetByNames(tx *gorm.DB, groups ...uint) *gorm.DB {
-	return tx.Model(a).Where("id IN ?", groups)
+func (a *Group) GetAll(tx *gorm.DB) ([]Group, error) {
+	var t []Group
+	return t, tx.Model(a).Find(&t).Error
+}
+
+func (a *Group) GetAllForShow(tx *gorm.DB) ([]dto.Group, error) {
+	var t = make([]dto.Group, 0)
+	return t, tx.Model(a).Find(&t).Error
+}
+
+func (a *Group) GetIdsByIds(tx *gorm.DB, ids ...uint) ([]uint, error) {
+	var t []uint
+	return t, a.sqlGetByIds(tx, ids...).Select("id").Find(&t).Error
 }
 
 func (a *Group) CreateGroups(tx *gorm.DB, groups []string) ([]Group, error) {

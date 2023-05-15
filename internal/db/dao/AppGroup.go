@@ -20,10 +20,14 @@ type AppGroup struct {
 	GID uint `gorm:"column:gid;not null;index;index:app_group_idx,unique"`
 }
 
-func (a *AppGroup) GetGroups(tx *gorm.DB, appCode string) *gorm.DB {
+func (a *AppGroup) sqlGetGroupsJoined(tx *gorm.DB) *gorm.DB {
 	groupModel := &Group{}
 	tx = tx.Model(groupModel)
 	tx = groupModel.sqlJoinAppGroups(tx)
 	tx = groupModel.sqlJoinApps(tx)
-	return tx.Where("apps.app_code=?", appCode)
+	return tx
+}
+
+func (a *AppGroup) sqlGetGroupsByAppCode(tx *gorm.DB, appCode string) *gorm.DB {
+	return a.sqlGetGroupsJoined(tx).Where("apps.app_code=?", appCode)
 }
