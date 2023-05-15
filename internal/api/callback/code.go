@@ -12,7 +12,7 @@ const (
 	cErrSignatureExpired
 	cErrOperationIllegal
 	cErrInsufficientPermissions
-	cErrAlreadyExist
+	cErrAppNameExist
 	cErrGroupNotFound
 	cErrAppNotFound
 )
@@ -73,9 +73,9 @@ var (
 		Msg:        "缺少对应身份组权限",
 		HttpStatus: 403,
 	}
-	ErrAlreadyExist = &Msg{
-		Code:       cErrAlreadyExist,
-		Msg:        "目标已存在",
+	ErrAppNameExist = &Msg{
+		Code:       cErrAppNameExist,
+		Msg:        "名称已被占用",
 		HttpStatus: 400,
 	}
 	ErrGroupNotFound = &Msg{

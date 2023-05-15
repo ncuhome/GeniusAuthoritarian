@@ -158,7 +158,7 @@ func ThirdPartyLogin(c *gin.Context) {
 		return
 	}
 
-	appInfo, e := service.App.FistAppForLogin(appCode)
+	appInfo, e := service.App.FirstAppByAppCode(appCode)
 	if e != nil {
 		callback.Error(c, e, callback.ErrDBOperation)
 		return

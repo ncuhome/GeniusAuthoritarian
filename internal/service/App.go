@@ -2,6 +2,7 @@ package service
 
 import (
 	"fmt"
+	"github.com/Mmx233/daoUtil"
 	"github.com/Mmx233/tool"
 	"github.com/ncuhome/GeniusAuthoritarian/internal/db/dao"
 	"github.com/ncuhome/GeniusAuthoritarian/internal/db/dto"
@@ -44,7 +45,11 @@ func (a AppSrv) New(uid uint, name, callback string, permitAll bool) (*dao.App, 
 	return &t, t.Insert(a.DB)
 }
 
-func (a AppSrv) Exist(appCode string) (bool, error) {
+func (a AppSrv) NameExist(name string) (bool, error) {
+	return (&dao.App{Name: name}).NameExist(a.DB)
+}
+
+func (a AppSrv) AppCodeExist(appCode string) (bool, error) {
 	list, e := redis.AppCode.Load()
 	if e != nil {
 		if e == redis.Nil {
@@ -67,14 +72,34 @@ func (a AppSrv) Exist(appCode string) (bool, error) {
 }
 
 func (a AppSrv) CheckAppCode(appCode string) (bool, error) {
-	return a.Exist(appCode)
+	return a.AppCodeExist(appCode)
 }
 
-func (a AppSrv) FistAppForLogin(appCode string) (*dao.App, error) {
+func (a AppSrv) FirstAppByAppCode(appCode string) (*dao.App, error) {
 	var t = dao.App{
 		AppCode: appCode,
 	}
 	return &t, t.FirstForLogin(a.DB)
+}
+
+func (a AppSrv) FirstAppDetailedByIDForUser(id, uid uint, opts ...daoUtil.ServiceOpt) (*dto.AppShowDetail, error) {
+	appDetailed, e := (&dao.App{
+		ID:  id,
+		UID: uid,
+	}).FirstDetailedByIdAndUID(a.DB)
+	if e != nil {
+		return nil, e
+	}
+
+	groups, e := (&dao.Group{}).GetByAppIdsRelatedForShow(a.DB, appDetailed.ID)
+	if e != nil {
+		return nil, e
+	}
+	appDetailed.Groups = make([]dto.Group, len(groups))
+	for i, group := range groups {
+		appDetailed.Groups[i] = group.Group
+	}
+	return appDetailed, nil
 }
 
 func (a AppSrv) FirstAppKeyPair(id uint) (string, string, error) {
@@ -82,10 +107,6 @@ func (a AppSrv) FirstAppKeyPair(id uint) (string, string, error) {
 		ID: id,
 	}
 	return t.AppCode, t.AppSecret, t.FirstAppKeyPairByID(a.DB)
-}
-
-func (a AppSrv) NameExist(name string) (bool, error) {
-	return (&dao.App{Name: name}).NameExist(a.DB)
 }
 
 func (a AppSrv) GetUserOwnedApp(uid uint) ([]dto.AppShowDetail, error) {
@@ -140,4 +161,13 @@ func (a AppSrv) DeleteByID(id, uid uint) error {
 		return gorm.ErrRecordNotFound
 	}
 	return nil
+}
+
+func (a AppSrv) UpdateAll(id uint, name, callback string, permitAllGroup bool) error {
+	return (&dao.App{
+		ID:             id,
+		Name:           name,
+		Callback:       callback,
+		PermitAllGroup: permitAllGroup,
+	}).UpdatesByID(a.DB)
 }

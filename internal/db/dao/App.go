@@ -40,6 +40,11 @@ func (a *App) NameExist(tx *gorm.DB) (bool, error) {
 	return t, tx.Model(a).Select("1").Where("name=?", a.Name).Limit(1).Find(&t).Error
 }
 
+func (a *App) FirstDetailedByIdAndUID(tx *gorm.DB) (*dto.AppShowDetail, error) {
+	var t dto.AppShowDetail
+	return &t, tx.Model(a).Where("id=? AND uid=?", a.ID, a.UID).First(&t).Error
+}
+
 func (a *App) FirstForLogin(tx *gorm.DB) error {
 	return tx.Model(a).Omit("app_secret").Where("app_code=?", a.AppCode).First(a).Error
 }
@@ -70,4 +75,8 @@ func (a *App) GetByUIDForShowDetailed(tx *gorm.DB) ([]dto.AppShowDetail, error) 
 
 func (a *App) DeleteByIdForUID(tx *gorm.DB) *gorm.DB {
 	return tx.Model(a).Where("id=? AND uid=?", a.ID, a.UID).Delete(a)
+}
+
+func (a *App) UpdatesByID(tx *gorm.DB) error {
+	return tx.Model(a).Select("name,callback,permit_all_group").Where("id=?", a.ID).Updates(a).Error
 }

@@ -9,7 +9,8 @@ import (
 
 func routerApp(G *gin.RouterGroup) {
 	G.Use(middlewares.LimitGroup([]string{departments.UDev}))
-	G.POST("/", controllers.ApplyApp)
 	G.GET("/", controllers.ListOwnedApp)
+	G.POST("/", controllers.ApplyApp)
+	G.PUT("/", controllers.ModifyApp)
 	G.DELETE("/", controllers.DeleteApp)
 }

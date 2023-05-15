@@ -32,3 +32,11 @@ func (a AppGroupSrv) BindForApp(aid uint, groupIds []uint) ([]dto.Group, error) 
 	}
 	return groups, a.DB.Create(&toCreate).Error
 }
+
+func (a AppGroupSrv) UnBindForApp(aid uint, groupIds []uint) error {
+	return (&dao.AppGroup{AID: aid}).DeleteByGidForApp(a.DB, groupIds...)
+}
+
+func (a AppGroupSrv) DeleteAllForApp(aid uint) error {
+	return (&dao.AppGroup{AID: aid}).DeleteByAID(a.DB)
+}

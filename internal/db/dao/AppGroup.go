@@ -31,3 +31,11 @@ func (a *AppGroup) sqlGetGroupsJoined(tx *gorm.DB) *gorm.DB {
 func (a *AppGroup) sqlGetGroupsByAppCode(tx *gorm.DB, appCode string) *gorm.DB {
 	return a.sqlGetGroupsJoined(tx).Where("apps.app_code=?", appCode)
 }
+
+func (a *AppGroup) DeleteByAID(tx *gorm.DB) error {
+	return tx.Model(a).Where("aid=?", a.AID).Delete(a).Error
+}
+
+func (a *AppGroup) DeleteByGidForApp(tx *gorm.DB, gids ...uint) error {
+	return tx.Model(a).Where("aid=? AND gid IN ?", a.AID, gids).Delete(a).Error
+}

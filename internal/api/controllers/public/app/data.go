@@ -27,7 +27,7 @@ func AppInfo(c *gin.Context) {
 			return
 		}
 
-		appInfo, e := service.App.FistAppForLogin(f.AppCode)
+		appInfo, e := service.App.FirstAppByAppCode(f.AppCode)
 		if e != nil {
 			callback.Error(c, e, callback.ErrDBOperation)
 			return
