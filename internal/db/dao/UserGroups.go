@@ -22,35 +22,41 @@ type UserGroups struct {
 	GID uint `gorm:"index;index:user_group_idx,unique;not null;column:gid"`
 }
 
+func (a *UserGroups) sqlJoinUsers(tx *gorm.DB) *gorm.DB {
+	return tx.Joins("INNER JOIN users ON users.id=user_groups.uid AND users.deleted_at IS NULL")
+}
+
+func (a *UserGroups) sqlGetUserGroupsByUID(tx *gorm.DB) *gorm.DB {
+	groupModel := &Group{}
+	tx = tx.Model(groupModel)
+	tx = groupModel.sqlJoinUserGroups(tx)
+	return tx.Where("user_groups.uid=?", a.UID)
+}
+
 func (a *UserGroups) InsertAll(tx *gorm.DB, data []UserGroups) error {
 	return tx.Model(a).Create(data).Error
 }
 
-func (a *UserGroups) GetUserGroupsByUID(tx *gorm.DB) *gorm.DB {
-	return tx.Model(&Group{}).
-		Joins("INNER JOIN user_groups ug ON ug.gid=groups.id").
-		Where("ug.uid=?", a.UID)
-}
-
 func (a *UserGroups) GetUserGroupsForAppCodeByUID(tx *gorm.DB, appCode string) *gorm.DB {
 	appGroupsTx := (&AppGroup{}).GetGroups(tx, appCode).Select("groups.name")
-	return a.GetUserGroupsByUID(appGroupsTx)
+	return a.sqlGetUserGroupsByUID(appGroupsTx)
 }
 
 // GetUserGroupsLimited 根据指定组范围获取用户所在组
 func (a *UserGroups) GetUserGroupsLimited(tx *gorm.DB, groups []string) ([]Group, error) {
 	var t []Group
-	return t, tx.Model(&Group{}).
-		Joins("INNER JOIN user_groups ug ON ug.gid=groups.id").
-		Where("ug.uid=? AND groups.name IN ?", a.UID, groups).
+	groupModel := &Group{}
+	tx = tx.Model(groupModel)
+	tx = groupModel.sqlJoinUserGroups(tx)
+	return t, tx.Where("user_groups.uid=? AND groups.name IN ?", a.UID, groups).
 		Find(&t).Error
 }
 
 func (a *UserGroups) GetAllUnfrozen(tx *gorm.DB) ([]UserGroups, error) {
 	var t []UserGroups
-	return t, tx.Model(a).
-		Joins("INNER JOIN users u ON u.id=user_groups.uid AND u.deleted_at IS NULL").
-		Find(&t).Error
+	tx = tx.Model(a)
+	tx = a.sqlJoinUsers(tx)
+	return t, tx.Find(&t).Error
 }
 
 func (a *UserGroups) DeleteByIDSlice(tx *gorm.DB, ids []uint) error {

@@ -36,9 +36,10 @@ func (a *FeishuGroups) CreateAll(tx *gorm.DB, data []FeishuGroups) error {
 
 func (a *FeishuGroups) GetGroupsByOpenIDSlice(tx *gorm.DB, openID []string) ([]Group, error) {
 	var t []Group
-	return t, tx.Model(&Group{}).
-		Joins("INNER JOIN feishu_groups fg ON fg.gid=groups.id").
-		Where("fg.open_department_id IN ?", openID).Find(&t).Error
+	groupModel := &Group{}
+	tx = tx.Model(groupModel)
+	tx = groupModel.sqlJoinFeishuGroups(tx)
+	return t, tx.Where("feishu_groups.open_department_id IN ?", openID).Find(&t).Error
 }
 
 func (a *FeishuGroups) GetByOpenIDSlice(tx *gorm.DB, openID []string) ([]FeishuGroups, error) {

@@ -8,6 +8,23 @@ type Group struct {
 	Name string `gorm:"not null;uniqueIndex;type:varchar(10)"`
 }
 
+func (a *Group) sqlJoinAppGroups(tx *gorm.DB) *gorm.DB {
+	return tx.Joins("INNER JOIN app_groups ON app_groups.gid=groups.id")
+}
+
+// sqlJoinApps join AppGroups first
+func (a *Group) sqlJoinApps(tx *gorm.DB) *gorm.DB {
+	return tx.Joins("INNER JOIN apps ON apps.id=app_groups.aid AND apps.deleted_at IS NULL")
+}
+
+func (a *Group) sqlJoinUserGroups(tx *gorm.DB) *gorm.DB {
+	return tx.Joins("INNER JOIN user_groups ON user_groups.gid=groups.id")
+}
+
+func (a *Group) sqlJoinFeishuGroups(tx *gorm.DB) *gorm.DB {
+	return tx.Joins("INNER JOIN feishu_groups ON feishu_groups.gid=groups.id")
+}
+
 func (a *Group) GetAll(tx *gorm.DB) *gorm.DB {
 	return tx.Model(a)
 }
