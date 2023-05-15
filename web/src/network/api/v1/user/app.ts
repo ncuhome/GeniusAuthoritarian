@@ -1,10 +1,12 @@
 import { apiV1User } from "@api/v1/user/base";
+import { Group } from "@api/v1/user/group";
 
 export type App = {
   id: number;
   name: string;
   appCode: string;
   permitAllGroup: boolean;
+  groups: Group[];
 };
 
 export async function GetOwnedAppList(): Promise<App[]> {

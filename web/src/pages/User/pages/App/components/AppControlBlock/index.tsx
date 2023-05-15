@@ -43,7 +43,7 @@ export const AppControlBlock: FC = () => {
 
   return (
     <Block title={"App"}>
-      <Paper sx={{ width: "100%", overflowX: "auto", marginTop: "1rem" }}>
+      <Paper sx={{ width: "100%", overflowX: "auto", marginTop: "1.3rem" }}>
         <TableContainer sx={{ maxHeight: 440 }}>
           <Table stickyHeader aria-label="sticky table">
             <TableHead>
@@ -59,6 +59,13 @@ export const AppControlBlock: FC = () => {
                 <TableRow hover role="checkbox" tabIndex={-1} key={app.id}>
                   <TableCell>{app.name}</TableCell>
                   <TableCell>{app.appCode}</TableCell>
+                  <TableCell>
+                    {app.permitAllGroup
+                      ? "ALL"
+                      : app.groups.length > 0
+                      ? app.groups.map((group) => group.name).join(",")
+                      : "NONE"}
+                  </TableCell>
                   <TableCell>-</TableCell>
                 </TableRow>
               ))}
