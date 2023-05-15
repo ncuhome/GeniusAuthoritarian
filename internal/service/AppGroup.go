@@ -2,6 +2,7 @@ package service
 
 import (
 	"github.com/ncuhome/GeniusAuthoritarian/internal/db/dao"
+	"github.com/ncuhome/GeniusAuthoritarian/internal/db/dto"
 	"gorm.io/gorm"
 )
 
@@ -16,12 +17,12 @@ func (a AppGroupSrv) Begin() (AppGroupSrv, error) {
 	return a, a.Error
 }
 
-func (a AppGroupSrv) BindForApp(aid uint, groups []uint) error {
-	groupIds, e := (&dao.Group{}).GetIdsByIds(a.DB, groups...)
+func (a AppGroupSrv) BindForApp(aid uint, groupIds []uint) ([]dto.Group, error) {
+	groups, e := (&dao.Group{}).GetByIdsForShow(a.DB, groupIds...)
 	if e != nil {
-		return e
+		return nil, e
 	} else if len(groupIds) != len(groups) {
-		return gorm.ErrRecordNotFound
+		return nil, gorm.ErrRecordNotFound
 	}
 
 	var toCreate = make([]dao.AppGroup, len(groupIds))
@@ -29,5 +30,5 @@ func (a AppGroupSrv) BindForApp(aid uint, groups []uint) error {
 		toCreate[i].GID = gid
 		toCreate[i].AID = aid
 	}
-	return a.DB.Create(&toCreate).Error
+	return groups, a.DB.Create(&toCreate).Error
 }

@@ -7,12 +7,12 @@ type AppShow struct {
 	PermitAllGroup bool   `json:"permitAllGroup"`
 }
 
-type AppNew struct {
-	AppShow
-	AppSecret string `json:"appSecret"`
-}
-
 type AppShowDetail struct {
 	AppShow
 	Groups []Group `json:"groups" gorm:"-"`
+}
+
+type AppNew struct {
+	AppShowDetail
+	AppSecret string `json:"appSecret"`
 }

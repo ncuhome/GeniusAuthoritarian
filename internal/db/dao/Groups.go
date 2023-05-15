@@ -48,9 +48,9 @@ func (a *Group) GetByAppIdsRelatedForShow(tx *gorm.DB, apps ...uint) ([]dto.Grou
 	return t, a.sqlJoinAppGroups(tx).Select("*", "app_groups.aid AS app_id").Where("app_groups.aid IN ?", apps).Order("app_groups.id").Find(&t).Error
 }
 
-func (a *Group) GetIdsByIds(tx *gorm.DB, ids ...uint) ([]uint, error) {
-	var t []uint
-	return t, a.sqlGetByIds(tx, ids...).Select("id").Find(&t).Error
+func (a *Group) GetByIdsForShow(tx *gorm.DB, ids ...uint) ([]dto.Group, error) {
+	var t = make([]dto.Group, 0)
+	return t, a.sqlGetByIds(tx, ids...).Find(&t).Error
 }
 
 func (a *Group) CreateGroups(tx *gorm.DB, groups []string) ([]Group, error) {

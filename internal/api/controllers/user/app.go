@@ -64,10 +64,11 @@ func ApplyApp(c *gin.Context) {
 		return
 	}
 
+	var groups = make([]dto.Group, 0)
 	if !f.PermitAll && len(f.PermitGroups) != 0 {
 		appGroupSrv := service.AppGroupSrv{DB: appSrc.DB}
 
-		if e = appGroupSrv.BindForApp(newApp.ID, f.PermitGroups); e != nil {
+		if groups, e = appGroupSrv.BindForApp(newApp.ID, f.PermitGroups); e != nil {
 			if e == gorm.ErrRecordNotFound {
 				callback.Error(c, nil, callback.ErrGroupNotFound)
 				return
@@ -83,11 +84,14 @@ func ApplyApp(c *gin.Context) {
 	}
 
 	callback.Success(c, dto.AppNew{
-		AppShow: dto.AppShow{
-			ID:             newApp.ID,
-			Name:           newApp.Name,
-			AppCode:        newApp.AppCode,
-			PermitAllGroup: newApp.PermitAllGroup,
+		AppShowDetail: dto.AppShowDetail{
+			AppShow: dto.AppShow{
+				ID:             newApp.ID,
+				Name:           newApp.Name,
+				AppCode:        newApp.AppCode,
+				PermitAllGroup: newApp.PermitAllGroup,
+			},
+			Groups: groups,
 		},
 		AppSecret: newApp.AppSecret,
 	})
