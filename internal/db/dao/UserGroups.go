@@ -38,6 +38,11 @@ func (a *UserGroups) InsertAll(tx *gorm.DB, data []UserGroups) error {
 	return tx.Model(a).Create(data).Error
 }
 
+func (a *UserGroups) GetUserGroupNamesByUID(tx *gorm.DB) ([]string, error) {
+	var t []string
+	return t, a.sqlGetUserGroupsByUID(tx).Select("groups.name").Find(&t).Error
+}
+
 func (a *UserGroups) GetUserGroupsForShowByUID(tx *gorm.DB) ([]dto.Group, error) {
 	var t = make([]dto.Group, 0)
 	return t, a.sqlGetUserGroupsByUID(tx).Find(&t).Error

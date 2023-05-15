@@ -17,8 +17,7 @@ func (a UserGroupsSrv) Begin() (UserGroupsSrv, error) {
 }
 
 func (a UserGroupsSrv) GetForUser(uid uint) ([]string, error) {
-	var groups []string
-	return groups, (&dao.UserGroups{UID: uid}).GetUserGroupsByUID(a.DB).Select("groups.name").Find(&groups).Error
+	return (&dao.UserGroups{UID: uid}).GetUserGroupNamesByUID(a.DB)
 }
 
 func (a UserGroupsSrv) GetAll() ([]dao.UserGroups, error) {

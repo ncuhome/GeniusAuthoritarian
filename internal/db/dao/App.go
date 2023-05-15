@@ -27,6 +27,10 @@ func (a *App) sqlGetForActionByUID(tx *gorm.DB) *gorm.DB {
 	return tx.Model(a).Omit("app_secret").Where("uid=?", a.UID)
 }
 
+func (a *App) sqlGetByUIDForShow(tx *gorm.DB) *gorm.DB {
+	return a.sqlGetForActionByUID(tx).Order("id DESC")
+}
+
 func (a *App) Insert(tx *gorm.DB) error {
 	return tx.Create(a).Error
 }
@@ -56,5 +60,10 @@ func (a *App) GetByUIDForAction(tx *gorm.DB) ([]App, error) {
 
 func (a *App) GetByUIDForShow(tx *gorm.DB) ([]dto.AppShow, error) {
 	var t = make([]dto.AppShow, 0)
-	return t, a.sqlGetForActionByUID(tx).Order("id DESC").Find(&t).Error
+	return t, a.sqlGetByUIDForShow(tx).Find(&t).Error
+}
+
+func (a *App) GetByUIDForShowDetailed(tx *gorm.DB) ([]dto.AppShowDetail, error) {
+	var t = make([]dto.AppShowDetail, 0)
+	return t, a.sqlGetByUIDForShow(tx).Find(&t).Error
 }

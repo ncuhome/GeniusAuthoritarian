@@ -42,6 +42,12 @@ func (a *Group) GetAllForShow(tx *gorm.DB) ([]dto.Group, error) {
 	return t, tx.Model(a).Find(&t).Error
 }
 
+func (a *Group) GetByAppIdsRelatedForShow(tx *gorm.DB, apps ...uint) ([]dto.GroupRelateApp, error) {
+	var t []dto.GroupRelateApp
+	tx = tx.Model(a)
+	return t, a.sqlJoinAppGroups(tx).Select("*", "app_groups.aid AS app_id").Where("app_groups.aid IN ?", apps).Find(&t).Error
+}
+
 func (a *Group) GetIdsByIds(tx *gorm.DB, ids ...uint) ([]uint, error) {
 	var t []uint
 	return t, a.sqlGetByIds(tx, ids...).Select("id").Find(&t).Error

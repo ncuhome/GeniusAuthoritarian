@@ -89,15 +89,40 @@ func (a AppSrv) NameExist(name string) (bool, error) {
 }
 
 func (a AppSrv) GetUserOwnedApp(uid uint) ([]dto.AppShowDetail, error) {
-	apps, e := (&dao.App{UID: uid}).GetByUIDForShow(a.DB)
+	apps, e := (&dao.App{UID: uid}).GetByUIDForShowDetailed(a.DB)
 	if e != nil {
 		return nil, e
 	}
 
+	// 获取各 app 授权组
 	if len(apps) > 0 {
-		var groups []dto.Group
-		(&dao.AppGroup{}).GetGroups()
+		var appIds = make([]uint, len(apps))
+		for i, app := range apps {
+			appIds[i] = app.ID
+		}
 
-		var groupCount = make(map[uint]int, len(t))
+		var groupRelatedList []dto.GroupRelateApp
+		groupRelatedList, e = (&dao.Group{}).GetByAppIdsRelatedForShow(a.DB, appIds...)
+		if e != nil {
+			return nil, e
+		}
+
+		var groupCount = make(map[uint]int, len(apps))
+		for _, groupRelated := range groupRelatedList {
+			count, _ := groupCount[groupRelated.ID]
+			groupCount[groupRelated.ID] = count + 1
+		}
+
+		for i, app := range apps {
+			length, _ := groupCount[app.ID]
+			apps[i].Groups = make([]dto.Group, length)
+		}
+
+		for i, groupRelated := range groupRelatedList {
+			apps[i].Groups[len(apps[i].Groups)-groupCount[groupRelated.ID]] = groupRelated.Group
+			groupCount[groupRelated.ID]--
+		}
 	}
+
+	return apps, nil
 }
