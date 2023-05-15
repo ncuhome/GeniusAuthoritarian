@@ -88,7 +88,10 @@ func (a AppSrv) NameExist(name string) (bool, error) {
 	return (&dao.App{Name: name}).NameExist(a.DB)
 }
 
-func (a AppSrv) GetUserOwnedApp(uid uint) ([]dto.AppShow, error) {
-	var t = make([]dto.AppShow, 0)
-	return t, (&dao.App{UID: uid}).GetByUID(a.DB).Order("id DESC").Find(&t).Error
+func (a AppSrv) GetUserOwnedApp(uid uint) ([]dto.AppShowDetail, error) {
+	var t = make([]dto.AppShowDetail, 0)
+	var model = dao.App{UID: uid}
+	appShowTx := model.GetByUID(a.DB).Order("id DESC")
+	appShowDetailTx := model.JoinGroups(appShowTx)
+	return t, appShowDetailTx.Find(&t).Error
 }

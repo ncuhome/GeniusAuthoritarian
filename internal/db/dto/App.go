@@ -11,3 +11,9 @@ type AppNew struct {
 	AppShow
 	AppSecret string `json:"appSecret"`
 }
+
+type AppShowDetail struct {
+	AppShow
+	GroupCount uint    `json:"groupCount"`
+	Groups     []Group `json:"groups" gorm:"-"`
+}

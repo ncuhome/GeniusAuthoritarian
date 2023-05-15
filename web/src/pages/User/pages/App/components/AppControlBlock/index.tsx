@@ -51,6 +51,7 @@ export const AppControlBlock: FC = () => {
                 <TableCell>名称</TableCell>
                 <TableCell>AppCode</TableCell>
                 <TableCell>授权</TableCell>
+                <TableCell></TableCell>
               </TableRow>
             </TableHead>
             <TableBody>
