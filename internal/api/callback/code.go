@@ -14,6 +14,7 @@ const (
 	cErrInsufficientPermissions
 	cErrAlreadyExist
 	cErrGroupNotFound
+	cErrAppNotFound
 )
 
 var (
@@ -80,6 +81,11 @@ var (
 	ErrGroupNotFound = &Msg{
 		Code:       cErrGroupNotFound,
 		Msg:        "找不到匹配身份组",
+		HttpStatus: 404,
+	}
+	ErrAppNotFound = &Msg{
+		Code:       cErrAppNotFound,
+		Msg:        "应用不存在",
 		HttpStatus: 404,
 	}
 )

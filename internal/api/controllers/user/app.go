@@ -108,3 +108,38 @@ func ListOwnedApp(c *gin.Context) {
 
 	callback.Success(c, apps)
 }
+
+func DeleteApp(c *gin.Context) {
+	var f struct {
+		ID uint `json:"id" form:"id" binding:"required"`
+	}
+	if e := c.ShouldBind(&f); e != nil {
+		callback.Error(c, e, callback.ErrForm)
+		return
+	}
+
+	uid := tools.GetUserInfo(c).ID
+
+	appSrv, e := service.App.Begin()
+	if e != nil {
+		callback.Error(c, e, callback.ErrDBOperation)
+		return
+	}
+	defer appSrv.Rollback()
+
+	if e = appSrv.DeleteByID(f.ID, uid); e != nil {
+		if e == gorm.ErrRecordNotFound {
+			callback.Error(c, nil, callback.ErrAppNotFound)
+			return
+		}
+		callback.Error(c, e, callback.ErrDBOperation)
+		return
+	}
+
+	if e = appSrv.Commit().Error; e != nil {
+		callback.Error(c, e, callback.ErrDBOperation)
+		return
+	}
+
+	callback.Default(c)
+}

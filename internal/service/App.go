@@ -129,3 +129,15 @@ func (a AppSrv) GetUserOwnedApp(uid uint) ([]dto.AppShowDetail, error) {
 
 	return apps, nil
 }
+
+func (a AppSrv) DeleteByID(id, uid uint) error {
+	result := (&dao.App{ID: id, UID: uid}).DeleteByIdForUID(a.DB)
+	if result.Error != nil {
+		return result.Error
+	}
+
+	if result.RowsAffected == 0 {
+		return gorm.ErrRecordNotFound
+	}
+	return nil
+}

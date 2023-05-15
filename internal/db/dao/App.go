@@ -67,3 +67,7 @@ func (a *App) GetByUIDForShowDetailed(tx *gorm.DB) ([]dto.AppShowDetail, error) 
 	var t = make([]dto.AppShowDetail, 0)
 	return t, a.sqlGetByUIDForShow(tx).Find(&t).Error
 }
+
+func (a *App) DeleteByIdForUID(tx *gorm.DB) *gorm.DB {
+	return tx.Model(a).Where("id=? AND uid=?", a.ID, a.UID).Delete(a)
+}
