@@ -109,18 +109,21 @@ func (a AppSrv) GetUserOwnedApp(uid uint) ([]dto.AppShowDetail, error) {
 
 		var groupCount = make(map[uint]int, len(apps))
 		for _, groupRelated := range groupRelatedList {
-			count, _ := groupCount[groupRelated.ID]
-			groupCount[groupRelated.ID] = count + 1
+			count, _ := groupCount[groupRelated.AppID]
+			groupCount[groupRelated.AppID] = count + 1
 		}
 
+		var AppIdToAppIndexMap = make(map[uint]int, len(apps))
 		for i, app := range apps {
+			AppIdToAppIndexMap[app.ID] = i
 			length, _ := groupCount[app.ID]
 			apps[i].Groups = make([]dto.Group, length)
 		}
 
-		for i, groupRelated := range groupRelatedList {
-			apps[i].Groups[len(apps[i].Groups)-groupCount[groupRelated.ID]] = groupRelated.Group
-			groupCount[groupRelated.ID]--
+		for _, groupRelated := range groupRelatedList {
+			appIndex := AppIdToAppIndexMap[groupRelated.AppID]
+			apps[appIndex].Groups[len(apps[appIndex].Groups)-groupCount[groupRelated.AppID]] = groupRelated.Group
+			groupCount[groupRelated.AppID]--
 		}
 	}
 
