@@ -94,10 +94,9 @@ export const AppFormBlock: FC = () => {
       setNameError(false);
     }
 
-    if (!callback || callback.indexOf("https://") !== 0) {
+    if (callback.length <= 8) {
       setCallbackError(true);
-      if (!callback) toast.error("回调地址不能为空");
-      else toast.error("回调地址仅支持 https 协议");
+      toast.error("回调地址不能为空");
       callbackInput.current!.focus();
       return false;
     } else {
@@ -175,7 +174,10 @@ export const AppFormBlock: FC = () => {
             inputRef={callbackInput}
             color={callbackError ? "error" : "primary"}
             value={callback}
-            onChange={(e) => setCallback(e.target.value)}
+            onChange={(e) => {
+              if (e.target.value.indexOf("https://") !== 0) return;
+              setCallback(e.target.value);
+            }}
           />
         </Grid>
         <Grid item xs={12}>

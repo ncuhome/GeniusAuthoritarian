@@ -20,7 +20,7 @@ interface AppFormActions {
 
 const initialAppForm: AppFormState = {
   name: "",
-  callback: "",
+  callback: "https://",
   permitAll: false,
   permitGroups: undefined,
 
