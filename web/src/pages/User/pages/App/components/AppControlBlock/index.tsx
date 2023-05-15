@@ -76,7 +76,7 @@ export const AppControlBlock: FC = () => {
                     {app.permitAllGroup
                       ? "ALL"
                       : app.groups.length > 0
-                      ? app.groups.map((group) => group.name).join(",")
+                      ? app.groups.map((group) => group.name).join("，")
                       : "NONE"}
                   </TableCell>
                   <TableCell>
