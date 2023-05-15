@@ -1,5 +1,6 @@
 import { FC, useState } from "react";
 import { useLoadingToast, useMount, useInterval } from "@hooks";
+import toast from "react-hot-toast";
 
 import { Block } from "@/pages/User/components";
 import { TipIconButton } from "@components";
@@ -17,13 +18,14 @@ import {
 
 import { DeleteForeverOutlined } from "@mui/icons-material";
 
-import { GetOwnedAppList } from "@api/v1/user/app";
+import { GetOwnedAppList, DeleteApp, App } from "@api/v1/user/app";
 
 import { useUser } from "@store";
 
 export const AppControlBlock: FC = () => {
   const apps = useUser((state) => state.apps);
   const setApps = useUser((state) => state.setState("apps"));
+  const setDialog = useUser((state) => state.setDialog);
 
   const [onRequestApps, setOnRequestApps] = useState(true);
   const [loadAppsToast, closeAppsToast] = useLoadingToast();
@@ -38,6 +40,21 @@ export const AppControlBlock: FC = () => {
       if (msg) loadAppsToast(msg as string);
     }
     setOnRequestApps(false);
+  }
+
+  async function handleDeleteApp(app: App) {
+    try {
+      const ok = await setDialog({
+        title: "确认删除",
+        content: `正在删除名称为 ${app.name} ，appCode 为 ${app.appCode} 的应用`,
+      });
+      if (!ok) return;
+      await DeleteApp(app.id);
+      setApps((apps || []).filter((a) => a.id !== app.id));
+      toast.success("删除成功");
+    } catch ({ msg }) {
+      if (msg) toast.error(msg as string);
+    }
   }
 
   useInterval(loadApps, !apps && !onRequestApps ? 2000 : null);
@@ -81,7 +98,10 @@ export const AppControlBlock: FC = () => {
                   </TableCell>
                   <TableCell>
                     <Stack flexDirection={"row"}>
-                      <TipIconButton title={"删除"}>
+                      <TipIconButton
+                        title={"删除"}
+                        onClick={() => handleDeleteApp(app)}
+                      >
                         <DeleteForeverOutlined />
                       </TipIconButton>
                     </Stack>
