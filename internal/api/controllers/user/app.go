@@ -98,6 +98,7 @@ func ApplyApp(c *gin.Context) {
 				ID:             newApp.ID,
 				Name:           newApp.Name,
 				AppCode:        newApp.AppCode,
+				Callback:       newApp.Callback,
 				PermitAllGroup: newApp.PermitAllGroup,
 			},
 			Groups: groups,
