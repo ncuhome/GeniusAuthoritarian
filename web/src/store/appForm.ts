@@ -1,10 +1,11 @@
 import { create } from "zustand";
+import { Group } from "@api/v1/user/group";
 
 interface AppFormState {
   name: string;
   callback: string;
   permitAll: boolean;
-  permitGroups?: string[],
+  permitGroups?: Group[];
 
   nameError: boolean;
   callbackError: boolean;

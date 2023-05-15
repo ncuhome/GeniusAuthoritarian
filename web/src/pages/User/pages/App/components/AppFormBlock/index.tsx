@@ -1,5 +1,5 @@
 import { FC, useEffect, useRef, useState } from "react";
-import { useLoadingToast, useMount, useInterval, useTimeout } from "@hooks";
+import { useTimeout } from "@hooks";
 import toast from "react-hot-toast";
 
 import {
@@ -118,7 +118,12 @@ export const AppFormBlock: FC = () => {
   async function createApp() {
     if (!(await checkForm())) return;
     try {
-      const data = await ApplyApp(name, callback, permitAll);
+      const data = await ApplyApp(
+        name,
+        callback,
+        permitAll,
+        permitGroups?.map((group) => group.id)
+      );
       setApps([data, ...apps!]);
       resetForm();
       setDialog({
@@ -202,23 +207,31 @@ export const AppFormBlock: FC = () => {
                 <InputLabel>授权身份组</InputLabel>
                 <Select
                   multiple
-                  value={permitGroups || []}
-                  onChange={({ target: { value } }) =>
-                    setPermitGroups(
-                      typeof value === "string" ? value.split(",") : value
-                    )
-                  }
+                  value={permitGroups?.map((group) => group.name) || []}
                   input={<OutlinedInput label="授权身份组" />}
                   renderValue={(selected) => selected.join(", ")}
                 >
-                  {groups.map((group) => (
-                    <MenuItem key={group.id} value={group.name}>
-                      <Checkbox
-                        checked={(permitGroups?.indexOf(group.name) ?? -2) > -1}
-                      />
-                      <ListItemText primary={group.name} />
-                    </MenuItem>
-                  ))}
+                  {groups.map((group) => {
+                    const checked = (permitGroups?.indexOf(group) ?? -2) > -1;
+                    return (
+                      <MenuItem
+                        key={group.id}
+                        value={group.name}
+                        onClick={() => {
+                          if (checked) {
+                            setPermitGroups(
+                              permitGroups?.filter((g) => g.id !== group.id)
+                            );
+                          } else {
+                            setPermitGroups([...(permitGroups ?? []), group]);
+                          }
+                        }}
+                      >
+                        <Checkbox checked={checked} />
+                        <ListItemText primary={group.name} />
+                      </MenuItem>
+                    );
+                  })}
                 </Select>
               </FormControl>
             ) : (
