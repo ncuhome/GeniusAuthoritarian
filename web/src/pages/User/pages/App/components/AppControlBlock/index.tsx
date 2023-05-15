@@ -2,6 +2,7 @@ import { FC, useState } from "react";
 import { useLoadingToast, useMount, useInterval } from "@hooks";
 
 import { Block } from "@/pages/User/components";
+import { TipIconButton } from "@components";
 import {
   Paper,
   TableContainer,
@@ -10,7 +11,10 @@ import {
   TableRow,
   TableCell,
   TableBody,
+  Stack,
 } from "@mui/material";
+
+import { DeleteForeverOutlined } from "@mui/icons-material";
 
 import { GetOwnedAppList } from "@api/v1/user/app";
 
@@ -66,7 +70,13 @@ export const AppControlBlock: FC = () => {
                       ? app.groups.map((group) => group.name).join(",")
                       : "NONE"}
                   </TableCell>
-                  <TableCell>-</TableCell>
+                  <TableCell>
+                    <Stack flexDirection={"row"}>
+                      <TipIconButton title={"删除"}>
+                        <DeleteForeverOutlined />
+                      </TipIconButton>
+                    </Stack>
+                  </TableCell>
                 </TableRow>
               ))}
             </TableBody>
