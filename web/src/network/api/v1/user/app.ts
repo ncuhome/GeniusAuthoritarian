@@ -36,3 +36,11 @@ export async function ApplyApp(
   });
   return data;
 }
+
+export async function DeleteApp(id: number): Promise<void> {
+  await apiV1User.delete("app/", {
+    params: {
+      id,
+    },
+  });
+}
