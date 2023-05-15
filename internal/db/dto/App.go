@@ -4,6 +4,7 @@ type AppShow struct {
 	ID             uint   `json:"id"`
 	Name           string `json:"name"`
 	AppCode        string `json:"appCode"`
+	Callback       string `json:"callback"`
 	PermitAllGroup bool   `json:"permitAllGroup"`
 }
 
