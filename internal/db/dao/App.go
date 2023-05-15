@@ -47,7 +47,3 @@ func (a *App) GetAppCode(tx *gorm.DB) ([]string, error) {
 func (a *App) GetByUID(tx *gorm.DB) *gorm.DB {
 	return tx.Model(a).Omit("app_secret").Where("uid=?", a.UID)
 }
-
-func (a *App) JoinGroups(tx *gorm.DB) *gorm.DB {
-	return tx.Joins("INNER JOIN app_groups ON app_groups.aid=apps.id")
-}

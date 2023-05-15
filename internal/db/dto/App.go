@@ -14,6 +14,5 @@ type AppNew struct {
 
 type AppShowDetail struct {
 	AppShow
-	GroupCount uint    `json:"groupCount"`
-	Groups     []Group `json:"groups" gorm:"-"`
+	Groups []Group `json:"groups" gorm:"-"`
 }

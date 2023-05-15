@@ -33,7 +33,8 @@ func (a *UserGroups) GetUserGroupsByUID(tx *gorm.DB) *gorm.DB {
 }
 
 func (a *UserGroups) GetUserGroupsForAppCodeByUID(tx *gorm.DB, appCode string) *gorm.DB {
-	return a.GetUserGroupsByUID((&AppGroup{}).GetGroups(tx, appCode))
+	appGroupsTx := (&AppGroup{}).GetGroups(tx, appCode).Select("groups.name")
+	return a.GetUserGroupsByUID(appGroupsTx)
 }
 
 // GetUserGroupsLimited 根据指定组范围获取用户所在组
