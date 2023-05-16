@@ -122,7 +122,10 @@ export const AppForm: FC<Props> = ({
   }
 
     useTimeout(() => setShowSelectGroups(false), permitAll ? 300 : null);
-    useInterval(loadGroups, !onRequestGroups && !permitAll ? 2000 : null);
+    useInterval(
+      loadGroups,
+      !groups && !onRequestGroups && !permitAll ? 2000 : null
+    );
     useEffect(() => {
       if (!permitAll) {
         setShowSelectGroups(true);
