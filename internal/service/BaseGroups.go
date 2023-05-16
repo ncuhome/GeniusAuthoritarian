@@ -6,25 +6,25 @@ import (
 	"gorm.io/gorm"
 )
 
-var Groups = GroupsSrv{dao.DB}
+var BaseGroups = BaseGroupsSrv{dao.DB}
 
-type GroupsSrv struct {
+type BaseGroupsSrv struct {
 	*gorm.DB
 }
 
-func (a GroupsSrv) Begin() (GroupsSrv, error) {
+func (a BaseGroupsSrv) Begin() (BaseGroupsSrv, error) {
 	a.DB = a.DB.Begin()
 	return a, a.Error
 }
 
-func (a GroupsSrv) LoadGroups() ([]dao.BaseGroup, error) {
+func (a BaseGroupsSrv) LoadGroups() ([]dao.BaseGroup, error) {
 	return (&dao.BaseGroup{}).GetAll(a.DB)
 }
 
-func (a GroupsSrv) LoadGroupsForShow() ([]dto.Group, error) {
+func (a BaseGroupsSrv) LoadGroupsForShow() ([]dto.Group, error) {
 	return (&dao.BaseGroup{}).GetAllForShow(a.DB)
 }
 
-func (a GroupsSrv) CreateGroups(groups []string) ([]dao.BaseGroup, error) {
+func (a BaseGroupsSrv) CreateGroups(groups []string) ([]dao.BaseGroup, error) {
 	return (&dao.BaseGroup{}).CreateGroups(a.DB, groups)
 }
