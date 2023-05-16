@@ -225,7 +225,7 @@ export const AppControlBlock: FC = () => {
       </Paper>
 
       <Dialog open={Boolean(onModifyApp)} onClose={() => setOnModifyApp(null)}>
-        <DialogTitle>Subscribe</DialogTitle>
+        <DialogTitle>修改 App</DialogTitle>
         <DialogContent>
           <AppForm
             useForm={useAppModifyForm}
