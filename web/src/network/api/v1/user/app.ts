@@ -45,3 +45,19 @@ export async function DeleteApp(id: number): Promise<void> {
     },
   });
 }
+
+export async function ModifyApp(
+  id: number,
+  name: string,
+  callback: string,
+  permitAll: boolean,
+  permitGroups?: number[]
+): Promise<void> {
+  await apiV1User.put("app/", {
+    id,
+    name,
+    callback,
+    permitAll,
+    permitGroups,
+  });
+}
