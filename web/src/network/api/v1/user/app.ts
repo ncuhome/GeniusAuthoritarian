@@ -5,6 +5,7 @@ export type App = {
   id: number;
   name: string;
   appCode: string;
+  callback: string;
   permitAllGroup: boolean;
   groups: Group[];
 };

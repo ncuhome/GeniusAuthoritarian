@@ -82,6 +82,7 @@ export const AppControlBlock: FC = () => {
                 <TableCell>名称</TableCell>
                 <TableCell>AppCode</TableCell>
                 <TableCell>授权</TableCell>
+                <TableCell>回调</TableCell>
                 <TableCell></TableCell>
               </TableRow>
             </TableHead>
@@ -97,6 +98,7 @@ export const AppControlBlock: FC = () => {
                       ? app.groups.map((group) => group.name).join("，")
                       : "NONE"}
                   </TableCell>
+                  <TableCell>{app.callback}</TableCell>
                   <TableCell>
                     <Stack flexDirection={"row"}>
                       <TipIconButton
