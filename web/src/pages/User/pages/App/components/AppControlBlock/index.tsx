@@ -4,7 +4,7 @@ import toast from "react-hot-toast";
 
 import { AppForm } from "@/pages/User/pages/App/components";
 import { Block } from "@/pages/User/components";
-import { TipIconButton } from "@components";
+import { AppTableRow } from "./components";
 import {
   Paper,
   TableContainer,
@@ -19,12 +19,7 @@ import {
   Dialog,
   DialogTitle,
   DialogContent,
-  Divider,
 } from "@mui/material";
-import {
-  DeleteForeverOutlined,
-  DriveFileRenameOutlineOutlined,
-} from "@mui/icons-material";
 
 import { GetOwnedAppList, DeleteApp, ModifyApp, App } from "@api/v1/user/app";
 
@@ -90,36 +85,36 @@ export const AppControlBlock: FC = () => {
 
   async function handleModifyApp() {
     if (!onModifyApp) return;
-      setModifyingApp(true);
-      try {
-        console.log(name);
-        await ModifyApp(
-          onModifyApp.id,
-          name,
-          callback,
-          permitAll,
-          permitGroups?.map((g) => g.id)
-        );
-        toast.success("修改成功");
-        setApps(
-          (apps || []).map((app) =>
-            app.id === onModifyApp.id
-              ? ({
-                  id: onModifyApp.id,
-                  name: name,
-                  appCode: onModifyApp.appCode,
-                  callback: callback,
-                  permitAllGroup: permitAll,
-                  groups: permitGroups || [],
-                } as App)
-              : app
-          )
-        );
-        setOnModifyApp(null);
-      } catch ({ msg }) {
-        if (msg) toast.error(msg as string);
-      }
-      setModifyingApp(false);
+    setModifyingApp(true);
+    try {
+      console.log(name);
+      await ModifyApp(
+        onModifyApp.id,
+        name,
+        callback,
+        permitAll,
+        permitGroups?.map((g) => g.id)
+      );
+      toast.success("修改成功");
+      setApps(
+        (apps || []).map((app) =>
+          app.id === onModifyApp.id
+            ? ({
+                id: onModifyApp.id,
+                name: name,
+                appCode: onModifyApp.appCode,
+                callback: callback,
+                permitAllGroup: permitAll,
+                groups: permitGroups || [],
+              } as App)
+            : app
+        )
+      );
+      setOnModifyApp(null);
+    } catch ({ msg }) {
+      if (msg) toast.error(msg as string);
+    }
+    setModifyingApp(false);
   }
 
   function showModifyAppDialog(app: App) {
@@ -160,46 +155,12 @@ export const AppControlBlock: FC = () => {
             </TableHead>
             <TableBody>
               {(apps || []).map((app) => (
-                <TableRow hover role="checkbox" tabIndex={-1} key={app.id}>
-                  <TableCell>{app.name}</TableCell>
-                  <TableCell>{app.appCode}</TableCell>
-                  <TableCell>
-                    {app.permitAllGroup
-                      ? "ALL"
-                      : app.groups.length > 0
-                      ? app.groups.map((group) => group.name).join("，")
-                      : "NONE"}
-                  </TableCell>
-                  <TableCell>{app.callback}</TableCell>
-                  <TableCell>
-                    <Stack
-                      flexDirection={"row"}
-                      alignItems={"center"}
-                      divider={
-                        <Divider
-                          orientation="vertical"
-                          sx={{
-                            height: "15px",
-                            mx: "3px",
-                          }}
-                        />
-                      }
-                    >
-                      <TipIconButton
-                        title={"编辑"}
-                        onClick={() => showModifyAppDialog(app)}
-                      >
-                        <DriveFileRenameOutlineOutlined />
-                      </TipIconButton>
-                      <TipIconButton
-                        title={"删除"}
-                        onClick={() => handleDeleteApp(app)}
-                      >
-                        <DeleteForeverOutlined />
-                      </TipIconButton>
-                    </Stack>
-                  </TableCell>
-                </TableRow>
+                <AppTableRow
+                  key={app.id}
+                  app={app}
+                  handleModify={showModifyAppDialog}
+                  handleDelete={handleDeleteApp}
+                />
               ))}
             </TableBody>
           </Table>
