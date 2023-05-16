@@ -37,9 +37,11 @@ export const AppFormBlock: FC = () => {
       setApps([data, ...apps!]);
       resetForm();
       setDialog({
-        title: "密文仅在此显示一次，请妥善保管",
+        title: "AppSecret 仅显示一次，请妥善保管",
         content: (
           <Stack>
+            <Typography>AppCode: </Typography>
+            <pre>{data.appCode}</pre>
             <Typography>AppSecret:</Typography>
             <Box
               sx={{
