@@ -105,6 +105,7 @@ export const AppControlBlock: FC = () => {
             ? ({
                 id: onModifyApp.id,
                 name: name,
+                appCode: onModifyApp.appCode,
                 callback: callback,
                 permitAllGroup: permitAll,
                 groups: permitGroups || [],
