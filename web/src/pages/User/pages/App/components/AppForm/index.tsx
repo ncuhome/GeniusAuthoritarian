@@ -3,6 +3,7 @@ import { useTimeout, useLoadingToast, useInterval } from "@hooks";
 import toast from "react-hot-toast";
 
 import { SelectPermitGroup } from "@/pages/User/pages/App/components";
+import { LoadingButton } from "@mui/lab";
 import {
   Button,
   Checkbox,
@@ -21,10 +22,13 @@ import { useGroup, useUser, UseAppForm } from "@store";
 
 interface Props {
   useForm: UseAppForm;
+
   submitText: string;
   onSubmit: () => void;
   cancelText: string;
   onCancel: () => void;
+
+  loading?: boolean;
 }
 
 export const AppForm: FC<Props> = ({
@@ -33,6 +37,7 @@ export const AppForm: FC<Props> = ({
   onSubmit,
   cancelText,
   onCancel,
+  loading,
 }) => {
   const setDialog = useUser((state) => state.setDialog);
 
@@ -215,9 +220,13 @@ export const AppForm: FC<Props> = ({
         <Button variant={"outlined"} onClick={onCancel}>
           {cancelText}
         </Button>
-        <Button variant={"contained"} onClick={handleSubmit}>
+        <LoadingButton
+          variant={"contained"}
+          loading={loading}
+          onClick={handleSubmit}
+        >
           {submitText}
-        </Button>
+        </LoadingButton>
       </Stack>
     </>
   );

@@ -1,4 +1,4 @@
-import { FC } from "react";
+import { FC, useState } from "react";
 import toast from "react-hot-toast";
 
 import { AppForm } from "@/pages/User/pages/App/components";
@@ -26,7 +26,10 @@ export const AppFormBlock: FC = () => {
   );
   const resetForm = useAppForm((state) => state.reset);
 
+  const [onCreateApp, setOnCreateApp] = useState(false);
+
   async function createApp() {
+    setOnCreateApp(true);
     try {
       const data = await ApplyApp(
         name,
@@ -56,6 +59,7 @@ export const AppFormBlock: FC = () => {
     } catch ({ msg }) {
       if (msg) toast.error(msg as string);
     }
+    setOnCreateApp(false);
   }
 
   return (
@@ -66,6 +70,7 @@ export const AppFormBlock: FC = () => {
         onSubmit={createApp}
         cancelText={"重置"}
         onCancel={resetForm}
+        loading={onCreateApp}
       />
     </Block>
   );
