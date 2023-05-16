@@ -87,7 +87,6 @@ export const AppControlBlock: FC = () => {
     if (!onModifyApp) return;
     setModifyingApp(true);
     try {
-      console.log(name);
       await ModifyApp(
         onModifyApp.id,
         name,
