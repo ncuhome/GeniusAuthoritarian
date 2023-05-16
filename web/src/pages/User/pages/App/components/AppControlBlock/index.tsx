@@ -59,6 +59,7 @@ export const AppControlBlock: FC = () => {
       shallow
     );
   const [onModifyApp, setOnModifyApp] = useState<App | null>(null);
+  const [modifyingApp, setModifyingApp] = useState(false);
 
   async function loadApps() {
     setOnRequestApps(true);
@@ -89,34 +90,36 @@ export const AppControlBlock: FC = () => {
 
   async function handleModifyApp() {
     if (!onModifyApp) return;
-    try {
-      console.log(name);
-      await ModifyApp(
-        onModifyApp.id,
-        name,
-        callback,
-        permitAll,
-        permitGroups?.map((g) => g.id)
-      );
-      toast.success("修改成功");
-      setApps(
-        (apps || []).map((app) =>
-          app.id === onModifyApp.id
-            ? ({
-                id: onModifyApp.id,
-                name: name,
-                appCode: onModifyApp.appCode,
-                callback: callback,
-                permitAllGroup: permitAll,
-                groups: permitGroups || [],
-              } as App)
-            : app
-        )
-      );
-      setOnModifyApp(null);
-    } catch ({ msg }) {
-      if (msg) toast.error(msg as string);
-    }
+      setModifyingApp(true);
+      try {
+        console.log(name);
+        await ModifyApp(
+          onModifyApp.id,
+          name,
+          callback,
+          permitAll,
+          permitGroups?.map((g) => g.id)
+        );
+        toast.success("修改成功");
+        setApps(
+          (apps || []).map((app) =>
+            app.id === onModifyApp.id
+              ? ({
+                  id: onModifyApp.id,
+                  name: name,
+                  appCode: onModifyApp.appCode,
+                  callback: callback,
+                  permitAllGroup: permitAll,
+                  groups: permitGroups || [],
+                } as App)
+              : app
+          )
+        );
+        setOnModifyApp(null);
+      } catch ({ msg }) {
+        if (msg) toast.error(msg as string);
+      }
+      setModifyingApp(false);
   }
 
   function showModifyAppDialog(app: App) {
@@ -229,6 +232,7 @@ export const AppControlBlock: FC = () => {
         <DialogContent>
           <AppForm
             useForm={useAppModifyForm}
+            loading={modifyingApp}
             submitText={"确认"}
             onSubmit={handleModifyApp}
             cancelText={"取消"}
