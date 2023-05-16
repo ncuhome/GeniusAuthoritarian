@@ -1,12 +1,12 @@
 import { FC } from "react";
 
-import { AppFormBlock, AppControlBlock } from "./components";
+import { NewAppBlock, AppControlBlock } from "./components";
 import { Container } from "@mui/material";
 
 export const App: FC = () => {
   return (
     <Container>
-      <AppFormBlock />
+      <NewAppBlock />
       <AppControlBlock />
     </Container>
   );

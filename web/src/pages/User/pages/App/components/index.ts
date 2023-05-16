@@ -1,4 +1,4 @@
-export * from "./AppFormBlock";
+export * from "./NewAppBlock";
 
 export * from "./AppControlBlock";
 

@@ -10,7 +10,7 @@ import { ApplyApp } from "@api/v1/user/app";
 import { shallow } from "zustand/shallow";
 import { useUser, useAppForm } from "@store";
 
-export const AppFormBlock: FC = () => {
+export const NewAppBlock: FC = () => {
   const apps = useUser((state) => state.apps);
   const setApps = useUser((state) => state.setState("apps"));
   const setDialog = useUser((state) => state.setDialog);
@@ -75,4 +75,4 @@ export const AppFormBlock: FC = () => {
     </Block>
   );
 };
-export default AppFormBlock;
+export default NewAppBlock;
