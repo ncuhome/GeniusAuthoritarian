@@ -44,13 +44,13 @@ func (a UserSrv) UserInfo(phone string) (*dao.User, error) {
 	return &user, user.FirstByPhone(a.DB)
 }
 
-func (a UserSrv) UserInfoForAppCode(phone, appCode string) (*dao.User, []dao.Group, error) {
+func (a UserSrv) UserInfoForAppCode(phone, appCode string) (*dao.User, []dao.BaseGroup, error) {
 	user, e := a.UserInfo(phone)
 	if e != nil {
 		return nil, nil, e
 	}
 
-	var groups []dao.Group
+	var groups []dao.BaseGroup
 	return user, groups, (&dao.UserGroups{
 		UID: user.ID,
 	}).GetUserGroupsForAppCodeByUID(a.DB, appCode).Find(&groups).Error

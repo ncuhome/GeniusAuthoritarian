@@ -74,7 +74,7 @@ func loadUserPhone(c *gin.Context, code string) string {
 }
 
 // 根据数据完成请求响应
-func callThirdPartyLoginResult(c *gin.Context, user *dao.User, appInfo *dao.App, groups []dao.Group, ip string) {
+func callThirdPartyLoginResult(c *gin.Context, user *dao.User, appInfo *dao.App, groups []dao.BaseGroup, ip string) {
 	var groupSlice = make([]string, len(groups))
 	for i, g := range groups {
 		groupSlice[i] = g.Name

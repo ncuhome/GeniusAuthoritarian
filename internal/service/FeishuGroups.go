@@ -33,6 +33,6 @@ func (a FeishuGroupsSrv) CreateAll(data []dao.FeishuGroups) error {
 	return (&dao.FeishuGroups{}).CreateAll(a.DB, data)
 }
 
-func (a FeishuGroupsSrv) Search(openID []string) ([]dao.Group, error) {
+func (a FeishuGroupsSrv) Search(openID []string) ([]dao.BaseGroup, error) {
 	return (&dao.FeishuGroups{}).GetGroupsByOpenIDSlice(a.DB, openID)
 }

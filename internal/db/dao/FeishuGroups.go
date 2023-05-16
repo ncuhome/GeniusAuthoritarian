@@ -6,7 +6,7 @@ import (
 
 type FeishuGroupsWithForeignKey struct {
 	FeishuGroups `gorm:"embedded"`
-	Group        Group `gorm:"-;foreignKey:GID;constraint:OnDelete:CASCADE"`
+	Group        BaseGroup `gorm:"-;foreignKey:GID;constraint:OnDelete:CASCADE"`
 }
 
 func (a *FeishuGroupsWithForeignKey) TableName() string {
@@ -17,7 +17,7 @@ type FeishuGroups struct {
 	ID               uint   `gorm:"primarykey"`
 	Name             string `gorm:"not null;unique"`
 	OpenDepartmentId string `gorm:"not null;uniqueInde;type:varchar(255)"`
-	// Group.ID
+	// BaseGroup.ID
 	GID uint `gorm:"uniqueIndex;not null;column:gid"`
 }
 
@@ -34,9 +34,9 @@ func (a *FeishuGroups) CreateAll(tx *gorm.DB, data []FeishuGroups) error {
 	return tx.Model(a).Create(data).Error
 }
 
-func (a *FeishuGroups) GetGroupsByOpenIDSlice(tx *gorm.DB, openID []string) ([]Group, error) {
-	var t []Group
-	groupModel := &Group{}
+func (a *FeishuGroups) GetGroupsByOpenIDSlice(tx *gorm.DB, openID []string) ([]BaseGroup, error) {
+	var t []BaseGroup
+	groupModel := &BaseGroup{}
 	tx = tx.Model(groupModel)
 	tx = groupModel.sqlJoinFeishuGroups(tx)
 	return t, tx.Where("feishu_groups.open_department_id IN ?", openID).Find(&t).Error

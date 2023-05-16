@@ -23,6 +23,20 @@ type App struct {
 	PermitAllGroup bool
 }
 
+func (a *App) sqlJoinAppGroups(tx *gorm.DB) *gorm.DB {
+	return tx.Joins("INNER JOIN app_groups ON app_groups.aid=apps.id")
+}
+
+// join AppGroups first
+func (a *App) sqlJoinGroups(tx *gorm.DB) *gorm.DB {
+	return tx.Joins("INNER JOIN base_groups ON base_groups.id=app_groups.gid")
+}
+
+// join Groups first
+func (a *App) sqlJoinUserGroups(tx *gorm.DB) *gorm.DB {
+	return tx.Joins("INNER JOIN user_groups ON user_groups.gid=base_groups.id")
+}
+
 func (a *App) sqlGetForActionByUID(tx *gorm.DB) *gorm.DB {
 	return tx.Model(a).Omit("app_secret").Where("uid=?", a.UID)
 }
@@ -63,14 +77,29 @@ func (a *App) GetByUIDForAction(tx *gorm.DB) ([]App, error) {
 	return t, a.sqlGetForActionByUID(tx).Find(&t).Error
 }
 
-func (a *App) GetByUIDForShow(tx *gorm.DB) ([]dto.AppShow, error) {
-	var t = make([]dto.AppShow, 0)
+func (a *App) GetByUIDForShow(tx *gorm.DB) ([]dto.AppShowOwner, error) {
+	var t = make([]dto.AppShowOwner, 0)
 	return t, a.sqlGetByUIDForShow(tx).Find(&t).Error
 }
 
 func (a *App) GetByUIDForShowDetailed(tx *gorm.DB) ([]dto.AppShowDetail, error) {
 	var t = make([]dto.AppShowDetail, 0)
 	return t, a.sqlGetByUIDForShow(tx).Find(&t).Error
+}
+
+func (a *App) GetPermitAll(tx *gorm.DB) ([]dto.AppShow, error) {
+	var t = make([]dto.AppShow, 0)
+	return t, tx.Model(a).Where("permit_all_group=?", true).Find(&t).Error
+}
+
+func (a *App) GetAccessAble(tx *gorm.DB) ([]dto.AppShowWithGroup, error) {
+	// 后续需要额外归类，故不 make
+	var t []dto.AppShowWithGroup
+	tx = tx.Model(a).Select("apps.*", "base_groups.id AS group_id", "base_groups.name as group_name")
+	tx = a.sqlJoinAppGroups(tx)
+	tx = a.sqlJoinGroups(tx)
+	tx = a.sqlJoinGroups(tx)
+	return t, tx.Where("user_groups.uid=?", a.UID).Find(&t).Error
 }
 
 func (a *App) DeleteByIdForUID(tx *gorm.DB) *gorm.DB {

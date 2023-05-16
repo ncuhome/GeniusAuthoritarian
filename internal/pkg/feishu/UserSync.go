@@ -76,7 +76,7 @@ func (a *UserSyncProcessor) downloadUserList() (map[string][]feishuApi.ListUserC
 	return Api.LoadUserList()
 }
 
-// 过滤无效组，并返回有效组映射 飞书 OpenID ==> dao.Group.ID
+// 过滤无效组，并返回有效组映射 飞书 OpenID ==> dao.BaseGroup.ID
 func (a *UserSyncProcessor) filterInvalidGroups(feishuUserList map[string][]feishuApi.ListUserContent) (map[string]uint, error) {
 	var openID = make([]string, len(feishuUserList))
 	i := 0
@@ -129,7 +129,7 @@ func (a *UserSyncProcessor) filterInvalidUsers(feishuUserList map[string][]feish
 	}
 }
 
-// 转换数据为 dao.Group.ID ==> []dao.User
+// 转换数据为 dao.BaseGroup.ID ==> []dao.User
 func (a *UserSyncProcessor) convertApiDataToGroupIdKeyMap(feishuUserList map[string][]feishuApi.ListUserContent, validGroupsMap map[string]uint) map[uint][]dao.User {
 	var filteredData = make(map[uint][]dao.User, len(feishuUserList))
 	for openID, users := range feishuUserList {

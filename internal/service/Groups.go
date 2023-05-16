@@ -17,14 +17,14 @@ func (a GroupsSrv) Begin() (GroupsSrv, error) {
 	return a, a.Error
 }
 
-func (a GroupsSrv) LoadGroups() ([]dao.Group, error) {
-	return (&dao.Group{}).GetAll(a.DB)
+func (a GroupsSrv) LoadGroups() ([]dao.BaseGroup, error) {
+	return (&dao.BaseGroup{}).GetAll(a.DB)
 }
 
 func (a GroupsSrv) LoadGroupsForShow() ([]dto.Group, error) {
-	return (&dao.Group{}).GetAllForShow(a.DB)
+	return (&dao.BaseGroup{}).GetAllForShow(a.DB)
 }
 
-func (a GroupsSrv) CreateGroups(groups []string) ([]dao.Group, error) {
-	return (&dao.Group{}).CreateGroups(a.DB, groups)
+func (a GroupsSrv) CreateGroups(groups []string) ([]dao.BaseGroup, error) {
+	return (&dao.BaseGroup{}).CreateGroups(a.DB, groups)
 }

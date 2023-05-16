@@ -7,8 +7,8 @@ import (
 
 type UserGroupsWithForeignKey struct {
 	UserGroups `gorm:"embedded"`
-	User       User  `gorm:"-;foreignKey:UID;constraint:OnDelete:CASCADE"`
-	Group      Group `gorm:"-;foreignKey:GID;constraint:OnDelete:CASCADE"`
+	User       User      `gorm:"-;foreignKey:UID;constraint:OnDelete:CASCADE"`
+	BaseGroup  BaseGroup `gorm:"-;foreignKey:GID;constraint:OnDelete:CASCADE"`
 }
 
 func (a *UserGroupsWithForeignKey) TableName() string {
@@ -19,7 +19,7 @@ type UserGroups struct {
 	ID uint `gorm:"primarykey"`
 	// User.ID
 	UID uint `gorm:"index;index:user_group_idx,unique;not null;column:uid;"`
-	// Group.ID
+	// BaseGroup.ID
 	GID uint `gorm:"index;index:user_group_idx,unique;not null;column:gid"`
 }
 
@@ -28,7 +28,7 @@ func (a *UserGroups) sqlJoinUsers(tx *gorm.DB) *gorm.DB {
 }
 
 func (a *UserGroups) sqlGetUserGroupsByUID(tx *gorm.DB) *gorm.DB {
-	groupModel := &Group{}
+	groupModel := &BaseGroup{}
 	tx = tx.Model(groupModel)
 	tx = groupModel.sqlJoinUserGroups(tx)
 	return tx.Where("user_groups.uid=?", a.UID)
@@ -40,7 +40,7 @@ func (a *UserGroups) InsertAll(tx *gorm.DB, data []UserGroups) error {
 
 func (a *UserGroups) GetUserGroupNamesByUID(tx *gorm.DB) ([]string, error) {
 	var t []string
-	return t, a.sqlGetUserGroupsByUID(tx).Select("groups.name").Find(&t).Error
+	return t, a.sqlGetUserGroupsByUID(tx).Select("base_groups.name").Find(&t).Error
 }
 
 func (a *UserGroups) GetUserGroupsForShowByUID(tx *gorm.DB) ([]dto.Group, error) {
@@ -49,17 +49,17 @@ func (a *UserGroups) GetUserGroupsForShowByUID(tx *gorm.DB) ([]dto.Group, error)
 }
 
 func (a *UserGroups) GetUserGroupsForAppCodeByUID(tx *gorm.DB, appCode string) *gorm.DB {
-	appGroupsTx := (&AppGroup{}).sqlGetGroupsByAppCode(tx, appCode).Select("groups.name")
+	appGroupsTx := (&AppGroup{}).sqlGetGroupsByAppCode(tx, appCode).Select("base_groups.name")
 	return a.sqlGetUserGroupsByUID(appGroupsTx)
 }
 
 // GetUserGroupsLimited 根据指定组范围获取用户所在组
-func (a *UserGroups) GetUserGroupsLimited(tx *gorm.DB, groups []string) ([]Group, error) {
-	var t []Group
-	groupModel := &Group{}
+func (a *UserGroups) GetUserGroupsLimited(tx *gorm.DB, groups []string) ([]BaseGroup, error) {
+	var t []BaseGroup
+	groupModel := &BaseGroup{}
 	tx = tx.Model(groupModel)
 	tx = groupModel.sqlJoinUserGroups(tx)
-	return t, tx.Where("user_groups.uid=? AND groups.name IN ?", a.UID, groups).
+	return t, tx.Where("user_groups.uid=? AND base_groups.name IN ?", a.UID, groups).
 		Find(&t).Error
 }
 

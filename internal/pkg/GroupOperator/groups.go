@@ -48,7 +48,7 @@ func LoadGroupRelation() error {
 	}
 
 	if len(notExistGroups) != 0 {
-		var newGroups []dao.Group
+		var newGroups []dao.BaseGroup
 		newGroups, e = service.Groups.CreateGroups(notExistGroups)
 		if e != nil {
 			return e

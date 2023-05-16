@@ -21,3 +21,9 @@ type AppNew struct {
 	AppShowDetail
 	AppSecret string `json:"appSecret"`
 }
+
+type AppShowWithGroup struct {
+	AppShow
+	GroupID   uint   `json:"groupID"`
+	GroupName string `json:"groupName"`
+}

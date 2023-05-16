@@ -91,7 +91,7 @@ func (a AppSrv) FirstAppDetailedByIDForUser(id, uid uint, opts ...daoUtil.Servic
 		return nil, e
 	}
 
-	groups, e := (&dao.Group{}).GetByAppIdsRelatedForShow(a.DB, appDetailed.ID)
+	groups, e := (&dao.BaseGroup{}).GetByAppIdsRelatedForShow(a.DB, appDetailed.ID)
 	if e != nil {
 		return nil, e
 	}
@@ -123,7 +123,7 @@ func (a AppSrv) GetUserOwnedApp(uid uint) ([]dto.AppShowDetail, error) {
 		}
 
 		var groupRelatedList []dto.GroupRelateApp
-		groupRelatedList, e = (&dao.Group{}).GetByAppIdsRelatedForShow(a.DB, appIds...)
+		groupRelatedList, e = (&dao.BaseGroup{}).GetByAppIdsRelatedForShow(a.DB, appIds...)
 		if e != nil {
 			return nil, e
 		}

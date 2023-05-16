@@ -27,7 +27,7 @@ func init() {
 	if e = DB.AutoMigrate(
 		&User{},
 		&SiteWhiteList{},
-		&Group{},
+		&BaseGroup{},
 		&AppWithForeignKey{},
 		&LoginRecordWithForeignKey{},
 		&UserGroupsWithForeignKey{},
