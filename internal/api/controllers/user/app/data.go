@@ -20,5 +20,5 @@ func ListOwnedApp(c *gin.Context) {
 }
 
 func ListAccessAbleApp(c *gin.Context) {
-	uid := tools.GetUserInfo(c).ID
+	//uid := tools.GetUserInfo(c).ID
 }

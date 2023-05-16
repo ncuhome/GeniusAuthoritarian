@@ -92,13 +92,13 @@ func (a *App) GetPermitAll(tx *gorm.DB) ([]dto.AppShow, error) {
 	return t, tx.Model(a).Where("permit_all_group=?", true).Find(&t).Error
 }
 
-func (a *App) GetAccessAble(tx *gorm.DB) ([]dto.AppShowWithGroup, error) {
+func (a *App) GetAccessible(tx *gorm.DB) ([]dto.AppShowWithGroup, error) {
 	// 后续需要额外归类，故不 make
 	var t []dto.AppShowWithGroup
 	tx = tx.Model(a).Select("apps.*", "base_groups.id AS group_id", "base_groups.name as group_name")
 	tx = a.sqlJoinAppGroups(tx)
 	tx = a.sqlJoinGroups(tx)
-	tx = a.sqlJoinGroups(tx)
+	tx = a.sqlJoinUserGroups(tx)
 	return t, tx.Where("user_groups.uid=?", a.UID).Find(&t).Error
 }
 

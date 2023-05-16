@@ -27,3 +27,8 @@ type AppShowWithGroup struct {
 	GroupID   uint   `json:"groupID"`
 	GroupName string `json:"groupName"`
 }
+
+type AppGroupClassified struct {
+	Group Group     `json:"group"`
+	App   []AppShow `json:"app"`
+}

@@ -151,6 +151,31 @@ func (a AppSrv) GetUserOwnedApp(uid uint) ([]dto.AppShowDetail, error) {
 	return apps, nil
 }
 
+func (a AppSrv) GetUserAccessible(uid uint) ([]dto.AppGroupClassified, error) {
+	list, e := (&dao.App{UID: uid}).GetAccessible(a.DB)
+	if e != nil {
+		return nil, e
+	}
+
+	var countMap = make(map[uint]int)
+	for _, group := range list {
+		count, _ := countMap[group.GroupID]
+		countMap[group.GroupID] = count + 1
+	}
+
+	var groupMap = make(map[uint]dto.Group, len(countMap))
+
+	var resultMap = make(map[uint][]dto.AppShow, len(countMap))
+	for key, length := range countMap {
+		resultMap[key] = make([]dto.AppShow, length)
+	}
+
+	for _, group := range list {
+		resultMap[group.GroupID][len(resultMap[group.GroupID])-countMap[group.GroupID]] = group.AppShow
+		countMap[group.GroupID]--
+	}
+}
+
 func (a AppSrv) DeleteByID(id, uid uint) error {
 	result := (&dao.App{ID: id, UID: uid}).DeleteByIdForUID(a.DB)
 	if result.Error != nil {
