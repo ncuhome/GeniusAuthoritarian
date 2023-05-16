@@ -243,7 +243,7 @@ func ModifyApp(c *gin.Context) {
 					break
 				}
 				i = j
-				if exGroup > f.PermitGroups[j] {
+				if exGroup < f.PermitGroups[j] {
 					groupToRemove = append(groupToRemove, exGroup)
 					break
 				}
@@ -261,7 +261,7 @@ func ModifyApp(c *gin.Context) {
 						goto nextGroup
 					}
 					i = j
-					if group > exGroups[j] {
+					if group < exGroups[j] {
 						break
 					}
 				}
