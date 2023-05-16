@@ -30,22 +30,15 @@ const initialAppForm: AppFormState = {
 
 export type UseAppForm = UseBoundStore<StoreApi<AppFormState & AppFormActions>>;
 
-export const useAppForm:UseAppForm = create<AppFormState & AppFormActions>()((set) => ({
-  ...initialAppForm,
-
-  reset: () => {
-    set(initialAppForm);
-  },
-  setState: (key) => (value) => set({ [key]: value }),
-}));
-
-export const useAppModifyForm:UseAppForm = create<AppFormState & AppFormActions>()(
-  (set) => ({
+const createAppForm = (): UseAppForm =>
+  create<AppFormState & AppFormActions>()((set) => ({
     ...initialAppForm,
 
     reset: () => {
       set(initialAppForm);
     },
     setState: (key) => (value) => set({ [key]: value }),
-  })
-);
+  }));
+
+export const useAppForm = createAppForm();
+export const useAppModifyForm = createAppForm();
