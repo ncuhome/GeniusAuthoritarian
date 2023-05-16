@@ -3,13 +3,17 @@ package dto
 type AppShow struct {
 	ID             uint   `json:"id"`
 	Name           string `json:"name"`
-	AppCode        string `json:"appCode"`
 	Callback       string `json:"callback"`
 	PermitAllGroup bool   `json:"permitAllGroup"`
 }
 
-type AppShowDetail struct {
+type AppShowOwner struct {
 	AppShow
+	AppCode string `json:"appCode"`
+}
+
+type AppShowDetail struct {
+	AppShowOwner
 	Groups []Group `json:"groups" gorm:"-"`
 }
 

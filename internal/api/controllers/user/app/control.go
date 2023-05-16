@@ -94,12 +94,14 @@ func ApplyApp(c *gin.Context) {
 
 	callback.Success(c, dto.AppNew{
 		AppShowDetail: dto.AppShowDetail{
-			AppShow: dto.AppShow{
-				ID:             newApp.ID,
-				Name:           newApp.Name,
-				AppCode:        newApp.AppCode,
-				Callback:       newApp.Callback,
-				PermitAllGroup: newApp.PermitAllGroup,
+			AppShowOwner: dto.AppShowOwner{
+				AppShow: dto.AppShow{
+					ID:             newApp.ID,
+					Name:           newApp.Name,
+					Callback:       newApp.Callback,
+					PermitAllGroup: newApp.PermitAllGroup,
+				},
+				AppCode: newApp.AppCode,
 			},
 			Groups: groups,
 		},
