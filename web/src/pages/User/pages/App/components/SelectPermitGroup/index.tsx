@@ -36,7 +36,7 @@ export const SelectPermitGroup: FC<Props> = ({
         renderValue={(selected) => selected.join(", ")}
       >
         {groups.map((group) => {
-          const checked = (permitGroups?.indexOf(group) ?? -2) > -1;
+          const checked = (permitGroups?.map(group=>group.id).indexOf(group.id) ?? -2) > -1;
           return (
             <MenuItem
               key={group.id}
