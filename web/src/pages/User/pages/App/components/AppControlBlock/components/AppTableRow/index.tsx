@@ -1,4 +1,4 @@
-import { FC } from "react";
+import { FC, useState } from "react";
 
 import { TipIconButton } from "@components";
 import { Divider, Stack, TableCell, TableRow } from "@mui/material";
@@ -11,11 +11,19 @@ import { App } from "@api/v1/user/app";
 
 interface Props {
   app: App;
-  handleModify: (app: App) => void;
-  handleDelete: (app: App) => void;
+  onModify: (app: App) => void;
+  onDelete: (app: App) => Promise<void>;
 }
 
-export const AppTableRow: FC<Props> = ({ app, handleDelete, handleModify }) => {
+export const AppTableRow: FC<Props> = ({ app, onDelete, onModify }) => {
+  const [deletingApp, setDeletingApp] = useState(false);
+
+  async function handleDeleteApp(app: App) {
+    setDeletingApp(true);
+    await onDelete(app);
+    setDeletingApp(false);
+  }
+
   return (
     <TableRow hover role="checkbox" tabIndex={-1}>
       <TableCell>{app.name}</TableCell>
@@ -42,10 +50,14 @@ export const AppTableRow: FC<Props> = ({ app, handleDelete, handleModify }) => {
             />
           }
         >
-          <TipIconButton title={"编辑"} onClick={() => handleModify(app)}>
+          <TipIconButton title={"编辑"} onClick={() => onModify(app)}>
             <DriveFileRenameOutlineOutlined />
           </TipIconButton>
-          <TipIconButton title={"删除"} onClick={() => handleDelete(app)}>
+          <TipIconButton
+            title={"删除"}
+            onClick={() => handleDeleteApp(app)}
+            disabled={deletingApp}
+          >
             <DeleteForeverOutlined />
           </TipIconButton>
         </Stack>

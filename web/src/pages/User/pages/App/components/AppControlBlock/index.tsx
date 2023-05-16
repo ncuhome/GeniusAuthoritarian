@@ -158,8 +158,8 @@ export const AppControlBlock: FC = () => {
                 <AppTableRow
                   key={app.id}
                   app={app}
-                  handleModify={showModifyAppDialog}
-                  handleDelete={handleDeleteApp}
+                  onModify={showModifyAppDialog}
+                  onDelete={handleDeleteApp}
                 />
               ))}
             </TableBody>

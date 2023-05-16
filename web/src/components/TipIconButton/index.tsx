@@ -13,7 +13,9 @@ export const TipIconButton: FC<IconButtonProps & Props> = ({
 }) => {
   return (
     <Tooltip title={title} placement={"top"} arrow>
-      <IconButton {...rest}>{children}</IconButton>
+      <span>
+        <IconButton {...rest}>{children}</IconButton>
+      </span>
     </Tooltip>
   );
 };
