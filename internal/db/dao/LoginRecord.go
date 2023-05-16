@@ -27,7 +27,7 @@ type LoginRecord struct {
 }
 
 func (a *LoginRecord) sqlJoinApps(tx *gorm.DB) *gorm.DB {
-	return tx.Joins("INNER JOIN apps ON apps.id=login_records.aid")
+	return tx.Joins("LEFT JOIN apps ON apps.id=login_records.aid")
 }
 
 func (a *LoginRecord) Insert(tx *gorm.DB) error {
