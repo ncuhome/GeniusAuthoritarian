@@ -8,7 +8,7 @@ import { Box, Stack, Typography } from "@mui/material";
 import { ApplyApp } from "@api/v1/user/app";
 
 import { shallow } from "zustand/shallow";
-import { useUser, useAppForm, useGroup } from "@store";
+import { useUser, useAppForm } from "@store";
 
 export const AppFormBlock: FC = () => {
   const apps = useUser((state) => state.apps);
@@ -59,6 +59,7 @@ export const AppFormBlock: FC = () => {
   return (
     <Block title={"New"}>
       <AppForm
+        useForm={useAppForm}
         submitText={"创建应用"}
         onSubmit={createApp}
         cancelText={"重置"}

@@ -29,7 +29,7 @@ import {
 import { GetOwnedAppList, DeleteApp, ModifyApp, App } from "@api/v1/user/app";
 
 import { shallow } from "zustand/shallow";
-import { useAppForm, useUser } from "@store";
+import { useUser, useAppModifyForm } from "@store";
 
 export const AppControlBlock: FC = () => {
   const apps = useUser((state) => state.apps);
@@ -39,7 +39,7 @@ export const AppControlBlock: FC = () => {
   const [onRequestApps, setOnRequestApps] = useState(true);
   const [loadAppsToast, closeAppsToast] = useLoadingToast();
 
-  const [name, callback, permitAll, permitGroups] = useAppForm(
+  const [name, callback, permitAll, permitGroups] = useAppModifyForm(
     (state) => [
       state.name,
       state.callback,
@@ -48,16 +48,16 @@ export const AppControlBlock: FC = () => {
     ],
     shallow
   );
-  const [setName, setCallback, setPermitAll, setPermitGroups] = useAppForm(
-    (state) => [
-      state.setState("name"),
-      state.setState("callback"),
-      state.setState("permitAll"),
-      state.setState("permitGroups"),
-    ],
-    shallow
-  );
-  const resetForm = useAppForm((state) => state.reset);
+  const [setName, setCallback, setPermitAll, setPermitGroups] =
+    useAppModifyForm(
+      (state) => [
+        state.setState("name"),
+        state.setState("callback"),
+        state.setState("permitAll"),
+        state.setState("permitGroups"),
+      ],
+      shallow
+    );
   const [onModifyApp, setOnModifyApp] = useState<App | null>(null);
 
   async function loadApps() {
@@ -113,7 +113,7 @@ export const AppControlBlock: FC = () => {
             : app
         )
       );
-      closeModifyAppDialog();
+      setOnModifyApp(null);
     } catch ({ msg }) {
       if (msg) toast.error(msg as string);
     }
@@ -125,11 +125,6 @@ export const AppControlBlock: FC = () => {
     setPermitAll(app.permitAllGroup);
     setPermitGroups(app.groups);
     setOnModifyApp(app);
-  }
-
-  function closeModifyAppDialog() {
-    setOnModifyApp(null);
-    resetForm();
   }
 
   useInterval(loadApps, !apps && !onRequestApps ? 2000 : null);
@@ -229,14 +224,15 @@ export const AppControlBlock: FC = () => {
         </TableContainer>
       </Paper>
 
-      <Dialog open={Boolean(onModifyApp)} onClose={closeModifyAppDialog}>
+      <Dialog open={Boolean(onModifyApp)} onClose={() => setOnModifyApp(null)}>
         <DialogTitle>Subscribe</DialogTitle>
         <DialogContent>
           <AppForm
+            useForm={useAppModifyForm}
             submitText={"确认"}
             onSubmit={handleModifyApp}
             cancelText={"取消"}
-            onCancel={closeModifyAppDialog}
+            onCancel={() => setOnModifyApp(null)}
           />
         </DialogContent>
       </Dialog>

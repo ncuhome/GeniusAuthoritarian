@@ -1,4 +1,4 @@
-import { create } from "zustand";
+import { create, StoreApi, UseBoundStore } from "zustand";
 import { Group } from "@api/v1/user/group";
 
 interface AppFormState {
@@ -28,7 +28,9 @@ const initialAppForm: AppFormState = {
   callbackError: false,
 };
 
-export const useAppForm = create<AppFormState & AppFormActions>()((set) => ({
+export type UseAppForm = UseBoundStore<StoreApi<AppFormState & AppFormActions>>;
+
+export const useAppForm:UseAppForm = create<AppFormState & AppFormActions>()((set) => ({
   ...initialAppForm,
 
   reset: () => {
@@ -36,3 +38,14 @@ export const useAppForm = create<AppFormState & AppFormActions>()((set) => ({
   },
   setState: (key) => (value) => set({ [key]: value }),
 }));
+
+export const useAppModifyForm:UseAppForm = create<AppFormState & AppFormActions>()(
+  (set) => ({
+    ...initialAppForm,
+
+    reset: () => {
+      set(initialAppForm);
+    },
+    setState: (key) => (value) => set({ [key]: value }),
+  })
+);
