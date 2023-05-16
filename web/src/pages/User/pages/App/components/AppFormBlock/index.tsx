@@ -2,25 +2,20 @@ import { FC, useEffect, useRef, useState } from "react";
 import { useTimeout } from "@hooks";
 import toast from "react-hot-toast";
 
+import { SelectPermitGroup } from "@/pages/User/pages/App/components";
+import { Block } from "@/pages/User/components";
 import {
   Box,
-  Button,
   Checkbox,
   Collapse,
-  FormControl,
   FormControlLabel,
   Grid,
-  InputLabel,
-  ListItemText,
-  MenuItem,
-  OutlinedInput,
-  Select,
   Skeleton,
   Stack,
   TextField,
   Typography,
+  Button,
 } from "@mui/material";
-import { Block } from "@/pages/User/components";
 
 import { ApplyApp } from "@api/v1/user/app";
 import { ListGroups } from "@api/v1/user/group";
@@ -205,37 +200,12 @@ export const AppFormBlock: FC = () => {
         >
           <Collapse in={showSelectGroups}>
             {groups ? (
-              <FormControl fullWidth>
-                <InputLabel>授权身份组</InputLabel>
-                <Select
-                  multiple
-                  value={permitGroups?.map((group) => group.name) || []}
-                  input={<OutlinedInput label="授权身份组" />}
-                  renderValue={(selected) => selected.join(", ")}
-                >
-                  {groups.map((group) => {
-                    const checked = (permitGroups?.indexOf(group) ?? -2) > -1;
-                    return (
-                      <MenuItem
-                        key={group.id}
-                        value={group.name}
-                        onClick={() => {
-                          if (checked) {
-                            setPermitGroups(
-                              permitGroups?.filter((g) => g.id !== group.id)
-                            );
-                          } else {
-                            setPermitGroups([...(permitGroups ?? []), group]);
-                          }
-                        }}
-                      >
-                        <Checkbox checked={checked} />
-                        <ListItemText primary={group.name} />
-                      </MenuItem>
-                    );
-                  })}
-                </Select>
-              </FormControl>
+              <SelectPermitGroup
+                groups={groups}
+                permitGroups={permitGroups}
+                setPermitGroups={setPermitGroups}
+                fullWidth
+              />
             ) : (
               <Skeleton variant={"rounded"} width={"100%"} height={56} />
             )}
@@ -264,4 +234,4 @@ export const AppFormBlock: FC = () => {
     </Block>
   );
 };
-export default AppFormBlock
+export default AppFormBlock;
