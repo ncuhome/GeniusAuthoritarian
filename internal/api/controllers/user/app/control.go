@@ -1,4 +1,4 @@
-package controllers
+package app
 
 import (
 	"github.com/Mmx233/daoUtil"
@@ -105,18 +105,6 @@ func ApplyApp(c *gin.Context) {
 		},
 		AppSecret: newApp.AppSecret,
 	})
-}
-
-func ListOwnedApp(c *gin.Context) {
-	uid := tools.GetUserInfo(c).ID
-
-	apps, e := service.App.GetUserOwnedApp(uid)
-	if e != nil {
-		callback.Error(c, e, callback.ErrDBOperation)
-		return
-	}
-
-	callback.Success(c, apps)
 }
 
 func DeleteApp(c *gin.Context) {

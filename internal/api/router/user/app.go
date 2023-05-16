@@ -2,7 +2,7 @@ package user
 
 import (
 	"github.com/gin-gonic/gin"
-	controllers "github.com/ncuhome/GeniusAuthoritarian/internal/api/controllers/user"
+	controllers "github.com/ncuhome/GeniusAuthoritarian/internal/api/controllers/user/app"
 	"github.com/ncuhome/GeniusAuthoritarian/internal/api/middlewares"
 	"github.com/ncuhome/GeniusAuthoritarian/pkg/departments"
 )
