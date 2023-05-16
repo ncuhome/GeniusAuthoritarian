@@ -50,7 +50,7 @@ func (a *App) FirstForLogin(tx *gorm.DB) error {
 }
 
 func (a *App) FirstAppKeyPairByID(tx *gorm.DB) error {
-	return tx.Model(a).Select("app_code,app_secret").Where("id=?", a.ID).First(a).Error
+	return tx.Model(a).Select("app_code", "app_secret").Where("id=?", a.ID).First(a).Error
 }
 
 func (a *App) GetAppCode(tx *gorm.DB) ([]string, error) {
@@ -78,5 +78,5 @@ func (a *App) DeleteByIdForUID(tx *gorm.DB) *gorm.DB {
 }
 
 func (a *App) UpdatesByID(tx *gorm.DB) error {
-	return tx.Model(a).Select("name,callback,permit_all_group").Where("id=?", a.ID).Updates(a).Error
+	return tx.Model(a).Select("name", "callback", "permit_all_group").Where("id=?", a.ID).Updates(a).Error
 }
