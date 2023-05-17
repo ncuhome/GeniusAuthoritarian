@@ -17,6 +17,19 @@ export async function GetOwnedAppList(): Promise<App[]> {
   return data;
 }
 
+export async function GetAccessibleAppList(): Promise<{
+  permitAll: App[];
+  accessible: {
+    group: Group;
+    app: App[];
+  }[];
+}> {
+  const {
+    data: { data },
+  } = await apiV1User.get("app/accessible");
+  return data;
+}
+
 export type AppNew = {
   appSecret: string;
 } & App;
