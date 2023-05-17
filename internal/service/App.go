@@ -158,22 +158,41 @@ func (a AppSrv) GetUserAccessible(uid uint) ([]dto.AppGroupClassified, error) {
 	}
 
 	var countMap = make(map[uint]int)
-	for _, group := range list {
-		count, _ := countMap[group.GroupID]
-		countMap[group.GroupID] = count + 1
+	for _, app := range list {
+		count, _ := countMap[app.GroupID]
+		countMap[app.GroupID] = count + 1
 	}
 
 	var groupMap = make(map[uint]dto.Group, len(countMap))
+	for _, app := range list {
+		_, ok := groupMap[app.GroupID]
+		if !ok {
+			groupMap[app.GroupID] = dto.Group{
+				ID:   app.GroupID,
+				Name: app.GroupName,
+			}
+		}
+	}
 
 	var resultMap = make(map[uint][]dto.AppShow, len(countMap))
 	for key, length := range countMap {
 		resultMap[key] = make([]dto.AppShow, length)
 	}
 
-	for _, group := range list {
-		resultMap[group.GroupID][len(resultMap[group.GroupID])-countMap[group.GroupID]] = group.AppShow
-		countMap[group.GroupID]--
+	for _, app := range list {
+		resultMap[app.GroupID][len(resultMap[app.GroupID])-countMap[app.GroupID]] = app.AppShow
+		countMap[app.GroupID]--
 	}
+
+	var result = make([]dto.AppGroupClassified, len(resultMap))
+	i := 0
+	for groupId, appList := range resultMap {
+		result[i].Group = groupMap[groupId]
+		result[i].App = appList
+		i++
+	}
+
+	return result, nil
 }
 
 func (a AppSrv) DeleteByID(id, uid uint) error {
