@@ -99,7 +99,7 @@ func (a *App) GetAccessible(tx *gorm.DB) ([]dto.AppShowWithGroup, error) {
 	tx = a.sqlJoinAppGroups(tx)
 	tx = a.sqlJoinGroups(tx)
 	tx = a.sqlJoinUserGroups(tx)
-	return t, tx.Where("user_groups.uid=?", a.UID).Find(&t).Error
+	return t, tx.Where("user_groups.uid=?", a.UID).Order("base_groups.id,apps.id").Find(&t).Error
 }
 
 func (a *App) DeleteByIdForUID(tx *gorm.DB) *gorm.DB {

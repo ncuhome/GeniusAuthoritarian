@@ -157,41 +157,36 @@ func (a AppSrv) GetUserAccessible(uid uint) ([]dto.AppGroupClassified, error) {
 		return nil, e
 	}
 
-	var countMap = make(map[uint]int)
+	var i = -1
+	var lastGroupID uint
+	var count []int
 	for _, app := range list {
-		count, _ := countMap[app.GroupID]
-		countMap[app.GroupID] = count + 1
+		if lastGroupID != app.GroupID {
+			i++
+			count = append(count, 0)
+			lastGroupID = app.GroupID
+		}
+		count[i]++
 	}
 
-	var groupMap = make(map[uint]dto.Group, len(countMap))
+	i = -1
+	j := 0
+	lastGroupID = 0
+	var result = make([]dto.AppGroupClassified, len(count))
 	for _, app := range list {
-		_, ok := groupMap[app.GroupID]
-		if !ok {
-			groupMap[app.GroupID] = dto.Group{
+		if lastGroupID != app.GroupID {
+			i++
+			j = 0
+			result[i].Group = dto.Group{
 				ID:   app.GroupID,
 				Name: app.GroupName,
 			}
+			result[i].App = make([]dto.AppShow, count[i])
+			lastGroupID = app.GroupID
 		}
+		result[i].App[j] = app.AppShow
+		j++
 	}
-
-	var resultMap = make(map[uint][]dto.AppShow, len(countMap))
-	for key, length := range countMap {
-		resultMap[key] = make([]dto.AppShow, length)
-	}
-
-	for _, app := range list {
-		resultMap[app.GroupID][len(resultMap[app.GroupID])-countMap[app.GroupID]] = app.AppShow
-		countMap[app.GroupID]--
-	}
-
-	var result = make([]dto.AppGroupClassified, len(resultMap))
-	i := 0
-	for groupId, appList := range resultMap {
-		result[i].Group = groupMap[groupId]
-		result[i].App = appList
-		i++
-	}
-
 	return result, nil
 }
 
