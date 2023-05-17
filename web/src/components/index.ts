@@ -5,3 +5,5 @@ export * from "./PageNotFound";
 export * from "./Suspense";
 
 export * from "./TipIconButton";
+
+export * from "./LoadingFullContainer";
