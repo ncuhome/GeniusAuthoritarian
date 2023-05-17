@@ -51,7 +51,7 @@ func (a *App) Insert(tx *gorm.DB) error {
 
 func (a *App) NameExist(tx *gorm.DB) (bool, error) {
 	var t bool
-	return t, tx.Model(a).Select("1").Where("name=?", a.Name).Limit(1).Find(&t).Error
+	return t, tx.Model(a).Unscoped().Select("1").Where("name=?", a.Name).Limit(1).Find(&t).Error
 }
 
 func (a *App) FirstDetailedByIdAndUID(tx *gorm.DB) (*dto.AppShowDetail, error) {
