@@ -21,7 +21,12 @@ import {
   DialogContent,
 } from "@mui/material";
 
-import { GetOwnedAppList, DeleteApp, ModifyApp, App } from "@api/v1/user/app";
+import {
+  GetOwnedAppList,
+  DeleteApp,
+  ModifyApp,
+  AppDetailed,
+} from "@api/v1/user/app";
 
 import { shallow } from "zustand/shallow";
 import { useUser, useAppModifyForm } from "@store";
@@ -53,7 +58,7 @@ export const AppControlBlock: FC = () => {
       ],
       shallow
     );
-  const [onModifyApp, setOnModifyApp] = useState<App | null>(null);
+  const [onModifyApp, setOnModifyApp] = useState<AppDetailed | null>(null);
   const [modifyingApp, setModifyingApp] = useState(false);
 
   async function loadApps() {
@@ -68,63 +73,63 @@ export const AppControlBlock: FC = () => {
     setOnRequestApps(false);
   }
 
-  async function handleDeleteApp(app: App) {
-    try {
-      const ok = await setDialog({
-        title: "确认删除",
-        content: `正在删除名称为 ${app.name} ，appCode 为 ${app.appCode} 的应用`,
-      });
-      if (!ok) return;
-      await DeleteApp(app.id);
-      setApps((apps || []).filter((a) => a.id !== app.id));
-      toast.success("删除成功");
-    } catch ({ msg }) {
-      if (msg) toast.error(msg as string);
+    async function handleDeleteApp(app: AppDetailed) {
+      try {
+        const ok = await setDialog({
+          title: "确认删除",
+          content: `正在删除名称为 ${app.name} ，appCode 为 ${app.appCode} 的应用`,
+        });
+        if (!ok) return;
+        await DeleteApp(app.id);
+        setApps((apps || []).filter((a) => a.id !== app.id));
+        toast.success("删除成功");
+      } catch ({ msg }) {
+        if (msg) toast.error(msg as string);
+      }
     }
-  }
 
-  async function handleModifyApp() {
-    if (!onModifyApp) return;
-    setModifyingApp(true);
-    try {
-      await ModifyApp(
-        onModifyApp.id,
-        name,
-        callback,
-        permitAll,
-        permitGroups?.map((g) => g.id)
-      );
-      toast.success("修改成功");
-      setApps(
-        (apps || []).map((app) =>
-          app.id === onModifyApp.id
-            ? ({
-                id: onModifyApp.id,
-                name: name,
-                appCode: onModifyApp.appCode,
-                callback: callback,
-                permitAllGroup: permitAll,
-                groups: permitGroups || [],
-              } as App)
-            : app
-        )
-      );
-      setOnModifyApp(null);
-    } catch ({ msg }) {
-      if (msg) toast.error(msg as string);
+    async function handleModifyApp() {
+      if (!onModifyApp) return;
+      setModifyingApp(true);
+      try {
+        await ModifyApp(
+          onModifyApp.id,
+          name,
+          callback,
+          permitAll,
+          permitGroups?.map((g) => g.id)
+        );
+        toast.success("修改成功");
+        setApps(
+          (apps || []).map((app) =>
+            app.id === onModifyApp.id
+              ? ({
+                  id: onModifyApp.id,
+                  name: name,
+                  appCode: onModifyApp.appCode,
+                  callback: callback,
+                  permitAllGroup: permitAll,
+                  groups: permitGroups || [],
+                } as AppDetailed)
+              : app
+          )
+        );
+        setOnModifyApp(null);
+      } catch ({ msg }) {
+        if (msg) toast.error(msg as string);
+      }
+      setModifyingApp(false);
     }
-    setModifyingApp(false);
-  }
 
-  function showModifyAppDialog(app: App) {
-    setName(app.name);
-    setCallback(app.callback);
-    setPermitAll(app.permitAllGroup);
-    setPermitGroups(app.groups);
-    setOnModifyApp(app);
-  }
+    function showModifyAppDialog(app: AppDetailed) {
+      setName(app.name);
+      setCallback(app.callback);
+      setPermitAll(app.permitAllGroup);
+      setPermitGroups(app.groups);
+      setOnModifyApp(app);
+    }
 
-  useInterval(loadApps, !apps && !onRequestApps ? 2000 : null);
+    useInterval(loadApps, !apps && !onRequestApps ? 2000 : null);
   useMount(() => {
     if (!apps) loadApps();
     else setOnRequestApps(false);

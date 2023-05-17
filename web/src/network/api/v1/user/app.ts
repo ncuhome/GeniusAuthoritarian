@@ -4,13 +4,19 @@ import { Group } from "@api/v1/user/group";
 export type App = {
   id: number;
   name: string;
-  appCode: string;
   callback: string;
   permitAllGroup: boolean;
-  groups: Group[];
 };
 
-export async function GetOwnedAppList(): Promise<App[]> {
+export type AppOwned = {
+  appCode: string;
+} & App;
+
+export type AppDetailed = {
+  groups: Group[];
+} & AppOwned;
+
+export async function GetOwnedAppList(): Promise<AppDetailed[]> {
   const {
     data: { data },
   } = await apiV1User.get("app/");
@@ -34,7 +40,7 @@ export async function GetAccessibleAppList(): Promise<AccessibleApps> {
 
 export type AppNew = {
   appSecret: string;
-} & App;
+} & AppDetailed;
 
 export async function ApplyApp(
   name: string,
