@@ -1,7 +1,8 @@
 import { FC, useState } from "react";
 import { useMount, useLoadingToast, useInterval } from "@hooks";
 
-import { Stack, Typography } from "@mui/material";
+import { AppListBlock } from "./components";
+import { Container, Grid } from "@mui/material";
 
 import { GetAccessibleAppList } from "@api/v1/user/app";
 
@@ -37,11 +38,11 @@ export const Navigation: FC = () => {
   });
 
   return (
-    <Stack justifyContent={"center"} alignItems={"center"} height={"100%"}>
-      <Typography variant={"h5"} fontWeight={"bold"} sx={{ opacity: 0.5 }}>
-        别急，马上写
-      </Typography>
-    </Stack>
+    <Container>
+      {accessibleApps ? (
+        <AppListBlock title={"全站"} apps={accessibleApps.permitAll} />
+      ) : null}
+    </Container>
   );
 };
 export default Navigation;
