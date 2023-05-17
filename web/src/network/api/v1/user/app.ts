@@ -17,13 +17,15 @@ export async function GetOwnedAppList(): Promise<App[]> {
   return data;
 }
 
-export async function GetAccessibleAppList(): Promise<{
+export type AccessibleApps = {
   permitAll: App[];
   accessible: {
     group: Group;
     app: App[];
   }[];
-}> {
+};
+
+export async function GetAccessibleAppList(): Promise<AccessibleApps> {
   const {
     data: { data },
   } = await apiV1User.get("app/accessible");

@@ -1,7 +1,7 @@
 import { ReactNode } from "react";
 import { create } from "zustand";
 import { UserProfile } from "@api/v1/user/profile";
-import { App } from "@api/v1/user/app";
+import { App, AccessibleApps } from "@api/v1/user/app";
 
 type DialogProps = {
   title: string;
@@ -18,12 +18,13 @@ interface UserState {
 
   profile: UserProfile | null;
   apps: App[] | null;
+  accessibleApps: AccessibleApps | null;
 
   setAuth: (token: string | null, groups?: string[]) => void;
   setDialog: (props: DialogProps) => Promise<boolean>;
 
   setState: <T extends keyof UserState>(
-      key: T
+    key: T
   ) => (value: UserState[T]) => void;
 }
 
@@ -36,6 +37,7 @@ export const useUser = create<UserState>()((set) => ({
 
   profile: null,
   apps: null,
+  accessibleApps: null,
 
   setAuth: (token, groups) => {
     if (token) localStorage.setItem("token", token);
