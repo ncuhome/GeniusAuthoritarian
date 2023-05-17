@@ -19,7 +19,7 @@ func ListOwnedApp(c *gin.Context) {
 	callback.Success(c, apps)
 }
 
-func ListAccessAbleApp(c *gin.Context) {
+func ListAccessibleApp(c *gin.Context) {
 	uid := tools.GetUserInfo(c).ID
 
 	permitAllApps, e := service.App.GetPermitAll()
