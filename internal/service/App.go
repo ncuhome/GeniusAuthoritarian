@@ -195,6 +195,10 @@ func (a AppSrv) GetUserAccessible(uid uint) ([]dto.AppGroupClassified, error) {
 	return result, nil
 }
 
+func (a AppSrv) GetPermitAll() ([]dto.AppShow, error) {
+	return (&dao.App{}).GetPermitAll(a.DB)
+}
+
 func (a AppSrv) DeleteByID(id, uid uint) error {
 	result := (&dao.App{ID: id, UID: uid}).DeleteByIdForUID(a.DB)
 	if result.Error != nil {

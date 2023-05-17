@@ -20,5 +20,22 @@ func ListOwnedApp(c *gin.Context) {
 }
 
 func ListAccessAbleApp(c *gin.Context) {
-	//uid := tools.GetUserInfo(c).ID
+	uid := tools.GetUserInfo(c).ID
+
+	permitAllApps, e := service.App.GetPermitAll()
+	if e != nil {
+		callback.Error(c, e, callback.ErrDBOperation)
+		return
+	}
+
+	accessibleApps, e := service.App.GetUserAccessible(uid)
+	if e != nil {
+		callback.Error(c, e, callback.ErrDBOperation)
+		return
+	}
+
+	callback.Success(c, gin.H{
+		"permitAll":  permitAllApps,
+		"accessible": accessibleApps,
+	})
 }

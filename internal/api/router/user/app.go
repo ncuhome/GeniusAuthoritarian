@@ -10,6 +10,7 @@ import (
 func routerApp(G *gin.RouterGroup) {
 	G.Use(middlewares.LimitGroup([]string{departments.UDev}))
 	G.GET("/", controllers.ListOwnedApp)
+	G.GET("/accessible", controllers.ListAccessAbleApp)
 	G.POST("/", controllers.ApplyApp)
 	G.PUT("/", controllers.ModifyApp)
 	G.DELETE("/", controllers.DeleteApp)
