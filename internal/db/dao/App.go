@@ -47,7 +47,7 @@ func (a *App) Insert(tx *gorm.DB) error {
 
 func (a *App) FirstDetailedByIdAndUID(tx *gorm.DB) (*dto.AppShowDetail, error) {
 	var t dto.AppShowDetail
-	return &t, tx.Model(a).Where("id=? AND uid=?", a.ID, a.UID).First(&t).Error
+	return &t, tx.Model(a).Where(a, "id", "uid").First(&t).Error
 }
 
 func (a *App) UserAccessible(tx *gorm.DB) (bool, error) {
@@ -60,7 +60,7 @@ func (a *App) UserAccessible(tx *gorm.DB) (bool, error) {
 }
 
 func (a *App) FirstByID(tx *gorm.DB) error {
-	return tx.Model(a).Omit("app_secret").Where("id=?", a.ID).First(a).Error
+	return tx.Model(a).Omit("app_secret").First(a, a.ID).Error
 }
 
 func (a *App) FirstByAppCode(tx *gorm.DB) error {
@@ -68,7 +68,7 @@ func (a *App) FirstByAppCode(tx *gorm.DB) error {
 }
 
 func (a *App) FirstAppKeyPairByID(tx *gorm.DB) error {
-	return tx.Model(a).Select("app_code", "app_secret").Where("id=?", a.ID).First(a).Error
+	return tx.Model(a).Select("app_code", "app_secret").First(a, a.ID).Error
 }
 
 func (a *App) GetAppCode(tx *gorm.DB) ([]string, error) {
@@ -107,9 +107,9 @@ func (a *App) GetAccessible(tx *gorm.DB) ([]dto.AppShowWithGroup, error) {
 }
 
 func (a *App) DeleteByIdForUID(tx *gorm.DB) *gorm.DB {
-	return tx.Model(a).Where("id=? AND uid=?", a.ID, a.UID).Delete(a)
+	return tx.Model(a).Where(a, "id", "uid").Delete(a)
 }
 
 func (a *App) UpdatesByID(tx *gorm.DB) error {
-	return tx.Model(a).Select("name", "callback", "permit_all_group").Where("id=?", a.ID).Updates(a).Error
+	return tx.Model(a).Select("name", "callback", "permit_all_group").Where(a, "id").Updates(a).Error
 }
