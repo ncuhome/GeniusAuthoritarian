@@ -10,6 +10,10 @@ type AppWithForeignKey struct {
 	User User `gorm:"-;foreignKey:UID;constraint:OnDelete:SET NULL"`
 }
 
+func (a *AppWithForeignKey) TableName() string {
+	return "apps"
+}
+
 type App struct {
 	ID        uint `gorm:"primarykey"`
 	CreatedAt int64
