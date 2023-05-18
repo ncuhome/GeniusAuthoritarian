@@ -50,15 +50,6 @@ func ApplyApp(c *gin.Context) {
 		return
 	}
 
-	exist, e := service.App.NameExist(f.Name)
-	if e != nil {
-		callback.Error(c, e, callback.ErrDBOperation)
-		return
-	} else if exist {
-		callback.Error(c, nil, callback.ErrAppNameExist)
-		return
-	}
-
 	appSrc, e := service.App.Begin()
 	if e != nil {
 		callback.Error(c, e, callback.ErrForm)
@@ -184,16 +175,7 @@ func ModifyApp(c *gin.Context) {
 
 	appInfoChanged := false
 
-	var exist bool
 	if f.Name != app.Name {
-		exist, e = appSrv.NameExist(f.Name)
-		if e != nil {
-			callback.Error(c, e, callback.ErrDBOperation)
-			return
-		} else if exist {
-			callback.Error(c, nil, callback.ErrAppNameExist)
-			return
-		}
 		appInfoChanged = true
 	}
 

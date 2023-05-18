@@ -45,10 +45,6 @@ func (a AppSrv) New(uid uint, name, callback string, permitAll bool) (*dao.App, 
 	return &t, t.Insert(a.DB)
 }
 
-func (a AppSrv) NameExist(name string) (bool, error) {
-	return (&dao.App{Name: name}).NameExist(a.DB)
-}
-
 func (a AppSrv) AppCodeExist(appCode string) (bool, error) {
 	list, e := redis.AppCode.Load()
 	if e != nil {

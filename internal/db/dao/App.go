@@ -12,7 +12,7 @@ type App struct {
 	// User.ID 拥有者
 	UID            uint   `gorm:"column:uid;index"`
 	User           User   `gorm:"foreignKey:UID;constraint:OnDelete:SET NULL"`
-	Name           string `gorm:"not null;uniqueIndex;type:varchar(30)"`
+	Name           string `gorm:"not null"`
 	AppCode        string `gorm:"not null;uniqueIndex;type:varchar(36)"`
 	AppSecret      string `gorm:"not null"`
 	Callback       string `gorm:"not null"`
@@ -43,11 +43,6 @@ func (a *App) sqlGetByUIDForShow(tx *gorm.DB) *gorm.DB {
 
 func (a *App) Insert(tx *gorm.DB) error {
 	return tx.Create(a).Error
-}
-
-func (a *App) NameExist(tx *gorm.DB) (bool, error) {
-	var t bool
-	return t, tx.Model(a).Unscoped().Select("1").Where("name=?", a.Name).Limit(1).Find(&t).Error
 }
 
 func (a *App) FirstDetailedByIdAndUID(tx *gorm.DB) (*dto.AppShowDetail, error) {
