@@ -14,8 +14,8 @@ type LoginRecord struct {
 	User User `gorm:"foreignKey:UID;constraint:OnDelete:CASCADE"`
 	IP   string
 	// App.ID
-	AID uint `gorm:"column:aid;not null;index"`
-	App App  `gorm:"foreignKey:AID;constraint:OnDelete:CASCADE"`
+	AID *uint `gorm:"column:aid;index"`
+	App App   `gorm:"foreignKey:AID;constraint:OnDelete:CASCADE"`
 }
 
 func (a *LoginRecord) sqlJoinApps(tx *gorm.DB) *gorm.DB {
