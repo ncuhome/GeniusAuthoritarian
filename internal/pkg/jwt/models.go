@@ -6,6 +6,7 @@ type UserToken struct {
 	jwt.RegisteredClaims
 	// dao.User.ID
 	ID     uint     `json:"id"`
+	Name   string   `json:"name"`
 	Groups []string `json:"groups,omitempty"`
 }
 

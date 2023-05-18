@@ -8,8 +8,8 @@ import (
 	"github.com/ncuhome/GeniusAuthoritarian/internal/pkg/feishu"
 	"github.com/ncuhome/GeniusAuthoritarian/internal/pkg/jwt"
 	"github.com/ncuhome/GeniusAuthoritarian/internal/service"
+	"github.com/ncuhome/GeniusAuthoritarian/internal/tools"
 	"gorm.io/gorm"
-	"net/url"
 )
 
 // 第三方登录 app 路由名称
@@ -86,18 +86,15 @@ func callThirdPartyLoginResult(c *gin.Context, user *dao.User, appInfo *dao.App,
 		return
 	}
 
-	callbackUrl, e := url.Parse(appInfo.Callback)
+	callbackUrl, e := tools.GenCallback(appInfo.Callback, token)
 	if e != nil {
 		callback.Error(c, e, callback.ErrUnexpected)
 		return
 	}
-	callbackQuery := callbackUrl.Query()
-	callbackQuery.Set("token", token)
-	callbackUrl.RawQuery = callbackQuery.Encode()
 
 	callback.Success(c, gin.H{
 		"token":    token,
-		"callback": callbackUrl.String(),
+		"callback": callbackUrl,
 	})
 }
 

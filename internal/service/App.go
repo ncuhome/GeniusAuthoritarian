@@ -71,18 +71,25 @@ func (a AppSrv) CheckAppCode(appCode string) (bool, error) {
 	return a.AppCodeExist(appCode)
 }
 
+func (a AppSrv) FirstAccessibleAppByID(id, uid uint) (*dao.App, error) {
+	var t = dao.App{
+		ID:  id,
+		UID: uid,
+	}
+	return &t, t.FirstAccessibleAppByID(a.DB)
+}
 func (a AppSrv) FirstAppByAppCode(appCode string) (*dao.App, error) {
 	var t = dao.App{
 		AppCode: appCode,
 	}
-	return &t, t.FirstForLogin(a.DB)
+	return &t, t.FirstByAppCode(a.DB)
 }
 
 func (a AppSrv) FirstAppDetailedByIDForUser(id, uid uint, opts ...daoUtil.ServiceOpt) (*dto.AppShowDetail, error) {
 	appDetailed, e := (&dao.App{
 		ID:  id,
 		UID: uid,
-	}).FirstDetailedByIdAndUID(a.DB)
+	}).FirstDetailedByIdAndUID(daoUtil.TxOpts(a.DB, opts...))
 	if e != nil {
 		return nil, e
 	}

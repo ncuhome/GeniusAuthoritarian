@@ -50,7 +50,15 @@ func (a *App) FirstDetailedByIdAndUID(tx *gorm.DB) (*dto.AppShowDetail, error) {
 	return &t, tx.Model(a).Where("id=? AND uid=?", a.ID, a.UID).First(&t).Error
 }
 
-func (a *App) FirstForLogin(tx *gorm.DB) error {
+func (a *App) FirstAccessibleAppByID(tx *gorm.DB) error {
+	tx = tx.Model(a).Omit("app_secret")
+	tx = a.sqlJoinAppGroups(tx)
+	tx = a.sqlJoinGroups(tx)
+	tx = a.sqlJoinUserGroups(tx)
+	return tx.Where("apps.id=? AND user_groups.uid=?", a.ID, a.UID).First(a).Error
+}
+
+func (a *App) FirstByAppCode(tx *gorm.DB) error {
 	return tx.Model(a).Omit("app_secret").Where("app_code=?", a.AppCode).First(a).Error
 }
 

@@ -28,13 +28,14 @@ func ParseToken[C jwt.Claims](token string, target C) (claims C, valid bool, e e
 }
 
 // GenerateUserToken 生成有效期 15 天的个人信息访问 Token
-func GenerateUserToken(uid uint, groups []string) (string, error) {
+func GenerateUserToken(uid uint, name string, groups []string) (string, error) {
 	return GenerateToken(&UserToken{
 		RegisteredClaims: jwt.RegisteredClaims{
 			ExpiresAt: jwt.NewNumericDate(time.Now().Add(time.Hour * 24 * 15)),
 			IssuedAt:  jwt.NewNumericDate(time.Now()),
 		},
 		ID:     uid,
+		Name:   name,
 		Groups: groups,
 	})
 }
@@ -44,10 +45,11 @@ func GenerateLoginToken(uid, appID uint, name, ip string, groups []string) (stri
 	now := time.Now()
 	valid := time.Minute * 5
 	id, e := redis.Jwt.NewLoginPoint(now.Unix(), valid, LoginTokenClaims{
-		UID:   uid,
-		IP:    ip,
-		Name:  name,
-		AppID: appID,
+		UID:    uid,
+		IP:     ip,
+		Name:   name,
+		AppID:  appID,
+		Groups: groups,
 	})
 	if e != nil {
 		return "", e
