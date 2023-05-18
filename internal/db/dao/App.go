@@ -5,21 +5,13 @@ import (
 	"gorm.io/gorm"
 )
 
-type AppWithForeignKey struct {
-	App  `gorm:"embedded"`
-	User User `gorm:"-;foreignKey:UID;constraint:OnDelete:SET NULL"`
-}
-
-func (a *AppWithForeignKey) TableName() string {
-	return "apps"
-}
-
 type App struct {
 	ID        uint `gorm:"primarykey"`
 	CreatedAt int64
-	gorm.DeletedAt
+	DeletedAt gorm.DeletedAt
 	// User.ID 拥有者
 	UID            uint   `gorm:"column:uid;index"`
+	User           User   `gorm:"foreignKey:UID;constraint:OnDelete:SET NULL"`
 	Name           string `gorm:"not null;uniqueIndex;type:varchar(30)"`
 	AppCode        string `gorm:"not null;uniqueIndex;type:varchar(36)"`
 	AppSecret      string `gorm:"not null"`

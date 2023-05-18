@@ -6,10 +6,10 @@ import (
 )
 
 type User struct {
-	ID uint `gorm:"primarykey"`
-	gorm.DeletedAt
-	Name  string `gorm:"not null"`
-	Phone string `gorm:"not null;uniqueIndex;type:varchar(15)"`
+	ID        uint `gorm:"primarykey"`
+	DeletedAt gorm.DeletedAt
+	Name      string `gorm:"not null"`
+	Phone     string `gorm:"not null;uniqueIndex;type:varchar(15)"`
 }
 
 func (a *User) Insert(tx *gorm.DB) error {

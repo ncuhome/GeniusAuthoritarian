@@ -28,16 +28,6 @@ func init() {
 		&User{},
 		&SiteWhiteList{},
 		&BaseGroup{},
-		&AppWithForeignKey{},
-		&LoginRecordWithForeignKey{},
-		&UserGroupsWithForeignKey{},
-		&FeishuGroupsWithForeignKey{},
-		&AppGroupWithForeignKey{},
-	); e != nil {
-		log.Fatalln("AutoMigration failed:", e)
-	}
-
-	if e = DB.AutoMigrate(
 		&App{},
 		&LoginRecord{},
 		&UserGroups{},

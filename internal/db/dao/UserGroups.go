@@ -5,22 +5,14 @@ import (
 	"gorm.io/gorm"
 )
 
-type UserGroupsWithForeignKey struct {
-	UserGroups `gorm:"embedded"`
-	User       User      `gorm:"-;foreignKey:UID;constraint:OnDelete:CASCADE"`
-	BaseGroup  BaseGroup `gorm:"-;foreignKey:GID;constraint:OnDelete:CASCADE"`
-}
-
-func (a *UserGroupsWithForeignKey) TableName() string {
-	return "user_groups"
-}
-
 type UserGroups struct {
 	ID uint `gorm:"primarykey"`
 	// User.ID
-	UID uint `gorm:"index;index:user_group_idx,unique;not null;column:uid;"`
+	UID  uint `gorm:"index;index:user_group_idx,unique;not null;column:uid;"`
+	User User `gorm:"foreignKey:UID;constraint:OnDelete:CASCADE"`
 	// BaseGroup.ID
-	GID uint `gorm:"index;index:user_group_idx,unique;not null;column:gid"`
+	GID       uint      `gorm:"index;index:user_group_idx,unique;not null;column:gid"`
+	BaseGroup BaseGroup `gorm:"foreignKey:GID;constraint:OnDelete:CASCADE"`
 }
 
 func (a *UserGroups) sqlJoinUsers(tx *gorm.DB) *gorm.DB {

@@ -6,24 +6,16 @@ import (
 	"gorm.io/gorm"
 )
 
-type LoginRecordWithForeignKey struct {
-	LoginRecord `gorm:"embedded"`
-	App         App  `gorm:"-;foreignKey:AID;constraint:OnDelete:CASCADE"`
-	User        User `gorm:"-;foreignKey:UID;constraint:OnDelete:CASCADE"`
-}
-
-func (a *LoginRecordWithForeignKey) TableName() string {
-	return "login_records"
-}
-
 type LoginRecord struct {
 	ID        uint `gorm:"primarykey"`
 	CreatedAt int64
 	// User.ID
-	UID uint `gorm:"not null;index;column:uid"`
-	IP  string
+	UID  uint `gorm:"not null;index;column:uid"`
+	User User `gorm:"foreignKey:UID;constraint:OnDelete:CASCADE"`
+	IP   string
 	// App.ID
 	AID uint `gorm:"column:aid;not null;index"`
+	App App  `gorm:"foreignKey:AID;constraint:OnDelete:CASCADE"`
 }
 
 func (a *LoginRecord) sqlJoinApps(tx *gorm.DB) *gorm.DB {

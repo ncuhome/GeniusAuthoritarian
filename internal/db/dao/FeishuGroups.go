@@ -4,21 +4,13 @@ import (
 	"gorm.io/gorm"
 )
 
-type FeishuGroupsWithForeignKey struct {
-	FeishuGroups `gorm:"embedded"`
-	Group        BaseGroup `gorm:"-;foreignKey:GID;constraint:OnDelete:CASCADE"`
-}
-
-func (a *FeishuGroupsWithForeignKey) TableName() string {
-	return "feishu_groups"
-}
-
 type FeishuGroups struct {
 	ID               uint   `gorm:"primarykey"`
 	Name             string `gorm:"not null;unique"`
 	OpenDepartmentId string `gorm:"not null;uniqueInde;type:varchar(255)"`
 	// BaseGroup.ID
-	GID uint `gorm:"uniqueIndex;not null;column:gid"`
+	GID   uint      `gorm:"uniqueIndex;not null;column:gid"`
+	Group BaseGroup `gorm:"foreignKey:GID;constraint:OnDelete:CASCADE"`
 }
 
 func (a *FeishuGroups) GetAll(tx *gorm.DB) ([]FeishuGroups, error) {
