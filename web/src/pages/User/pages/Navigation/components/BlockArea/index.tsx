@@ -9,8 +9,14 @@ interface Props extends PropsWithChildren {
 
 export const BlockArea: FC<Props> = ({ title, children }) => {
   return (
-    <Box>
-      <BlockTitle>{title}</BlockTitle>
+    <Box className={"block-area"}>
+      <BlockTitle
+        sx={{
+          marginBottom: "0.8rem",
+        }}
+      >
+        {title}
+      </BlockTitle>
       {children}
     </Box>
   );

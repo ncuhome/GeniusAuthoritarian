@@ -1,9 +1,9 @@
 import { FC } from "react";
 
-import { BlockArea } from "..";
+import { BlockArea, NavAppCard } from "..";
+import { Grid } from "@mui/material";
 
 import { App } from "@api/v1/user/app";
-import { Grid } from "@mui/material";
 
 interface Props {
   title: string;
@@ -16,7 +16,7 @@ export const AppListBlock: FC<Props> = ({ title, apps }) => {
       <Grid container spacing={2}>
         {apps.map((app) => (
           <Grid key={app.id} item xs={6} sm={4}>
-            {app.name}
+            <NavAppCard app={app} />
           </Grid>
         ))}
       </Grid>

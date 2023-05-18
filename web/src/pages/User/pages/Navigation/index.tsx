@@ -40,7 +40,16 @@ export const Navigation: FC = () => {
   return (
     <Container>
       {accessibleApps ? (
-        <AppListBlock title={"全站"} apps={accessibleApps.permitAll} />
+        <>
+          {accessibleApps.accessible.map((item) => (
+            <AppListBlock
+              key={item.group.id}
+              title={item.group.name}
+              apps={item.app}
+            />
+          ))}
+          <AppListBlock title={"全站"} apps={accessibleApps.permitAll} />
+        </>
       ) : null}
     </Container>
   );
