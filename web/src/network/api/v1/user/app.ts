@@ -82,3 +82,16 @@ export async function ModifyApp(
     permitGroups,
   });
 }
+
+export async function GetLandingUrl(id: number): Promise<string> {
+  const {
+    data: {
+      data: { url },
+    },
+  } = await apiV1User.get("app/landing", {
+    params: {
+      id,
+    },
+  });
+  return url;
+}
