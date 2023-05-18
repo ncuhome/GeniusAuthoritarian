@@ -35,7 +35,7 @@ export const NavAppCard: FC<Props> = ({ app }) => {
       <CardContent>
         <Typography
           gutterBottom
-          variant="h5"
+          variant="subtitle1"
           sx={{
             margin: 0,
           }}

@@ -15,7 +15,7 @@ export const AppListBlock: FC<Props> = ({ title, apps }) => {
     <BlockArea title={title}>
       <Grid container spacing={2}>
         {apps.map((app) => (
-          <Grid key={app.id} item xs={6} sm={4}>
+          <Grid key={app.id} item xs={12} sm={6} md={4}>
             <NavAppCard app={app} />
           </Grid>
         ))}
