@@ -20,7 +20,7 @@ func LandingApp(c *gin.Context) {
 
 	user := tools.GetUserInfo(c)
 
-	app, e := service.App.FirstAccessibleAppByID(f.ID, user.ID)
+	app, e := service.App.FirstAppByID(f.ID)
 	if e != nil {
 		if e == gorm.ErrRecordNotFound {
 			callback.Error(c, nil, callback.ErrAppNotFound)
@@ -28,6 +28,18 @@ func LandingApp(c *gin.Context) {
 		}
 		callback.Error(c, e, callback.ErrDBOperation)
 		return
+	}
+
+	if !app.PermitAllGroup {
+		var yes bool
+		yes, e = service.App.UserAccessible(f.ID, user.ID)
+		if e != nil {
+			callback.Error(c, e, callback.ErrDBOperation)
+			return
+		} else if !yes {
+			callback.ErrorWithTip(c, nil, callback.ErrOperationIllegal, "没有访问该应用的权限")
+			return
+		}
 	}
 
 	token, e := jwt.GenerateLoginToken(user.ID, app.ID, user.Name, c.ClientIP(), user.Groups)

@@ -67,17 +67,24 @@ func (a AppSrv) AppCodeExist(appCode string) (bool, error) {
 	return false, nil
 }
 
+func (a AppSrv) UserAccessible(id, uid uint) (bool, error) {
+	return (&dao.App{
+		ID:  id,
+		UID: uid,
+	}).UserAccessible(a.DB)
+}
+
 func (a AppSrv) CheckAppCode(appCode string) (bool, error) {
 	return a.AppCodeExist(appCode)
 }
 
-func (a AppSrv) FirstAccessibleAppByID(id, uid uint) (*dao.App, error) {
+func (a AppSrv) FirstAppByID(id uint) (*dao.App, error) {
 	var t = dao.App{
-		ID:  id,
-		UID: uid,
+		ID: id,
 	}
-	return &t, t.FirstAccessibleAppByID(a.DB)
+	return &t, t.FirstByID(a.DB)
 }
+
 func (a AppSrv) FirstAppByAppCode(appCode string) (*dao.App, error) {
 	var t = dao.App{
 		AppCode: appCode,
