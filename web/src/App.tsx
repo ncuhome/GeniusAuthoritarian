@@ -6,6 +6,7 @@ import { Toaster } from "react-hot-toast";
 const User = lazy(() => import("./pages/User"));
 import { Home, Error, Feishu, DingTalk, Login } from "./pages";
 import { PageNotFound, Suspense } from "@components";
+import { Box } from "@mui/material";
 import { ThemeProvider, createTheme } from "@mui/material/styles";
 
 import { useTheme } from "@store";
@@ -34,15 +35,24 @@ export default function App() {
   });
 
   return (
-    <>
+    <Box
+      sx={{
+        minHeight: "100vh",
+        backgroundColor: isDarkTheme ? "#242424" : "#fff",
+      }}
+    >
       <Toaster
-        toastOptions={{
-          style: {
-            borderRadius: "20px",
-            background: "#2f2f2f",
-            color: "#fff",
-          },
-        }}
+        toastOptions={
+          isDarkTheme
+            ? {
+                style: {
+                  borderRadius: "20px",
+                  background: "#2f2f2f",
+                  color: "#fff",
+                },
+              }
+            : undefined
+        }
       />
       <ThemeProvider theme={theme}>
         <BrowserRouter>
@@ -64,6 +74,6 @@ export default function App() {
           </Routes>
         </BrowserRouter>
       </ThemeProvider>
-    </>
+    </Box>
   );
 }
