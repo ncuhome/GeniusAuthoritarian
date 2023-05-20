@@ -1,5 +1,5 @@
 import { FC } from "react";
-import logo from "@/assets/img/logo-lg.png";
+import logo from "@/assets/img/logo-white.png";
 import bkg from "@/assets/img/bkg.png";
 
 import { Stack, Box, Paper } from "@mui/material";

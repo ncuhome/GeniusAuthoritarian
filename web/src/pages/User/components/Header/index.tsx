@@ -1,6 +1,7 @@
 import { FC } from "react";
 import { useNavigate } from "react-router-dom";
-import logo from "@/assets/img/logo-lg.png";
+import logo_white from "@/assets/img/logo-white.png";
+import logo_dark from "@/assets/img/logo-dark.png";
 import "./styles.css";
 
 import {
@@ -62,7 +63,7 @@ export const Header: FC<Props> = ({
           },
         }}
       >
-        <img src={logo} alt={"NCUHOME"} />
+        <img src={darkTheme ? logo_white : logo_dark} alt={"NCUHOME"} />
       </Box>
 
       <Stack
