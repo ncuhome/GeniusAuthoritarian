@@ -12,6 +12,8 @@ interface ThemeState {
 export const useTheme = create<ThemeState>()(
   persist(
     (set, get) => ({
+      dark: true,
+
       setState: (key) => (value) => set({ [key]: value }),
     }),
     {

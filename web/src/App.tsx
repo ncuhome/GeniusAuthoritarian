@@ -1,23 +1,28 @@
-import { lazy } from "react";
+import { lazy, useMemo } from "react";
 import { useMount } from "@hooks";
 import { BrowserRouter, Route, Routes } from "react-router-dom";
 import { Toaster } from "react-hot-toast";
 
 const User = lazy(() => import("./pages/User"));
 import { Home, Error, Feishu, DingTalk, Login } from "./pages";
-import { PageNotFound } from "@components";
-
-import { Suspense } from "@components";
-
+import { PageNotFound, Suspense } from "@components";
 import { ThemeProvider, createTheme } from "@mui/material/styles";
 
-const darkTheme = createTheme({
-  palette: {
-    mode: "dark",
-  },
-});
+import { useTheme } from "@store";
 
 export default function App() {
+  const isDarkTheme = useTheme((state) => state.dark);
+
+  const theme = useMemo(
+    () =>
+      createTheme({
+        palette: {
+          mode: isDarkTheme ? "dark" : undefined,
+        },
+      }),
+    [isDarkTheme]
+  );
+
   useMount(() => {
     if (import.meta.env.MODE === "production") {
       console.log(
@@ -27,6 +32,7 @@ export default function App() {
       );
     }
   });
+
   return (
     <>
       <Toaster
@@ -38,7 +44,7 @@ export default function App() {
           },
         }}
       />
-      <ThemeProvider theme={darkTheme}>
+      <ThemeProvider theme={theme}>
         <BrowserRouter>
           <Routes>
             <Route index element={<Home />} />
