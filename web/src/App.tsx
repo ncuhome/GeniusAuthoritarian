@@ -37,8 +37,9 @@ export default function App() {
   return (
     <Box
       sx={{
-        minHeight: "100vh",
+        height: "100vh",
         backgroundColor: isDarkTheme ? "#242424" : "#fff",
+        colorScheme: isDarkTheme ? "dark" : "light",
       }}
     >
       <Toaster
