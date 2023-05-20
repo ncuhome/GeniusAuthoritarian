@@ -12,11 +12,11 @@ import {
   Typography,
   IconButton,
 } from "@mui/material";
-import { LogoutRounded } from "@mui/icons-material";
+import { LogoutRounded, DarkMode, LightMode } from "@mui/icons-material";
 
 import { Logout } from "@api/v1/user/base";
 
-import { useUser } from "@store";
+import { useUser, useTheme } from "@store";
 
 interface Props {
   routers: Array<{
@@ -35,6 +35,9 @@ export const Header: FC<Props> = ({
   const nav = useNavigate();
 
   const setDialog = useUser((state) => state.setDialog);
+
+  const darkTheme = useTheme((state) => state.dark);
+  const setDarkTheme = useTheme((state) => state.setState("dark"));
 
   return (
     <Stack
@@ -82,7 +85,18 @@ export const Header: FC<Props> = ({
           ))}
         </Tabs>
 
-        <Stack flexDirection={"row"} alignItems={"center"}>
+        <Stack
+          flexDirection={"row"}
+          alignItems={"center"}
+          sx={{
+            "&>*": {
+              marginLeft: "0.5rem",
+            },
+          }}
+        >
+          <IconButton onClick={() => setDarkTheme(!darkTheme)}>
+            {darkTheme ? <DarkMode /> : <LightMode />}
+          </IconButton>
           <IconButton
             onClick={async () => {
               const ok = await setDialog({
