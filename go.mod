@@ -5,6 +5,7 @@ go 1.20
 require (
 	github.com/Mmx233/EnvConfig v0.0.2
 	github.com/Mmx233/Gateway/v2 v2.0.4
+	github.com/Mmx233/GinWebServe v1.0.1
 	github.com/Mmx233/config v0.1.0
 	github.com/Mmx233/daoUtil v0.6.1
 	github.com/Mmx233/tool v0.7.1
