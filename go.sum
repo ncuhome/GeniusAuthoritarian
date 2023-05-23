@@ -2,8 +2,8 @@ github.com/Mmx233/EnvConfig v0.0.2 h1:u6GNM7rED9Knmhe2QAnEeUorSW5PmKC8KzAK+03WPo
 github.com/Mmx233/EnvConfig v0.0.2/go.mod h1:BS1qukaUFWqAGzWzMhhAUuPCi7A8KHvhpZt+2QU/IJc=
 github.com/Mmx233/Gateway/v2 v2.0.4 h1:LLO4u6iNGQed3KcqSo4yv7epuF9Mfyx+aNqgi7Dguvo=
 github.com/Mmx233/Gateway/v2 v2.0.4/go.mod h1:Wp+n3bGPjj3eDfJSDeL2OQfENp3eISLqR9Hvh7v3ZD0=
-github.com/Mmx233/GinWebServe v1.0.1 h1:54AxA9SYp2gFVRsUqBdcilmTnIMOV7R3u7nxLbphczE=
-github.com/Mmx233/GinWebServe v1.0.1/go.mod h1:RcBanYGjxFtzQDL71R4V4ySXUdLMAXxGZpJ1BYYBnJA=
+github.com/Mmx233/GinWebServe v1.0.2 h1:hmplXkAGqLmDKjuswygYbLVgIQ/N7yZxDSwwWdAn/Ck=
+github.com/Mmx233/GinWebServe v1.0.2/go.mod h1:RcBanYGjxFtzQDL71R4V4ySXUdLMAXxGZpJ1BYYBnJA=
 github.com/Mmx233/config v0.1.0 h1:nqZWr4FKmSXVsl21QX/1VH1spCEA+3PuzeyGDkQ43jU=
 github.com/Mmx233/config v0.1.0/go.mod h1:ge+JBtKrLTGVE26Xx2LDl4s0QuCcddDabuEolr26PyQ=
 github.com/Mmx233/daoUtil v0.6.1 h1:Dd7GIfsBMk68Rkqeil6sxmy8DxcBQ2GlO6sVrQiDhNA=

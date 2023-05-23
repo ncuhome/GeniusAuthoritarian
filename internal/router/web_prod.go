@@ -20,10 +20,5 @@ func frontendHandler() gin.HandlerFunc {
 		log.Fatalln(e)
 	}
 
-	return func(c *gin.Context) {
-		if !frontendRouterCheck(c) {
-			return
-		}
-		handler(c)
-	}
+	return handler
 }
