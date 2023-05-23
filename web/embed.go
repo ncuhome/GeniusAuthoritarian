@@ -2,7 +2,14 @@
 
 package web
 
-import "embed"
+import (
+	"embed"
+	"io/fs"
+)
 
 //go:embed dist/*
-var FS embed.FS
+var dist embed.FS
+
+func Fs() (fs.FS, error) {
+	return fs.Sub(dist, "dist")
+}

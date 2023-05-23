@@ -21,7 +21,7 @@ func calcEtag(d []byte) string {
 }
 
 func frontendHandler() gin.HandlerFunc {
-	fe, e := fs.Sub(web.FS, "dist")
+	fe, e := web.Fs()
 	if e != nil {
 		log.Fatalln(e)
 	}
