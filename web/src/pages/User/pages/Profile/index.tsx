@@ -4,6 +4,7 @@ import toast from "react-hot-toast";
 import moment from "moment";
 
 import { Block } from "@/pages/User/components";
+import { Ip } from "./components";
 import {
   Container,
   Box,
@@ -122,7 +123,9 @@ export const Profile: FC = () => {
                       )}
                     </TableCell>
                     <TableCell>{record.target}</TableCell>
-                    <TableCell>{record.ip}</TableCell>
+                    <TableCell>
+                      <Ip ip={record.ip} />
+                    </TableCell>
                   </TableRow>
                 ))}
               </TableBody>
