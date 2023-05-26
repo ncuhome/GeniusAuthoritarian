@@ -98,17 +98,23 @@ export const LoginForm: FC = () => {
         >
           {appInfo ? (
             <>
-              <Typography variant={"h6"}>
+              <Stack
+                flexDirection={"row"}
+                sx={{
+                  "&>h6": {
+                    mx: "0.2rem",
+                  },
+                }}
+              >
                 <Typography
                   variant={"h6"}
-                  display={"inline"}
                   fontWeight={"bold"}
                   letterSpacing={"1px"}
                 >
                   {appInfo.name}
                 </Typography>
-                {` 请求登录你的帐号`}
-              </Typography>
+                <Typography variant={"h6"}>{` 请求登录你的帐号`}</Typography>
+              </Stack>
               <Typography
                 variant={"subtitle1"}
                 sx={{ opacity: 0.6 }}
