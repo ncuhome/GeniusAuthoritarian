@@ -1,5 +1,5 @@
-import { FC, useState } from "react";
-import { createUseQuery, useMount, useInterval, useLoadingToast } from "@hooks";
+import { FC } from "react";
+import { createUseQuery, useMount } from "@hooks";
 import { useNavigate } from "react-router-dom";
 import toast from "react-hot-toast";
 import feishuLogo from "@/assets/img/login/feishu.png";
@@ -9,8 +9,7 @@ import { ThrowError } from "@util/nav";
 import { Stack, Box, Typography, List, Paper, Skeleton } from "@mui/material";
 import { LoginItem } from "./components";
 
-import { ErrNetwork } from "@api/base";
-import { GetLoginUrl } from "@api/v1/login";
+import { ErrNetwork, apiV1 } from "@api/base";
 import { useApiV1WithLoading } from "@api/hook";
 
 import { useUser } from "@store";
@@ -36,7 +35,11 @@ export const LoginForm: FC = () => {
 
   async function onGoLogin(thirdParty: string) {
     try {
-      const url = await GetLoginUrl(thirdParty, appCode);
+      const {
+        data: {
+          data: { url },
+        },
+      } = await apiV1.get(`public/login/${thirdParty}/link/${appCode}`);
       window.open(url, "_self");
     } catch ({ msg }) {
       if (msg) toast.error(msg as string);

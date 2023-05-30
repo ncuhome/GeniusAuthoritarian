@@ -1,17 +1,5 @@
 import { apiV1 } from "@api/base";
 
-export async function GetLoginUrl(
-  thirdParty: string,
-  appCode: string = ""
-): Promise<string> {
-  const {
-    data: {
-      data: { url },
-    },
-  } = await apiV1.get(`public/login/${thirdParty}/link/${appCode}`);
-  return url;
-}
-
 export type UserLoginResult = {
   token: string;
   groups: string[];
