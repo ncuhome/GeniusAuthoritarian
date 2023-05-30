@@ -50,6 +50,7 @@ export const Error: FC = () => {
         </Box>
         <Typography
           variant={"h4"}
+          color={"text.primary"}
           sx={{
             fontWeight: 600,
             letterSpacing: "0.25rem",
