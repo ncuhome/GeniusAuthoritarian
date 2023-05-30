@@ -11,6 +11,18 @@ declare namespace App {
     permitAllGroup: boolean;
   };
 
+  type Owned = Info & {
+    appCode: string;
+  };
+
+  type Detailed = Owned & {
+    groups: User.Group[];
+  };
+
+  type New = Detailed & {
+    appSecret: string;
+  };
+
   type Accessible = {
     permitAll: Info[];
     accessible: {

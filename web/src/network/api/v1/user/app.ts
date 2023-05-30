@@ -1,38 +1,18 @@
 import { apiV1User } from "@api/v1/user/base";
-import { Group } from "@api/v1/user/group";
 
-export type App = {
-  id: number;
-  name: string;
-  callback: string;
-  permitAllGroup: boolean;
-};
-
-export type AppOwned = {
-  appCode: string;
-} & App;
-
-export type AppDetailed = {
-  groups: Group[];
-} & AppOwned;
-
-export async function GetOwnedAppList(): Promise<AppDetailed[]> {
+export async function GetOwnedAppList(): Promise<App.Detailed[]> {
   const {
     data: { data },
   } = await apiV1User.get("app/");
   return data;
 }
 
-export type AppNew = {
-  appSecret: string;
-} & AppDetailed;
-
 export async function ApplyApp(
   name: string,
   callback: string,
   permitAll: boolean,
   permitGroups?: number[]
-): Promise<AppNew> {
+): Promise<App.New> {
   const {
     data: { data },
   } = await apiV1User.post("app/", {
