@@ -11,7 +11,7 @@ import { LoginItem } from "./components";
 
 import { ErrNetwork } from "@api/base";
 import { GetLoginUrl } from "@api/v1/login";
-import { GetAppInfo, AppInfo } from "@api/v1/app";
+import { useApiV1WithLoading } from "@api/hook";
 
 import { useUser } from "@store";
 
@@ -23,12 +23,18 @@ export const LoginForm: FC = () => {
 
   const token = useUser((state) => state.token);
 
-  const [appInfo, setAppInfo] = useState<AppInfo | null>(null);
-  const [onRequestAppInfo, setOnRequestAppInfo] = useState(true);
+  const { data: appInfo } = useApiV1WithLoading<App.Info>(
+    `public/app/?appCode=${appCode}`,
+    {
+      onError(err) {
+        if (err.msg !== ErrNetwork) {
+          ThrowError(nav, "登录对象异常", err.msg);
+        }
+      },
+    }
+  );
 
-  const [loadAppInfoToast, closeAppInfoToast] = useLoadingToast();
-
-  async function goLogin(thirdParty: string) {
+  async function onGoLogin(thirdParty: string) {
     try {
       const url = await GetLoginUrl(thirdParty, appCode);
       window.open(url, "_self");
@@ -37,38 +43,16 @@ export const LoginForm: FC = () => {
     }
   }
 
-  const goFeishuLogin = () => goLogin("feishu");
-  const goDingTalkLogin = () => goLogin("dingTalk");
-
-  async function loadAppInfo() {
-    setOnRequestAppInfo(true);
-    try {
-      const data = await GetAppInfo(appCode);
-      setAppInfo(data);
-      closeAppInfoToast();
-    } catch ({ msg }) {
-      if (msg) {
-        if (msg === ErrNetwork) {
-          loadAppInfoToast(msg);
-        } else {
-          ThrowError(nav, "登录对象异常", msg as string);
-        }
-      }
-    }
-    setOnRequestAppInfo(false);
-  }
-
-  useInterval(loadAppInfo, !appInfo && !onRequestAppInfo ? 2000 : null);
+  const onGoFeishuLogin = () => onGoLogin("feishu");
+  const onGoDingTalkLogin = () => onGoLogin("dingTalk");
 
   useMount(() => {
     if (token && !appCode) nav("/user");
     switch (true) {
       case navigator.userAgent.indexOf("Feishu") !== -1:
-        goFeishuLogin();
+        onGoFeishuLogin();
         break;
     }
-
-    loadAppInfo();
   });
 
   return (
@@ -142,11 +126,15 @@ export const LoginForm: FC = () => {
           请选择你的登录方式:
         </Typography>
         <List>
-          <LoginItem logo={feishuLogo} text={"飞书"} onClick={goFeishuLogin} />
+          <LoginItem
+            logo={feishuLogo}
+            text={"飞书"}
+            onClick={onGoFeishuLogin}
+          />
           <LoginItem
             logo={dingLogo}
             text={"钉钉"}
-            onClick={goDingTalkLogin}
+            onClick={onGoDingTalkLogin}
             disableDivider
           />
         </List>
