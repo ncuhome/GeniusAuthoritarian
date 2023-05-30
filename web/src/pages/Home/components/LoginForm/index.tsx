@@ -10,7 +10,7 @@ import { Stack, Box, Typography, List, Paper, Skeleton } from "@mui/material";
 import { LoginItem } from "./components";
 
 import { ErrNetwork, apiV1 } from "@api/base";
-import { useApiV1WithLoading } from "@api/hook";
+import { useApiV1WithLoading } from "@api/v1/hook";
 
 import { useUser } from "@store";
 
@@ -22,7 +22,7 @@ export const LoginForm: FC = () => {
 
   const token = useUser((state) => state.token);
 
-  const { data: appInfo } = useApiV1WithLoading<App.Info>(
+  const { data: appInfo } = useApiV1WithLoading<App.LoginInfo>(
     `public/app/?appCode=${appCode}`,
     {
       onError(err) {

@@ -1,40 +1,24 @@
-import { FC, useState } from "react";
-import { useMount, useLoadingToast, useInterval } from "@hooks";
+import { FC } from "react";
 
 import { AppListBlock } from "./components";
-import { Container, Grid } from "@mui/material";
+import { Container } from "@mui/material";
 
-import { GetAccessibleAppList } from "@api/v1/user/app";
+import { useUserApiV1WithLoading } from "@api/v1/user/hook";
 
 import { useUser } from "@store";
 
 export const Navigation: FC = () => {
-  const [loadAccessible, closeLoadAccessible] = useLoadingToast();
-  const [onRequestAccessible, setOnRequestAccessible] = useState(false);
-
   const accessibleApps = useUser((state) => state.accessibleApps);
   const setAccessibleApps = useUser((state) =>
     state.setState("accessibleApps")
   );
 
-  async function loadAccessibleApps() {
-    setOnRequestAccessible(true);
-    try {
-      const data = await GetAccessibleAppList();
+  useUserApiV1WithLoading<App.Accessible>("app/accessible", {
+    onSuccess: (data) => {
       setAccessibleApps(data);
-      closeLoadAccessible();
-    } catch ({ msg }) {
-      if (msg) loadAccessible(msg as string);
-    }
-    setOnRequestAccessible(false);
-  }
-
-  useInterval(
-    loadAccessibleApps,
-    !accessibleApps && !onRequestAccessible ? 2000 : null
-  );
-  useMount(() => {
-    if (!accessibleApps) loadAccessibleApps();
+    },
+    revalidateIfStale: false,
+    revalidateOnFocus: false,
   });
 
   return (
