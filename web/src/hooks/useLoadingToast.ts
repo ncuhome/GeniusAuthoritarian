@@ -1,7 +1,6 @@
-import { useEffect, useRef } from "react";
+import { useRef } from "react";
 import { useMount } from "./useMount";
 import toast, { ToastOptions } from "react-hot-toast";
-import { SWRConfiguration, SWRResponse } from "swr";
 
 type fnShowToast = (msg: string, options?: ToastOptions) => void;
 
@@ -34,15 +33,3 @@ export function useLoadingToast() {
 
   return [showToast, closeToast];
 }
-
-export const createSwrWithLoading =
-  (useApi: <T>(url: string, config?: SWRConfiguration<T>) => SWRResponse<T>) =>
-  <T>(url: string, config?: SWRConfiguration<T>) => {
-    const swr = useApi<T>(url, config);
-    const [showToast, closeToast] = useLoadingToast();
-    useEffect(() => {
-      if (swr.error?.msg) showToast(swr.error.msg);
-      else closeToast();
-    }, [swr.error]);
-    return swr;
-  };

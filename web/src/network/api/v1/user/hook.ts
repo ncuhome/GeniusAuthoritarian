@@ -1,12 +1,4 @@
-import useSWR, { SWRConfiguration } from "swr";
-import { createSwrWithLoading } from "@hooks";
+import { createFetchHook } from "@/hooks/useFetch";
 import { apiV1User } from "./base";
 
-export const useUserApiV1 = <T>(url: string, config?: SWRConfiguration<T>) =>
-  useSWR<T>(
-    url,
-    (url) => apiV1User.get(url).then((res) => res.data.data),
-    config
-  );
-
-export const useUserApiV1WithLoading = createSwrWithLoading(useUserApiV1);
+export const useUserApiV1 = createFetchHook(apiV1User);

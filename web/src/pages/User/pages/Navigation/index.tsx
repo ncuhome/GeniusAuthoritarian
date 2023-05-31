@@ -3,7 +3,7 @@ import { FC } from "react";
 import { AppListBlock } from "./components";
 import { Container } from "@mui/material";
 
-import { useUserApiV1WithLoading } from "@api/v1/user/hook";
+import { useUserApiV1 } from "@api/v1/user/hook";
 
 import { useUser } from "@store";
 
@@ -13,12 +13,12 @@ export const Navigation: FC = () => {
     state.setState("accessibleApps")
   );
 
-  useUserApiV1WithLoading<App.Accessible>("app/accessible", {
+  useUserApiV1<App.Accessible>("app/accessible", {
+    immutable: true,
+    enableLoading: true,
     onSuccess: (data) => {
       setAccessibleApps(data);
     },
-    revalidateIfStale: false,
-    revalidateOnFocus: false,
   });
 
   return (

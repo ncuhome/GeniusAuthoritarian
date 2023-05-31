@@ -10,7 +10,7 @@ import { Stack, Box, Typography, List, Paper, Skeleton } from "@mui/material";
 import { LoginItem } from "./components";
 
 import { ErrNetwork, apiV1 } from "@api/base";
-import { useApiV1WithLoading } from "@api/v1/hook";
+import { useApiV1 } from "@api/v1/hook";
 
 import { useUser } from "@store";
 
@@ -22,9 +22,11 @@ export const LoginForm: FC = () => {
 
   const token = useUser((state) => state.token);
 
-  const { data: appInfo } = useApiV1WithLoading<App.LoginInfo>(
+  const { data: appInfo } = useApiV1<App.LoginInfo>(
     `public/app/?appCode=${appCode}`,
     {
+      immutable: true,
+      enableLoading: true,
       onError(err) {
         if (err.msg !== ErrNetwork) {
           ThrowError(nav, "登录对象异常", err.msg);
