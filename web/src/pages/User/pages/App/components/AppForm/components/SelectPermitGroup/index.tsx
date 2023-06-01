@@ -11,12 +11,10 @@ import {
   FormControlProps,
 } from "@mui/material";
 
-import { Group } from "@api/v1/user/group";
-
 interface Props extends FormControlProps {
-  groups: Group[];
-  permitGroups?: Group[];
-  setPermitGroups: (data?: Group[]) => void;
+  groups: User.Group[];
+  permitGroups?: User.Group[];
+  setPermitGroups: (data?: User.Group[]) => void;
 }
 
 // 需要额外手动加载 group 列表

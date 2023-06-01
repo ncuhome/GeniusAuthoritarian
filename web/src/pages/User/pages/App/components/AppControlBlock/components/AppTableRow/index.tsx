@@ -7,18 +7,16 @@ import {
   DriveFileRenameOutlineOutlined,
 } from "@mui/icons-material";
 
-import { AppDetailed } from "@api/v1/user/app";
-
 interface Props {
-  app: AppDetailed;
-  onModify: (app: AppDetailed) => void;
-  onDelete: (app: AppDetailed) => Promise<void>;
+  app: App.Detailed;
+  onModify: (app: App.Detailed) => void;
+  onDelete: (app: App.Detailed) => Promise<void>;
 }
 
 export const AppTableRow: FC<Props> = ({ app, onDelete, onModify }) => {
   const [deletingApp, setDeletingApp] = useState(false);
 
-    async function handleDeleteApp(app: AppDetailed) {
+    async function handleDeleteApp(app: App.Detailed) {
       setDeletingApp(true);
       await onDelete(app);
       setDeletingApp(false);

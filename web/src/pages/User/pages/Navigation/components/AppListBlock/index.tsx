@@ -3,11 +3,9 @@ import { FC } from "react";
 import { BlockArea, NavAppCard } from "..";
 import { Grid } from "@mui/material";
 
-import { App } from "@api/v1/user/app";
-
 interface Props {
   title: string;
-  apps: App[];
+  apps: App.Info[];
 }
 
 export const AppListBlock: FC<Props> = ({ title, apps }) => {

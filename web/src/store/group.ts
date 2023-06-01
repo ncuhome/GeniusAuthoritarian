@@ -1,8 +1,7 @@
 import { create } from "zustand";
-import { Group } from "@api/v1/user/group";
 
 type GroupState = {
-  groups?: Group[];
+  groups?: User.Group[];
 
   setState: <T extends keyof GroupState>(
     key: T

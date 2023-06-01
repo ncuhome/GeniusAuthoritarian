@@ -1,11 +1,10 @@
 import { create, StoreApi, UseBoundStore } from "zustand";
-import { Group } from "@api/v1/user/group";
 
 interface AppFormState {
   name: string;
   callback: string;
   permitAll: boolean;
-  permitGroups?: Group[];
+  permitGroups?: User.Group[];
 
   nameError: boolean;
   callbackError: boolean;
