@@ -1,5 +1,4 @@
 import { FC, useState } from "react";
-import { useLoadingToast, useMount, useInterval } from "@hooks";
 import toast from "react-hot-toast";
 
 import { AppForm } from "@/pages/User/pages/App/components";
@@ -21,12 +20,8 @@ import {
   DialogContent,
 } from "@mui/material";
 
-import {
-  GetOwnedAppList,
-  DeleteApp,
-  ModifyApp,
-  AppDetailed,
-} from "@api/v1/user/app";
+import { useUserApiV1 } from "@api/v1/user/hook";
+import { apiV1User } from "@api/v1/user/base";
 
 import { shallow } from "zustand/shallow";
 import { useUser, useAppModifyForm } from "@store";
@@ -36,8 +31,11 @@ export const AppControlBlock: FC = () => {
   const setApps = useUser((state) => state.setState("apps"));
   const setDialog = useUser((state) => state.setDialog);
 
-  const [onRequestApps, setOnRequestApps] = useState(true);
-  const [loadAppsToast, closeAppsToast] = useLoadingToast();
+  useUserApiV1<App.Detailed[]>("app/", {
+    immutable: true,
+    enableLoading: true,
+    onSuccess: (data) => setApps(data),
+  });
 
   const [name, callback, permitAll, permitGroups] = useAppModifyForm(
     (state) => [
@@ -58,82 +56,68 @@ export const AppControlBlock: FC = () => {
       ],
       shallow
     );
-  const [onModifyApp, setOnModifyApp] = useState<AppDetailed | null>(null);
+  const [onModifyApp, setOnModifyApp] = useState<App.Detailed | null>(null);
   const [modifyingApp, setModifyingApp] = useState(false);
 
-  async function loadApps() {
-    setOnRequestApps(true);
+  async function handleDeleteApp(app: App.Detailed) {
     try {
-      const data = await GetOwnedAppList();
-      setApps(data);
-      closeAppsToast();
+      const ok = await setDialog({
+        title: "确认删除",
+        content: `正在删除名称为 ${app.name} ，appCode 为 ${app.appCode} 的应用`,
+      });
+      if (!ok) return;
+      await apiV1User.delete("app/", {
+        params: {
+          id: app.id,
+        },
+      });
+      setApps((apps || []).filter((a) => a.id !== app.id));
+      toast.success("删除成功");
     } catch ({ msg }) {
-      if (msg) loadAppsToast(msg as string);
+      if (msg) toast.error(msg as string);
     }
-    setOnRequestApps(false);
   }
 
-    async function handleDeleteApp(app: AppDetailed) {
-      try {
-        const ok = await setDialog({
-          title: "确认删除",
-          content: `正在删除名称为 ${app.name} ，appCode 为 ${app.appCode} 的应用`,
-        });
-        if (!ok) return;
-        await DeleteApp(app.id);
-        setApps((apps || []).filter((a) => a.id !== app.id));
-        toast.success("删除成功");
-      } catch ({ msg }) {
-        if (msg) toast.error(msg as string);
-      }
+  async function handleModifyApp() {
+    if (!onModifyApp) return;
+    setModifyingApp(true);
+    try {
+      await apiV1User.put("app/", {
+        id: onModifyApp.id,
+        name,
+        callback,
+        permitAll,
+        permitGroups: permitGroups?.map((g) => g.id),
+      });
+      toast.success("修改成功");
+      setApps(
+        (apps || []).map((app) =>
+          app.id === onModifyApp.id
+            ? ({
+                id: onModifyApp.id,
+                name: name,
+                appCode: onModifyApp.appCode,
+                callback: callback,
+                permitAllGroup: permitAll,
+                groups: permitGroups || [],
+              } as App.Detailed)
+            : app
+        )
+      );
+      setOnModifyApp(null);
+    } catch ({ msg }) {
+      if (msg) toast.error(msg as string);
     }
+    setModifyingApp(false);
+  }
 
-    async function handleModifyApp() {
-      if (!onModifyApp) return;
-      setModifyingApp(true);
-      try {
-        await ModifyApp(
-          onModifyApp.id,
-          name,
-          callback,
-          permitAll,
-          permitGroups?.map((g) => g.id)
-        );
-        toast.success("修改成功");
-        setApps(
-          (apps || []).map((app) =>
-            app.id === onModifyApp.id
-              ? ({
-                  id: onModifyApp.id,
-                  name: name,
-                  appCode: onModifyApp.appCode,
-                  callback: callback,
-                  permitAllGroup: permitAll,
-                  groups: permitGroups || [],
-                } as AppDetailed)
-              : app
-          )
-        );
-        setOnModifyApp(null);
-      } catch ({ msg }) {
-        if (msg) toast.error(msg as string);
-      }
-      setModifyingApp(false);
-    }
-
-    function showModifyAppDialog(app: AppDetailed) {
-      setName(app.name);
-      setCallback(app.callback);
-      setPermitAll(app.permitAllGroup);
-      setPermitGroups(app.groups);
-      setOnModifyApp(app);
-    }
-
-    useInterval(loadApps, !apps && !onRequestApps ? 2000 : null);
-  useMount(() => {
-    if (!apps) loadApps();
-    else setOnRequestApps(false);
-  });
+  function showModifyAppDialog(app: App.Detailed) {
+    setName(app.name);
+    setCallback(app.callback);
+    setPermitAll(app.permitAllGroup);
+    setPermitGroups(app.groups);
+    setOnModifyApp(app);
+  }
 
   return (
     <Block title={"App"}>

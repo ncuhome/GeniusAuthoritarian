@@ -5,7 +5,7 @@ import { ThrowError } from "@util/nav";
 
 import { OnLogin } from "@components";
 
-import { Login } from "@api/v1/login";
+import { LoginUrl } from "@api/v1/login";
 
 export const DingTalk: FC = () => {
   const nav = useNavigate();
@@ -15,7 +15,7 @@ export const DingTalk: FC = () => {
 
   async function login() {
     try {
-      const callbackUrl = await Login("dingTalk", code, appCode);
+      const callbackUrl = await LoginUrl("dingTalk", code, appCode);
       window.open(callbackUrl, "_self");
     } catch ({ msg }) {
       if (msg) ThrowError(nav, "登录失败", msg as string);

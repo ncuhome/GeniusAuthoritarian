@@ -5,7 +5,7 @@ import { ThrowError } from "@util/nav";
 
 import { OnLogin } from "@components";
 
-import { Login } from "@api/v1/login";
+import { LoginUrl } from "@api/v1/login";
 
 export const Feishu: FC = () => {
   const nav = useNavigate();
@@ -15,7 +15,7 @@ export const Feishu: FC = () => {
 
   async function login() {
     try {
-      const callbackUrl = await Login("feishu", code, appCode);
+      const callbackUrl = await LoginUrl("feishu", code, appCode);
       window.open(callbackUrl, "_self");
     } catch ({ msg }) {
       if (msg) ThrowError(nav, "登录失败", msg as string);

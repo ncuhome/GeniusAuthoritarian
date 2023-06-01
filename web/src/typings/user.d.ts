@@ -3,4 +3,9 @@ declare namespace User {
     id: number;
     name: string;
   };
+
+  type LoginResult = {
+    token: string;
+    groups: string[];
+  };
 }

@@ -5,7 +5,7 @@ import { ThrowError } from "@util/nav";
 
 import { OnLogin } from "@components";
 
-import { UserLogin } from "@api/v1/login";
+import { apiV1 } from "@api/base";
 
 import { useUser } from "@store";
 
@@ -18,7 +18,13 @@ export const Login: FC = () => {
 
   async function handleLogin() {
     try {
-      const res = await UserLogin(token);
+      const {
+        data: { data: res },
+      } = await apiV1.post<{
+        data: User.LoginResult;
+      }>("public/login/", {
+        token,
+      });
       setAuth(res.token, res.groups);
       nav("/user/");
     } catch ({ msg }) {

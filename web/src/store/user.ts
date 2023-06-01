@@ -1,7 +1,6 @@
 import { ReactNode } from "react";
 import { create } from "zustand";
 import { UserProfile } from "@api/v1/user/profile";
-import { AppDetailed } from "@api/v1/user/app";
 
 type DialogProps = {
   title: string;
@@ -17,7 +16,7 @@ interface UserState {
   dialogResolver?: (ok: boolean) => void;
 
   profile: UserProfile | null;
-  apps: AppDetailed[] | null;
+  apps: App.Detailed[] | null;
   accessibleApps: App.Accessible | undefined;
 
   setAuth: (token: string | null, groups?: string[]) => void;

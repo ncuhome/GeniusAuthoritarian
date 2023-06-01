@@ -5,15 +5,11 @@ import { useUser } from "@store";
 
 function GoLogin() {
   window.location.href = "/";
-  console.log(4);
 }
 
 export function Logout() {
-  console.log(1);
   useUser.getState().setAuth(null);
-  console.log(2);
   GoLogin();
-  console.log(3);
 }
 
 export const apiV1User = axios.create({
