@@ -1,6 +1,5 @@
 import { ReactNode } from "react";
 import { create } from "zustand";
-import { UserProfile } from "@api/v1/user/profile";
 
 type DialogProps = {
   title: string;
@@ -15,7 +14,7 @@ interface UserState {
   dialog: DialogProps;
   dialogResolver?: (ok: boolean) => void;
 
-  profile: UserProfile | null;
+  profile: User.Profile | null;
   apps: App.Detailed[] | null;
   accessibleApps: App.Accessible | undefined;
 

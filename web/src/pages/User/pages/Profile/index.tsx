@@ -1,5 +1,4 @@
-import { FC, useCallback, useMemo, useState } from "react";
-import { useInterval, useMount, useLoadingToast } from "@hooks";
+import { FC, useMemo } from "react";
 import toast from "react-hot-toast";
 import moment from "moment";
 
@@ -19,7 +18,7 @@ import {
   Skeleton,
 } from "@mui/material";
 
-import { GetUserProfile } from "@api/v1/user/profile";
+import { useUserApiV1 } from "@api/v1/user/hook";
 
 import { useUser } from "@store";
 
@@ -27,27 +26,15 @@ export const Profile: FC = () => {
   const profile = useUser((state) => state.profile);
   const setProfile = useUser((state) => state.setState("profile"));
 
-  const [onRequest, setOnRequest] = useState(true);
-
   const userGroups: string = useMemo(() => {
     if (!profile) return "";
     return profile.user.groups.map((group) => group.name).join("、");
   }, [profile]);
 
-  const [loadProfileFailedToast, closeLoadProfileFailedToast] =
-    useLoadingToast();
-
-  const loadProfile = useCallback(async () => {
-    setOnRequest(true);
-    try {
-      const data = await GetUserProfile();
-      setProfile(data);
-      closeLoadProfileFailedToast();
-    } catch ({ msg }) {
-      if (msg) loadProfileFailedToast(msg as string);
-    }
-    setOnRequest(false);
-  }, []);
+  useUserApiV1<User.Profile>("profile/", {
+    enableLoading: true,
+    onSuccess: (data) => setProfile(data),
+  });
 
   const GridTextField: FC<TextFieldProps> = ({ ...props }) => {
     return (
@@ -79,12 +66,6 @@ export const Profile: FC = () => {
       </Grid>
     );
   };
-
-  useInterval(loadProfile, profile || onRequest ? null : 2000);
-  useMount(() => {
-    if (!profile) loadProfile();
-    else setOnRequest(false);
-  });
 
   return (
     <Container>
