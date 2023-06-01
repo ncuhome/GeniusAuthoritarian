@@ -5,7 +5,7 @@ import { AppForm } from "@/pages/User/pages/App/components";
 import { Block } from "@/pages/User/components";
 import { Box, Stack, Typography } from "@mui/material";
 
-import { ApplyApp } from "@api/v1/user/app";
+import { apiV1User } from "@api/v1/user/base";
 
 import { shallow } from "zustand/shallow";
 import { useUser, useAppForm } from "@store";
@@ -31,12 +31,14 @@ export const NewAppBlock: FC = () => {
   async function createApp() {
     setOnCreateApp(true);
     try {
-      const data = await ApplyApp(
+      const {
+        data: { data },
+      } = await apiV1User.post("app/", {
         name,
         callback,
         permitAll,
-        permitGroups?.map((group) => group.id)
-      );
+        permitGroups: permitGroups?.map((group) => group.id),
+      });
       setApps([data, ...apps!]);
       resetForm();
       setDialog({

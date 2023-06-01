@@ -6,7 +6,7 @@ import { AxiosInstance } from "axios";
 export const createFetchHook = (api: AxiosInstance) => {
   const fetcher = (url: string) => api.get(url).then((res) => res.data.data);
   return <T>(
-    url: string,
+    url: string | null,
     config?: SWRConfiguration<T> & {
       enableLoading?: boolean;
       immutable?: boolean;

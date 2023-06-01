@@ -3,7 +3,7 @@ import toast from "react-hot-toast";
 
 import { Card, CardContent, Typography } from "@mui/material";
 
-import { GetLandingUrl } from "@api/v1/user/app";
+import { apiV1User } from "@api/v1/user/base";
 
 interface Props {
   app: App.Info;
@@ -14,7 +14,15 @@ export const NavAppCard: FC<Props> = ({ app }) => {
 
   async function onLandingApp(id: number) {
     try {
-      const url = await GetLandingUrl(id);
+      const {
+        data: {
+          data: { url },
+        },
+      } = await apiV1User.get("app/landing", {
+        params: {
+          id,
+        },
+      });
       window.open(url, "_blank");
     } catch ({ msg }) {
       if (msg) toast.error(msg as string);

@@ -1,5 +1,5 @@
 import { FC, useEffect, useRef, useState } from "react";
-import { useTimeout, useLoadingToast, useInterval } from "@hooks";
+import { useTimeout } from "@hooks";
 import toast from "react-hot-toast";
 
 import { SelectPermitGroup } from "./components";
@@ -15,7 +15,7 @@ import {
   TextField,
 } from "@mui/material";
 
-import { ListGroups } from "@api/v1/user/group";
+import { useUserApiV1 } from "@api/v1/user/hook";
 
 import { shallow } from "zustand/shallow";
 import { useGroup, useUser, UseAppForm } from "@store";
@@ -78,20 +78,12 @@ export const AppForm: FC<Props> = ({
 
   const groups = useGroup((state) => state.groups);
   const setGroups = useGroup((state) => state.setState("groups"));
-  const [onRequestGroups, setOnRequestGroups] = useState(false);
-  const [loadGroupToast, closeLoadGroupToast] = useLoadingToast();
 
-  async function loadGroups() {
-    setOnRequestGroups(true);
-    try {
-      const data = await ListGroups();
-      setGroups(data);
-      closeLoadGroupToast();
-    } catch ({ msg }) {
-      if (msg) loadGroupToast(msg as string);
-    }
-    setOnRequestGroups(false);
-  }
+  useUserApiV1<User.Group[]>(!permitAll ? "group/list" : null, {
+    immutable: true,
+    enableLoading: true,
+    onSuccess: (data) => setGroups(data),
+  });
 
   async function checkForm(): Promise<boolean> {
     if (!name) {
@@ -129,18 +121,9 @@ export const AppForm: FC<Props> = ({
   }
 
   useTimeout(() => setShowSelectGroups(false), permitAll ? 300 : null);
-  useInterval(
-    loadGroups,
-    !groups && !onRequestGroups && !permitAll ? 2000 : null
-  );
+
   useEffect(() => {
-    if (!permitAll) {
-      setShowSelectGroups(true);
-      if (onRequestGroups || groups) return;
-      loadGroups();
-    } else {
-      closeLoadGroupToast();
-    }
+    if (!permitAll) setShowSelectGroups(true);
   }, [permitAll]);
   return (
     <>
