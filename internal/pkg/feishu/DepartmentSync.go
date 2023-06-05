@@ -10,6 +10,7 @@ import (
 	"github.com/ncuhome/GeniusAuthoritarian/pkg/departments"
 	log "github.com/sirupsen/logrus"
 	"strings"
+	"time"
 )
 
 func DepartmentSync() error {
@@ -93,10 +94,11 @@ func AddDepartmentSyncCron(spec string) error {
 		T: spec,
 		E: func() {
 			defer tool.Recover()
+			startAt := time.Now()
 			if e := DepartmentSync(); e != nil {
 				log.Errorf("同步飞书部门失败: %v", e)
 			} else {
-				log.Infoln("飞书部门同步成功")
+				log.Infof("飞书部门同步成功，耗时 %dms", time.Now().Sub(startAt).Milliseconds())
 			}
 		},
 	})

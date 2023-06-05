@@ -15,7 +15,7 @@ import (
 type UserSyncProcessor struct {
 	tx *gorm.DB
 
-	cost time.Duration
+	Cost time.Duration
 
 	createdUser  int
 	unFrozenUser int
@@ -63,13 +63,13 @@ func (a *UserSyncProcessor) Run() error {
 		return e
 	}
 
-	a.cost = time.Now().Sub(startAt)
+	a.Cost = time.Now().Sub(startAt)
 	return nil
 }
 
 func (a *UserSyncProcessor) PrintSyncResult() {
-	log.Infof("耗时 %dms，创建用户 %d 个，解冻用户 %d 个，冻结用户 %d 个，添加用户组 %d 个，移除用户组 %d 个",
-		a.cost.Milliseconds(), a.createdUser, a.frozenUser, a.unFrozenUser, a.createdUserGroup, a.deletedUserGroup)
+	log.Infof("创建用户 %d 个，解冻用户 %d 个，冻结用户 %d 个，添加用户组 %d 个，移除用户组 %d 个",
+		a.createdUser, a.frozenUser, a.unFrozenUser, a.createdUserGroup, a.deletedUserGroup)
 }
 
 func (a *UserSyncProcessor) downloadUserList() (map[string][]feishuApi.ListUserContent, error) {
@@ -302,7 +302,7 @@ func AddUserSyncCron(spec string) error {
 			if e := sync.Run(); e != nil {
 				log.Errorf("同步飞书用户列表失败: %v", e)
 			} else {
-				log.Infoln("飞书用户列表同步成功")
+				log.Infof("飞书用户列表同步成功，耗时 %dms", sync.Cost)
 				sync.PrintSyncResult()
 			}
 		},
