@@ -3,6 +3,7 @@ package controllers
 import (
 	"bytes"
 	"encoding/base64"
+	"fmt"
 	"github.com/Mmx233/daoUtil"
 	"github.com/gin-gonic/gin"
 	"github.com/ncuhome/GeniusAuthoritarian/internal/api/callback"
@@ -33,7 +34,10 @@ func MfaAdd(c *gin.Context) {
 		return
 	}
 
-	mfaKey, e := totp.Generate(totp.GenerateOpts{})
+	mfaKey, e := totp.Generate(totp.GenerateOpts{
+		Issuer:      "GeniusAuth",
+		AccountName: fmt.Sprint(uid),
+	})
 	if e != nil {
 		callback.Error(c, e, callback.ErrUnexpected)
 		return
