@@ -24,6 +24,41 @@ import { useUserApiV1 } from "@api/v1/user/hook";
 
 import { useUser } from "@store";
 
+const GridItem: FC<PropsWithChildren> = ({ children }) => (
+  <Grid item xs={12} sm={6} position={"relative"}>
+    {children ? children : <Skeleton variant={"rounded"} height={56} />}
+  </Grid>
+);
+
+const GridTextField: FC<TextFieldProps> = ({ ...props }) => {
+  return (
+    <GridItem>
+      {props.value ? (
+        <TextField
+          variant={"outlined"}
+          inputProps={{
+            readOnly: true,
+            style: {
+              cursor: "default",
+            },
+          }}
+          fullWidth
+          onClick={async () => {
+            try {
+              await navigator.clipboard.writeText(props.value as string);
+              toast.success("已复制");
+            } catch (e) {
+              console.log(e);
+              toast.error(`复制失败: ${e}`);
+            }
+          }}
+          {...props}
+        />
+      ) : undefined}
+    </GridItem>
+  );
+};
+
 export const Profile: FC = () => {
   const profile = useUser((state) => state.profile);
   const setProfile = useUser((state) => state.setState("profile"));
@@ -37,41 +72,6 @@ export const Profile: FC = () => {
     enableLoading: true,
     onSuccess: (data) => setProfile(data),
   });
-
-  const GridItem: FC<PropsWithChildren> = ({ children }) => (
-    <Grid item xs={12} sm={6} position={"relative"}>
-      {children ? children : <Skeleton variant={"rounded"} height={56} />}
-    </Grid>
-  );
-
-  const GridTextField: FC<TextFieldProps> = ({ ...props }) => {
-    return (
-      <GridItem>
-        {props.value ? (
-          <TextField
-            variant={"outlined"}
-            inputProps={{
-              readOnly: true,
-              style: {
-                cursor: "default",
-              },
-            }}
-            fullWidth
-            onClick={async () => {
-              try {
-                await navigator.clipboard.writeText(props.value as string);
-                toast.success("已复制");
-              } catch (e) {
-                console.log(e);
-                toast.error(`复制失败: ${e}`);
-              }
-            }}
-            {...props}
-          />
-        ) : undefined}
-      </GridItem>
-    );
-  };
 
   return (
     <Container>
