@@ -18,6 +18,7 @@ const (
 	cErrMfaCode
 	cErrMfaAlreadyExist
 	cErrMfaAddExpired
+	cErrMfaNotExist
 )
 
 var (
@@ -105,5 +106,10 @@ var (
 		Code:       cErrMfaAddExpired,
 		Msg:        "双因素认证绑定已过期，请刷新重试",
 		HttpStatus: 404,
+	}
+	ErrMfaNotExist = &Msg{
+		Code:       cErrMfaNotExist,
+		Msg:        "双因素认证未开启",
+		HttpStatus: 400,
 	}
 )

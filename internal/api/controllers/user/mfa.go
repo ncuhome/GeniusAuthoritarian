@@ -113,4 +113,50 @@ func MfaCheck(c *gin.Context) {
 		return
 	}
 
+	callback.Default(c)
+}
+
+func MfaDel(c *gin.Context) {
+	var f struct {
+		Code string `json:"code" form:"code" binding:"required"`
+	}
+	if e := c.ShouldBind(&f); e != nil {
+		callback.Error(c, e, callback.ErrForm)
+		return
+	}
+
+	userSrv, e := service.User.Begin()
+	if e != nil {
+		callback.Error(c, e, callback.ErrDBOperation)
+		return
+	}
+	defer userSrv.Rollback()
+
+	uid := tools.GetUserInfo(c).ID
+
+	mfaSecret, e := userSrv.FindMfa(uid, daoUtil.LockForUpdate)
+	if e != nil {
+		callback.Error(c, e, callback.ErrDBOperation)
+		return
+	} else if mfaSecret == "" {
+		callback.Error(c, nil, callback.ErrMfaNotExist)
+		return
+	}
+
+	if !totp.Validate(f.Code, mfaSecret) {
+		callback.Error(c, nil, callback.ErrMfaCode)
+		return
+	}
+
+	if e = userSrv.DelMfa(uid); e != nil {
+		callback.Error(c, e, callback.ErrDBOperation)
+		return
+	}
+
+	if e = userSrv.Commit().Error; e != nil {
+		callback.Error(c, e, callback.ErrDBOperation)
+		return
+	}
+
+	callback.Default(c)
 }

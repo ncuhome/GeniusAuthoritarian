@@ -41,12 +41,16 @@ func (a *User) GetNotInPhoneSlice(tx *gorm.DB, phone []string) ([]User, error) {
 }
 
 func (a *User) UpdateMfa(tx *gorm.DB) error {
-	return tx.Model(a).Select("mfa").Where(a, "uid").Updates(a).Error
+	return tx.Model(a).Select("mfa").Where(a, "id").Updates(a).Error
 }
 
 func (a *User) MfaExist(tx *gorm.DB) (bool, error) {
 	var t bool
-	return t, tx.Model(a).Select("mfa").Where(a, "uid").First(&t).Error
+	return t, tx.Model(a).Select("mfa").Where(a, "id").First(&t).Error
+}
+
+func (a *User) FirstMfa(tx *gorm.DB) error {
+	return tx.Model(a).Select("mfa").Where(a, "id").First(a).Error
 }
 
 func (a *User) FrozeByIDSlice(tx *gorm.DB, ids []uint) error {
@@ -55,4 +59,8 @@ func (a *User) FrozeByIDSlice(tx *gorm.DB, ids []uint) error {
 
 func (a *User) UnfrozeByIDSlice(tx *gorm.DB, ids []uint) error {
 	return tx.Model(a).Unscoped().Where("id IN ?", ids).Update("deleted_at", gorm.Expr("NULL")).Error
+}
+
+func (a *User) DelMfa(tx *gorm.DB) error {
+	return tx.Model(a).Model(a).Where(a, "id").Update("mfa", gorm.Expr("NULL")).Error
 }

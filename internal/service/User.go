@@ -73,6 +73,17 @@ func (a UserSrv) MfaExist(uid uint, opts ...daoUtil.ServiceOpt) (bool, error) {
 	return (&dao.User{ID: uid}).MfaExist(daoUtil.TxOpts(a.DB, opts...))
 }
 
+func (a UserSrv) FindMfa(uid uint, opts ...daoUtil.ServiceOpt) (string, error) {
+	var t = dao.User{
+		ID: uid,
+	}
+	return t.MFA, t.FirstMfa(daoUtil.TxOpts(a.DB, opts...))
+}
+
 func (a UserSrv) SetMfaSecret(uid uint, secret string) error {
 	return (&dao.User{ID: uid, MFA: secret}).UpdateMfa(a.DB)
+}
+
+func (a UserSrv) DelMfa(uid uint) error {
+	return (&dao.User{ID: uid}).DelMfa(a.DB)
 }
