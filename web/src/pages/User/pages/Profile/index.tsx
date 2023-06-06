@@ -1,4 +1,4 @@
-import { FC, useMemo, PropsWithChildren } from "react";
+import { FC, useMemo } from "react";
 import toast from "react-hot-toast";
 import moment from "moment";
 
@@ -8,6 +8,7 @@ import {
   Container,
   Box,
   Grid,
+  GridProps,
   TextField,
   TextFieldProps,
   Table,
@@ -24,8 +25,8 @@ import { useUserApiV1 } from "@api/v1/user/hook";
 
 import { useUser } from "@store";
 
-const GridItem: FC<PropsWithChildren> = ({ children }) => (
-  <Grid item xs={12} sm={6} position={"relative"}>
+const GridItem: FC<GridProps> = ({ children, ...props }) => (
+  <Grid item xs={12} sm={6} {...props}>
     {children ? children : <Skeleton variant={"rounded"} height={56} />}
   </Grid>
 );
