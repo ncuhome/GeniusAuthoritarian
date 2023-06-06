@@ -2,7 +2,7 @@ import { FC, useMemo } from "react";
 import toast from "react-hot-toast";
 import moment from "moment";
 
-import { Block } from "@/pages/User/components";
+import { Block, BlockTitle } from "@/pages/User/components";
 import { Ip } from "./components";
 import {
   Container,
@@ -16,7 +16,13 @@ import {
   TableRow,
   TableHead,
   Skeleton,
+  Stack,
+  Chip,
+  ButtonGroup,
+  Button,
 } from "@mui/material";
+import { LoadingButton } from "@mui/lab";
+import { Done, Remove } from "@mui/icons-material";
 
 import { useUserApiV1 } from "@api/v1/user/hook";
 
@@ -70,11 +76,27 @@ export const Profile: FC = () => {
   return (
     <Container>
       <Block title={"Profile"}>
-        <Grid container spacing={2} marginTop={"0"}>
+        <Grid container spacing={2} marginTop={0} marginBottom={3}>
           <GridTextField label={"姓名"} value={profile?.user.name} />
           <GridTextField label={"电话"} value={profile?.user.phone} />
           <GridTextField label={"身份组"} value={userGroups} />
         </Grid>
+
+        <BlockTitle>MFA</BlockTitle>
+
+        <Stack flexDirection={"row"} marginTop={1}>
+          <Chip
+            label={profile?.user.mfa ? "已开启" : "未启用"}
+            variant={"outlined"}
+            icon={
+              profile?.user.mfa ? (
+                <Done color={"success"} fontSize="small" />
+              ) : (
+                <Remove />
+              )
+            }
+          />
+        </Stack>
       </Block>
 
       {profile && profile.loginRecord.length ? (
