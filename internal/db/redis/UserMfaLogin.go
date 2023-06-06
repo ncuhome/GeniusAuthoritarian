@@ -2,31 +2,35 @@ package redis
 
 import (
 	"context"
+	"encoding/json"
 	"fmt"
 	"time"
 )
 
 var UserMfaLogin = UserMfaLoginHelper{
-	key:           keyUserMfaLogin.String(),
-	compareLength: 5,
+	key: keyUserMfaLogin.String(),
 }
 
 type UserMfaLoginHelper struct {
-	key           string
-	compareLength int
+	key string
 }
 
-func (a UserMfaLoginHelper) Set(uid uint, token string, valid time.Duration) error {
-	return Client.Set(context.Background(), a.key+fmt.Sprint(uid), token[:a.compareLength], valid).Err()
+func (a UserMfaLoginHelper) genKey(uid uint, token string) string {
+	return a.key + fmt.Sprint(uid) + "-" + token[:5]
 }
 
-func (a UserMfaLoginHelper) Verify(uid uint, token string) (bool, error) {
-	value, e := Client.Get(context.Background(), a.key+fmt.Sprint(uid)).Result()
+func (a UserMfaLoginHelper) Set(uid uint, token string, valid time.Duration, claims interface{}) error {
+	v, e := json.Marshal(claims)
 	if e != nil {
-		if e == Nil {
-			e = nil
-		}
-		return false, e
+		return e
 	}
-	return value == token[:a.compareLength], nil
+	return Client.Set(context.Background(), a.genKey(uid, token), string(v), valid).Err()
+}
+
+func (a UserMfaLoginHelper) Get(uid uint, token string, claims interface{}) error {
+	value, e := Client.Get(context.Background(), a.genKey(uid, token)).Result()
+	if e != nil {
+		return e
+	}
+	return json.Unmarshal([]byte(value), claims)
 }
