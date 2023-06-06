@@ -64,6 +64,23 @@ export const Mfa: FC<Props> = ({ enabled, setEnabled, ...props }) => {
     setIsMfaCheckLoading(false);
   }
 
+  async function onDisableMfa(code: string) {
+    setIsMfaCheckLoading(true);
+    try {
+      await apiV1User.delete("mfa/", {
+        params: {
+          code,
+        },
+      });
+      setCheckMfaCallback(null);
+      setEnabled(false);
+      toast.success("已关闭双因素认证");
+    } catch ({ msg }) {
+      if (msg) toast.error(msg as string);
+    }
+    setIsMfaCheckLoading(false);
+  }
+
   useEffect(() => {
     if (checkMfaCallback) setCheckMfaCode("");
   }, [checkMfaCallback]);
@@ -84,13 +101,26 @@ export const Mfa: FC<Props> = ({ enabled, setEnabled, ...props }) => {
             ml: 2,
           }}
         >
-          <LoadingButton
-            variant={"outlined"}
-            loading={isLoadingMfaNew}
-            onClick={onEnableMfa}
-          >
-            开启
-          </LoadingButton>
+          {enabled ? (
+            <>
+              <Button
+                color={"warning"}
+                onClick={() => setCheckMfaCallback(() => onDisableMfa)}
+              >
+                关闭
+              </Button>
+            </>
+          ) : (
+            <>
+              <LoadingButton
+                variant={"outlined"}
+                loading={isLoadingMfaNew}
+                onClick={onEnableMfa}
+              >
+                开启
+              </LoadingButton>
+            </>
+          )}
         </ButtonGroup>
       </Stack>
 

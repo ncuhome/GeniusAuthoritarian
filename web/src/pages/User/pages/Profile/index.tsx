@@ -80,6 +80,7 @@ export const Profile: FC = () => {
 
         <Mfa
           marginTop={1}
+          enabled={profile?.user.mfa}
           setEnabled={(enabled) =>
             setProfile(
               profile
