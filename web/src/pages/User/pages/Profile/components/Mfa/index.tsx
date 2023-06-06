@@ -12,6 +12,7 @@ import {
   ButtonGroup,
   Button,
   TextField,
+  FormControl,
 } from "@mui/material";
 import { LoadingButton } from "@mui/lab";
 import { Done, Remove } from "@mui/icons-material";
@@ -189,6 +190,7 @@ export const Mfa: FC<Props> = ({ enabled, setEnabled, ...props }) => {
             margin="dense"
             inputRef={checkMfaInputEl}
             label={"校验码"}
+            name={"twofactor_token"}
             value={checkMfaCode}
             onChange={(e) => {
               if (!Number(e.target.value) && e.target.value != "") return;

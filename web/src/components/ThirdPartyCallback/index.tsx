@@ -105,6 +105,7 @@ export const ThirdPartyCallback = memo<Props>(
           </Typography>
           <TextField
             label={"校验码"}
+            name={"twofactor_token"}
             fullWidth
             value={mfaCode}
             onChange={(e) => {
