@@ -10,6 +10,11 @@ declare namespace User {
     callback?: string;
   };
 
+  type MfaLoginResult = {
+    token: string;
+    callback: string;
+  };
+
   type LoginResult = {
     token: string;
     groups: string[];
