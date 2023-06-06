@@ -17,6 +17,7 @@ func NewMfa(uid uint) (*otp.Key, error) {
 
 func VerifyMfa(code, secret string) (bool, error) {
 	return totp.ValidateCustom(code, secret, time.Now(), totp.ValidateOpts{
+		Digits:    otp.DigitsSix,
 		Algorithm: otp.AlgorithmSHA512,
 	})
 }
