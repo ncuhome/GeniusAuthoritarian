@@ -4,13 +4,11 @@ export async function LoginUrl(
   thirdParty: string,
   code: string,
   appCode: string
-): Promise<string> {
+): Promise<User.ThirdPartyLoginResult> {
   const {
-    data: {
-      data: { token, callback: callbackUrl },
-    },
+    data: { data },
   } = await apiV1.post(`public/login/${thirdParty}/${appCode}`, {
     code,
   });
-  return callbackUrl;
+  return data;
 }

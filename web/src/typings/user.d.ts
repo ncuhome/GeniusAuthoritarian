@@ -4,6 +4,12 @@ declare namespace User {
     name: string;
   };
 
+  type ThirdPartyLoginResult = {
+    token: string;
+    mfa: boolean;
+    callback?: string;
+  };
+
   type LoginResult = {
     token: string;
     groups: string[];
@@ -14,6 +20,7 @@ declare namespace User {
       id: number;
       name: string;
       phone: string;
+      mfa: boolean;
       groups: Group[];
     };
     loginRecord: Array<{
