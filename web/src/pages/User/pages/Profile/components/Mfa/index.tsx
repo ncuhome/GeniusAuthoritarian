@@ -19,7 +19,7 @@ import { Done, Remove } from "@mui/icons-material";
 import { apiV1User } from "@api/v1/user/base";
 
 interface Props extends StackProps {
-  enabled?: boolean;
+  enabled: boolean;
   setEnabled: (enabled: boolean) => void;
 }
 
@@ -89,7 +89,7 @@ export const Mfa: FC<Props> = ({ enabled, setEnabled, ...props }) => {
     <>
       <Stack flexDirection={"row"} alignItems={"center"} {...props}>
         <Chip
-          label={enabled ? "已开启" : "未启用"}
+          label={enabled ? "双因素认证已开启" : "双因素未启用"}
           variant={"outlined"}
           icon={
             enabled ? <Done color={"success"} fontSize="small" /> : <Remove />

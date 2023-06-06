@@ -1,8 +1,8 @@
-import { FC, useMemo } from "react";
+import { FC, useMemo, PropsWithChildren } from "react";
 import toast from "react-hot-toast";
 import moment from "moment";
 
-import { Block, BlockTitle } from "@/pages/User/components";
+import { Block } from "@/pages/User/components";
 import { Ip, Mfa } from "./components";
 import {
   Container,
@@ -16,6 +16,8 @@ import {
   TableRow,
   TableHead,
   Skeleton,
+  Stack,
+  Typography,
 } from "@mui/material";
 
 import { useUserApiV1 } from "@api/v1/user/hook";
@@ -36,9 +38,15 @@ export const Profile: FC = () => {
     onSuccess: (data) => setProfile(data),
   });
 
+  const GridItem: FC<PropsWithChildren> = ({ children }) => (
+    <Grid item xs={12} sm={6} position={"relative"}>
+      {children ? children : <Skeleton variant={"rounded"} height={56} />}
+    </Grid>
+  );
+
   const GridTextField: FC<TextFieldProps> = ({ ...props }) => {
     return (
-      <Grid item xs={12} sm={6} position={"relative"}>
+      <GridItem>
         {props.value ? (
           <TextField
             variant={"outlined"}
@@ -60,10 +68,8 @@ export const Profile: FC = () => {
             }}
             {...props}
           />
-        ) : (
-          <Skeleton variant={"rounded"} height={56} />
-        )}
-      </Grid>
+        ) : undefined}
+      </GridItem>
     );
   };
 
@@ -74,27 +80,31 @@ export const Profile: FC = () => {
           <GridTextField label={"姓名"} value={profile?.user.name} />
           <GridTextField label={"电话"} value={profile?.user.phone} />
           <GridTextField label={"身份组"} value={userGroups} />
-        </Grid>
-
-        <BlockTitle>MFA</BlockTitle>
-
-        <Mfa
-          marginTop={1}
-          enabled={profile?.user.mfa}
-          setEnabled={(enabled) =>
-            setProfile(
-              profile
-                ? {
-                    user: {
-                      ...profile.user,
-                      mfa: enabled,
-                    },
-                    loginRecord: profile.loginRecord,
+          <GridItem>
+            {profile ? (
+              <Stack
+                alignItems={"center"}
+                height={"100%"}
+                flexDirection={"row"}
+              >
+                <Typography>MFA:</Typography>
+                <Mfa
+                  ml={1.8}
+                  enabled={profile.user.mfa}
+                  setEnabled={(enabled) =>
+                    setProfile({
+                      user: {
+                        ...profile.user,
+                        mfa: enabled,
+                      },
+                      loginRecord: profile.loginRecord,
+                    })
                   }
-                : null
-            )
-          }
-        />
+                />
+              </Stack>
+            ) : undefined}
+          </GridItem>
+        </Grid>
       </Block>
 
       {profile && profile.loginRecord.length ? (
