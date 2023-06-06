@@ -8,16 +8,16 @@ import (
 	"time"
 )
 
-var Jwt = JwtHelper{
-	key: keyJwt.String(),
+var ThirdPartyLogin = ThirdPartyLoginHelper{
+	key: keyThirdPartyLogin.String(),
 }
 
-type JwtHelper struct {
+type ThirdPartyLoginHelper struct {
 	key string
 	id  atomic.Uint64
 }
 
-func (a *JwtHelper) loginPointKey(id uint64) string {
+func (a *ThirdPartyLoginHelper) loginPointKey(id uint64) string {
 	return a.key + "ap-" + fmt.Sprint(id)
 }
 
@@ -26,7 +26,7 @@ type LoginPoint struct {
 	Data json.RawMessage
 }
 
-func (a *JwtHelper) NewLoginPoint(unix int64, valid time.Duration, claims interface{}) (id uint64, e error) {
+func (a *ThirdPartyLoginHelper) NewLoginPoint(unix int64, valid time.Duration, claims interface{}) (id uint64, e error) {
 	claimsRaw, e := json.Marshal(claims)
 	if e != nil {
 		return 0, e
@@ -46,7 +46,7 @@ func (a *JwtHelper) NewLoginPoint(unix int64, valid time.Duration, claims interf
 	return
 }
 
-func (a *JwtHelper) VerifyLoginPoint(id uint64, unix int64, claims interface{}) (bool, error) {
+func (a *ThirdPartyLoginHelper) VerifyLoginPoint(id uint64, unix int64, claims interface{}) (bool, error) {
 	value, e := Client.Get(context.Background(), a.loginPointKey(id)).Result()
 	if e != nil {
 		if e == Nil {
@@ -62,6 +62,6 @@ func (a *JwtHelper) VerifyLoginPoint(id uint64, unix int64, claims interface{}) 
 	return loginPoint.Unix == unix, json.Unmarshal(loginPoint.Data, claims)
 }
 
-func (a *JwtHelper) DelLoginPoint(id uint64) error {
+func (a *ThirdPartyLoginHelper) DelLoginPoint(id uint64) error {
 	return Client.Del(context.Background(), a.loginPointKey(id)).Err()
 }

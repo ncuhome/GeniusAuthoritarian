@@ -15,7 +15,7 @@ func (a keys) String() string {
 
 const (
 	_keySiteWhiteList keys = iota
-	keyJwt
+	keyThirdPartyLogin
 	keyAppCode
 	keyUserJwt
 	keyUserMfaLogin
