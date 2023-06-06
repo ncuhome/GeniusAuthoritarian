@@ -100,7 +100,7 @@ func callThirdPartyLoginResult(c *gin.Context, user *dao.User, appInfo *dao.App,
 			Callback: callbackUrl,
 		})
 	} else {
-		token, e := jwt.GenerateMfaToken(user.ID, appInfo.ID, user.Name, ip, groupSlice)
+		token, e := jwt.GenerateMfaToken(user.ID, appInfo.ID, user.Name, ip, user.MFA, appInfo.Callback, groupSlice)
 		if e != nil {
 			callback.Error(c, e, callback.ErrUnexpected)
 			return

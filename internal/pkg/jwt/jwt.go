@@ -66,7 +66,7 @@ func GenerateLoginToken(uid, appID uint, name, ip string, groups []string) (stri
 }
 
 // GenerateMfaToken 生成 2FA 中间身份令牌，五分钟有效
-func GenerateMfaToken(uid, appID uint, name, ip string, groups []string) (string, error) {
+func GenerateMfaToken(uid, appID uint, name, ip, mfaSecret, appCallback string, groups []string) (string, error) {
 	now := time.Now()
 	valid := time.Minute * 5
 
@@ -89,6 +89,8 @@ func GenerateMfaToken(uid, appID uint, name, ip string, groups []string) (string
 			Groups: groups,
 			AppID:  appID,
 		},
+		Mfa:         mfaSecret,
+		AppCallback: appCallback,
 	}); e != nil {
 		return "", e
 	}

@@ -15,6 +15,7 @@ const (
 	cErrAppNameExist
 	cErrGroupNotFound
 	cErrAppNotFound
+	cErrMfaCode
 )
 
 var (
@@ -87,5 +88,10 @@ var (
 		Code:       cErrAppNotFound,
 		Msg:        "应用不存在",
 		HttpStatus: 404,
+	}
+	ErrMfaCode = &Msg{
+		Code:       cErrMfaCode,
+		Msg:        "双因素校验码错误",
+		HttpStatus: 403,
 	}
 )

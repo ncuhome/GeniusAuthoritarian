@@ -32,4 +32,6 @@ type MfaToken struct {
 
 type MfaLoginClaims struct {
 	LoginTokenClaims
+	Mfa         string `json:"mfa"`
+	AppCallback string `json:"appCallback"`
 }
