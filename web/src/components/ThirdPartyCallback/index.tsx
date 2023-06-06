@@ -51,6 +51,11 @@ export const ThirdPartyCallback = memo<Props>(
         mfaInput.current?.focus();
         return;
       }
+      if (mfaCode.length != 6) {
+        toast.error("双因素校验码错误");
+        mfaInput.current?.focus();
+        return;
+      }
 
       setMfaLoading(true);
       try {
@@ -102,7 +107,10 @@ export const ThirdPartyCallback = memo<Props>(
             label={"校验码"}
             fullWidth
             value={mfaCode}
-            onChange={(e) => setMfaCode(e.target.value)}
+            onChange={(e) => {
+              if (!Number(e.target.value) && e.target.value != "") return;
+              setMfaCode(e.target.value);
+            }}
             inputRef={mfaInput}
           />
           <LoadingButton
