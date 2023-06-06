@@ -1,6 +1,6 @@
 import { FC, useMemo } from "react";
 import toast from "react-hot-toast";
-import moment from "moment";
+import { unix } from "dayjs";
 
 import { Block } from "@/pages/User/components";
 import { Ip, Mfa } from "./components";
@@ -130,9 +130,7 @@ export const Profile: FC = () => {
                 {profile.loginRecord.map((record) => (
                   <TableRow key={record.id}>
                     <TableCell>
-                      {moment(record.createdAt * 1000).format(
-                        "YYYY/MM/DD HH:mm"
-                      )}
+                      {unix(record.createdAt).format("YYYY/MM/DD HH:mm")}
                     </TableCell>
                     <TableCell>{record.target}</TableCell>
                     <TableCell>
