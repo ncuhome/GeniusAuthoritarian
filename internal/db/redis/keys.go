@@ -18,4 +18,5 @@ const (
 	keyJwt
 	keyAppCode
 	keyUserJwt
+	keyUserMfaLogin
 )

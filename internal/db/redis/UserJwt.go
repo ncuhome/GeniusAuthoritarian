@@ -7,13 +7,13 @@ import (
 )
 
 var UserJwt = UserJwtHelper{
-	key:         keyUserJwt.String(),
-	storeLength: 5,
+	key:           keyUserJwt.String(),
+	compareLength: 5,
 }
 
 type UserJwtHelper struct {
-	key         string
-	storeLength int
+	key           string
+	compareLength int
 }
 
 func (a UserJwtHelper) userKey(uid uint) string {
@@ -21,7 +21,7 @@ func (a UserJwtHelper) userKey(uid uint) string {
 }
 
 func (a UserJwtHelper) Set(uid uint, token string, valid time.Duration) error {
-	return Client.Set(context.Background(), a.userKey(uid), token[:a.storeLength], valid).Err()
+	return Client.Set(context.Background(), a.userKey(uid), token[:a.compareLength], valid).Err()
 }
 
 func (a UserJwtHelper) Pair(uid uint, token string) (bool, error) {
@@ -32,5 +32,5 @@ func (a UserJwtHelper) Pair(uid uint, token string) (bool, error) {
 		}
 		return false, e
 	}
-	return value == token[:a.storeLength], nil
+	return value == token[:a.compareLength], nil
 }
