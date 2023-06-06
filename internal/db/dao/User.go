@@ -40,6 +40,15 @@ func (a *User) GetNotInPhoneSlice(tx *gorm.DB, phone []string) ([]User, error) {
 	return t, tx.Model(a).Where("NOT phone IN ?", phone).Find(&t).Error
 }
 
+func (a *User) UpdateMfa(tx *gorm.DB) error {
+	return tx.Model(a).Select("mfa").Where(a, "uid").Updates(a).Error
+}
+
+func (a *User) MfaExist(tx *gorm.DB) (bool, error) {
+	var t bool
+	return t, tx.Model(a).Select("mfa").Where(a, "uid").First(&t).Error
+}
+
 func (a *User) FrozeByIDSlice(tx *gorm.DB, ids []uint) error {
 	return tx.Delete(a, "id IN ?", ids).Error
 }

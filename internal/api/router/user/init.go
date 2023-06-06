@@ -11,4 +11,5 @@ func Router(G *gin.RouterGroup) {
 	routerProfile(G.Group("profile"))
 	routerApp(G.Group("app"))
 	routerGroups(G.Group("group"))
+	routerMfa(G.Group("mfa"))
 }

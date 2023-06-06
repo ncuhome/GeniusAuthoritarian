@@ -16,6 +16,7 @@ const (
 	cErrGroupNotFound
 	cErrAppNotFound
 	cErrMfaCode
+	cErrMfaAlreadyExist
 )
 
 var (
@@ -93,5 +94,10 @@ var (
 		Code:       cErrMfaCode,
 		Msg:        "双因素校验码错误",
 		HttpStatus: 403,
+	}
+	ErrMfaAlreadyExist = &Msg{
+		Code:       cErrMfaAlreadyExist,
+		Msg:        "双因素校验已开启",
+		HttpStatus: 400,
 	}
 )

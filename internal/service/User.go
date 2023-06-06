@@ -1,6 +1,7 @@
 package service
 
 import (
+	"github.com/Mmx233/daoUtil"
 	"github.com/ncuhome/GeniusAuthoritarian/internal/db/dao"
 	"github.com/ncuhome/GeniusAuthoritarian/internal/db/dto"
 	"gorm.io/gorm"
@@ -66,4 +67,12 @@ func (a UserSrv) UserProfile(uid uint) (*dto.UserProfile, error) {
 		UID: uid,
 	}).GetUserGroupsForShowByUID(a.DB)
 	return profile, e
+}
+
+func (a UserSrv) MfaExist(uid uint, opts ...daoUtil.ServiceOpt) (bool, error) {
+	return (&dao.User{ID: uid}).MfaExist(daoUtil.TxOpts(a.DB, opts...))
+}
+
+func (a UserSrv) SetMfaSecret(uid uint, secret string) error {
+	return (&dao.User{ID: uid, MFA: secret}).UpdateMfa(a.DB)
 }
