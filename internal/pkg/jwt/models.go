@@ -24,3 +24,12 @@ type LoginTokenClaims struct {
 
 	AppID uint `json:"appID"`
 }
+
+type MfaToken struct {
+	jwt.RegisteredClaims
+	UID uint `json:"uid"`
+}
+
+type MfaLoginClaims struct {
+	LoginTokenClaims
+}

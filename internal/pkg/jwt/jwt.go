@@ -27,7 +27,7 @@ func ParseToken[C jwt.Claims](token string, target C) (claims C, valid bool, e e
 	return
 }
 
-// GenerateUserToken 生成有效期 15 天的个人信息访问 Token
+// GenerateUserToken 生成有效期 15 天的后台 Token
 func GenerateUserToken(uid uint, name string, groups []string) (string, error) {
 	return GenerateToken(&UserToken{
 		RegisteredClaims: jwt.RegisteredClaims{
@@ -44,7 +44,8 @@ func GenerateUserToken(uid uint, name string, groups []string) (string, error) {
 func GenerateLoginToken(uid, appID uint, name, ip string, groups []string) (string, error) {
 	now := time.Now()
 	valid := time.Minute * 5
-	id, e := redis.Jwt.NewLoginPoint(now.Unix(), valid, LoginTokenClaims{
+
+	id, e := redis.ThirdPartyLogin.NewLoginPoint(now.Unix(), valid, LoginTokenClaims{
 		UID:    uid,
 		IP:     ip,
 		Name:   name,
@@ -54,6 +55,7 @@ func GenerateLoginToken(uid, appID uint, name, ip string, groups []string) (stri
 	if e != nil {
 		return "", e
 	}
+
 	return GenerateToken(&LoginToken{
 		RegisteredClaims: jwt.RegisteredClaims{
 			ExpiresAt: jwt.NewNumericDate(now.Add(valid)),
@@ -61,6 +63,37 @@ func GenerateLoginToken(uid, appID uint, name, ip string, groups []string) (stri
 		},
 		ID: id,
 	})
+}
+
+// GenerateMfaToken 生成 2FA 中间身份令牌，五分钟有效
+func GenerateMfaToken(uid, appID uint, name, ip string, groups []string) (string, error) {
+	now := time.Now()
+	valid := time.Minute * 5
+
+	token, e := GenerateToken(&MfaToken{
+		RegisteredClaims: jwt.RegisteredClaims{
+			ExpiresAt: jwt.NewNumericDate(now.Add(valid)),
+			IssuedAt:  jwt.NewNumericDate(now),
+		},
+		UID: uid,
+	})
+	if e != nil {
+		return "", e
+	}
+
+	if e = redis.MfaLogin.Set(uid, token, valid, MfaLoginClaims{
+		LoginTokenClaims: LoginTokenClaims{
+			UID:    uid,
+			Name:   name,
+			IP:     ip,
+			Groups: groups,
+			AppID:  appID,
+		},
+	}); e != nil {
+		return "", e
+	}
+
+	return token, nil
 }
 
 func ParseUserToken(token string) (*UserToken, bool, error) {
@@ -75,7 +108,7 @@ func ParseLoginToken(token string) (*LoginTokenClaims, bool, error) {
 	}
 
 	var redisClaims LoginTokenClaims
-	valid, e = redis.Jwt.VerifyLoginPoint(claims.ID, claims.IssuedAt.Unix(), &redisClaims)
+	valid, e = redis.ThirdPartyLogin.VerifyLoginPoint(claims.ID, claims.IssuedAt.Unix(), &redisClaims)
 	if e != nil {
 		if e == redis.Nil {
 			e = nil
@@ -85,6 +118,17 @@ func ParseLoginToken(token string) (*LoginTokenClaims, bool, error) {
 	return &redisClaims, valid, DestroyAuthToken(claims.ID)
 }
 
+// ParseMfaToken 不会销毁，允许多次验证尝试
+func ParseMfaToken(token string) (*MfaLoginClaims, error) {
+	claims, valid, e := ParseToken(token, &MfaToken{})
+	if e != nil || !valid {
+		return nil, e
+	}
+
+	var redisClaims MfaLoginClaims
+	return &redisClaims, redis.MfaLogin.Get(claims.UID, token, &redisClaims)
+}
+
 func DestroyAuthToken(cID uint64) error {
-	return redis.Jwt.DelLoginPoint(cID)
+	return redis.ThirdPartyLogin.DelLoginPoint(cID)
 }

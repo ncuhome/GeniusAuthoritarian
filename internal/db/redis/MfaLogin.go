@@ -7,19 +7,19 @@ import (
 	"time"
 )
 
-var UserMfaLogin = UserMfaLoginHelper{
+var MfaLogin = MfaLoginHelper{
 	key: keyUserMfaLogin.String(),
 }
 
-type UserMfaLoginHelper struct {
+type MfaLoginHelper struct {
 	key string
 }
 
-func (a UserMfaLoginHelper) genKey(uid uint, token string) string {
+func (a MfaLoginHelper) genKey(uid uint, token string) string {
 	return a.key + fmt.Sprint(uid) + "-" + token[:5]
 }
 
-func (a UserMfaLoginHelper) Set(uid uint, token string, valid time.Duration, claims interface{}) error {
+func (a MfaLoginHelper) Set(uid uint, token string, valid time.Duration, claims interface{}) error {
 	v, e := json.Marshal(claims)
 	if e != nil {
 		return e
@@ -27,7 +27,7 @@ func (a UserMfaLoginHelper) Set(uid uint, token string, valid time.Duration, cla
 	return Client.Set(context.Background(), a.genKey(uid, token), string(v), valid).Err()
 }
 
-func (a UserMfaLoginHelper) Get(uid uint, token string, claims interface{}) error {
+func (a MfaLoginHelper) Get(uid uint, token string, claims interface{}) error {
 	value, e := Client.Get(context.Background(), a.genKey(uid, token)).Result()
 	if e != nil {
 		return e
