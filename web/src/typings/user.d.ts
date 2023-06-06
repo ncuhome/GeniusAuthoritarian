@@ -4,22 +4,6 @@ declare namespace User {
     name: string;
   };
 
-  type ThirdPartyLoginResult = {
-    token: string;
-    mfa: boolean;
-    callback?: string;
-  };
-
-  type MfaLoginResult = {
-    token: string;
-    callback: string;
-  };
-
-  type LoginResult = {
-    token: string;
-    groups: string[];
-  };
-
   type Profile = {
     user: {
       id: number;
@@ -35,4 +19,22 @@ declare namespace User {
       ip: string;
     }>;
   };
+
+  namespace Login {
+    type Result = {
+      token: string;
+      groups: string[];
+    };
+
+    type ThirdParty = {
+      token: string;
+      mfa: boolean;
+      callback?: string;
+    };
+
+    type Mfa = {
+      token: string;
+      callback: string;
+    };
+  }
 }

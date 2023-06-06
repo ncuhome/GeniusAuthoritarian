@@ -21,7 +21,7 @@ export const Login: FC = () => {
       const {
         data: { data: res },
       } = await apiV1.post<{
-        data: User.LoginResult;
+        data: User.Login.Result;
       }>("public/login/", {
         token,
       });

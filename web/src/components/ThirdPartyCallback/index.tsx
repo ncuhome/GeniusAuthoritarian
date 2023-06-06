@@ -32,7 +32,7 @@ export const ThirdPartyCallback = memo<Props>(
       try {
         const {
           data: { data },
-        } = await apiV1.post<{ data: User.ThirdPartyLoginResult }>(
+        } = await apiV1.post<{ data: User.Login.ThirdParty }>(
           `public/login/${thirdParty}/${appCode}`,
           {
             code,
@@ -56,13 +56,10 @@ export const ThirdPartyCallback = memo<Props>(
       try {
         const {
           data: { data },
-        } = await apiV1.post<{ data: User.MfaLoginResult }>(
-          "public/login/mfa",
-          {
-            token: mfaToken,
-            code: mfaCode,
-          }
-        );
+        } = await apiV1.post<{ data: User.Login.Mfa }>("public/login/mfa", {
+          token: mfaToken,
+          code: mfaCode,
+        });
         window.open(data.callback, "_self");
       } catch ({ msg }) {
         if (msg) toast.error(msg as string);
