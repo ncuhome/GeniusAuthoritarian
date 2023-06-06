@@ -6,13 +6,15 @@ import (
 	"github.com/Mmx233/daoUtil"
 	"github.com/gin-gonic/gin"
 	"github.com/ncuhome/GeniusAuthoritarian/internal/api/callback"
+	"github.com/ncuhome/GeniusAuthoritarian/internal/db/redis"
 	"github.com/ncuhome/GeniusAuthoritarian/internal/service"
 	"github.com/ncuhome/GeniusAuthoritarian/internal/tools"
 	"github.com/pquerna/otp/totp"
 	"image/jpeg"
+	"time"
 )
 
-func AddMfa(c *gin.Context) {
+func MfaAdd(c *gin.Context) {
 	uid := tools.GetUserInfo(c).ID
 
 	userSrv, e := service.User.Begin()
@@ -22,7 +24,7 @@ func AddMfa(c *gin.Context) {
 	}
 	defer userSrv.Rollback()
 
-	exist, e := userSrv.MfaExist(uid, daoUtil.LockForUpdate)
+	exist, e := userSrv.MfaExist(uid, daoUtil.LockForShare)
 	if e != nil {
 		callback.Error(c, e, callback.ErrDBOperation)
 		return
@@ -51,13 +53,8 @@ func AddMfa(c *gin.Context) {
 		return
 	}
 
-	if e = userSrv.SetMfaSecret(uid, mfaKey.Secret()); e != nil {
-		callback.Error(c, e, callback.ErrDBOperation)
-		return
-	}
-
-	if e = userSrv.Commit().Error; e != nil {
-		callback.Error(c, e, callback.ErrDBOperation)
+	if e = redis.MfaEnable.Set(uid, mfaKey.Secret(), time.Minute*15); e != nil {
+		callback.Error(c, e, callback.ErrUnexpected)
 		return
 	}
 
@@ -66,4 +63,54 @@ func AddMfa(c *gin.Context) {
 		"url":    mfaKey.URL(),
 		"qr":     "data:image/jpeg;base64," + base64.StdEncoding.EncodeToString(qrBuffer.Bytes()),
 	})
+}
+
+func MfaCheck(c *gin.Context) {
+	var f struct {
+		Code string `json:"code" form:"code" binding:"required"`
+	}
+	if e := c.ShouldBind(&f); e != nil {
+		callback.Error(c, e, callback.ErrForm)
+		return
+	}
+
+	uid := tools.GetUserInfo(c).ID
+
+	mfaSecret, e := redis.MfaEnable.Get(uid)
+	if e != nil {
+		if e == redis.Nil {
+			callback.Error(c, nil, callback.ErrMfaAddExpired)
+			return
+		}
+		callback.Error(c, e, callback.ErrDBOperation)
+		return
+	}
+
+	if !totp.Validate(f.Code, mfaSecret) {
+		callback.Error(c, nil, callback.ErrMfaCode)
+		return
+	}
+
+	userSrv, e := service.User.Begin()
+	if e != nil {
+		callback.Error(c, e, callback.ErrDBOperation)
+		return
+	}
+	defer userSrv.Rollback()
+
+	if e = userSrv.SetMfaSecret(uid, mfaSecret); e != nil {
+		callback.Error(c, e, callback.ErrDBOperation)
+		return
+	}
+
+	if e = redis.MfaEnable.Del(uid); e != nil && e != redis.Nil {
+		callback.Error(c, e, callback.ErrUnexpected)
+		return
+	}
+
+	if e = userSrv.Commit().Error; e != nil {
+		callback.Error(c, e, callback.ErrDBOperation)
+		return
+	}
+
 }

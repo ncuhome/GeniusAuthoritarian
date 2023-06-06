@@ -6,5 +6,6 @@ import (
 )
 
 func routerMfa(G *gin.RouterGroup) {
-	G.POST("/", controllers.AddMfa)
+	G.GET("/", controllers.MfaAdd)
+	G.POST("/", controllers.MfaCheck)
 }

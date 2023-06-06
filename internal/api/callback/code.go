@@ -17,6 +17,7 @@ const (
 	cErrAppNotFound
 	cErrMfaCode
 	cErrMfaAlreadyExist
+	cErrMfaAddExpired
 )
 
 var (
@@ -99,5 +100,10 @@ var (
 		Code:       cErrMfaAlreadyExist,
 		Msg:        "双因素校验已开启",
 		HttpStatus: 400,
+	}
+	ErrMfaAddExpired = &Msg{
+		Code:       cErrMfaAddExpired,
+		Msg:        "双因素认证绑定已过期，请刷新重试",
+		HttpStatus: 404,
 	}
 )
