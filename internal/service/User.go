@@ -70,7 +70,8 @@ func (a UserSrv) UserProfile(uid uint) (*dto.UserProfile, error) {
 }
 
 func (a UserSrv) MfaExist(uid uint, opts ...daoUtil.ServiceOpt) (bool, error) {
-	return (&dao.User{ID: uid}).MfaExist(daoUtil.TxOpts(a.DB, opts...))
+	mfa, e := a.FindMfa(uid, opts...)
+	return mfa != "", e
 }
 
 func (a UserSrv) FindMfa(uid uint, opts ...daoUtil.ServiceOpt) (string, error) {
