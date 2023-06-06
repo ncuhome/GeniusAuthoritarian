@@ -29,6 +29,7 @@ func doVerifyToken(c *gin.Context, tx *gorm.DB, token string) *jwt.LoginTokenCla
 	return claims
 }
 
+// VerifyToken 第三方应用后端调用校验认证权威性
 func VerifyToken(c *gin.Context) {
 	var f struct {
 		Token     string `json:"token" form:"token" binding:"required"`
@@ -88,6 +89,7 @@ func VerifyToken(c *gin.Context) {
 	})
 }
 
+// Login 用户后台登录
 func Login(c *gin.Context) {
 	var f struct {
 		Token string `json:"token" form:"token" binding:"required"`

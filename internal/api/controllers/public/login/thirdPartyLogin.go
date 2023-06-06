@@ -3,6 +3,7 @@ package controllers
 import (
 	"github.com/gin-gonic/gin"
 	"github.com/ncuhome/GeniusAuthoritarian/internal/api/callback"
+	"github.com/ncuhome/GeniusAuthoritarian/internal/api/models/response"
 	"github.com/ncuhome/GeniusAuthoritarian/internal/db/dao"
 	"github.com/ncuhome/GeniusAuthoritarian/internal/pkg/dingTalk"
 	"github.com/ncuhome/GeniusAuthoritarian/internal/pkg/feishu"
@@ -80,22 +81,36 @@ func callThirdPartyLoginResult(c *gin.Context, user *dao.User, appInfo *dao.App,
 		groupSlice[i] = g.Name
 	}
 
-	token, e := jwt.GenerateLoginToken(user.ID, appInfo.ID, user.Name, ip, groupSlice)
-	if e != nil {
-		callback.Error(c, e, callback.ErrUnexpected)
-		return
-	}
+	if user.MFA == "" {
+		token, e := jwt.GenerateLoginToken(user.ID, appInfo.ID, user.Name, ip, groupSlice)
+		if e != nil {
+			callback.Error(c, e, callback.ErrUnexpected)
+			return
+		}
 
-	callbackUrl, e := tools.GenCallback(appInfo.Callback, token)
-	if e != nil {
-		callback.Error(c, e, callback.ErrUnexpected)
-		return
-	}
+		callbackUrl, e := tools.GenCallback(appInfo.Callback, token)
+		if e != nil {
+			callback.Error(c, e, callback.ErrUnexpected)
+			return
+		}
 
-	callback.Success(c, gin.H{
-		"token":    token,
-		"callback": callbackUrl,
-	})
+		callback.Success(c, response.ThirdPartyLogin{
+			Token:    token,
+			Mfa:      false,
+			Callback: callbackUrl,
+		})
+	} else {
+		token, e := jwt.GenerateMfaToken(user.ID, appInfo.ID, user.Name, ip, groupSlice)
+		if e != nil {
+			callback.Error(c, e, callback.ErrUnexpected)
+			return
+		}
+
+		callback.Success(c, response.ThirdPartyLogin{
+			Token: token,
+			Mfa:   true,
+		})
+	}
 }
 
 // ThirdPartySelfLogin 校验第三方登录回调结果，生成控制系统回调链接
