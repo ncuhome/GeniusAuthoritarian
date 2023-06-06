@@ -10,6 +10,7 @@ type User struct {
 	DeletedAt gorm.DeletedAt `gorm:"index"`
 	Name      string         `gorm:"not null"`
 	Phone     string         `gorm:"not null;uniqueIndex;type:varchar(15)"`
+	MFA       string
 }
 
 func (a *User) Insert(tx *gorm.DB) error {
