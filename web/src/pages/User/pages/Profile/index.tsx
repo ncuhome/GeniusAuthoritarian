@@ -3,7 +3,7 @@ import toast from "react-hot-toast";
 import moment from "moment";
 
 import { Block, BlockTitle } from "@/pages/User/components";
-import { Ip } from "./components";
+import { Ip, Mfa } from "./components";
 import {
   Container,
   Box,
@@ -16,13 +16,7 @@ import {
   TableRow,
   TableHead,
   Skeleton,
-  Stack,
-  Chip,
-  ButtonGroup,
-  Button,
 } from "@mui/material";
-import { LoadingButton } from "@mui/lab";
-import { Done, Remove } from "@mui/icons-material";
 
 import { useUserApiV1 } from "@api/v1/user/hook";
 
@@ -84,19 +78,22 @@ export const Profile: FC = () => {
 
         <BlockTitle>MFA</BlockTitle>
 
-        <Stack flexDirection={"row"} marginTop={1}>
-          <Chip
-            label={profile?.user.mfa ? "已开启" : "未启用"}
-            variant={"outlined"}
-            icon={
-              profile?.user.mfa ? (
-                <Done color={"success"} fontSize="small" />
-              ) : (
-                <Remove />
-              )
-            }
-          />
-        </Stack>
+        <Mfa
+          marginTop={1}
+          setEnabled={(enabled) =>
+            setProfile(
+              profile
+                ? {
+                    user: {
+                      ...profile.user,
+                      mfa: enabled,
+                    },
+                    loginRecord: profile.loginRecord,
+                  }
+                : null
+            )
+          }
+        />
       </Block>
 
       {profile && profile.loginRecord.length ? (

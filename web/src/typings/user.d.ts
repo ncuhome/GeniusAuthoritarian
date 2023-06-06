@@ -37,4 +37,11 @@ declare namespace User {
       callback: string;
     };
   }
+
+  namespace Mfa {
+    type New = {
+      url: string;
+      qrcode: string;
+    };
+  }
 }
