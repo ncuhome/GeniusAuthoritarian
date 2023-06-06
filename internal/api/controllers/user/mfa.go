@@ -3,14 +3,12 @@ package controllers
 import (
 	"bytes"
 	"encoding/base64"
-	"fmt"
 	"github.com/Mmx233/daoUtil"
 	"github.com/gin-gonic/gin"
 	"github.com/ncuhome/GeniusAuthoritarian/internal/api/callback"
 	"github.com/ncuhome/GeniusAuthoritarian/internal/db/redis"
 	"github.com/ncuhome/GeniusAuthoritarian/internal/service"
 	"github.com/ncuhome/GeniusAuthoritarian/internal/tools"
-	"github.com/pquerna/otp/totp"
 	"image/jpeg"
 	"time"
 )
@@ -34,23 +32,20 @@ func MfaAdd(c *gin.Context) {
 		return
 	}
 
-	mfaKey, e := totp.Generate(totp.GenerateOpts{
-		Issuer:      "GeniusAuth",
-		AccountName: fmt.Sprint(uid),
-	})
+	mfaKey, e := tools.NewMfa(uid)
 	if e != nil {
 		callback.Error(c, e, callback.ErrUnexpected)
 		return
 	}
 
-	qr, e := mfaKey.Image(300, 300)
+	qrcodeImage, e := mfaKey.Image(300, 300)
 	if e != nil {
 		callback.Error(c, e, callback.ErrUnexpected)
 		return
 	}
 
-	var qrBuffer = bytes.Buffer{}
-	if e = jpeg.Encode(&qrBuffer, qr, &jpeg.Options{
+	var qrcodeBuffer = bytes.Buffer{}
+	if e = jpeg.Encode(&qrcodeBuffer, qrcodeImage, &jpeg.Options{
 		Quality: 100,
 	}); e != nil {
 		callback.Error(c, e, callback.ErrUnexpected)
@@ -63,9 +58,8 @@ func MfaAdd(c *gin.Context) {
 	}
 
 	callback.Success(c, gin.H{
-		"secret": mfaKey.Secret(),
 		"url":    mfaKey.URL(),
-		"qr":     "data:image/jpeg;base64," + base64.StdEncoding.EncodeToString(qrBuffer.Bytes()),
+		"qrcode": "data:image/jpeg;base64," + base64.StdEncoding.EncodeToString(qrcodeBuffer.Bytes()),
 	})
 }
 
@@ -90,7 +84,11 @@ func MfaCheck(c *gin.Context) {
 		return
 	}
 
-	if !totp.Validate(f.Code, mfaSecret) {
+	valid, e := tools.VerifyMfa(f.Code, mfaSecret)
+	if e != nil {
+		callback.Error(c, e, callback.ErrUnexpected)
+		return
+	} else if !valid {
 		callback.Error(c, nil, callback.ErrMfaCode)
 		return
 	}
@@ -147,7 +145,11 @@ func MfaDel(c *gin.Context) {
 		return
 	}
 
-	if !totp.Validate(f.Code, mfaSecret) {
+	valid, e := tools.VerifyMfa(f.Code, mfaSecret)
+	if e != nil {
+		callback.Error(c, e, callback.ErrUnexpected)
+		return
+	} else if !valid {
 		callback.Error(c, nil, callback.ErrMfaCode)
 		return
 	}
