@@ -5,7 +5,6 @@ import (
 	"github.com/ncuhome/GeniusAuthoritarian/internal/api/callback"
 	"github.com/ncuhome/GeniusAuthoritarian/internal/pkg/jwt"
 	"github.com/ncuhome/GeniusAuthoritarian/internal/tools"
-	"github.com/pquerna/otp/totp"
 )
 
 func VerifyMfa(c *gin.Context) {
@@ -24,7 +23,11 @@ func VerifyMfa(c *gin.Context) {
 		return
 	}
 
-	if !totp.Validate(f.Code, claims.Mfa) {
+	valid, e := tools.VerifyMfa(f.Code, claims.Mfa)
+	if e != nil {
+		callback.Error(c, e, callback.ErrUnexpected)
+		return
+	} else if !valid {
 		callback.Error(c, nil, callback.ErrMfaCode)
 		return
 	}
