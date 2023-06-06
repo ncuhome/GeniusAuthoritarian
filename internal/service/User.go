@@ -63,6 +63,8 @@ func (a UserSrv) UserProfile(uid uint) (*dto.UserProfile, error) {
 		return nil, e
 	}
 
+	profile.MfaEnabled = profile.Mfa != ""
+
 	profile.Groups, e = (&dao.UserGroups{
 		UID: uid,
 	}).GetUserGroupsForShowByUID(a.DB)
