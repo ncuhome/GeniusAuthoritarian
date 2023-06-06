@@ -1,15 +1,17 @@
 import { lazy, useMemo } from "react";
-import { useMount } from "@hooks";
+import useMount from "@hooks/useMount";
 import { BrowserRouter, Route, Routes } from "react-router-dom";
 import { Toaster } from "react-hot-toast";
 
 const User = lazy(() => import("./pages/User"));
-import { Home, Error, Feishu, DingTalk, Login } from "./pages";
-import { PageNotFound, Suspense } from "@components";
+const Authoritarian = lazy(() => import("./pages/Authoritarian"));
+import Error from "@/pages/Error";
+
+import Suspense from "@components/Suspense";
 import { Box } from "@mui/material";
 import { ThemeProvider, createTheme } from "@mui/material/styles";
 
-import { useTheme } from "@store";
+import useTheme from "@store/useTheme";
 
 export default function App() {
   const isDarkTheme = useTheme((state) => state.dark);
@@ -58,11 +60,7 @@ export default function App() {
       <ThemeProvider theme={theme}>
         <BrowserRouter>
           <Routes>
-            <Route index element={<Home />} />
             <Route path={"error"} element={<Error />} />
-            <Route path={"feishu"} element={<Feishu />} />
-            <Route path={"dingTalk"} element={<DingTalk />} />
-            <Route path={"login"} element={<Login />} />
             <Route
               path={"user/*"}
               element={
@@ -71,7 +69,14 @@ export default function App() {
                 </Suspense>
               }
             />
-            <Route path={"*"} element={<PageNotFound />} />
+            <Route
+              path={"*"}
+              element={
+                <Suspense>
+                  <Authoritarian />
+                </Suspense>
+              }
+            />
           </Routes>
         </BrowserRouter>
       </ThemeProvider>

@@ -3,11 +3,12 @@ import { Routes, Route } from "react-router-dom";
 import "./style.css";
 
 const App = lazy(() => import("./pages/App"));
-import { Navigation, Profile } from "./pages";
+import Navigation from "./pages/Navigation";
+import Profile from "./pages/Profile";
 
-import { Suspense } from "@components";
-import { PageNotFound } from "@components";
-import { Header } from "./components";
+import Suspense from "@components/Suspense";
+import PageNotFound from "@components/PageNotFound";
+import NavHeader from "@components/user/NavHeader";
 import {
   Box,
   Stack,
@@ -19,7 +20,7 @@ import {
 } from "@mui/material";
 
 import { shallow } from "zustand/shallow";
-import { useUser } from "@store";
+import useUser from "@store/useUser";
 
 type RouterElement = {
   name: string;
@@ -82,7 +83,7 @@ export const User: FC = () => {
           height: "3.5rem",
         }}
       >
-        <Header
+        <NavHeader
           routers={UserRouters}
           currentTab={currentTab}
           onChangeTab={setCurrentTab}

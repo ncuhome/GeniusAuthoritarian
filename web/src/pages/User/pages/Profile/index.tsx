@@ -1,9 +1,10 @@
-import { FC, useMemo } from "react";
+import {FC, useMemo} from "react";
 import toast from "react-hot-toast";
-import { unix } from "dayjs";
+import {unix} from "dayjs";
 
-import { Block } from "@/pages/User/components";
-import { Ip, Mfa } from "./components";
+import Block from "@components/user/Block";
+import Ip from "@components/user/profile/Ip";
+import Mfa from "@components/user/profile/Mfa";
 import {
   Container,
   Box,
@@ -23,7 +24,7 @@ import {
 
 import { useUserApiV1 } from "@api/v1/user/hook";
 
-import { useUser } from "@store";
+import useUser from "@store/useUser";
 
 const GridItem: FC<GridProps> = ({ children, ...props }) => (
   <Grid item xs={12} sm={6} {...props}>

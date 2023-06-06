@@ -14,3 +14,4 @@ export const useTimeout = (callback: () => void, delay: number | null) => {
     }
   }, [delay]);
 };
+export default useTimeout;

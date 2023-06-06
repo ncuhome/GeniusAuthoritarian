@@ -1,11 +1,11 @@
 import { FC } from "react";
 
-import { AppListBlock } from "./components";
+import AppListBlock from "@components/user/nav/AppListBlock";
 import { Container } from "@mui/material";
 
 import { useUserApiV1 } from "@api/v1/user/hook";
 
-import { useUser } from "@store";
+import useUser from "@store/useUser";
 
 export const Navigation: FC = () => {
   const accessibleApps = useUser((state) => state.accessibleApps);

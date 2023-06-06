@@ -1,6 +1,7 @@
 import { FC } from "react";
 
-import { NewAppBlock, AppControlBlock } from "./components";
+import NewAppBlock from "./NewAppBlock";
+import AppControlBlock from "./AppControlBlock";
 import { Container } from "@mui/material";
 
 export const App: FC = () => {

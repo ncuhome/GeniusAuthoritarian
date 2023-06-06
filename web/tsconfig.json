@@ -19,14 +19,11 @@
       "@/*": [
         "./src/*"
       ],
-      "@components": [
-        "./src/components"
-      ],
       "@components/*": [
         "./src/components/*"
       ],
-      "@hooks": [
-        "./src/hooks"
+      "@hooks/*": [
+        "./src/hooks/*"
       ],
       "@api/*": [
         "./src/network/api/*"
@@ -34,8 +31,8 @@
       "@util/*": [
         "./src/util/*"
       ],
-      "@store": [
-        "./src/store"
+      "@store/*": [
+        "./src/store/*"
       ]
     }
   },
