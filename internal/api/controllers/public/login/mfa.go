@@ -11,7 +11,7 @@ import (
 func VerifyMfa(c *gin.Context) {
 	var f struct {
 		Token string `json:"token" form:"token" binding:"required"`
-		Code  string `json:"code" form:"code" binding:"required"`
+		Code  string `json:"code" form:"code" binding:"required,len=6,numeric"`
 	}
 	if e := c.ShouldBind(&f); e != nil {
 		callback.Error(c, e, callback.ErrForm)

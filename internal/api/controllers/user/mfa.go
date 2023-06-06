@@ -65,7 +65,7 @@ func MfaAdd(c *gin.Context) {
 
 func MfaCheck(c *gin.Context) {
 	var f struct {
-		Code string `json:"code" form:"code" binding:"required"`
+		Code string `json:"code" form:"code" binding:"required,len=6,numeric"`
 	}
 	if e := c.ShouldBind(&f); e != nil {
 		callback.Error(c, e, callback.ErrForm)
@@ -120,7 +120,7 @@ func MfaCheck(c *gin.Context) {
 
 func MfaDel(c *gin.Context) {
 	var f struct {
-		Code string `json:"code" form:"code" binding:"required"`
+		Code string `json:"code" form:"code" binding:"required,len=6,numeric"`
 	}
 	if e := c.ShouldBind(&f); e != nil {
 		callback.Error(c, e, callback.ErrForm)
