@@ -5,14 +5,20 @@ import { Card, CardContent, Typography } from "@mui/material";
 
 import { apiV1User } from "@api/v1/user/base";
 
+import useMfaCodeDialog from "@store/useMfaCodeDialog";
+
 interface Props {
   app: App.Info;
 }
 
 export const NavAppCard: FC<Props> = ({ app }) => {
+  const setMfaCodeCallback = useMfaCodeDialog((state) =>
+    state.setState("callback")
+  );
+
   const [elevation, setElevation] = useState(5);
 
-  async function onLandingApp(id: number) {
+  async function onLandingApp(id: number, code?: string) {
     try {
       const {
         data: {
@@ -21,11 +27,15 @@ export const NavAppCard: FC<Props> = ({ app }) => {
       } = await apiV1User.get("app/landing", {
         params: {
           id,
+          code,
         },
       });
       window.open(url, "_blank");
-    } catch ({ msg }) {
-      if (msg) toast.error(msg as string);
+    } catch ({ msg, response }) {
+      console.log(response, (response as any)?.data)
+      if ((response as any)?.data?.code === 21) {
+        setMfaCodeCallback((code) => onLandingApp(id, code));
+      } else if (msg) toast.error(msg as string);
     }
   }
 

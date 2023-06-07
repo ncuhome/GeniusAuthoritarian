@@ -6,6 +6,7 @@ const App = lazy(() => import("./pages/App"));
 import Navigation from "./pages/Navigation";
 import Profile from "./pages/Profile";
 
+import MfaCodeDialog from "@components/user/MfaCodeDialog";
 import Suspense from "@components/Suspense";
 import PageNotFound from "@components/PageNotFound";
 import NavHeader from "@components/user/NavHeader";
@@ -102,6 +103,8 @@ export const User: FC = () => {
           <Route path={"*"} element={<PageNotFound />} />
         </Routes>
       </Box>
+
+      <MfaCodeDialog />
 
       <Dialog
         sx={{ "& .MuiDialog-paper": { width: "60%", maxHeight: 435 } }}
