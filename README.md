@@ -71,10 +71,13 @@ Form:
 | appCode   | string | √        |           |
 | timeStamp | int64  | √        | unix 时间，秒 |
 | signature | string | √        | 请求签名      |
+| clientIp  | string | x        | 客户端 ip    |
 
 `signature` 的计算方法是，在表单对象中加入 `appSecret`，去掉 `signature`，再将整个对象按键名排序，将键名和键值用 `=` 连接，不同项中间用 `&` 连接之后得到一个字符串，如：`key1=value1&key2=value2`，计算 `sha256` 值。
 
-注意不要把 `appSecret` 当表单值放入请求传出。
+**注意不要把 `appSecret` 当表单值放入请求传出。**
+
+可选参数请尽量传入，可以增加系统安全性
 
 成功：
 
