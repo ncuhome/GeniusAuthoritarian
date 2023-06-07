@@ -1,5 +1,6 @@
 import { FC } from "react";
-import { createUseQuery, useMount } from "@hooks";
+import { createUseQuery } from "@hooks/useQuery";
+import useMount from "@hooks/useMount";
 import { useNavigate } from "react-router-dom";
 import toast from "react-hot-toast";
 import feishuLogo from "@/assets/img/login/feishu.png";

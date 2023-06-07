@@ -1,10 +1,11 @@
 import { memo, useRef, useState } from "react";
-import { useMount, createUseQuery } from "@hooks";
+import { createUseQuery } from "@hooks/useQuery";
+import useMount from "@hooks/useMount";
 import { useNavigate } from "react-router-dom";
 import { ThrowError } from "@util/nav";
 import toast from "react-hot-toast";
 
-import { OnLogin } from "@components";
+import LoginLoading from "@components/auth/LoginLoading";
 import { Stack, Typography, TextField } from "@mui/material";
 import { LoadingButton } from "@mui/lab";
 
@@ -127,7 +128,7 @@ export const ThirdPartyCallback = memo<Props>(
         </Stack>
       </Stack>
     ) : (
-      <OnLogin />
+      <LoginLoading />
     );
   }
 );

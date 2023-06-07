@@ -1,7 +1,7 @@
 import axios, { AxiosError } from "axios";
 import { BaseUrlV1, apiV1ErrorHandler } from "@api/base";
 
-import { useUser } from "@store";
+import useUser from "@store/useUser";
 
 function GoLogin() {
   window.location.href = "/";
