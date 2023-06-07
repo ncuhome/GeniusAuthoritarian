@@ -11,7 +11,8 @@ import (
 
 func LandingApp(c *gin.Context) {
 	var f struct {
-		ID uint `json:"id" form:"id" binding:"required"`
+		ID   uint   `json:"id" form:"id" binding:"required"`
+		Code string `json:"code" form:"code"`
 	}
 	if e := c.ShouldBind(&f); e != nil {
 		callback.Error(c, e, callback.ErrForm)
@@ -19,6 +20,30 @@ func LandingApp(c *gin.Context) {
 	}
 
 	user := tools.GetUserInfo(c)
+
+	mfaSecret, e := service.User.FindMfa(user.ID)
+	if e != nil {
+		callback.Error(c, e, callback.ErrDBOperation)
+		return
+	} else if mfaSecret != "" {
+		if f.Code == "" {
+			callback.Error(c, nil, callback.ErrMfaRequired)
+			return
+		} else if len(f.Code) != 6 {
+			callback.Error(c, nil, callback.ErrMfaCode)
+			return
+		}
+
+		var valid bool
+		valid, e = tools.VerifyMfa(f.Code, mfaSecret)
+		if e != nil {
+			callback.Error(c, e, callback.ErrUnexpected)
+			return
+		} else if !valid {
+			callback.Error(c, nil, callback.ErrMfaCode)
+			return
+		}
+	}
 
 	app, e := service.App.FirstAppByID(f.ID)
 	if e != nil {

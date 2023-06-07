@@ -21,6 +21,7 @@ const (
 	cErrMfaNotExist
 	cErrRequestFrequency
 	cErrNetContextChanged
+	cErrMfaRequired
 )
 
 var (
@@ -122,6 +123,11 @@ var (
 	ErrNetContextChanged = &Msg{
 		Code:       cErrNetContextChanged,
 		Msg:        "网络环境异常变更，请重新登录",
+		HttpStatus: 403,
+	}
+	ErrMfaRequired = &Msg{
+		Code:       cErrMfaRequired,
+		Msg:        "双因素校验码缺失",
 		HttpStatus: 403,
 	}
 )
