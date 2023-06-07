@@ -16,7 +16,6 @@ export const PageNotFound: FC = () => {
       }}
       justifyContent={"center"}
       alignContent={"center"}
-      color={"text.primary"}
     >
       <Typography variant={"h3"}>404</Typography>
       <Typography variant={"h5"}>Not Found</Typography>

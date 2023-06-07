@@ -17,7 +17,6 @@ export const LoginLoading: FC = () => {
 
       <Typography
         variant={"h6"}
-        color={"text.primary"}
         sx={{
           letterSpacing: "0.15em",
         }}

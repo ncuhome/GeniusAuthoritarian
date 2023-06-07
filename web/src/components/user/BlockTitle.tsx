@@ -6,7 +6,6 @@ export const BlockTitle: FC<TypographyProps> = ({ children, ...props }) => {
     <Typography
       variant={"h5"}
       fontWeight={"bold"}
-      color={"text.primary"}
       {...props}
     >
       {children}

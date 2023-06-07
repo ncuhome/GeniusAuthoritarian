@@ -37,27 +37,28 @@ export default function App() {
   });
 
   return (
-    <Box
-      sx={{
-        height: "100vh",
-        backgroundColor: isDarkTheme ? "#242424" : "#fff",
-        colorScheme: isDarkTheme ? "dark" : "light",
-      }}
-    >
-      <Toaster
-        toastOptions={
-          isDarkTheme
-            ? {
-                style: {
-                  borderRadius: "20px",
-                  background: "#2f2f2f",
-                  color: "#fff",
-                },
-              }
-            : undefined
-        }
-      />
-      <ThemeProvider theme={theme}>
+    <ThemeProvider theme={theme}>
+      <Box
+        color={"text.primary"}
+        sx={{
+          height: "100vh",
+          backgroundColor: isDarkTheme ? "#242424" : "#fff",
+          colorScheme: isDarkTheme ? "dark" : "light",
+        }}
+      >
+        <Toaster
+          toastOptions={
+            isDarkTheme
+              ? {
+                  style: {
+                    borderRadius: "20px",
+                    background: "#2f2f2f",
+                    color: "#fff",
+                  },
+                }
+              : undefined
+          }
+        />
         <BrowserRouter>
           <Routes>
             <Route path={"error"} element={<Error />} />
@@ -79,7 +80,7 @@ export default function App() {
             />
           </Routes>
         </BrowserRouter>
-      </ThemeProvider>
-    </Box>
+      </Box>
+    </ThemeProvider>
   );
 }

@@ -98,7 +98,6 @@ export const ThirdPartyCallback = memo<Props>(
         >
           <Typography
             variant={"h5"}
-            color={"text.primary"}
             fontWeight={"bold"}
             letterSpacing={"2px"}
           >
