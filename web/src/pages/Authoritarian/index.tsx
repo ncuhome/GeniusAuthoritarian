@@ -11,7 +11,7 @@ import PageNotFound from "@components/PageNotFound";
 export const Authoritarian: FC = () => {
   return (
     <Routes>
-      <Route path={"home"} element={<Home />} />
+      <Route index element={<Home />} />
       <Route path={"feishu"} element={<Feishu />} />
       <Route path={"dingTalk"} element={<DingTalk />} />
       <Route path={"login"} element={<Login />} />
