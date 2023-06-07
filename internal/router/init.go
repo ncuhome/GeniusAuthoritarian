@@ -11,8 +11,7 @@ func init() {
 	gin.SetMode(gin.ReleaseMode)
 	E = gin.Default()
 
-	api := E.Group("api")
-	router.ApiV1(api.Group("v1"))
+	router.Api(E.Group("api"))
 
 	serveFrontend(E)
 }

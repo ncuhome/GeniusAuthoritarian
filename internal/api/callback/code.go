@@ -19,6 +19,7 @@ const (
 	cErrMfaAlreadyExist
 	cErrMfaAddExpired
 	cErrMfaNotExist
+	cErrRequestFrequency
 )
 
 var (
@@ -111,5 +112,10 @@ var (
 		Code:       cErrMfaNotExist,
 		Msg:        "双因素认证未开启",
 		HttpStatus: 400,
+	}
+	ErrRequestFrequency = &Msg{
+		Code:       cErrRequestFrequency,
+		Msg:        "操作频繁，请稍后重试",
+		HttpStatus: 403,
 	}
 )
