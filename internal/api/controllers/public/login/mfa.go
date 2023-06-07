@@ -23,6 +23,11 @@ func VerifyMfa(c *gin.Context) {
 		return
 	}
 
+	if claims.IP != c.ClientIP() {
+		callback.Error(c, nil, callback.ErrNetContextChanged)
+		return
+	}
+
 	valid, e := tools.VerifyMfa(f.Code, claims.Mfa)
 	if e != nil {
 		callback.Error(c, e, callback.ErrUnexpected)

@@ -20,6 +20,7 @@ const (
 	cErrMfaAddExpired
 	cErrMfaNotExist
 	cErrRequestFrequency
+	cErrNetContextChanged
 )
 
 var (
@@ -116,6 +117,11 @@ var (
 	ErrRequestFrequency = &Msg{
 		Code:       cErrRequestFrequency,
 		Msg:        "操作频繁，请稍后重试",
+		HttpStatus: 403,
+	}
+	ErrNetContextChanged = &Msg{
+		Code:       cErrNetContextChanged,
+		Msg:        "网络环境异常变更，请重新登录",
 		HttpStatus: 403,
 	}
 )

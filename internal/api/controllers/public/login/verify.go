@@ -13,6 +13,7 @@ import (
 	"time"
 )
 
+// 验证 token 并添加登录记录
 func doVerifyToken(c *gin.Context, tx *gorm.DB, token string) *jwt.LoginTokenClaims {
 	claims, valid, e := jwt.ParseLoginToken(token)
 	if e != nil || !valid {
@@ -36,6 +37,8 @@ func VerifyToken(c *gin.Context) {
 		AppCode   string `json:"appCode" form:"appCode" binding:"required"`
 		TimeStamp int64  `json:"timeStamp" form:"timeStamp" binding:"required"`
 		Signature string `json:"signature" form:"signature" binding:"required"`
+
+		ClientIp string `json:"clientIp" form:"clientIp"`
 	}
 	if e := c.ShouldBind(&f); e != nil {
 		callback.Error(c, e, callback.ErrForm)
@@ -56,6 +59,11 @@ func VerifyToken(c *gin.Context) {
 
 	claims := doVerifyToken(c, appSrv.DB, f.Token)
 	if c.IsAborted() {
+		return
+	}
+
+	if f.ClientIp != "" && claims.IP != f.ClientIp {
+		callback.Error(c, nil, callback.ErrNetContextChanged)
 		return
 	}
 
@@ -111,6 +119,9 @@ func Login(c *gin.Context) {
 		return
 	} else if claims.AppID != 0 {
 		callback.Error(c, nil, callback.ErrOperationIllegal)
+		return
+	} else if claims.IP != c.ClientIP() {
+		callback.Error(c, nil, callback.ErrNetContextChanged)
 		return
 	}
 
