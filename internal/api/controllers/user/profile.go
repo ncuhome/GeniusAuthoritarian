@@ -11,12 +11,12 @@ func ProfileData(c *gin.Context) {
 	uid := tools.GetUserInfo(c).ID
 	profile, e := service.User.UserProfile(uid)
 	if e != nil {
-		callback.Error(c, e, callback.ErrDBOperation)
+		callback.Error(c, callback.ErrDBOperation, e)
 		return
 	}
 	loginRecord, e := service.LoginRecord.UserHistory(uid, 10)
 	if e != nil {
-		callback.Error(c, e, callback.ErrDBOperation)
+		callback.Error(c, callback.ErrDBOperation, e)
 	}
 	callback.Success(c, gin.H{
 		"user":        profile,

@@ -17,13 +17,13 @@ import (
 func doVerifyToken(c *gin.Context, tx *gorm.DB, token string) *jwt.LoginTokenClaims {
 	claims, valid, e := jwt.ParseLoginToken(token)
 	if e != nil || !valid {
-		callback.Error(c, e, callback.ErrUnauthorized)
+		callback.Error(c, callback.ErrUnauthorized, e)
 		return nil
 	}
 
 	loginRecordSrv := service.LoginRecordSrv{DB: tx}
 	if e = loginRecordSrv.Add(claims.UID, claims.AppID, claims.IP); e != nil {
-		callback.Error(c, e, callback.ErrDBOperation)
+		callback.Error(c, callback.ErrDBOperation, e)
 		return nil
 	}
 
@@ -41,18 +41,18 @@ func VerifyToken(c *gin.Context) {
 		ClientIp string `json:"clientIp" form:"clientIp"`
 	}
 	if e := c.ShouldBind(&f); e != nil {
-		callback.Error(c, e, callback.ErrForm)
+		callback.Error(c, callback.ErrForm, e)
 		return
 	}
 
 	if time.Now().Sub(time.Unix(f.TimeStamp, 0)) > time.Minute*5 {
-		callback.Error(c, nil, callback.ErrSignatureExpired)
+		callback.Error(c, callback.ErrSignatureExpired)
 		return
 	}
 
 	appSrv, e := service.App.Begin()
 	if e != nil {
-		callback.Error(c, e, callback.ErrDBOperation)
+		callback.Error(c, callback.ErrDBOperation, e)
 		return
 	}
 	defer appSrv.Rollback()
@@ -63,16 +63,16 @@ func VerifyToken(c *gin.Context) {
 	}
 
 	if f.ClientIp != "" && claims.IP != f.ClientIp {
-		callback.Error(c, nil, callback.ErrNetContextChanged)
+		callback.Error(c, callback.ErrNetContextChanged)
 		return
 	}
 
 	appCode, appSecret, e := appSrv.FirstAppKeyPair(claims.AppID)
 	if e != nil {
-		callback.Error(c, e, callback.ErrDBOperation)
+		callback.Error(c, callback.ErrDBOperation, e)
 		return
 	} else if f.AppCode != appCode {
-		callback.Error(c, nil, callback.ErrOperationIllegal)
+		callback.Error(c, callback.ErrOperationIllegal)
 		return
 	}
 
@@ -82,12 +82,12 @@ func VerifyToken(c *gin.Context) {
 		TimeStamp: f.TimeStamp,
 		AppSecret: appSecret,
 	}) {
-		callback.Error(c, nil, callback.ErrUnauthorized)
+		callback.Error(c, callback.ErrUnauthorized)
 		return
 	}
 
 	if e = appSrv.Commit().Error; e != nil {
-		callback.Error(c, e, callback.ErrDBOperation)
+		callback.Error(c, callback.ErrDBOperation, e)
 		return
 	}
 
@@ -103,13 +103,13 @@ func Login(c *gin.Context) {
 		Token string `json:"token" form:"token" binding:"required"`
 	}
 	if e := c.ShouldBind(&f); e != nil {
-		callback.Error(c, e, callback.ErrForm)
+		callback.Error(c, callback.ErrForm, e)
 		return
 	}
 
 	tx := dao.DB.Begin()
 	if tx.Error != nil {
-		callback.Error(c, tx.Error, callback.ErrDBOperation)
+		callback.Error(c, callback.ErrDBOperation, tx.Error)
 		return
 	}
 	defer tx.Rollback()
@@ -118,32 +118,32 @@ func Login(c *gin.Context) {
 	if c.IsAborted() {
 		return
 	} else if claims.AppID != 0 {
-		callback.Error(c, nil, callback.ErrOperationIllegal)
+		callback.Error(c, callback.ErrOperationIllegal)
 		return
 	} else if claims.IP != c.ClientIP() {
-		callback.Error(c, nil, callback.ErrNetContextChanged)
+		callback.Error(c, callback.ErrNetContextChanged)
 		return
 	}
 
 	groups, e := (service.UserGroupsSrv{DB: tx}).GetForUser(claims.UID)
 	if e != nil {
-		callback.Error(c, e, callback.ErrDBOperation)
+		callback.Error(c, callback.ErrDBOperation, e)
 		return
 	}
 
 	if e = tx.Commit().Error; e != nil {
-		callback.Error(c, e, callback.ErrDBOperation)
+		callback.Error(c, callback.ErrDBOperation, e)
 		return
 	}
 
 	token, e := jwt.GenerateUserToken(claims.UID, claims.Name, groups)
 	if e != nil {
-		callback.Error(c, e, callback.ErrUnexpected)
+		callback.Error(c, callback.ErrUnexpected, e)
 		return
 	}
 
 	if e = redis.UserJwt.Set(claims.UID, token, time.Hour*24*15); e != nil {
-		callback.Error(c, e, callback.ErrUnexpected)
+		callback.Error(c, callback.ErrUnexpected, e)
 		return
 	}
 

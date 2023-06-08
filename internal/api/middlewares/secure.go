@@ -12,7 +12,7 @@ func Secure() gin.HandlerFunc {
 	middleware, e := secure.New(&secure.Config{
 		Driver: &drivers.DefaultDriver{},
 		HandleReachLimit: func(c *gin.Context) {
-			callback.Error(c, nil, callback.ErrRequestFrequency)
+			callback.Error(c, callback.ErrRequestFrequency)
 		},
 		RateLimit: 60, // API 每分钟最大请求数
 	})

@@ -27,7 +27,7 @@ func genLoginLink(c *gin.Context, appCode string) string {
 	case appDingTalk:
 		return dingTalk.Api.LoginLink(c.Request.Host, appCode)
 	default:
-		callback.Error(c, nil, callback.ErrForm)
+		callback.Error(c, callback.ErrForm)
 		return ""
 	}
 }
@@ -44,10 +44,10 @@ func GetLoginLink(c *gin.Context) {
 	appCode := c.Param("appCode")
 
 	if ok, e := service.App.CheckAppCode(appCode); e != nil {
-		callback.Error(c, e, callback.ErrDBOperation)
+		callback.Error(c, callback.ErrDBOperation, e)
 		return
 	} else if !ok {
-		callback.Error(c, e, callback.ErrAppCodeNotFound)
+		callback.Error(c, callback.ErrAppCodeNotFound, e)
 		return
 	}
 
@@ -69,7 +69,7 @@ func loadUserPhone(c *gin.Context, code string) string {
 	case appFeishu:
 		return loginFeishu(c, code)
 	default:
-		callback.Error(c, nil, callback.ErrForm)
+		callback.Error(c, callback.ErrForm)
 		return ""
 	}
 }
@@ -84,13 +84,13 @@ func callThirdPartyLoginResult(c *gin.Context, user *dao.User, appInfo *dao.App,
 	if user.MFA == "" {
 		token, e := jwt.GenerateLoginToken(user.ID, appInfo.ID, user.Name, ip, groupSlice)
 		if e != nil {
-			callback.Error(c, e, callback.ErrUnexpected)
+			callback.Error(c, callback.ErrUnexpected, e)
 			return
 		}
 
 		callbackUrl, e := tools.GenCallback(appInfo.Callback, token)
 		if e != nil {
-			callback.Error(c, e, callback.ErrUnexpected)
+			callback.Error(c, callback.ErrUnexpected, e)
 			return
 		}
 
@@ -102,7 +102,7 @@ func callThirdPartyLoginResult(c *gin.Context, user *dao.User, appInfo *dao.App,
 	} else {
 		token, e := jwt.GenerateMfaToken(user.ID, appInfo.ID, user.Name, ip, user.MFA, appInfo.Callback, groupSlice)
 		if e != nil {
-			callback.Error(c, e, callback.ErrUnexpected)
+			callback.Error(c, callback.ErrUnexpected, e)
 			return
 		}
 
@@ -119,7 +119,7 @@ func ThirdPartySelfLogin(c *gin.Context) {
 		Code string `json:"code" form:"code" binding:"required"`
 	}
 	if e := c.ShouldBind(&f); e != nil {
-		callback.Error(c, e, callback.ErrForm)
+		callback.Error(c, callback.ErrForm, e)
 		return
 	}
 
@@ -127,7 +127,7 @@ func ThirdPartySelfLogin(c *gin.Context) {
 	if c.IsAborted() {
 		return
 	} else if userPhone == "" {
-		callback.Error(c, nil, callback.ErrUnexpected)
+		callback.Error(c, callback.ErrUnexpected)
 		return
 	}
 
@@ -135,7 +135,7 @@ func ThirdPartySelfLogin(c *gin.Context) {
 
 	user, e := service.User.UserInfo(userPhone)
 	if e != nil {
-		callback.Error(c, e, callback.ErrDBOperation)
+		callback.Error(c, callback.ErrDBOperation, e)
 		return
 	}
 
@@ -148,17 +148,17 @@ func ThirdPartyLogin(c *gin.Context) {
 		Code string `json:"code" form:"code" binding:"required"`
 	}
 	if e := c.ShouldBind(&f); e != nil {
-		callback.Error(c, e, callback.ErrForm)
+		callback.Error(c, callback.ErrForm, e)
 		return
 	}
 
 	appCode := c.Param("appCode")
 
 	if ok, e := service.App.CheckAppCode(appCode); e != nil {
-		callback.Error(c, e, callback.ErrDBOperation)
+		callback.Error(c, callback.ErrDBOperation, e)
 		return
 	} else if !ok {
-		callback.Error(c, e, callback.ErrAppCodeNotFound)
+		callback.Error(c, callback.ErrAppCodeNotFound, e)
 		return
 	}
 
@@ -166,26 +166,26 @@ func ThirdPartyLogin(c *gin.Context) {
 	if c.IsAborted() {
 		return
 	} else if userPhone == "" {
-		callback.Error(c, nil, callback.ErrUnexpected)
+		callback.Error(c, callback.ErrUnexpected)
 		return
 	}
 
 	appInfo, e := service.App.FirstAppByAppCode(appCode)
 	if e != nil {
-		callback.Error(c, e, callback.ErrDBOperation)
+		callback.Error(c, callback.ErrDBOperation, e)
 		return
 	}
 
 	user, groups, e := service.User.UserInfoForAppCode(userPhone, appCode)
 	if e != nil {
 		if e == gorm.ErrRecordNotFound {
-			callback.ErrorWithTip(c, nil, callback.ErrUnauthorized, "没有找到角色，请尝试使用其他登录方式或联系管理员")
+			callback.ErrorWithTip(c, callback.ErrUnauthorized, "没有找到角色，请尝试使用其他登录方式或联系管理员")
 			return
 		}
-		callback.Error(c, e, callback.ErrDBOperation)
+		callback.Error(c, callback.ErrDBOperation, e)
 		return
 	} else if len(groups) == 0 && !appInfo.PermitAllGroup {
-		callback.Error(c, nil, callback.ErrFindUnit)
+		callback.Error(c, callback.ErrFindUnit)
 		return
 	}
 

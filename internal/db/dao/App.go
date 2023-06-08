@@ -97,7 +97,7 @@ func (a *App) GetPermitAll(tx *gorm.DB) ([]dto.AppShow, error) {
 }
 
 func (a *App) GetAccessible(tx *gorm.DB) ([]dto.AppShowWithGroup, error) {
-	// 后续需要额外归类，故不 make
+	// 后续需要二次归类，故不 make
 	var t []dto.AppShowWithGroup
 	tx = tx.Model(a).Select("apps.*", "base_groups.id AS group_id", "base_groups.name as group_name")
 	tx = a.sqlJoinAppGroups(tx)

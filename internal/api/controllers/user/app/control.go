@@ -16,19 +16,19 @@ import (
 func checkCallback(c *gin.Context, callbackStr string) {
 	callbackUrl, e := url.Parse(callbackStr)
 	if e != nil {
-		callback.Error(c, e, callback.ErrForm)
+		callback.Error(c, callback.ErrForm, e)
 		return
 	} else if callbackUrl.Scheme != "https" {
-		callback.Error(c, nil, callback.ErrForm)
+		callback.Error(c, callback.ErrForm)
 		return
 	}
 
 	exist, e := service.SiteWhiteList.Exist(callbackUrl.Host)
 	if e != nil {
-		callback.Error(c, e, callback.ErrDBOperation)
+		callback.Error(c, callback.ErrDBOperation, e)
 		return
 	} else if !exist {
-		callback.Error(c, e, callback.ErrSiteNotAllow)
+		callback.Error(c, callback.ErrSiteNotAllow, e)
 		return
 	}
 }
@@ -41,7 +41,7 @@ func ApplyApp(c *gin.Context) {
 		PermitGroups []uint `json:"permitGroups" form:"permitGroups"`
 	}
 	if e := c.ShouldBind(&f); e != nil {
-		callback.Error(c, e, callback.ErrForm)
+		callback.Error(c, callback.ErrForm, e)
 		return
 	}
 
@@ -52,7 +52,7 @@ func ApplyApp(c *gin.Context) {
 
 	appSrc, e := service.App.Begin()
 	if e != nil {
-		callback.Error(c, e, callback.ErrForm)
+		callback.Error(c, callback.ErrForm, e)
 		return
 	}
 	defer appSrc.Rollback()
@@ -60,7 +60,7 @@ func ApplyApp(c *gin.Context) {
 	uid := tools.GetUserInfo(c).ID
 	newApp, e := appSrc.New(uid, f.Name, f.Callback, f.PermitAll)
 	if e != nil {
-		callback.Error(c, e, callback.ErrDBOperation)
+		callback.Error(c, callback.ErrDBOperation, e)
 		return
 	}
 
@@ -70,16 +70,16 @@ func ApplyApp(c *gin.Context) {
 
 		if groups, e = appGroupSrv.BindForApp(newApp.ID, f.PermitGroups); e != nil {
 			if e == gorm.ErrRecordNotFound {
-				callback.Error(c, nil, callback.ErrGroupNotFound)
+				callback.Error(c, callback.ErrGroupNotFound)
 				return
 			}
-			callback.Error(c, e, callback.ErrDBOperation)
+			callback.Error(c, callback.ErrDBOperation, e)
 			return
 		}
 	}
 
 	if e = redis.AppCode.Add(newApp.AppCode); e != nil || appSrc.Commit().Error != nil {
-		callback.Error(c, e, callback.ErrUnexpected)
+		callback.Error(c, callback.ErrUnexpected, e)
 		return
 	}
 
@@ -105,7 +105,7 @@ func DeleteApp(c *gin.Context) {
 		ID uint `json:"id" form:"id" binding:"required"`
 	}
 	if e := c.ShouldBind(&f); e != nil {
-		callback.Error(c, e, callback.ErrForm)
+		callback.Error(c, callback.ErrForm, e)
 		return
 	}
 
@@ -113,22 +113,22 @@ func DeleteApp(c *gin.Context) {
 
 	appSrv, e := service.App.Begin()
 	if e != nil {
-		callback.Error(c, e, callback.ErrDBOperation)
+		callback.Error(c, callback.ErrDBOperation, e)
 		return
 	}
 	defer appSrv.Rollback()
 
 	if e = appSrv.DeleteByID(f.ID, uid); e != nil {
 		if e == gorm.ErrRecordNotFound {
-			callback.Error(c, nil, callback.ErrAppNotFound)
+			callback.Error(c, callback.ErrAppNotFound)
 			return
 		}
-		callback.Error(c, e, callback.ErrDBOperation)
+		callback.Error(c, callback.ErrDBOperation, e)
 		return
 	}
 
 	if e = appSrv.Commit().Error; e != nil {
-		callback.Error(c, e, callback.ErrDBOperation)
+		callback.Error(c, callback.ErrDBOperation, e)
 		return
 	}
 
@@ -144,7 +144,7 @@ func ModifyApp(c *gin.Context) {
 		PermitGroups []uint `json:"permitGroups" form:"permitGroups"`
 	}
 	if e := c.ShouldBind(&f); e != nil {
-		callback.Error(c, e, callback.ErrForm)
+		callback.Error(c, callback.ErrForm, e)
 		return
 	}
 
@@ -152,7 +152,7 @@ func ModifyApp(c *gin.Context) {
 		sort.Sort(tools.UintSlice(f.PermitGroups))
 		for i := 1; i < len(f.PermitGroups); i++ {
 			if f.PermitGroups[i-1] == f.PermitGroups[i] {
-				callback.Error(c, nil, callback.ErrForm)
+				callback.Error(c, callback.ErrForm)
 				return
 			}
 		}
@@ -160,7 +160,7 @@ func ModifyApp(c *gin.Context) {
 
 	appSrv, e := service.App.Begin()
 	if e != nil {
-		callback.Error(c, e, callback.ErrDBOperation)
+		callback.Error(c, callback.ErrDBOperation, e)
 		return
 	}
 	defer appSrv.Rollback()
@@ -169,7 +169,7 @@ func ModifyApp(c *gin.Context) {
 
 	app, e := appSrv.FirstAppDetailedByIDForUser(f.ID, uid, daoUtil.LockForUpdate)
 	if e != nil {
-		callback.Error(c, e, callback.ErrDBOperation)
+		callback.Error(c, callback.ErrDBOperation, e)
 		return
 	}
 
@@ -194,13 +194,13 @@ func ModifyApp(c *gin.Context) {
 		if f.PermitAll {
 			e = appGroupSrv.DeleteAllForApp(app.ID)
 			if e != nil {
-				callback.Error(c, e, callback.ErrDBOperation)
+				callback.Error(c, callback.ErrDBOperation, e)
 				return
 			}
 		} else if len(f.PermitGroups) > 0 {
 			app.Groups, e = appGroupSrv.BindForApp(app.ID, f.PermitGroups)
 			if e != nil {
-				callback.Error(c, e, callback.ErrDBOperation)
+				callback.Error(c, callback.ErrDBOperation, e)
 				return
 			}
 		}
@@ -255,13 +255,13 @@ func ModifyApp(c *gin.Context) {
 
 		if len(groupToRemove) > 0 {
 			if e = appGroupSrv.UnBindForApp(app.ID, groupToRemove); e != nil {
-				callback.Error(c, e, callback.ErrDBOperation)
+				callback.Error(c, callback.ErrDBOperation, e)
 				return
 			}
 		}
 		if len(groupToCreate) > 0 {
 			if _, e = appGroupSrv.BindForApp(app.ID, groupToCreate); e != nil {
-				callback.Error(c, e, callback.ErrDBOperation)
+				callback.Error(c, callback.ErrDBOperation, e)
 				return
 			}
 		}
@@ -269,13 +269,13 @@ func ModifyApp(c *gin.Context) {
 
 	if appInfoChanged {
 		if e = appSrv.UpdateAll(app.ID, f.Name, f.Callback, f.PermitAll); e != nil {
-			callback.Error(c, e, callback.ErrDBOperation)
+			callback.Error(c, callback.ErrDBOperation, e)
 			return
 		}
 	}
 
 	if e = appSrv.Commit().Error; e != nil {
-		callback.Error(c, e, callback.ErrDBOperation)
+		callback.Error(c, callback.ErrDBOperation, e)
 		return
 	}
 

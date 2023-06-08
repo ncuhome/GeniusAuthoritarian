@@ -9,7 +9,7 @@ import (
 func ListGroups(c *gin.Context) {
 	list, e := service.BaseGroups.LoadGroupsForShow()
 	if e != nil {
-		callback.Error(c, e, callback.ErrDBOperation)
+		callback.Error(c, callback.ErrDBOperation, e)
 		return
 	}
 

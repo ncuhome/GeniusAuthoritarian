@@ -13,16 +13,16 @@ type Msg struct {
 	HttpStatus int         `json:"-"`
 }
 
-func Error(c *gin.Context, e error, msg *Msg) {
-	log.Debugln(msg.Msg, e)
+func Error(c *gin.Context, msg *Msg, errors ...error) {
+	log.Debugln(msg.Msg, errors)
 	c.JSON(msg.HttpStatus, msg)
 	c.AbortWithStatus(msg.HttpStatus)
 }
 
-func ErrorWithTip(c *gin.Context, e error, msg *Msg, tip any) {
+func ErrorWithTip(c *gin.Context, msg *Msg, tip any, errors ...error) {
 	tipMsg := *msg
 	tipMsg.Msg = fmt.Sprint(tip)
-	Error(c, e, &tipMsg)
+	Error(c, &tipMsg, errors...)
 }
 
 func Success(c *gin.Context, data interface{}) {

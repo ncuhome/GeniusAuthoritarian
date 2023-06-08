@@ -12,7 +12,7 @@ func ListOwnedApp(c *gin.Context) {
 
 	apps, e := service.App.GetUserOwnedApp(uid)
 	if e != nil {
-		callback.Error(c, e, callback.ErrDBOperation)
+		callback.Error(c, callback.ErrDBOperation, e)
 		return
 	}
 
@@ -24,13 +24,13 @@ func ListAccessibleApp(c *gin.Context) {
 
 	permitAllApps, e := service.App.GetPermitAll()
 	if e != nil {
-		callback.Error(c, e, callback.ErrDBOperation)
+		callback.Error(c, callback.ErrDBOperation, e)
 		return
 	}
 
 	accessibleApps, e := service.App.GetUserAccessible(uid)
 	if e != nil {
-		callback.Error(c, e, callback.ErrDBOperation)
+		callback.Error(c, callback.ErrDBOperation, e)
 		return
 	}
 

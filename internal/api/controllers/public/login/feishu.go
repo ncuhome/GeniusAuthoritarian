@@ -9,7 +9,7 @@ import (
 func loginFeishu(c *gin.Context, code string) string {
 	user, e := feishu.Api.GetUser(code)
 	if e != nil {
-		callback.Error(c, e, callback.ErrRemoteOperationFailed)
+		callback.Error(c, callback.ErrRemoteOperationFailed, e)
 		return ""
 	}
 	return user.Mobile

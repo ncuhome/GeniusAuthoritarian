@@ -15,7 +15,7 @@ func LandingApp(c *gin.Context) {
 		Code string `json:"code" form:"code"`
 	}
 	if e := c.ShouldBind(&f); e != nil {
-		callback.Error(c, e, callback.ErrForm)
+		callback.Error(c, callback.ErrForm, e)
 		return
 	}
 
@@ -23,24 +23,24 @@ func LandingApp(c *gin.Context) {
 
 	mfaSecret, e := service.User.FindMfa(user.ID)
 	if e != nil {
-		callback.Error(c, e, callback.ErrDBOperation)
+		callback.Error(c, callback.ErrDBOperation, e)
 		return
 	} else if mfaSecret != "" {
 		if f.Code == "" {
-			callback.Error(c, nil, callback.ErrMfaRequired)
+			callback.Error(c, callback.ErrMfaRequired)
 			return
 		} else if len(f.Code) != 6 {
-			callback.Error(c, nil, callback.ErrMfaCode)
+			callback.Error(c, callback.ErrMfaCode)
 			return
 		}
 
 		var valid bool
 		valid, e = tools.VerifyMfa(f.Code, mfaSecret)
 		if e != nil {
-			callback.Error(c, e, callback.ErrUnexpected)
+			callback.Error(c, callback.ErrUnexpected, e)
 			return
 		} else if !valid {
-			callback.Error(c, nil, callback.ErrMfaCode)
+			callback.Error(c, callback.ErrMfaCode)
 			return
 		}
 	}
@@ -48,10 +48,10 @@ func LandingApp(c *gin.Context) {
 	app, e := service.App.FirstAppByID(f.ID)
 	if e != nil {
 		if e == gorm.ErrRecordNotFound {
-			callback.Error(c, nil, callback.ErrAppNotFound)
+			callback.Error(c, callback.ErrAppNotFound)
 			return
 		}
-		callback.Error(c, e, callback.ErrDBOperation)
+		callback.Error(c, callback.ErrDBOperation, e)
 		return
 	}
 
@@ -59,23 +59,23 @@ func LandingApp(c *gin.Context) {
 		var yes bool
 		yes, e = service.App.UserAccessible(f.ID, user.ID)
 		if e != nil {
-			callback.Error(c, e, callback.ErrDBOperation)
+			callback.Error(c, callback.ErrDBOperation, e)
 			return
 		} else if !yes {
-			callback.ErrorWithTip(c, nil, callback.ErrOperationIllegal, "没有访问该应用的权限")
+			callback.ErrorWithTip(c, callback.ErrOperationIllegal, "没有访问该应用的权限")
 			return
 		}
 	}
 
 	token, e := jwt.GenerateLoginToken(user.ID, app.ID, user.Name, c.ClientIP(), user.Groups)
 	if e != nil {
-		callback.Error(c, e, callback.ErrUnexpected)
+		callback.Error(c, callback.ErrUnexpected, e)
 		return
 	}
 
 	callbackUrl, e := tools.GenCallback(app.Callback, token)
 	if e != nil {
-		callback.Error(c, e, callback.ErrUnexpected)
+		callback.Error(c, callback.ErrUnexpected, e)
 		return
 	}
 

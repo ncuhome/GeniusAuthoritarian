@@ -17,6 +17,6 @@ func LimitGroup(groups []string) gin.HandlerFunc {
 			}
 		}
 
-		callback.Error(c, nil, callback.ErrInsufficientPermissions)
+		callback.Error(c, callback.ErrInsufficientPermissions)
 	}
 }

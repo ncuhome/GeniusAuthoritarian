@@ -10,17 +10,17 @@ import (
 func loginDingTalk(c *gin.Context, code string) string {
 	userToken, e := dingTalk.Api.GetUserToken(code)
 	if e != nil {
-		callback.Error(c, e, callback.ErrRemoteOperationFailed)
+		callback.Error(c, callback.ErrRemoteOperationFailed, e)
 		return ""
 	}
 	userInfo, e := dingTalk.Api.GetUserInfo(*userToken.Body.AccessToken)
 	if e != nil {
-		callback.Error(c, e, callback.ErrRemoteOperationFailed)
+		callback.Error(c, callback.ErrRemoteOperationFailed, e)
 		return ""
 	}
 
 	if userInfo.Body.Mobile == nil || *userInfo.Body.Mobile == "" {
-		callback.Error(c, nil, callback.ErrUnexpected)
+		callback.Error(c, callback.ErrUnexpected)
 		return ""
 	}
 

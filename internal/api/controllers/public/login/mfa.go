@@ -13,39 +13,39 @@ func VerifyMfa(c *gin.Context) {
 		Code  string `json:"code" form:"code" binding:"required,len=6,numeric"`
 	}
 	if e := c.ShouldBind(&f); e != nil {
-		callback.Error(c, e, callback.ErrForm)
+		callback.Error(c, callback.ErrForm, e)
 		return
 	}
 
 	claims, e := jwt.ParseMfaToken(f.Token)
 	if e != nil {
-		callback.Error(c, nil, callback.ErrUnauthorized)
+		callback.Error(c, callback.ErrUnauthorized)
 		return
 	}
 
 	if claims.IP != c.ClientIP() {
-		callback.Error(c, nil, callback.ErrNetContextChanged)
+		callback.Error(c, callback.ErrNetContextChanged)
 		return
 	}
 
 	valid, e := tools.VerifyMfa(f.Code, claims.Mfa)
 	if e != nil {
-		callback.Error(c, e, callback.ErrUnexpected)
+		callback.Error(c, callback.ErrUnexpected, e)
 		return
 	} else if !valid {
-		callback.Error(c, nil, callback.ErrMfaCode)
+		callback.Error(c, callback.ErrMfaCode)
 		return
 	}
 
 	token, e := jwt.GenerateLoginToken(claims.UID, claims.AppID, claims.Name, claims.IP, claims.Groups)
 	if e != nil {
-		callback.Error(c, e, callback.ErrUnexpected)
+		callback.Error(c, callback.ErrUnexpected, e)
 		return
 	}
 
 	callbackUrl, e := tools.GenCallback(claims.AppCallback, token)
 	if e != nil {
-		callback.Error(c, e, callback.ErrUnexpected)
+		callback.Error(c, callback.ErrUnexpected, e)
 		return
 	}
 
