@@ -13,7 +13,7 @@ type LoginRecord struct {
 	UID  uint `gorm:"not null;index;column:uid"`
 	User User `gorm:"foreignKey:UID;constraint:OnDelete:CASCADE"`
 	IP   string
-	// App.ID
+	// App.ID 为 null 或 0 表示登录的是后台
 	AID *uint `gorm:"column:aid;index"`
 	App App   `gorm:"foreignKey:AID;constraint:OnDelete:CASCADE"`
 }
@@ -32,4 +32,9 @@ func (a *LoginRecord) GetByUID(tx *gorm.DB, limit int) ([]dto.LoginRecord, error
 	tx = a.sqlJoinApps(tx)
 	tx = tx.Order("login_records.id DESC").Limit(limit)
 	return t, tx.Find(&t).Error
+}
+
+func (a *LoginRecord) GetLastMonth(tx *gorm.DB) ([]LoginRecord, error) {
+	var t []LoginRecord
+	return t, tx.Model(a).Where("created_at<=?", 604800).Order("id DESC").Find(&t).Error
 }
