@@ -33,7 +33,7 @@
 
 ## :gear: 使用
 
-需要先申请鉴权密钥对，请分别在 [预发布版后台](https://v.ncuhome.club) 和 [生产版后台](https://v.ncuos.com) 创建相应应用用于测试和上线。应用一经创建就会显示在导航栏，请谨慎操作。
+需要先申请鉴权密钥对，请后端同学分别在 [预发布版后台](https://v.ncuhome.club) 和 [生产版后台](https://v.ncuos.com) 创建相应应用用于测试和上线。应用一经创建就会显示在导航栏，请谨慎操作。创建应用时回调地址可以带自定义参数。
 
 ### 为开放服务非入侵式添加鉴权
 
@@ -51,7 +51,7 @@
 window.open('https://v.ncuos.com/?appCode=YourAppCode', '_self')
 ```
 
-其中 `target` 为前端回调页面 url，登录系统会对域名进行白名单校验，可以附带自定义 path、query 或 hash
+其中 `YourAppCode` 需要替换为自己的应用的 `appCode`
 
 ### 后端调用
 
