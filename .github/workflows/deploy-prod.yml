@@ -28,7 +28,7 @@ jobs:
         env:
           GOPRIVATE: github.com/ncuhome
           CGO_ENABLED: 0
-        run: go build -gcflags=-trimpath=$GOPATH -asmflags=-trimpath=$GOPATH -ldflags '-extldflags "-static" -s -w' -o runner ./cmd/core
+        run: go build -gcflags=-trimpath=$GOPATH -asmflags=-trimpath=$GOPATH -ldflags '-extldflags "-static" -s -w' -o runner --tags="core web" ./cmd/core
 
       - name: Build the Docker image
         run: |
@@ -57,4 +57,53 @@ jobs:
           token: ${{ secrets.CATTLE_TOKEN_LOCAL }}
           namespace: 'genius-auth'
           deployment: 'core'
+          image: ${{ steps.image.outputs.VERSION }}
+
+  GateProduction:
+    runs-on: self-hosted
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+
+      - name: Get Docker Image Url
+        id: image
+        env:
+          URL: harbor.ncuos.com/genius-auth/gate
+        run: |
+          echo LATEST=${URL}:latest >> $GITHUB_OUTPUT
+          echo VERSION=${URL}:${GITHUB_REF/refs\/tags\//} >> $GITHUB_OUTPUT
+
+      - name: Build Binary
+        env:
+          GOPRIVATE: github.com/ncuhome
+          CGO_ENABLED: 0
+        run: go build -gcflags=-trimpath=$GOPATH -asmflags=-trimpath=$GOPATH -ldflags '-extldflags "-static" -s -w' -o runner --tags="gate" ./cmd/gate
+
+      - name: Build the Docker image
+        run: |
+          docker build . --file Dockerfile \
+          --tag ${{ steps.image.outputs.VERSION }} \
+          --tag ${{ steps.image.outputs.LATEST }}
+
+      - name: Push
+        run: |
+          docker push ${{ steps.image.outputs.VERSION }}
+          docker push ${{ steps.image.outputs.LATEST }}
+
+      - name: Update Production Deployment
+        uses: MultiMx/K8sSetImageAction@v0.2
+        with:
+          backend: 'https://rancher.ncuos.com'
+          token: ${{ secrets.CATTLE_TOKEN }}
+          namespace: 'genius-auth'
+          deployment: 'gate'
+          image: ${{ steps.image.outputs.VERSION }}
+
+      - name: Update Develop Deployment
+        uses: MultiMx/K8sSetImageAction@v0.2
+        with:
+          backend: 'https://rancher.ncuhome.club'
+          token: ${{ secrets.CATTLE_TOKEN_LOCAL }}
+          namespace: 'genius-auth'
+          deployment: 'gate'
           image: ${{ steps.image.outputs.VERSION }}
