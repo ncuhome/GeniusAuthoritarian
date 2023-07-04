@@ -81,10 +81,11 @@ jobs:
           docker push ${{ steps.image.outputs.LATEST }}
 
       - name: Update Deployment
-        uses: MultiMx/K8sSetImageAction@v0.2
+        uses: MultiMx/K8sSetImageAction@v0.3
         with:
           backend: 'https://rancher.ncuhome.club'
           token: ${{ secrets.CATTLE_TOKEN_LOCAL }}
+          type: daemonsets
           namespace: 'genius-auth'
           deployment: 'gate'
           image: ${{ steps.image.outputs.VERSION }}
