@@ -7,7 +7,7 @@ on:
       - '!**beta**'
 
 jobs:
-  DeployProduction:
+  CoreProduction:
     runs-on: self-hosted
     steps:
       - name: Checkout

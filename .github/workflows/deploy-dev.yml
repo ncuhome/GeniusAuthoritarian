@@ -6,7 +6,7 @@ on:
       - v**beta**
 
 jobs:
-  DeployDev:
+  CoreDev:
     runs-on: self-hosted
     steps:
       - name: Checkout
@@ -48,4 +48,3 @@ jobs:
           namespace: 'genius-auth'
           deployment: 'core'
           image: ${{ steps.image.outputs.VERSION }}
-
