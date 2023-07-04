@@ -15,7 +15,7 @@ func routerApp(G *gin.RouterGroup) {
 }
 
 func routerOwnedApp(G *gin.RouterGroup) {
-	G.Use(middlewares.LimitGroup([]string{departments.UDev}))
+	G.Use(middlewares.LimitGroup(departments.UDev))
 	G.GET("/", controllers.ListOwnedApp)
 	G.POST("/", controllers.ApplyApp)
 	G.PUT("/", controllers.ModifyApp)

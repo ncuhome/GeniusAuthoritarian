@@ -6,7 +6,7 @@ import (
 	"github.com/ncuhome/GeniusAuthoritarian/internal/tools"
 )
 
-func LimitGroup(groups []string) gin.HandlerFunc {
+func LimitGroup(groups ...string) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		userGroups := tools.GetUserInfo(c).Groups
 		for _, userGroup := range userGroups {
