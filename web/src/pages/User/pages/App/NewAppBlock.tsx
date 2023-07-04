@@ -34,7 +34,7 @@ export const NewAppBlock: FC = () => {
     try {
       const {
         data: { data },
-      } = await apiV1User.post("app/", {
+      } = await apiV1User.post("app/owned/", {
         name,
         callback,
         permitAll,
