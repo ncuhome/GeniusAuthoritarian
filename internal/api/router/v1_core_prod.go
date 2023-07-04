@@ -1,3 +1,5 @@
+//go:build core && !dev
+
 package router
 
 import (
