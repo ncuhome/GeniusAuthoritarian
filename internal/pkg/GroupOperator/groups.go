@@ -20,7 +20,7 @@ var Groups = []string{
 
 var GroupRelation map[string]uint
 
-func init() {
+func InitGroupRelation() {
 	e := LoadGroupRelation()
 	if e != nil {
 		log.Fatalf("载入部门 id 关系失败: %v", e)

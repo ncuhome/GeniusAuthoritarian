@@ -8,7 +8,7 @@ import (
 
 var Parser cron.Parser
 
-func init() {
+func Init() {
 	Parser = cron.NewParser(
 		cron.Minute | cron.Hour | cron.Dom | cron.Month | cron.Dow,
 	)

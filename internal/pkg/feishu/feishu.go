@@ -3,12 +3,17 @@ package feishu
 import (
 	"github.com/ncuhome/GeniusAuthoritarian/internal/db/dao"
 	"github.com/ncuhome/GeniusAuthoritarian/internal/global"
+	"github.com/ncuhome/GeniusAuthoritarian/internal/pkg/GroupOperator"
 	"github.com/ncuhome/GeniusAuthoritarian/internal/tools"
 	"github.com/ncuhome/GeniusAuthoritarian/pkg/feishuApi"
 	log "github.com/sirupsen/logrus"
 )
 
-func init() {
+var Api = feishuApi.New(global.Config.Feishu.ClientID, global.Config.Feishu.Secret, tools.Http.Client)
+
+func InitSync() {
+	GroupOperator.InitGroupRelation()
+
 	var count int64
 	e := dao.DB.Model(&dao.FeishuGroups{}).Count(&count).Error
 	if e != nil {
@@ -39,5 +44,3 @@ func init() {
 		log.Fatalf("添加定时同步飞书用户任务失败: %v", e)
 	}
 }
-
-var Api = feishuApi.New(global.Config.Feishu.ClientID, global.Config.Feishu.Secret, tools.Http.Client)
