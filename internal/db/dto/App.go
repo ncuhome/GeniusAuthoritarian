@@ -5,6 +5,7 @@ type AppShow struct {
 	Name           string `json:"name"`
 	Callback       string `json:"callback"`
 	PermitAllGroup bool   `json:"permitAllGroup"`
+	Views          uint64 `json:"views"`
 }
 
 type AppShowOwner struct {
