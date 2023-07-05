@@ -17,6 +17,7 @@ type App struct {
 	AppSecret      string `gorm:"not null"`
 	Callback       string `gorm:"not null"`
 	PermitAllGroup bool
+	Views          uint64
 }
 
 func (a *App) sqlJoinAppGroups(tx *gorm.DB) *gorm.DB {
@@ -112,4 +113,8 @@ func (a *App) DeleteByIdForUID(tx *gorm.DB) *gorm.DB {
 
 func (a *App) UpdatesByID(tx *gorm.DB) error {
 	return tx.Model(a).Select("name", "callback", "permit_all_group").Where(a, "id").Updates(a).Error
+}
+
+func (a *App) UpdateViewByID(tx *gorm.DB) error {
+	return tx.Model(a).Update("views", a.Views).Error
 }

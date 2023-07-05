@@ -224,3 +224,10 @@ func (a AppSrv) UpdateAll(id uint, name, callback string, permitAllGroup bool) e
 		PermitAllGroup: permitAllGroup,
 	}).UpdatesByID(a.DB)
 }
+
+func (a AppSrv) UpdateViews(id uint, views uint64) error {
+	return (&dao.App{
+		ID:    id,
+		Views: views,
+	}).UpdateViewByID(a.DB)
+}
