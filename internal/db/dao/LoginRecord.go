@@ -38,3 +38,10 @@ func (a *LoginRecord) GetLastMonth(tx *gorm.DB) ([]LoginRecord, error) {
 	var t []LoginRecord
 	return t, tx.Model(a).Where("created_at<=?", 604800).Order("id DESC").Find(&t).Error
 }
+
+func (a *LoginRecord) GetViewCount(tx *gorm.DB) ([]dto.ViewCount, error) {
+	var t []dto.ViewCount
+	return t, tx.Model(a).Select("apps.id", "COUNT(login_records.id) AS views").
+		Joins("INNER JOIN apps ON apps.id=login_records.aid AND apps.deleted_at IS NULL").
+		Group("apps.id").Find(&t).Error
+}

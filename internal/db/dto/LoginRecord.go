@@ -6,3 +6,9 @@ type LoginRecord struct {
 	IP        string `json:"ip"`
 	Target    string `json:"target"`
 }
+
+type ViewCount struct {
+	// App.ID
+	ID    uint   `json:"id"`
+	Views uint64 `json:"views"`
+}
