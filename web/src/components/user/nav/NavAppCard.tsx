@@ -1,7 +1,9 @@
 import { FC, useState } from "react";
 import toast from "react-hot-toast";
+import { numeral } from "@util/num";
 
-import { Card, CardContent, Typography } from "@mui/material";
+import { Card, CardContent, Stack, Typography, Box } from "@mui/material";
+import { Visibility } from "@mui/icons-material";
 
 import { apiV1User } from "@api/v1/user/base";
 
@@ -32,7 +34,7 @@ export const NavAppCard: FC<Props> = ({ app }) => {
       });
       window.open(url, "_blank");
     } catch ({ msg, response }) {
-      console.log(response, (response as any)?.data)
+      console.log(response, (response as any)?.data);
       if ((response as any)?.data?.code === 21) {
         setMfaCodeCallback((code) => onLandingApp(id, code));
       } else if (msg) toast.error(msg as string);
@@ -60,6 +62,24 @@ export const NavAppCard: FC<Props> = ({ app }) => {
         >
           {app.name}
         </Typography>
+
+        <Stack
+          flexDirection={"row-reverse"}
+          sx={{
+            mt: 1,
+            opacity: 0.8,
+          }}
+        >
+          <Stack flexDirection={"row"} alignItems={"center"} width={"3.8rem"}>
+            <Visibility
+              fontSize={"small"}
+              sx={{
+                mr: 1,
+              }}
+            />
+            <span>{numeral(app.views)}</span>
+          </Stack>
+        </Stack>
       </CardContent>
     </Card>
   );

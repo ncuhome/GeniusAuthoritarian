@@ -9,6 +9,7 @@ declare namespace App {
     name: string;
     callback: string;
     permitAllGroup: boolean;
+    views: number;
   };
 
   type Owned = Info & {
