@@ -1,4 +1,4 @@
-//go:build gate
+//go:build auth
 
 package router
 

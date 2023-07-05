@@ -68,7 +68,7 @@ jobs:
       - name: Get Docker Image Url
         id: image
         env:
-          URL: harbor.ncuos.com/genius-auth/gate
+          URL: harbor.ncuos.com/genius-auth/auth
         run: |
           echo LATEST=${URL}:latest >> $GITHUB_OUTPUT
           echo VERSION=${URL}:${GITHUB_REF/refs\/tags\//} >> $GITHUB_OUTPUT
@@ -77,7 +77,7 @@ jobs:
         env:
           GOPRIVATE: github.com/ncuhome
           CGO_ENABLED: 0
-        run: go build -gcflags=-trimpath=$GOPATH -asmflags=-trimpath=$GOPATH -ldflags '-extldflags "-static" -s -w' -o runner --tags="gate" ./cmd/gate
+        run: go build -gcflags=-trimpath=$GOPATH -asmflags=-trimpath=$GOPATH -ldflags '-extldflags "-static" -s -w' -o runner --tags="auth" ./cmd/auth
 
       - name: Build the Docker image
         run: |
@@ -96,7 +96,7 @@ jobs:
           backend: 'https://rancher.ncuos.com'
           token: ${{ secrets.CATTLE_TOKEN }}
           namespace: 'genius-auth'
-          deployment: 'gate'
+          deployment: 'auth'
           image: ${{ steps.image.outputs.VERSION }}
 
       - name: Update Develop Deployment
@@ -105,5 +105,5 @@ jobs:
           backend: 'https://rancher.ncuhome.club'
           token: ${{ secrets.CATTLE_TOKEN_LOCAL }}
           namespace: 'genius-auth'
-          deployment: 'gate'
+          deployment: 'auth'
           image: ${{ steps.image.outputs.VERSION }}
