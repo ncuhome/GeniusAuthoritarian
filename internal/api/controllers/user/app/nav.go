@@ -3,16 +3,15 @@ package controllers
 import (
 	"github.com/gin-gonic/gin"
 	"github.com/ncuhome/GeniusAuthoritarian/internal/api/callback"
-	"github.com/ncuhome/GeniusAuthoritarian/internal/pkg/jwt"
 	"github.com/ncuhome/GeniusAuthoritarian/internal/service"
 	"github.com/ncuhome/GeniusAuthoritarian/internal/tools"
 	"gorm.io/gorm"
+	"net/url"
 )
 
 func LandingApp(c *gin.Context) {
 	var f struct {
-		ID   uint   `json:"id" form:"id" binding:"required"`
-		Code string `json:"code" form:"code"`
+		ID uint `json:"id" form:"id" binding:"required"`
 	}
 	if e := c.ShouldBind(&f); e != nil {
 		callback.Error(c, callback.ErrForm, e)
@@ -20,30 +19,6 @@ func LandingApp(c *gin.Context) {
 	}
 
 	user := tools.GetUserInfo(c)
-
-	mfaSecret, e := service.User.FindMfa(user.ID)
-	if e != nil {
-		callback.Error(c, callback.ErrDBOperation, e)
-		return
-	} else if mfaSecret != "" {
-		if f.Code == "" {
-			callback.Error(c, callback.ErrMfaRequired)
-			return
-		} else if len(f.Code) != 6 {
-			callback.Error(c, callback.ErrMfaCode)
-			return
-		}
-
-		var valid bool
-		valid, e = tools.VerifyMfa(f.Code, mfaSecret)
-		if e != nil {
-			callback.Error(c, callback.ErrUnexpected, e)
-			return
-		} else if !valid {
-			callback.Error(c, callback.ErrMfaCode)
-			return
-		}
-	}
 
 	app, e := service.App.FirstAppByID(f.ID)
 	if e != nil {
@@ -67,26 +42,15 @@ func LandingApp(c *gin.Context) {
 		}
 	}
 
-	token, e := jwt.GenerateLoginToken(jwt.LoginTokenClaims{
-		UID:       user.ID,
-		AvatarUrl: "",
-		Name:      user.Name,
-		IP:        c.ClientIP(),
-		Groups:    user.Groups,
-		AppID:     app.ID,
-	})
+	callbackUrl, e := url.Parse(app.Callback)
 	if e != nil {
 		callback.Error(c, callback.ErrUnexpected, e)
 		return
 	}
 
-	callbackUrl, e := tools.GenCallback(app.Callback, token)
-	if e != nil {
-		callback.Error(c, callback.ErrUnexpected, e)
-		return
-	}
+	callbackUrl.RawQuery = ""
 
 	callback.Success(c, gin.H{
-		"url": callbackUrl,
+		"url": callbackUrl.String(),
 	})
 }
