@@ -2,8 +2,8 @@ import { FC, useState } from "react";
 import toast from "react-hot-toast";
 import { numeral } from "@util/num";
 
-import { Card, CardContent, Stack, Typography, Box } from "@mui/material";
-import { Visibility } from "@mui/icons-material";
+import { Card, CardContent, Stack, Typography } from "@mui/material";
+import { DataSaverOff } from "@mui/icons-material";
 
 import { apiV1User } from "@api/v1/user/base";
 
@@ -71,7 +71,7 @@ export const NavAppCard: FC<Props> = ({ app }) => {
           }}
         >
           <Stack flexDirection={"row"} alignItems={"center"} width={"3.8rem"}>
-            <Visibility
+            <DataSaverOff
               fontSize={"small"}
               sx={{
                 mr: 1,
