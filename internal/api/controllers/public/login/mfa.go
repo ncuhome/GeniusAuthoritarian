@@ -37,7 +37,7 @@ func VerifyMfa(c *gin.Context) {
 		return
 	}
 
-	token, e := jwt.GenerateLoginToken(claims.UID, claims.AppID, claims.Name, claims.IP, claims.Groups)
+	token, e := jwt.GenerateLoginToken(claims.LoginTokenClaims)
 	if e != nil {
 		callback.Error(c, callback.ErrUnexpected, e)
 		return

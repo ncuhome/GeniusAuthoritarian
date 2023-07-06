@@ -67,7 +67,14 @@ func LandingApp(c *gin.Context) {
 		}
 	}
 
-	token, e := jwt.GenerateLoginToken(user.ID, app.ID, user.Name, c.ClientIP(), user.Groups)
+	token, e := jwt.GenerateLoginToken(jwt.LoginTokenClaims{
+		UID:       user.ID,
+		AvatarUrl: "",
+		Name:      user.Name,
+		IP:        c.ClientIP(),
+		Groups:    user.Groups,
+		AppID:     app.ID,
+	})
 	if e != nil {
 		callback.Error(c, callback.ErrUnexpected, e)
 		return

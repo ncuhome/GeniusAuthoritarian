@@ -5,6 +5,7 @@ import (
 	"github.com/ncuhome/GeniusAuthoritarian/internal/api/callback"
 	"github.com/ncuhome/GeniusAuthoritarian/internal/api/models/response"
 	"github.com/ncuhome/GeniusAuthoritarian/internal/db/dao"
+	"github.com/ncuhome/GeniusAuthoritarian/internal/db/dto"
 	"github.com/ncuhome/GeniusAuthoritarian/internal/pkg/dingTalk"
 	"github.com/ncuhome/GeniusAuthoritarian/internal/pkg/feishu"
 	"github.com/ncuhome/GeniusAuthoritarian/internal/pkg/jwt"
@@ -62,7 +63,7 @@ func GetLoginLink(c *gin.Context) {
 }
 
 // 根据前端传来的 code 获取用户电话号码
-func loadUserPhone(c *gin.Context, code string) string {
+func loadUserIdentity(c *gin.Context, code string) *dto.UserThirdPartyIdentity {
 	switch c.Param("app") {
 	case appDingTalk:
 		return loginDingTalk(c, code)
@@ -70,25 +71,42 @@ func loadUserPhone(c *gin.Context, code string) string {
 		return loginFeishu(c, code)
 	default:
 		callback.Error(c, callback.ErrForm)
-		return ""
+		return nil
 	}
 }
 
+type ThirdPartyLoginContext struct {
+	User      *dao.User
+	AppInfo   *dao.App
+	Groups    []dao.BaseGroup
+	Ip        string
+	AvatarUrl string
+}
+
 // 根据数据完成请求响应
-func callThirdPartyLoginResult(c *gin.Context, user *dao.User, appInfo *dao.App, groups []dao.BaseGroup, ip string) {
-	var groupSlice = make([]string, len(groups))
-	for i, g := range groups {
+func callThirdPartyLoginResult(c *gin.Context, info ThirdPartyLoginContext) {
+	var groupSlice = make([]string, len(info.Groups))
+	for i, g := range info.Groups {
 		groupSlice[i] = g.Name
 	}
 
-	if user.MFA == "" {
-		token, e := jwt.GenerateLoginToken(user.ID, appInfo.ID, user.Name, ip, groupSlice)
+	claims := jwt.LoginTokenClaims{
+		UID:       info.User.ID,
+		Name:      info.User.Name,
+		IP:        info.Ip,
+		Groups:    groupSlice,
+		AppID:     info.AppInfo.ID,
+		AvatarUrl: info.AvatarUrl,
+	}
+
+	if info.User.MFA == "" {
+		token, e := jwt.GenerateLoginToken(claims)
 		if e != nil {
 			callback.Error(c, callback.ErrUnexpected, e)
 			return
 		}
 
-		callbackUrl, e := tools.GenCallback(appInfo.Callback, token)
+		callbackUrl, e := tools.GenCallback(info.AppInfo.Callback, token)
 		if e != nil {
 			callback.Error(c, callback.ErrUnexpected, e)
 			return
@@ -100,7 +118,7 @@ func callThirdPartyLoginResult(c *gin.Context, user *dao.User, appInfo *dao.App,
 			Callback: callbackUrl,
 		})
 	} else {
-		token, e := jwt.GenerateMfaToken(user.ID, appInfo.ID, user.Name, ip, user.MFA, appInfo.Callback, groupSlice)
+		token, e := jwt.GenerateMfaToken(claims, info.User.MFA, info.AppInfo.Callback)
 		if e != nil {
 			callback.Error(c, callback.ErrUnexpected, e)
 			return
@@ -123,23 +141,29 @@ func ThirdPartySelfLogin(c *gin.Context) {
 		return
 	}
 
-	userPhone := loadUserPhone(c, f.Code)
+	userIdentity := loadUserIdentity(c, f.Code)
 	if c.IsAborted() {
 		return
-	} else if userPhone == "" {
+	} else if userIdentity == nil {
 		callback.Error(c, callback.ErrUnexpected)
 		return
 	}
 
 	appInfo := service.App.This(c.Request.Host)
 
-	user, e := service.User.UserInfo(userPhone)
+	user, e := service.User.UserInfo(userIdentity.Phone)
 	if e != nil {
 		callback.Error(c, callback.ErrDBOperation, e)
 		return
 	}
 
-	callThirdPartyLoginResult(c, user, appInfo, nil, c.ClientIP())
+	callThirdPartyLoginResult(c, ThirdPartyLoginContext{
+		User:      user,
+		AppInfo:   appInfo,
+		Groups:    nil,
+		Ip:        c.ClientIP(),
+		AvatarUrl: userIdentity.AvatarUrl,
+	})
 }
 
 // ThirdPartyLogin 校验第三方登录回调结果，生成目标 APP 回调链接
@@ -162,10 +186,10 @@ func ThirdPartyLogin(c *gin.Context) {
 		return
 	}
 
-	userPhone := loadUserPhone(c, f.Code)
+	userIdentity := loadUserIdentity(c, f.Code)
 	if c.IsAborted() {
 		return
-	} else if userPhone == "" {
+	} else if userIdentity == nil {
 		callback.Error(c, callback.ErrUnexpected)
 		return
 	}
@@ -176,7 +200,7 @@ func ThirdPartyLogin(c *gin.Context) {
 		return
 	}
 
-	user, groups, e := service.User.UserInfoForAppCode(userPhone, appCode)
+	user, groups, e := service.User.UserInfoForAppCode(userIdentity.Phone, appCode)
 	if e != nil {
 		if e == gorm.ErrRecordNotFound {
 			callback.ErrorWithTip(c, callback.ErrUnauthorized, "没有找到角色，请尝试使用其他登录方式或联系管理员")
@@ -189,5 +213,11 @@ func ThirdPartyLogin(c *gin.Context) {
 		return
 	}
 
-	callThirdPartyLoginResult(c, user, appInfo, groups, c.ClientIP())
+	callThirdPartyLoginResult(c, ThirdPartyLoginContext{
+		User:      user,
+		AppInfo:   appInfo,
+		Groups:    groups,
+		Ip:        c.ClientIP(),
+		AvatarUrl: userIdentity.AvatarUrl,
+	})
 }

@@ -92,8 +92,9 @@ func VerifyToken(c *gin.Context) {
 	}
 
 	callback.Success(c, response.VerifyTokenSuccess{
-		Name:   claims.Name,
-		Groups: claims.Groups,
+		Name:      claims.Name,
+		Groups:    claims.Groups,
+		AvatarUrl: claims.AvatarUrl,
 	})
 }
 

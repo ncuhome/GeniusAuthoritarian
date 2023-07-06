@@ -1,8 +1,9 @@
 package response
 
 type VerifyTokenSuccess struct {
-	Name   string   `json:"name"`
-	Groups []string `json:"groups"`
+	Name      string   `json:"name"`
+	Groups    []string `json:"groups"`
+	AvatarUrl string   `json:"avatarUrl"`
 }
 
 type ThirdPartyLogin struct {

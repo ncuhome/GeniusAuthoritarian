@@ -41,17 +41,11 @@ func GenerateUserToken(uid uint, name string, groups []string) (string, error) {
 }
 
 // GenerateLoginToken 生成有效期 5 分钟的登录校验 Token
-func GenerateLoginToken(uid, appID uint, name, ip string, groups []string) (string, error) {
+func GenerateLoginToken(clams LoginTokenClaims) (string, error) {
 	now := time.Now()
 	valid := time.Minute * 5
 
-	id, e := redis.ThirdPartyLogin.NewLoginPoint(now.Unix(), valid, LoginTokenClaims{
-		UID:    uid,
-		IP:     ip,
-		Name:   name,
-		AppID:  appID,
-		Groups: groups,
-	})
+	id, e := redis.ThirdPartyLogin.NewLoginPoint(now.Unix(), valid, clams)
 	if e != nil {
 		return "", e
 	}
@@ -66,7 +60,7 @@ func GenerateLoginToken(uid, appID uint, name, ip string, groups []string) (stri
 }
 
 // GenerateMfaToken 生成 2FA 中间身份令牌，五分钟有效
-func GenerateMfaToken(uid, appID uint, name, ip, mfaSecret, appCallback string, groups []string) (string, error) {
+func GenerateMfaToken(clams LoginTokenClaims, mfaSecret, appCallback string) (string, error) {
 	now := time.Now()
 	valid := time.Minute * 5
 
@@ -75,22 +69,16 @@ func GenerateMfaToken(uid, appID uint, name, ip, mfaSecret, appCallback string, 
 			ExpiresAt: jwt.NewNumericDate(now.Add(valid)),
 			IssuedAt:  jwt.NewNumericDate(now),
 		},
-		UID: uid,
+		UID: clams.UID,
 	})
 	if e != nil {
 		return "", e
 	}
 
-	if e = redis.MfaLogin.Set(uid, token, valid, MfaLoginClaims{
-		LoginTokenClaims: LoginTokenClaims{
-			UID:    uid,
-			Name:   name,
-			IP:     ip,
-			Groups: groups,
-			AppID:  appID,
-		},
-		Mfa:         mfaSecret,
-		AppCallback: appCallback,
+	if e = redis.MfaLogin.Set(clams.UID, token, valid, MfaLoginClaims{
+		LoginTokenClaims: clams,
+		Mfa:              mfaSecret,
+		AppCallback:      appCallback,
 	}); e != nil {
 		return "", e
 	}
