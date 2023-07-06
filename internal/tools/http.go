@@ -8,6 +8,7 @@ import (
 	"net/http"
 	"os"
 	"os/signal"
+	"syscall"
 	"time"
 )
 
@@ -30,9 +31,10 @@ func SoftHttpSrv(E *gin.Engine) error {
 		Handler: E,
 	}
 
+	shutdown := make(chan bool)
 	go func(srv *http.Server) {
 		quit := make(chan os.Signal)
-		signal.Notify(quit, os.Interrupt, os.Kill)
+		signal.Notify(quit, os.Interrupt, os.Kill, syscall.SIGTERM)
 		<-quit
 		log.Infoln("Shutdown Server...")
 
@@ -42,7 +44,13 @@ func SoftHttpSrv(E *gin.Engine) error {
 		if e != nil {
 			log.Errorln("Server Shutdown:", e)
 		}
+		close(shutdown)
 	}(srv)
 
-	return srv.ListenAndServe()
+	e := srv.ListenAndServe()
+	if e == http.ErrServerClosed {
+		<-shutdown
+		return nil
+	}
+	return e
 }
