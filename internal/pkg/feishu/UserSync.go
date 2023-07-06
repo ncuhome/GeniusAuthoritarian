@@ -2,10 +2,10 @@ package feishu
 
 import (
 	"github.com/Mmx233/daoUtil"
-	"github.com/Mmx233/tool"
 	"github.com/ncuhome/GeniusAuthoritarian/internal/db/dao"
 	"github.com/ncuhome/GeniusAuthoritarian/internal/pkg/agent"
 	"github.com/ncuhome/GeniusAuthoritarian/internal/service"
+	"github.com/ncuhome/GeniusAuthoritarian/pkg/backoff"
 	"github.com/ncuhome/GeniusAuthoritarian/pkg/feishuApi"
 	log "github.com/sirupsen/logrus"
 	"gorm.io/gorm"
@@ -294,18 +294,24 @@ func (a *UserSyncProcessor) doSyncUserGroups(reserveData map[string]*RelatedUser
 }
 
 func AddUserSyncCron(spec string) error {
-	_, e := agent.AddRegular(&agent.Event{
-		T: spec,
-		E: func() {
-			defer tool.Recover()
+	worker := backoff.New(backoff.Conf{
+		Content: func() error {
 			sync := UserSyncProcessor{}
-			if e := sync.Run(); e != nil {
+			e := sync.Run()
+			if e != nil {
 				log.Errorf("同步飞书用户列表失败: %v", e)
 			} else {
 				log.Infof("飞书用户列表同步成功，耗时 %dms", sync.Cost.Milliseconds())
 				sync.PrintSyncResult()
 			}
+			return e
 		},
+		MaxRetryDelay: time.Minute * 60,
+	})
+
+	_, e := agent.AddRegular(&agent.Event{
+		T: spec,
+		E: worker.Start,
 	})
 	return e
 }

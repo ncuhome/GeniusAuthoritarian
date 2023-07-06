@@ -2,11 +2,11 @@ package feishu
 
 import (
 	"github.com/Mmx233/daoUtil"
-	"github.com/Mmx233/tool"
 	"github.com/ncuhome/GeniusAuthoritarian/internal/db/dao"
 	"github.com/ncuhome/GeniusAuthoritarian/internal/pkg/GroupOperator"
 	"github.com/ncuhome/GeniusAuthoritarian/internal/pkg/agent"
 	"github.com/ncuhome/GeniusAuthoritarian/internal/service"
+	"github.com/ncuhome/GeniusAuthoritarian/pkg/backoff"
 	"github.com/ncuhome/GeniusAuthoritarian/pkg/departments"
 	log "github.com/sirupsen/logrus"
 	"strings"
@@ -90,17 +90,23 @@ func DepartmentSync() error {
 }
 
 func AddDepartmentSyncCron(spec string) error {
-	_, e := agent.AddRegular(&agent.Event{
-		T: spec,
-		E: func() {
-			defer tool.Recover()
+	worker := backoff.New(backoff.Conf{
+		Content: func() error {
 			startAt := time.Now()
-			if e := DepartmentSync(); e != nil {
+			e := DepartmentSync()
+			if e != nil {
 				log.Errorf("同步飞书部门失败: %v", e)
 			} else {
 				log.Infof("飞书部门同步成功，耗时 %dms", time.Now().Sub(startAt).Milliseconds())
 			}
+			return e
 		},
+		MaxRetryDelay: time.Minute * 30,
+	})
+
+	_, e := agent.AddRegular(&agent.Event{
+		T: spec,
+		E: worker.Start,
 	})
 	return e
 }
