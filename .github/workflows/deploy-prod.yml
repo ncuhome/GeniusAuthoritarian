@@ -7,7 +7,7 @@ on:
       - '!**beta**'
 
 jobs:
-  CoreProduction:
+  Deploy:
     runs-on: self-hosted
     steps:
       - name: Checkout
@@ -16,94 +16,117 @@ jobs:
       - name: Get Docker Image Url
         id: image
         env:
-          URL: harbor.ncuos.com/genius-auth/core
+          CORE: harbor.ncuos.com/genius-auth/core
+          AUTH: harbor.ncuos.com/genius-auth/gate
+          FE: harbor.ncuos.com/genius-auth/fe
         run: |
-          echo LATEST=${URL}:latest >> $GITHUB_OUTPUT
-          echo VERSION=${URL}:${GITHUB_REF/refs\/tags\//} >> $GITHUB_OUTPUT
+          echo CORE_LATEST=${CORE}:latest >> $GITHUB_OUTPUT
+          echo CORE_VERSION=${CORE}:${GITHUB_REF/refs\/tags\//} >> $GITHUB_OUTPUT
+          echo AUTH_LATEST=${AUTH}:latest >> $GITHUB_OUTPUT
+          echo AUTH_VERSION=${AUTH}:${GITHUB_REF/refs\/tags\//} >> $GITHUB_OUTPUT
+          echo FE_LATEST=${FE}:latest >> $GITHUB_OUTPUT
+          echo FE_VERSION=${FE}:${GITHUB_REF/refs\/tags\//} >> $GITHUB_OUTPUT
 
       - name: Build Site
         run: cd web && pnpm i && pnpm run build
 
-      - name: Build Binary
+      - name: Build Core Binary
         env:
           GOPRIVATE: github.com/ncuhome
           CGO_ENABLED: 0
         run: go build -gcflags=-trimpath=$GOPATH -asmflags=-trimpath=$GOPATH -ldflags '-extldflags "-static" -s -w' -o runner --tags="core web" ./cmd/core
 
-      - name: Build the Docker image
+      - name: Build Core Docker Image
         run: |
           docker build . --file Dockerfile \
-          --tag ${{ steps.image.outputs.VERSION }} \
-          --tag ${{ steps.image.outputs.LATEST }}
+          --tag ${{ steps.image.outputs.CORE_VERSION }} \
+          --tag ${{ steps.image.outputs.CORE_LATEST }}
 
-      - name: Push
-        run: |
-          docker push ${{ steps.image.outputs.VERSION }}
-          docker push ${{ steps.image.outputs.LATEST }}
-
-      - name: Update Production Deployment
-        uses: MultiMx/K8sSetImageAction@v0.2
-        with:
-          backend: 'https://rancher.ncuos.com'
-          token: ${{ secrets.CATTLE_TOKEN }}
-          namespace: 'genius-auth'
-          deployment: 'core'
-          image: ${{ steps.image.outputs.VERSION }}
-
-      - name: Update Develop Deployment
-        uses: MultiMx/K8sSetImageAction@v0.2
-        with:
-          backend: 'https://rancher.ncuhome.club'
-          token: ${{ secrets.CATTLE_TOKEN_LOCAL }}
-          namespace: 'genius-auth'
-          deployment: 'core'
-          image: ${{ steps.image.outputs.VERSION }}
-
-  GateProduction:
-    runs-on: self-hosted
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v3
-
-      - name: Get Docker Image Url
-        id: image
-        env:
-          URL: harbor.ncuos.com/genius-auth/auth
-        run: |
-          echo LATEST=${URL}:latest >> $GITHUB_OUTPUT
-          echo VERSION=${URL}:${GITHUB_REF/refs\/tags\//} >> $GITHUB_OUTPUT
-
-      - name: Build Binary
+      - name: Build Auth Binary
         env:
           GOPRIVATE: github.com/ncuhome
           CGO_ENABLED: 0
         run: go build -gcflags=-trimpath=$GOPATH -asmflags=-trimpath=$GOPATH -ldflags '-extldflags "-static" -s -w' -o runner --tags="auth" ./cmd/auth
 
-      - name: Build the Docker image
+      - name: Build Auth Docker Image
         run: |
           docker build . --file Dockerfile \
-          --tag ${{ steps.image.outputs.VERSION }} \
-          --tag ${{ steps.image.outputs.LATEST }}
+          --tag ${{ steps.image.outputs.AUTH_VERSION }} \
+          --tag ${{ steps.image.outputs.AUTH_LATEST }}
+
+      - name: Build Fe Binary
+        env:
+          GOPRIVATE: github.com/ncuhome
+          CGO_ENABLED: 0
+        run: go build -gcflags=-trimpath=$GOPATH -asmflags=-trimpath=$GOPATH -ldflags '-extldflags "-static" -s -w' -o runner --tags="fe web" ./cmd/fe
+
+      - name: Build Fe Docker Image
+        run: |
+          docker build . --file Dockerfile \
+          --tag ${{ steps.image.outputs.FE_VERSION }} \
+          --tag ${{ steps.image.outputs.FE_LATEST }}
 
       - name: Push
         run: |
-          docker push ${{ steps.image.outputs.VERSION }}
-          docker push ${{ steps.image.outputs.LATEST }}
+          docker push ${{ steps.image.outputs.CORE_VERSION }}
+          docker push ${{ steps.image.outputs.CORE_LATEST }}
+          docker push ${{ steps.image.outputs.AUTH_VERSION }}
+          docker push ${{ steps.image.outputs.AUTH_LATEST }}
+          docker push ${{ steps.image.outputs.FE_VERSION }}
+          docker push ${{ steps.image.outputs.FE_LATEST }}
 
-      - name: Update Production Deployment
+      - name: Update Core Dev Deployment
         uses: MultiMx/K8sSetImageAction@v0.2
         with:
-          backend: 'https://rancher.ncuos.com'
-          token: ${{ secrets.CATTLE_TOKEN }}
+          backend: 'https://rancher.ncuhome.club'
+          token: ${{ secrets.CATTLE_TOKEN_LOCAL }}
           namespace: 'genius-auth'
-          deployment: 'auth'
-          image: ${{ steps.image.outputs.VERSION }}
+          deployment: 'core'
+          image: ${{ steps.image.outputs.CORE_VERSION }}
+          wait: true
 
-      - name: Update Develop Deployment
+      - name: Update Auth Dev Deployment
         uses: MultiMx/K8sSetImageAction@v0.2
         with:
           backend: 'https://rancher.ncuhome.club'
           token: ${{ secrets.CATTLE_TOKEN_LOCAL }}
           namespace: 'genius-auth'
           deployment: 'auth'
-          image: ${{ steps.image.outputs.VERSION }}
+          image: ${{ steps.image.outputs.AUTH_VERSION }}
+
+      - name: Update Fe Dev Deployment
+        uses: MultiMx/K8sSetImageAction@v0.2
+        with:
+          backend: 'https://rancher.ncuhome.club'
+          token: ${{ secrets.CATTLE_TOKEN_LOCAL }}
+          namespace: 'genius-auth'
+          deployment: 'fe'
+          image: ${{ steps.image.outputs.FE_VERSION }}
+
+      - name: Update Core Prod Deployment
+        uses: MultiMx/K8sSetImageAction@v0.2
+        with:
+          backend: 'https://rancher.ncuos.com'
+          token: ${{ secrets.CATTLE_TOKEN }}
+          namespace: 'genius-auth'
+          deployment: 'core'
+          image: ${{ steps.image.outputs.CORE_VERSION }}
+          wait: true
+
+      - name: Update Auth Prod Deployment
+        uses: MultiMx/K8sSetImageAction@v0.2
+        with:
+          backend: 'https://rancher.ncuos.com'
+          token: ${{ secrets.CATTLE_TOKEN }}
+          namespace: 'genius-auth'
+          deployment: 'auth'
+          image: ${{ steps.image.outputs.AUTH_VERSION }}
+
+      - name: Update Fe Prod Deployment
+        uses: MultiMx/K8sSetImageAction@v0.2
+        with:
+          backend: 'https://rancher.ncuos.com'
+          token: ${{ secrets.CATTLE_TOKEN }}
+          namespace: 'genius-auth'
+          deployment: 'fe'
+          image: ${{ steps.image.outputs.FE_VERSION }}
