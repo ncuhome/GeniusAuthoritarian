@@ -3,6 +3,7 @@ package feishu
 import (
 	"github.com/Mmx233/daoUtil"
 	"github.com/ncuhome/GeniusAuthoritarian/internal/db/dao"
+	"github.com/ncuhome/GeniusAuthoritarian/internal/db/redis"
 	"github.com/ncuhome/GeniusAuthoritarian/internal/pkg/agent"
 	"github.com/ncuhome/GeniusAuthoritarian/internal/service"
 	"github.com/ncuhome/GeniusAuthoritarian/pkg/backoff"
@@ -266,6 +267,7 @@ func (a *UserSyncProcessor) doSyncUserGroups(reserveData map[string]*RelatedUser
 				UID: user.Data.ID,
 				GID: userDepartment,
 			})
+			_ = redis.UserJwt.Clear(user.Data.ID)
 		nextUserDepartment:
 		}
 		for _, exUserDepartment := range exUserGroupMap[user.Data.ID] {
@@ -275,6 +277,10 @@ func (a *UserSyncProcessor) doSyncUserGroups(reserveData map[string]*RelatedUser
 				}
 			}
 			userGroupsToDelete = append(userGroupsToDelete, exUserDepartment)
+			e = redis.UserJwt.Clear(user.Data.ID)
+			if e != nil && e != redis.Nil {
+				return e
+			}
 		nextExUserDepartment:
 		}
 	}

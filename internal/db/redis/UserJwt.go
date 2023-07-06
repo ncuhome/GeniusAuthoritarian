@@ -34,3 +34,7 @@ func (a UserJwtHelper) Pair(uid uint, token string) (bool, error) {
 	}
 	return value == token[:a.compareLength], nil
 }
+
+func (a UserJwtHelper) Clear(uid uint) error {
+	return Client.Del(context.Background(), a.userKey(uid)).Err()
+}
