@@ -1,7 +1,13 @@
 package tools
 
 import (
+	"context"
 	"github.com/Mmx233/tool"
+	"github.com/gin-gonic/gin"
+	log "github.com/sirupsen/logrus"
+	"net/http"
+	"os"
+	"os/signal"
 	"time"
 )
 
@@ -16,4 +22,27 @@ func init() {
 		}),
 		Timeout: defaultTimeout,
 	}))
+}
+
+func SoftHttpSrv(E *gin.Engine) error {
+	srv := &http.Server{
+		Addr:    ":80",
+		Handler: E,
+	}
+
+	go func(srv *http.Server) {
+		quit := make(chan os.Signal)
+		signal.Notify(quit, os.Interrupt, os.Kill)
+		<-quit
+		log.Infoln("Shutdown Server...")
+
+		ctx, cancel := context.WithTimeout(context.Background(), time.Second*20)
+		defer cancel()
+		e := srv.Shutdown(ctx)
+		if e != nil {
+			log.Errorln("Server Shutdown:", e)
+		}
+	}(srv)
+
+	return srv.ListenAndServe()
 }
