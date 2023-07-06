@@ -70,14 +70,14 @@ export const NavAppCard: FC<Props> = ({ app }) => {
             opacity: 0.8,
           }}
         >
-          <Stack flexDirection={"row"} alignItems={"center"} width={"3.8rem"}>
+          <Stack flexDirection={"row"} alignItems={"center"} width={"3.5rem"}>
             <DataSaverOff
               fontSize={"small"}
               sx={{
-                mr: 1,
+                mr: 0.7,
               }}
             />
-            <span>{numeral(app.views)}</span>
+            <span>{numeral(app.views, 0)}</span>
           </Stack>
         </Stack>
       </CardContent>
