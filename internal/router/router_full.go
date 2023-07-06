@@ -1,4 +1,4 @@
-//go:build web
+//go:build core
 
 package router
 

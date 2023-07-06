@@ -1,4 +1,4 @@
-//go:build !web && !fe
+//go:build gate
 
 package router
 
