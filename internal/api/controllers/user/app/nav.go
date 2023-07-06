@@ -48,6 +48,7 @@ func LandingApp(c *gin.Context) {
 		return
 	}
 
+	callbackUrl.Path = ""
 	callbackUrl.RawQuery = ""
 
 	callback.Success(c, gin.H{
