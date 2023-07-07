@@ -30,6 +30,13 @@ func (a UserGroupsSrv) GetForUser(uid uint) ([]string, error) {
 	return (&dao.UserGroups{UID: uid}).GetUserGroupNamesByUID(a.DB)
 }
 
+func (a UserGroupsSrv) GetForAppCode(uid uint, appCode string) ([]dao.BaseGroup, error) {
+	var groups []dao.BaseGroup
+	return groups, (&dao.UserGroups{
+		UID: uid,
+	}).GetUserGroupsForAppCodeByUID(a.DB, appCode).Find(&groups).Error
+}
+
 func (a UserGroupsSrv) GetAll() ([]dao.UserGroups, error) {
 	return (&dao.UserGroups{}).GetAllUnfrozen(a.DB)
 }

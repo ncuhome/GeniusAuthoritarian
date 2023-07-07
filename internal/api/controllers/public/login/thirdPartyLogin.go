@@ -78,23 +78,18 @@ func loadUserIdentity(c *gin.Context, code string) *dto.UserThirdPartyIdentity {
 type ThirdPartyLoginContext struct {
 	User      *dao.User
 	AppInfo   *dao.App
-	Groups    []dao.BaseGroup
+	Groups    []string
 	Ip        string
 	AvatarUrl string
 }
 
 // 根据数据完成请求响应
 func callThirdPartyLoginResult(c *gin.Context, info ThirdPartyLoginContext) {
-	var groupSlice = make([]string, len(info.Groups))
-	for i, g := range info.Groups {
-		groupSlice[i] = g.Name
-	}
-
 	claims := jwt.LoginTokenClaims{
 		UID:       info.User.ID,
 		Name:      info.User.Name,
 		IP:        info.Ip,
-		Groups:    groupSlice,
+		Groups:    info.Groups,
 		AppID:     info.AppInfo.ID,
 		AvatarUrl: info.AvatarUrl,
 	}
@@ -206,17 +201,38 @@ func ThirdPartyLogin(c *gin.Context) {
 		return
 	}
 
-	groups, e := service.App.InfoForAppCode(user.ID, appCode)
+	var groups []string
+	isCenterMember, e := service.UserGroups.IsCenterMember(user.ID)
 	if e != nil {
-		if e == gorm.ErrRecordNotFound {
-			callback.ErrorWithTip(c, callback.ErrUnauthorized, "没有找到角色，请尝试使用其他登录方式或联系管理员")
-			return
-		}
 		callback.Error(c, callback.ErrDBOperation, e)
 		return
-	} else if len(groups) == 0 && !appInfo.PermitAllGroup {
-		callback.Error(c, callback.ErrFindUnit)
-		return
+	} else if isCenterMember {
+		groups, e = service.UserGroups.GetForUser(user.ID)
+		if e != nil {
+			callback.Error(c, callback.ErrDBOperation, e)
+			return
+		}
+	} else {
+		var baseGroups []dao.BaseGroup
+		baseGroups, e = service.UserGroups.GetForAppCode(user.ID, appCode)
+		if e != nil {
+			if e == gorm.ErrRecordNotFound {
+				callback.ErrorWithTip(c, callback.ErrUnauthorized, "没有找到角色，请尝试使用其他登录方式或联系管理员")
+				return
+			}
+			callback.Error(c, callback.ErrDBOperation, e)
+			return
+		}
+
+		if len(groups) == 0 && !appInfo.PermitAllGroup {
+			callback.Error(c, callback.ErrFindUnit)
+			return
+		}
+
+		groups = make([]string, len(baseGroups))
+		for i, g := range baseGroups {
+			groups[i] = g.Name
+		}
 	}
 
 	callThirdPartyLoginResult(c, ThirdPartyLoginContext{

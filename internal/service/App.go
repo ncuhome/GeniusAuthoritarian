@@ -119,13 +119,6 @@ func (a AppSrv) FirstAppKeyPair(id uint) (string, string, error) {
 	return t.AppCode, t.AppSecret, t.FirstAppKeyPairByID(a.DB)
 }
 
-func (a AppSrv) InfoForAppCode(uid uint, appCode string) ([]dao.BaseGroup, error) {
-	var groups []dao.BaseGroup
-	return groups, (&dao.UserGroups{
-		UID: uid,
-	}).GetUserGroupsForAppCodeByUID(a.DB, appCode).Find(&groups).Error
-}
-
 func (a AppSrv) GetUserOwnedApp(uid uint) ([]dto.AppShowDetail, error) {
 	apps, e := (&dao.App{UID: uid}).GetByUIDForShowDetailed(a.DB)
 	if e != nil {
