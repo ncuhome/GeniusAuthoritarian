@@ -17,7 +17,9 @@ type App struct {
 	AppSecret      string `gorm:"not null"`
 	Callback       string `gorm:"not null"`
 	PermitAllGroup bool
-	Views          uint64
+	// 以下仅用于导航标识
+	LinkOff bool
+	Views   uint64
 }
 
 func (a *App) sqlJoinAppGroups(tx *gorm.DB) *gorm.DB {
