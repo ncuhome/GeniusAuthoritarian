@@ -14,7 +14,6 @@ export const Navigation: FC = () => {
   );
 
   useUserApiV1<App.Accessible>("app/accessible", {
-    immutable: true,
     enableLoading: true,
     onSuccess: (data) => {
       setAccessibleApps(data);
