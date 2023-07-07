@@ -79,6 +79,30 @@ export const AppControlBlock: FC = () => {
     }
   }
 
+  async function handleModifyLinkOff(app: App.Detailed) {
+    try {
+      const ok = await setDialog({
+        title: "确认修改对接状态",
+        content: `正在将名称为 ${app.name} 的应用接入状态修改为：${
+          !app.linkOff ? "未对接" : "已对接"
+        }`,
+      });
+      if (!ok) return;
+      await apiV1User.put("app/owned/linkOff", {
+          id: app.id,
+          linkOff: !app.linkOff,
+      });
+      setApps(
+        (apps || []).map((a) =>
+          a.id === app.id ? ({ ...a, linkOff: !a.linkOff } as App.Detailed) : a
+        )
+      );
+      toast.success("修改成功");
+    } catch ({ msg }) {
+      if (msg) toast.error(msg as string);
+    }
+  }
+
   async function handleModifyApp() {
     if (!onModifyApp) return;
     setModifyingApp(true);
@@ -136,6 +160,7 @@ export const AppControlBlock: FC = () => {
             <TableHead>
               <TableRow>
                 <TableCell>名称</TableCell>
+                <TableCell>对接</TableCell>
                 <TableCell>AppCode</TableCell>
                 <TableCell>授权</TableCell>
                 <TableCell>回调</TableCell>
@@ -148,6 +173,7 @@ export const AppControlBlock: FC = () => {
                   key={app.id}
                   app={app}
                   onModify={showModifyAppDialog}
+                  onModifyLinkOff={handleModifyLinkOff}
                   onDelete={handleDeleteApp}
                 />
               ))}
