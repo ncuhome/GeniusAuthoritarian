@@ -137,5 +137,5 @@ func (a *App) UpdateViewByID(tx *gorm.DB) error {
 }
 
 func (a *App) UpdateLinkOff(tx *gorm.DB) error {
-	return tx.Model(a).Where(a).Update("link_off", a.LinkOff).Error
+	return tx.Model(a).Where(a, "id", "uid").Update("link_off", a.LinkOff).Error
 }
