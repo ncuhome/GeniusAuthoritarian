@@ -3,7 +3,7 @@ import toast from "react-hot-toast";
 import { numeral } from "@util/num";
 
 import { Card, CardContent, Stack, Typography } from "@mui/material";
-import { DataSaverOff } from "@mui/icons-material";
+import { DataSaverOff, LinkOff } from "@mui/icons-material";
 
 import { apiV1User } from "@api/v1/user/base";
 
@@ -57,10 +57,19 @@ export const NavAppCard: FC<Props> = ({ app }) => {
           gutterBottom
           variant="subtitle1"
           sx={{
+            display: "flex",
+            alignItems: "center",
             margin: 0,
           }}
         >
           {app.name}
+          {app.linkOff ? (
+            <LinkOff
+              fontSize={"small"}
+              color={"warning"}
+              style={{ display: "inline", marginLeft: "0.5rem", opacity: 0.5 }}
+            />
+          ) : undefined}
         </Typography>
 
         <Stack
@@ -77,7 +86,7 @@ export const NavAppCard: FC<Props> = ({ app }) => {
                 mr: 0.7,
               }}
             />
-            <span>{numeral(app.views, 0)}</span>
+            <span>{app.linkOff ? "--" : numeral(app.views, 0)}</span>
           </Stack>
         </Stack>
       </CardContent>
