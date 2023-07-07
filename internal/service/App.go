@@ -245,3 +245,11 @@ func (a AppSrv) UpdateViews(id uint, views uint64) error {
 		Views: views,
 	}).UpdateViewByID(a.DB)
 }
+
+func (a AppSrv) UpdateLinkOff(uid, id uint, linkOff bool) error {
+	return (&dao.App{
+		ID:      id,
+		UID:     uid,
+		LinkOff: linkOff,
+	}).UpdateLinkOff(a.DB)
+}

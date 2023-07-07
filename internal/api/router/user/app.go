@@ -19,5 +19,6 @@ func routerOwnedApp(G *gin.RouterGroup) {
 	G.GET("/", controllers.ListOwnedApp)
 	G.POST("/", controllers.ApplyApp)
 	G.PUT("/", controllers.ModifyApp)
+	G.PUT("/linkOff", controllers.UpdateLinkState)
 	G.DELETE("/", controllers.DeleteApp)
 }

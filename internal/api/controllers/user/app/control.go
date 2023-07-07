@@ -281,3 +281,35 @@ func ModifyApp(c *gin.Context) {
 
 	callback.Default(c)
 }
+
+func UpdateLinkState(c *gin.Context) {
+	var f struct {
+		ID      uint `json:"id" form:"id" binding:"required"`
+		LinkOff bool `json:"linkOff" form:"linkOff"`
+	}
+	if e := c.ShouldBind(&f); e != nil {
+		callback.Error(c, callback.ErrForm, e)
+		return
+	}
+
+	appSrv, e := service.App.Begin()
+	if e != nil {
+		callback.Error(c, callback.ErrDBOperation, e)
+		return
+	}
+	defer appSrv.Rollback()
+
+	uid := tools.GetUserInfo(c).ID
+
+	if e = appSrv.UpdateLinkOff(uid, f.ID, f.LinkOff); e != nil {
+		callback.Error(c, callback.ErrDBOperation, e)
+		return
+	}
+
+	if e = appSrv.Commit().Error; e != nil {
+		callback.Error(c, callback.ErrDBOperation, e)
+		return
+	}
+
+	callback.Default(c)
+}
