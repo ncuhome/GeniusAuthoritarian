@@ -41,6 +41,8 @@ func (a AppSrv) New(uid uint, name, callback string, permitAll bool) (*dao.App, 
 		AppSecret:      tool.RandString(randSrc, 100),
 		Callback:       callback,
 		PermitAllGroup: permitAll,
+
+		LinkOff: true,
 	}
 	return &t, t.Insert(a.DB)
 }
