@@ -91,6 +91,7 @@ func ApplyApp(c *gin.Context) {
 					Name:           newApp.Name,
 					Callback:       newApp.Callback,
 					PermitAllGroup: newApp.PermitAllGroup,
+					LinkOff:        newApp.LinkOff,
 				},
 				AppCode: newApp.AppCode,
 			},
