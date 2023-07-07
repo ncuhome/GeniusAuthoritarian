@@ -2,6 +2,8 @@ package service
 
 import (
 	"github.com/ncuhome/GeniusAuthoritarian/internal/db/dao"
+	"github.com/ncuhome/GeniusAuthoritarian/internal/pkg/GroupOperator"
+	"github.com/ncuhome/GeniusAuthoritarian/pkg/departments"
 	"gorm.io/gorm"
 )
 
@@ -14,6 +16,14 @@ type UserGroupsSrv struct {
 func (a UserGroupsSrv) Begin() (UserGroupsSrv, error) {
 	a.DB = a.DB.Begin()
 	return a, a.Error
+}
+
+// IsCenterMember 是否是中心组组员
+func (a UserGroupsSrv) IsCenterMember(uid uint) (bool, error) {
+	return (&dao.UserGroups{
+		ID:  GroupOperator.GroupRelation[departments.UCe],
+		UID: uid,
+	}).Exist(a.DB)
 }
 
 func (a UserGroupsSrv) GetForUser(uid uint) ([]string, error) {

@@ -6,6 +6,7 @@ import (
 	"github.com/ncuhome/GeniusAuthoritarian/internal/api/models/response"
 	"github.com/ncuhome/GeniusAuthoritarian/internal/db/dao"
 	"github.com/ncuhome/GeniusAuthoritarian/internal/db/redis"
+	"github.com/ncuhome/GeniusAuthoritarian/internal/pkg/GroupOperator"
 	"github.com/ncuhome/GeniusAuthoritarian/internal/pkg/jwt"
 	"github.com/ncuhome/GeniusAuthoritarian/internal/service"
 	"github.com/ncuhome/GeniusAuthoritarianClient/pkg/signature"
@@ -126,10 +127,23 @@ func Login(c *gin.Context) {
 		return
 	}
 
-	groups, e := (service.UserGroupsSrv{DB: tx}).GetForUser(claims.UID)
+	userGroupSrv := service.UserGroupsSrv{DB: tx}
+
+	isCenterMember, e := userGroupSrv.IsCenterMember(claims.UID)
 	if e != nil {
 		callback.Error(c, callback.ErrDBOperation, e)
 		return
+	}
+
+	var groups []string
+	if isCenterMember {
+		groups = GroupOperator.Groups
+	} else {
+		groups, e = userGroupSrv.GetForUser(claims.UID)
+		if e != nil {
+			callback.Error(c, callback.ErrDBOperation, e)
+			return
+		}
 	}
 
 	if e = tx.Commit().Error; e != nil {

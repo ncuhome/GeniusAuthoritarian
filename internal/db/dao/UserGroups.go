@@ -26,6 +26,11 @@ func (a *UserGroups) sqlGetUserGroupsByUID(tx *gorm.DB) *gorm.DB {
 	return tx.Where("user_groups.uid=?", a.UID)
 }
 
+func (a *UserGroups) Exist(tx *gorm.DB) (bool, error) {
+	var t bool
+	return t, tx.Model(a).Select("1").Where(a).Find(&t).Error
+}
+
 func (a *UserGroups) InsertAll(tx *gorm.DB, data []UserGroups) error {
 	return tx.Model(a).Create(data).Error
 }
