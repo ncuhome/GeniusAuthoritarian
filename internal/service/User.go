@@ -45,18 +45,6 @@ func (a UserSrv) UserInfo(phone string) (*dao.User, error) {
 	return &user, user.FirstByPhone(a.DB)
 }
 
-func (a UserSrv) UserInfoForAppCode(phone, appCode string) (*dao.User, []dao.BaseGroup, error) {
-	user, e := a.UserInfo(phone)
-	if e != nil {
-		return nil, nil, e
-	}
-
-	var groups []dao.BaseGroup
-	return user, groups, (&dao.UserGroups{
-		UID: user.ID,
-	}).GetUserGroupsForAppCodeByUID(a.DB, appCode).Find(&groups).Error
-}
-
 func (a UserSrv) UserProfile(uid uint) (*dto.UserProfile, error) {
 	profile, e := (&dao.User{ID: uid}).FirstProfileByID(a.DB)
 	if e != nil {
