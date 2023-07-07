@@ -28,7 +28,13 @@ func ListAccessibleApp(c *gin.Context) {
 		return
 	}
 
-	accessibleApps, e := service.App.GetUserAccessible(uid)
+	isCenterMember, e := service.UserGroups.IsCenterMember(uid)
+	if e != nil {
+		callback.Error(c, callback.ErrDBOperation, e)
+		return
+	}
+
+	accessibleApps, e := service.App.GetUserAccessible(uid, isCenterMember)
 	if e != nil {
 		callback.Error(c, callback.ErrDBOperation, e)
 		return

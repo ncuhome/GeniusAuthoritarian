@@ -21,7 +21,7 @@ func (a UserGroupsSrv) Begin() (UserGroupsSrv, error) {
 // IsCenterMember 是否是中心组组员
 func (a UserGroupsSrv) IsCenterMember(uid uint) (bool, error) {
 	return (&dao.UserGroups{
-		ID:  global.DepartmentRelation[departments.UCe],
+		GID: global.DepartmentRelation[departments.UCe],
 		UID: uid,
 	}).Exist(a.DB)
 }

@@ -4,7 +4,6 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/ncuhome/GeniusAuthoritarian/internal/api/callback"
 	"github.com/ncuhome/GeniusAuthoritarian/internal/service"
-	"github.com/ncuhome/GeniusAuthoritarian/internal/tools"
 	"gorm.io/gorm"
 	"net/url"
 )
@@ -18,9 +17,7 @@ func LandingApp(c *gin.Context) {
 		return
 	}
 
-	user := tools.GetUserInfo(c)
-
-	app, e := service.App.FirstAppByID(f.ID)
+	callbackStr, e := service.App.FirstAppCallbackByID(f.ID)
 	if e != nil {
 		if e == gorm.ErrRecordNotFound {
 			callback.Error(c, callback.ErrAppNotFound)
@@ -30,19 +27,7 @@ func LandingApp(c *gin.Context) {
 		return
 	}
 
-	if !app.PermitAllGroup {
-		var yes bool
-		yes, e = service.App.UserAccessible(f.ID, user.ID)
-		if e != nil {
-			callback.Error(c, callback.ErrDBOperation, e)
-			return
-		} else if !yes {
-			callback.ErrorWithTip(c, callback.ErrOperationIllegal, "没有访问该应用的权限")
-			return
-		}
-	}
-
-	callbackUrl, e := url.Parse(app.Callback)
+	callbackUrl, e := url.Parse(callbackStr)
 	if e != nil {
 		callback.Error(c, callback.ErrUnexpected, e)
 		return

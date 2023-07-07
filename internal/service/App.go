@@ -85,6 +85,13 @@ func (a AppSrv) FirstAppByID(id uint) (*dao.App, error) {
 	return &t, t.FirstByID(a.DB)
 }
 
+func (a AppSrv) FirstAppCallbackByID(id uint) (string, error) {
+	var t = dao.App{
+		ID: id,
+	}
+	return t.Callback, t.FirstCallbackByID(a.DB)
+}
+
 func (a AppSrv) FirstAppByAppCode(appCode string) (*dao.App, error) {
 	var t = dao.App{
 		AppCode: appCode,
@@ -161,8 +168,15 @@ func (a AppSrv) GetUserOwnedApp(uid uint) ([]dto.AppShowDetail, error) {
 	return apps, nil
 }
 
-func (a AppSrv) GetUserAccessible(uid uint) ([]dto.AppGroupClassified, error) {
-	list, e := (&dao.App{UID: uid}).GetAccessible(a.DB)
+func (a AppSrv) GetUserAccessible(uid uint, isCenterMember bool) ([]dto.AppGroupClassified, error) {
+	var list []dto.AppShowWithGroup
+	var e error
+	appModel := dao.App{UID: uid}
+	if isCenterMember {
+		list, e = appModel.GetAllWithGroup(a.DB)
+	} else {
+		list, e = appModel.GetAccessible(a.DB)
+	}
 	if e != nil {
 		return nil, e
 	}

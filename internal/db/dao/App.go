@@ -42,6 +42,13 @@ func (a *App) sqlGetByUIDForShow(tx *gorm.DB) *gorm.DB {
 	return a.sqlGetForActionByUID(tx).Order("id DESC")
 }
 
+func (a *App) sqlGetForWithGroup(tx *gorm.DB) *gorm.DB {
+	tx = tx.Model(a).Select("apps.*", "base_groups.id AS group_id", "base_groups.name as group_name")
+	tx = a.sqlJoinAppGroups(tx)
+	tx = a.sqlJoinGroups(tx)
+	return tx.Order("base_groups.id,apps.id")
+}
+
 func (a *App) Insert(tx *gorm.DB) error {
 	return tx.Create(a).Error
 }
@@ -62,6 +69,10 @@ func (a *App) UserAccessible(tx *gorm.DB) (bool, error) {
 
 func (a *App) FirstByID(tx *gorm.DB) error {
 	return tx.Model(a).Omit("app_secret").First(a, a.ID).Error
+}
+
+func (a *App) FirstCallbackByID(tx *gorm.DB) error {
+	return tx.Model(a).Select("callback").First(a, a.ID).Error
 }
 
 func (a *App) FirstByAppCode(tx *gorm.DB) error {
@@ -100,11 +111,15 @@ func (a *App) GetPermitAll(tx *gorm.DB) ([]dto.AppShow, error) {
 func (a *App) GetAccessible(tx *gorm.DB) ([]dto.AppShowWithGroup, error) {
 	// 后续需要二次归类，故不 make
 	var t []dto.AppShowWithGroup
-	tx = tx.Model(a).Select("apps.*", "base_groups.id AS group_id", "base_groups.name as group_name")
-	tx = a.sqlJoinAppGroups(tx)
-	tx = a.sqlJoinGroups(tx)
+	tx = a.sqlGetForWithGroup(tx)
 	tx = a.sqlJoinUserGroups(tx)
-	return t, tx.Where("user_groups.uid=?", a.UID).Order("base_groups.id,apps.id").Find(&t).Error
+	return t, tx.Where("user_groups.uid=?", a.UID).Find(&t).Error
+}
+
+func (a *App) GetAllWithGroup(tx *gorm.DB) ([]dto.AppShowWithGroup, error) {
+	var t []dto.AppShowWithGroup
+	tx = a.sqlGetForWithGroup(tx)
+	return t, tx.Find(&t).Error
 }
 
 func (a *App) DeleteByIdForUID(tx *gorm.DB) *gorm.DB {
