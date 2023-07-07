@@ -6,7 +6,7 @@ import (
 	"github.com/ncuhome/GeniusAuthoritarian/internal/api/models/response"
 	"github.com/ncuhome/GeniusAuthoritarian/internal/db/dao"
 	"github.com/ncuhome/GeniusAuthoritarian/internal/db/redis"
-	"github.com/ncuhome/GeniusAuthoritarian/internal/pkg/GroupOperator"
+	"github.com/ncuhome/GeniusAuthoritarian/internal/global"
 	"github.com/ncuhome/GeniusAuthoritarian/internal/pkg/jwt"
 	"github.com/ncuhome/GeniusAuthoritarian/internal/service"
 	"github.com/ncuhome/GeniusAuthoritarianClient/pkg/signature"
@@ -137,7 +137,7 @@ func Login(c *gin.Context) {
 
 	var groups []string
 	if isCenterMember {
-		groups = GroupOperator.Groups
+		groups = global.Departments
 	} else {
 		groups, e = userGroupSrv.GetForUser(claims.UID)
 		if e != nil {

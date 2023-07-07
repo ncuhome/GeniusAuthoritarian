@@ -2,23 +2,10 @@ package GroupOperator
 
 import (
 	"github.com/ncuhome/GeniusAuthoritarian/internal/db/dao"
+	"github.com/ncuhome/GeniusAuthoritarian/internal/global"
 	"github.com/ncuhome/GeniusAuthoritarian/internal/service"
-	"github.com/ncuhome/GeniusAuthoritarian/pkg/departments"
 	log "github.com/sirupsen/logrus"
 )
-
-var Groups = []string{
-	departments.UDev,
-	departments.UPm,
-	departments.UGame,
-	departments.UOp,
-	departments.UAdm,
-	departments.UDes,
-	departments.UCe,
-	departments.USenior,
-}
-
-var GroupRelation map[string]uint
 
 func InitGroupRelation() {
 	e := LoadGroupRelation()
@@ -33,10 +20,10 @@ func LoadGroupRelation() error {
 		return e
 	}
 
-	var groupRelations = make(map[string]uint, len(Groups))
+	var groupRelations = make(map[string]uint, len(global.Departments))
 
 	var notExistGroups []string
-	for _, group := range Groups {
+	for _, group := range global.Departments {
 		for _, dbGroup := range dbGroups {
 			if group == dbGroup.Name {
 				groupRelations[group] = dbGroup.ID
@@ -58,6 +45,6 @@ func LoadGroupRelation() error {
 		}
 	}
 
-	GroupRelation = groupRelations
+	global.DepartmentRelation = groupRelations
 	return nil
 }

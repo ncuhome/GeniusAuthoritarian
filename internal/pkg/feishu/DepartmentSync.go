@@ -3,7 +3,7 @@ package feishu
 import (
 	"github.com/Mmx233/daoUtil"
 	"github.com/ncuhome/GeniusAuthoritarian/internal/db/dao"
-	"github.com/ncuhome/GeniusAuthoritarian/internal/pkg/GroupOperator"
+	"github.com/ncuhome/GeniusAuthoritarian/internal/global"
 	"github.com/ncuhome/GeniusAuthoritarian/internal/pkg/agent"
 	"github.com/ncuhome/GeniusAuthoritarian/internal/service"
 	"github.com/ncuhome/GeniusAuthoritarian/pkg/backoff"
@@ -28,7 +28,7 @@ func DepartmentSync() error {
 					pairedDepartments[relate.department] = &dao.FeishuGroups{
 						Name:             item.Name,
 						OpenDepartmentId: item.OpenDepartmentId,
-						GID:              GroupOperator.GroupRelation[relate.department],
+						GID:              global.DepartmentRelation[relate.department],
 					}
 					goto next
 				}

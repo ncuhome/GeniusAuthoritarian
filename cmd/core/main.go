@@ -1,6 +1,7 @@
 package main
 
 import (
+	"github.com/ncuhome/GeniusAuthoritarian/internal/pkg/GroupOperator"
 	"github.com/ncuhome/GeniusAuthoritarian/internal/pkg/agent"
 	"github.com/ncuhome/GeniusAuthoritarian/internal/pkg/feishu"
 	"github.com/ncuhome/GeniusAuthoritarian/internal/pkg/views"
@@ -13,6 +14,7 @@ func init() {
 	agent.Init()
 	feishu.InitSync()
 	views.InitRenewAgent()
+	GroupOperator.InitGroupRelation()
 }
 
 // 主程序，包含所有路由，不可多实例运行
