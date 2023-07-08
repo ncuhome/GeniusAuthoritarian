@@ -31,6 +31,14 @@
 + 在 web 目录运行 `pnpm run dev`
 + 在 Goland 启动运行配置项
 
+## :children_crossing: 项目子程序说明
+
+Core 程序为 standalone 程序，包含所有逻辑、接口和功能，但是不能多实例运行
+
+Fe 为纯网页子程序，Auth 为公有登录接口子程序，可以多实例运行，用于确保登录功能稳定、保持在线
+
+子程序使用条件编译无缝切换路由，涉及子程序不需要的逻辑的模块在 main init 中手动初始化
+
 ## :gear: 使用
 
 需要先申请鉴权密钥对，请后端同学分别在 [预发布版后台 (v.ncuhome.club)](https://v.ncuhome.club) 和 [生产版后台 (v.ncuos.com)](https://v.ncuos.com) 创建相应应用用于测试和上线。应用一经创建就会显示在导航栏，请谨慎操作。创建应用时回调地址可以带自定义参数
@@ -87,7 +95,9 @@ Form:
 {
   "code": 0,
   "data": {
+    "id": 8,
     "name": "孙翔宇",
+    "avatarUrl": "https://aaa.bbb.com/ccc.png", // 可能为空字符串，头像地址随登录方式改变而改变来源
     "groups": [
       "研发",
       "中心"
