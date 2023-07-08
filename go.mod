@@ -11,14 +11,14 @@ require (
 	github.com/Mmx233/secure/v2 v2.0.3
 	github.com/Mmx233/tool v0.7.2
 	github.com/alibabacloud-go/darabonba-openapi/v2 v2.0.4
-	github.com/alibabacloud-go/dingtalk v1.5.76
+	github.com/alibabacloud-go/dingtalk v1.5.77
 	github.com/alibabacloud-go/tea v1.2.1
 	github.com/alibabacloud-go/tea-utils/v2 v2.0.3
 	github.com/aliyun/aliyun-oss-go-sdk v2.2.7+incompatible
 	github.com/gin-gonic/gin v1.9.1
 	github.com/go-redis/redis/v8 v8.11.5
 	github.com/golang-jwt/jwt/v4 v4.5.0
-	github.com/ncuhome/GeniusAuthoritarianClient v1.1.1
+	github.com/ncuhome/GeniusAuthoritarianClient v1.1.3
 	github.com/pquerna/otp v1.4.0
 	github.com/robfig/cron/v3 v3.0.1
 	github.com/sirupsen/logrus v1.9.3
@@ -59,11 +59,11 @@ require (
 	github.com/tjfoc/gmsm v1.4.1 // indirect
 	github.com/twitchyliquid64/golang-asm v0.15.1 // indirect
 	github.com/ugorji/go/codec v1.2.11 // indirect
-	golang.org/x/arch v0.3.0 // indirect
-	golang.org/x/crypto v0.10.0 // indirect
-	golang.org/x/net v0.11.0 // indirect
-	golang.org/x/sys v0.9.0 // indirect
-	golang.org/x/text v0.10.0 // indirect
+	golang.org/x/arch v0.4.0 // indirect
+	golang.org/x/crypto v0.11.0 // indirect
+	golang.org/x/net v0.12.0 // indirect
+	golang.org/x/sys v0.10.0 // indirect
+	golang.org/x/text v0.11.0 // indirect
 	golang.org/x/time v0.3.0 // indirect
 	google.golang.org/protobuf v1.31.0 // indirect
 	gopkg.in/ini.v1 v1.67.0 // indirect
