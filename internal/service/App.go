@@ -56,7 +56,10 @@ func (a AppSrv) AppCodeExist(appCode string) (bool, error) {
 		if e != nil {
 			return false, e
 		}
-		_ = redis.AppCode.Add(list...)
+		e = redis.AppCode.Add(list...)
+		if e != nil {
+			return false, e
+		}
 	}
 
 	return redis.AppCode.Exist(appCode)
