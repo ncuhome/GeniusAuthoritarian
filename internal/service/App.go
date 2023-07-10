@@ -90,6 +90,14 @@ func (a AppSrv) FirstAppCallbackByID(id uint) (string, error) {
 	return t.Callback, t.FirstCallbackByID(a.DB)
 }
 
+func (a AppSrv) FirstAppCodeByID(id, uid uint, opts ...daoUtil.ServiceOpt) (string, error) {
+	var t = dao.App{
+		ID:  id,
+		UID: uid,
+	}
+	return t.AppCode, t.FirstAppCodeByID(daoUtil.TxOpts(a.DB, opts...))
+}
+
 func (a AppSrv) FirstAppByAppCode(appCode string) (*dao.App, error) {
 	var t = dao.App{
 		AppCode: appCode,
@@ -216,17 +224,8 @@ func (a AppSrv) GetPermitAll() ([]dto.AppShow, error) {
 	return (&dao.App{}).GetPermitAll(a.DB)
 }
 
-func (a AppSrv) DeleteByID(id, uid uint) (*dao.App, error) {
-	model := dao.App{ID: id, UID: uid}
-	result := model.DeleteByIdForUID(a.DB)
-	if result.Error != nil {
-		return nil, result.Error
-	}
-
-	if result.RowsAffected == 0 {
-		return nil, gorm.ErrRecordNotFound
-	}
-	return &model, nil
+func (a AppSrv) DeleteByID(id, uid uint) error {
+	return (&dao.App{ID: id, UID: uid}).DeleteByIdForUID(a.DB)
 }
 
 func (a AppSrv) UpdateAll(id uint, name, callback string, permitAllGroup bool) error {

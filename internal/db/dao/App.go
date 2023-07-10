@@ -73,6 +73,10 @@ func (a *App) FirstByID(tx *gorm.DB) error {
 	return tx.Model(a).Omit("app_secret").First(a, a.ID).Error
 }
 
+func (a *App) FirstAppCodeByID(tx *gorm.DB) error {
+	return tx.Model(a).Where(a, "id", "uid").Select("app_code").First(a).Error
+}
+
 func (a *App) FirstCallbackByID(tx *gorm.DB) error {
 	return tx.Model(a).Select("callback").First(a, a.ID).Error
 }
@@ -124,8 +128,8 @@ func (a *App) GetAllWithGroup(tx *gorm.DB) ([]dto.AppShowWithGroup, error) {
 	return t, tx.Find(&t).Error
 }
 
-func (a *App) DeleteByIdForUID(tx *gorm.DB) *gorm.DB {
-	return tx.Model(a).Where(a, "id", "uid").Delete(a)
+func (a *App) DeleteByIdForUID(tx *gorm.DB) error {
+	return tx.Model(a).Where(a, "id", "uid").Delete(a).Error
 }
 
 func (a *App) UpdatesByID(tx *gorm.DB) error {

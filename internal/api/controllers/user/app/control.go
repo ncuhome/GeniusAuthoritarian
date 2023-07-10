@@ -119,7 +119,7 @@ func DeleteApp(c *gin.Context) {
 	}
 	defer appSrv.Rollback()
 
-	appModel, e := appSrv.DeleteByID(f.ID, uid)
+	appCode, e := appSrv.FirstAppCodeByID(f.ID, uid, daoUtil.LockForUpdate)
 	if e != nil {
 		if e == gorm.ErrRecordNotFound {
 			callback.Error(c, callback.ErrAppNotFound)
@@ -129,7 +129,12 @@ func DeleteApp(c *gin.Context) {
 		return
 	}
 
-	if e = redis.AppCode.Del(appModel.AppCode); e != nil {
+	if e = appSrv.DeleteByID(f.ID, uid); e != nil {
+		callback.Error(c, callback.ErrDBOperation, e)
+		return
+	}
+
+	if e = redis.AppCode.Del(appCode); e != nil {
 		callback.Error(c, callback.ErrUnexpected)
 		return
 	}
