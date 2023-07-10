@@ -119,12 +119,18 @@ func DeleteApp(c *gin.Context) {
 	}
 	defer appSrv.Rollback()
 
-	if e = appSrv.DeleteByID(f.ID, uid); e != nil {
+	appModel, e := appSrv.DeleteByID(f.ID, uid)
+	if e != nil {
 		if e == gorm.ErrRecordNotFound {
 			callback.Error(c, callback.ErrAppNotFound)
 			return
 		}
 		callback.Error(c, callback.ErrDBOperation, e)
+		return
+	}
+
+	if e = redis.AppCode.Del(appModel.AppCode); e != nil {
+		callback.Error(c, callback.ErrUnexpected)
 		return
 	}
 

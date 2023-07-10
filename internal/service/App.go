@@ -48,25 +48,18 @@ func (a AppSrv) New(uid uint, name, callback string, permitAll bool) (*dao.App, 
 }
 
 func (a AppSrv) AppCodeExist(appCode string) (bool, error) {
-	list, e := redis.AppCode.Load()
+	empty, e := redis.AppCode.IsEmpty()
 	if e != nil {
-		if e == redis.Nil {
-			list, e = (&dao.App{}).GetAppCode(a.DB)
-			if e != nil {
-				return false, e
-			}
-			_ = redis.AppCode.Add(list...)
-		} else {
+		return false, e
+	} else if empty {
+		list, e := (&dao.App{}).GetAppCode(a.DB)
+		if e != nil {
 			return false, e
 		}
+		_ = redis.AppCode.Add(list...)
 	}
 
-	for _, v := range list {
-		if v == appCode {
-			return true, nil
-		}
-	}
-	return false, nil
+	return redis.AppCode.Exist(appCode)
 }
 
 func (a AppSrv) UserAccessible(id, uid uint) (bool, error) {
@@ -220,16 +213,17 @@ func (a AppSrv) GetPermitAll() ([]dto.AppShow, error) {
 	return (&dao.App{}).GetPermitAll(a.DB)
 }
 
-func (a AppSrv) DeleteByID(id, uid uint) error {
-	result := (&dao.App{ID: id, UID: uid}).DeleteByIdForUID(a.DB)
+func (a AppSrv) DeleteByID(id, uid uint) (*dao.App, error) {
+	model := dao.App{ID: id, UID: uid}
+	result := model.DeleteByIdForUID(a.DB)
 	if result.Error != nil {
-		return result.Error
+		return nil, result.Error
 	}
 
 	if result.RowsAffected == 0 {
-		return gorm.ErrRecordNotFound
+		return nil, gorm.ErrRecordNotFound
 	}
-	return nil
+	return &model, nil
 }
 
 func (a AppSrv) UpdateAll(id uint, name, callback string, permitAllGroup bool) error {
