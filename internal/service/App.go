@@ -204,7 +204,7 @@ func (a AppSrv) GetUserAccessible(uid uint, isCenterMember bool) ([]dto.AppGroup
 	countEl := counts.PushFront(nil)
 	j := 0
 	lastGroupID = 0
-	var result = make([]dto.AppGroupClassified, counts.Len())
+	var result = make([]dto.AppGroupClassified, counts.Len()-1)
 	for _, app := range appList {
 		if lastGroupID != app.GroupID {
 			i++
