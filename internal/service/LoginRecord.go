@@ -39,3 +39,7 @@ func (a LoginRecordSrv) GetViewIDs(aid, startAt uint) ([]uint, error) {
 		AID: &aid,
 	}).GetViewIds(a.DB, startAt)
 }
+
+func (a LoginRecordSrv) GetMultipleViewsIDs(apps []dao.App) ([]dto.ViewID, error) {
+	return (&dao.LoginRecord{}).GetMultipleViewsIds(a.DB, apps)
+}

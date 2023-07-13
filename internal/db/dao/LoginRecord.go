@@ -46,6 +46,16 @@ func (a *LoginRecord) GetLastMonth(tx *gorm.DB) ([]LoginRecord, error) {
 	return t, tx.Group("apps.id").Find(&t).Error
 }*/
 
+func (a *LoginRecord) GetMultipleViewsIds(tx *gorm.DB, apps []App) ([]dto.ViewID, error) {
+	var t []dto.ViewID
+	tx = tx.Model(a).Select("login_records.id", "login_records.aid")
+	tx = a.sqlJoinApps(tx)
+	for _, app := range apps {
+		tx = tx.Or("apps.id=? AND login_records.id>?", app.ID, app.ViewsID)
+	}
+	return t, tx.Order("apps.id,login_records.id DESC").Find(&t).Error
+}
+
 func (a *LoginRecord) GetViewIds(tx *gorm.DB, startAt uint) ([]uint, error) {
 	var t []uint
 	tx = tx.Model(a).Select("login_records.id")

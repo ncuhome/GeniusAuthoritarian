@@ -12,3 +12,10 @@ type ViewCount struct {
 	ID    uint   `json:"id"`
 	Views uint64 `json:"views"`
 }
+
+type ViewID struct {
+	// LoginRecord.ID
+	ID uint
+	// App.ID
+	AID uint `gorm:"aid"`
+}
