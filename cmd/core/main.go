@@ -11,10 +11,10 @@ import (
 )
 
 func init() {
+	GroupOperator.InitGroupRelation()
 	agent.Init()
 	feishu.InitSync()
 	views.InitRenewAgent()
-	GroupOperator.InitGroupRelation()
 }
 
 // 主程序，包含所有路由，不可多实例运行
