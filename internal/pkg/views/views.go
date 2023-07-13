@@ -51,42 +51,44 @@ func Renew() error {
 		return e
 	}
 
-	var appIndex, loginRecordIndex int
-	var loginRecord = loginRecordList[loginRecordIndex]
-	var appUpdated = list.New() // *dao.App
-	for appIndex < len(apps) {
-		app := apps[appIndex]
+	if len(apps) != 0 && len(loginRecordList) != 0 {
+		var appIndex, loginRecordIndex int
+		var loginRecord = loginRecordList[loginRecordIndex]
+		var appUpdated = list.New() // *dao.App
+		for appIndex < len(apps) {
+			app := apps[appIndex]
 
-		if app.ID != loginRecord.AID {
-			appIndex++
-			continue
-		}
-
-		appUpdated.PushBack(&app)
-		app.ViewsID = loginRecord.ID
-		for {
-			app.Views++
-			loginRecordIndex++
-
-			if loginRecordIndex > len(loginRecordList) {
-				goto doUpdate
-			}
-
-			loginRecord = loginRecordList[loginRecordIndex]
-			if loginRecord.AID != app.ID {
+			if app.ID != loginRecord.AID {
 				appIndex++
-				break
+				continue
+			}
+
+			appUpdated.PushBack(&app)
+			app.ViewsID = loginRecord.ID
+			for {
+				app.Views++
+				loginRecordIndex++
+
+				if loginRecordIndex > len(loginRecordList) {
+					goto doUpdate
+				}
+
+				loginRecord = loginRecordList[loginRecordIndex]
+				if loginRecord.AID != app.ID {
+					appIndex++
+					break
+				}
 			}
 		}
-	}
 
-doUpdate:
+	doUpdate:
 
-	for el := appUpdated.Front(); el != nil; el = el.Next() {
-		app := el.Value.(*dao.App)
-		e = appSrv.UpdateViews(app.ID, app.ViewsID, app.Views)
-		if e != nil {
-			return e
+		for el := appUpdated.Front(); el != nil; el = el.Next() {
+			app := el.Value.(*dao.App)
+			e = appSrv.UpdateViews(app.ID, app.ViewsID, app.Views)
+			if e != nil {
+				return e
+			}
 		}
 	}
 
