@@ -1,6 +1,7 @@
 package feishu
 
 import (
+	"container/list"
 	"github.com/Mmx233/daoUtil"
 	"github.com/ncuhome/GeniusAuthoritarian/internal/db/dao"
 	"github.com/ncuhome/GeniusAuthoritarian/internal/db/redis"
@@ -93,16 +94,18 @@ func (a *UserSyncProcessor) filterInvalidGroups(feishuUserList map[string][]feis
 	for _, group := range validGroups {
 		validGroupsMap[group.OpenDepartmentId] = group.GID
 	}
-	var invalidOpenID []string
+	var invalidOpenID = list.New() // string
 	for k := range feishuUserList {
 		if _, ok := validGroupsMap[k]; ok {
 			goto nextGroup
 		}
-		invalidOpenID = append(invalidOpenID, k)
+		invalidOpenID.PushBack(k)
 	nextGroup:
 	}
-	for _, key := range invalidOpenID {
-		delete(feishuUserList, key)
+	el := invalidOpenID.Front()
+	for el != nil {
+		delete(feishuUserList, el.Value.(string))
+		el = el.Next()
 	}
 	return validGroupsMap, nil
 }
@@ -247,8 +250,8 @@ func (a *UserSyncProcessor) doSyncUserGroups(reserveData map[string]*RelatedUser
 	if e != nil {
 		return e
 	}
-	var userGroupsToAdd []dao.UserGroups
-	var userGroupsToDelete []uint
+	var userGroupsToAdd = list.New()
+	var userGroupsToDelete = list.New() // uint
 	var exUserGroupMap = make(map[uint][]uint, len(reserveData))
 	for _, exUserGroup := range existUserGroups {
 		exUserGroupMap[exUserGroup.UID] = append(exUserGroupMap[exUserGroup.UID], exUserGroup.GID)
@@ -263,7 +266,7 @@ func (a *UserSyncProcessor) doSyncUserGroups(reserveData map[string]*RelatedUser
 					}
 				}
 			}
-			userGroupsToAdd = append(userGroupsToAdd, dao.UserGroups{
+			userGroupsToAdd.PushBack(dao.UserGroups{
 				UID: user.Data.ID,
 				GID: userDepartment,
 			})
@@ -276,7 +279,7 @@ func (a *UserSyncProcessor) doSyncUserGroups(reserveData map[string]*RelatedUser
 					goto nextExUserDepartment
 				}
 			}
-			userGroupsToDelete = append(userGroupsToDelete, exUserDepartment)
+			userGroupsToDelete.PushBack(exUserDepartment)
 			e = redis.UserJwt.Clear(user.Data.ID)
 			if e != nil && e != redis.Nil {
 				return e
@@ -284,17 +287,33 @@ func (a *UserSyncProcessor) doSyncUserGroups(reserveData map[string]*RelatedUser
 		nextExUserDepartment:
 		}
 	}
-	if len(userGroupsToAdd) > 0 {
-		if e = userGroupSrv.CreateAll(userGroupsToAdd); e != nil {
+	if userGroupsToAdd.Len() != 0 {
+		a.createdUserGroup = userGroupsToAdd.Len()
+		userGroupsToAddModels := make([]dao.UserGroups, userGroupsToAdd.Len())
+		el := userGroupsToAdd.Front()
+		i := 0
+		for el != nil {
+			userGroupsToAddModels[i] = el.Value.(dao.UserGroups)
+			i++
+			el = el.Next()
+		}
+		if e = userGroupSrv.CreateAll(userGroupsToAddModels); e != nil {
 			return e
 		}
-		a.createdUserGroup = len(userGroupsToAdd)
 	}
-	if len(userGroupsToDelete) > 0 {
-		if e = userGroupSrv.DeleteByIDSlice(userGroupsToDelete); e != nil {
+	if userGroupsToDelete.Len() != 0 {
+		a.deletedUserGroup = userGroupsToDelete.Len()
+		userGroupsToDeleteSlice := make([]uint, userGroupsToDelete.Len())
+		el := userGroupsToDelete.Front()
+		i := 0
+		for el != nil {
+			userGroupsToDeleteSlice[i] = el.Value.(uint)
+			i++
+			el = el.Next()
+		}
+		if e = userGroupSrv.DeleteByIDSlice(userGroupsToDeleteSlice); e != nil {
 			return e
 		}
-		a.deletedUserGroup = len(userGroupsToDelete)
 	}
 	return nil
 }

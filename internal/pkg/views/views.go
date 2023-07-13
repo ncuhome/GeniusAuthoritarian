@@ -53,7 +53,7 @@ func Renew() error {
 
 	var appIndex, loginRecordIndex int
 	var loginRecord = loginRecordList[loginRecordIndex]
-	var appUpdated = list.New()
+	var appUpdated = list.New() // *dao.App
 	for appIndex < len(apps) {
 		app := apps[appIndex]
 

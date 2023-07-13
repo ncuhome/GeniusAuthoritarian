@@ -1,6 +1,7 @@
 package feishu
 
 import (
+	"container/list"
 	"github.com/Mmx233/daoUtil"
 	"github.com/ncuhome/GeniusAuthoritarian/internal/db/dao"
 	"github.com/ncuhome/GeniusAuthoritarian/internal/global"
@@ -43,7 +44,7 @@ func DepartmentSync() error {
 		pairedDepartmentsRelations[v.GID] = v
 	}
 
-	var toDelete []uint
+	var toDelete = list.New() // uint
 	var toCreate []dao.FeishuGroups
 	srv, e := service.FeishuGroups.Begin()
 	if e != nil {
@@ -60,13 +61,13 @@ func DepartmentSync() error {
 	for _, dbDepartment := range dbFeishuDepartments {
 		paired, ok := pairedDepartmentsRelations[dbDepartment.GID]
 		if !ok {
-			toDelete = append(toDelete, dbDepartment.ID)
+			toDelete.PushBack(dbDepartment.ID)
 			continue
 		}
 		if paired.Name == dbDepartment.Name && paired.OpenDepartmentId == dbDepartment.OpenDepartmentId {
 			delete(pairedDepartmentsRelations, dbDepartment.GID)
 		} else {
-			toDelete = append(toDelete, dbDepartment.ID)
+			toDelete.PushBack(dbDepartment.ID)
 		}
 	}
 	toCreate = make([]dao.FeishuGroups, len(pairedDepartmentsRelations))
@@ -76,8 +77,16 @@ func DepartmentSync() error {
 		i++
 	}
 
-	if len(toDelete) != 0 {
-		if e = srv.DeleteSelected(toDelete); e != nil {
+	if toDelete.Len() != 0 {
+		var toDeleteSlice = make([]uint, toDelete.Len())
+		el := toDelete.Front()
+		i = 0
+		for el != nil {
+			toDeleteSlice[i] = el.Value.(uint)
+			i++
+			el = el.Next()
+		}
+		if e = srv.DeleteSelected(toDeleteSlice); e != nil {
 			return e
 		}
 	}

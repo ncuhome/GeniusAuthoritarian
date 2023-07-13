@@ -1,6 +1,7 @@
 package GroupOperator
 
 import (
+	"container/list"
 	"github.com/ncuhome/GeniusAuthoritarian/internal/db/dao"
 	"github.com/ncuhome/GeniusAuthoritarian/internal/global"
 	"github.com/ncuhome/GeniusAuthoritarian/internal/service"
@@ -22,7 +23,7 @@ func LoadGroupRelation() error {
 
 	var groupRelations = make(map[string]uint, len(global.Departments))
 
-	var notExistGroups []string
+	var notExistGroups = list.New() // string
 	for _, group := range global.Departments {
 		for _, dbGroup := range dbGroups {
 			if group == dbGroup.Name {
@@ -30,13 +31,21 @@ func LoadGroupRelation() error {
 				goto next
 			}
 		}
-		notExistGroups = append(notExistGroups, group)
+		notExistGroups.PushBack(group)
 	next:
 	}
 
-	if len(notExistGroups) != 0 {
-		var newGroups []dao.BaseGroup
-		newGroups, e = service.BaseGroups.CreateGroups(notExistGroups)
+	if notExistGroups.Len() != 0 {
+		var newGroups = make([]dao.BaseGroup, notExistGroups.Len())
+		el := notExistGroups.Front()
+		i := 0
+		for el != nil {
+			newGroups[i].Name = el.Value.(string)
+			el = el.Next()
+			i++
+		}
+
+		e = service.BaseGroups.CreateGroups(&newGroups)
 		if e != nil {
 			return e
 		}

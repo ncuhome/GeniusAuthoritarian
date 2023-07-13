@@ -25,6 +25,6 @@ func (a BaseGroupsSrv) LoadGroupsForShow() ([]dto.Group, error) {
 	return (&dao.BaseGroup{}).GetAllForShow(a.DB)
 }
 
-func (a BaseGroupsSrv) CreateGroups(groups []string) ([]dao.BaseGroup, error) {
+func (a BaseGroupsSrv) CreateGroups(groups *[]dao.BaseGroup) error {
 	return (&dao.BaseGroup{}).CreateGroups(a.DB, groups)
 }

@@ -1,6 +1,7 @@
 package service
 
 import (
+	"container/list"
 	"fmt"
 	"github.com/Mmx233/daoUtil"
 	"github.com/Mmx233/tool"
@@ -175,43 +176,45 @@ func (a AppSrv) GetUserOwnedApp(uid uint) ([]dto.AppShowDetail, error) {
 }
 
 func (a AppSrv) GetUserAccessible(uid uint, isCenterMember bool) ([]dto.AppGroupClassified, error) {
-	var list []dto.AppShowWithGroup
+	var appList []dto.AppShowWithGroup
 	var e error
 	appModel := dao.App{UID: uid}
 	if isCenterMember {
-		list, e = appModel.GetAllWithGroup(a.DB)
+		appList, e = appModel.GetAllWithGroup(a.DB)
 	} else {
-		list, e = appModel.GetAccessible(a.DB)
+		appList, e = appModel.GetAccessible(a.DB)
 	}
 	if e != nil {
 		return nil, e
 	}
 
-	var i = -1
 	var lastGroupID uint
-	var count []int
-	for _, app := range list {
+	var counts = list.New() // *int
+	var count *int
+	for _, app := range appList {
 		if lastGroupID != app.GroupID {
-			i++
-			count = append(count, 0)
+			count = new(int)
+			counts.PushBack(count)
 			lastGroupID = app.GroupID
 		}
-		count[i]++
+		*count++
 	}
 
-	i = -1
+	i := -1
+	countEl := counts.PushFront(nil)
 	j := 0
 	lastGroupID = 0
-	var result = make([]dto.AppGroupClassified, len(count))
-	for _, app := range list {
+	var result = make([]dto.AppGroupClassified, counts.Len())
+	for _, app := range appList {
 		if lastGroupID != app.GroupID {
 			i++
+			countEl = countEl.Next()
 			j = 0
 			result[i].Group = dto.Group{
 				ID:   app.GroupID,
 				Name: app.GroupName,
 			}
-			result[i].App = make([]dto.AppShow, count[i])
+			result[i].App = make([]dto.AppShow, *countEl.Value.(*int))
 			lastGroupID = app.GroupID
 		}
 		result[i].App[j] = app.AppShow
