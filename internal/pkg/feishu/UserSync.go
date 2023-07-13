@@ -33,13 +33,12 @@ type RelatedUserInfo struct {
 }
 
 func (a *UserSyncProcessor) Run() error {
-	var startAt = time.Now()
-
 	GroupOpenIdToFeishuUserSliceMap, e := a.downloadUserList()
 	if e != nil {
 		return e
 	}
 
+	var startAt = time.Now()
 	a.tx = dao.DB.Begin()
 	defer a.tx.Rollback()
 
