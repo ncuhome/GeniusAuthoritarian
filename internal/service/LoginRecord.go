@@ -34,6 +34,8 @@ func (a LoginRecordSrv) UserHistory(uid uint, limit int) ([]dto.LoginRecord, err
 	}).GetByUID(a.DB, limit)
 }
 
-func (a LoginRecordSrv) GetViewCount() ([]dto.ViewCount, error) {
-	return (&dao.LoginRecord{}).GetViewCount(a.DB)
+func (a LoginRecordSrv) GetViewIDs(aid, startAt uint) ([]uint, error) {
+	return (&dao.LoginRecord{
+		AID: &aid,
+	}).GetViewIds(a.DB, startAt)
 }

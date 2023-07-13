@@ -1,6 +1,7 @@
 package views
 
 import (
+	"github.com/Mmx233/daoUtil"
 	"github.com/Mmx233/tool"
 	"github.com/ncuhome/GeniusAuthoritarian/internal/pkg/agent"
 	"github.com/ncuhome/GeniusAuthoritarian/internal/service"
@@ -10,7 +11,7 @@ import (
 
 func InitRenewAgent() {
 	_, e := agent.AddRegular(&agent.Event{
-		T: "0 */3 * * *",
+		T: "0 6,12,16,20,23 * * *",
 		E: func() {
 			defer tool.Recover()
 
@@ -31,21 +32,30 @@ func InitRenewAgent() {
 }
 
 func Renew() error {
-	views, e := service.LoginRecord.GetViewCount()
-	if e != nil {
-		return e
-	}
-
 	appSrv, e := service.App.Begin()
 	if e != nil {
 		return e
 	}
 	defer appSrv.Rollback()
 
-	for _, v := range views {
-		e = appSrv.UpdateViews(v.ID, v.Views)
+	apps, e := appSrv.GetForUpdateViews(daoUtil.LockForUpdate)
+	if e != nil {
+		return e
+	}
+
+	loginRecordSrv := service.LoginRecordSrv{DB: appSrv.DB}
+	for _, app := range apps {
+		var loginRecordIdList []uint
+		loginRecordIdList, e = loginRecordSrv.GetViewIDs(app.ID, app.ViewsID)
 		if e != nil {
 			return e
+		}
+
+		if len(loginRecordIdList) != 0 {
+			e = appSrv.UpdateViews(app.ID, loginRecordIdList[0], app.Views+uint64(len(loginRecordIdList)))
+			if e != nil {
+				return e
+			}
 		}
 	}
 

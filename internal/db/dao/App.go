@@ -11,15 +11,17 @@ type App struct {
 	DeletedAt gorm.DeletedAt `gorm:"index"`
 	// User.ID 拥有者
 	UID            uint   `gorm:"column:uid;index"`
-	User           User   `gorm:"foreignKey:UID;constraint:OnDelete:SET NULL"`
+	User           *User  `gorm:"foreignKey:UID;constraint:OnDelete:SET NULL"`
 	Name           string `gorm:"not null"`
 	AppCode        string `gorm:"not null;uniqueIndex;type:varchar(36)"`
 	AppSecret      string `gorm:"not null"`
 	Callback       string `gorm:"not null"`
 	PermitAllGroup bool
 	// 以下仅用于导航标识
-	LinkOff bool
+	LinkOff bool `gorm:"index"`
 	Views   uint64
+	// LoginRecord.ID 统计用，无需约束
+	ViewsID uint
 }
 
 func (a *App) sqlJoinAppGroups(tx *gorm.DB) *gorm.DB {
@@ -128,6 +130,11 @@ func (a *App) GetAllWithGroup(tx *gorm.DB) ([]dto.AppShowWithGroup, error) {
 	return t, tx.Find(&t).Error
 }
 
+func (a *App) GetForUpdateView(tx *gorm.DB) ([]App, error) {
+	var t []App
+	return t, tx.Model(a).Select("id", "views_id", "views").Where("NOT link_off=?", true).Find(&t).Error
+}
+
 func (a *App) DeleteByIdForUID(tx *gorm.DB) error {
 	return tx.Model(a).Where(a, "id", "uid").Delete(a).Error
 }
@@ -137,7 +144,7 @@ func (a *App) UpdatesByID(tx *gorm.DB) error {
 }
 
 func (a *App) UpdateViewByID(tx *gorm.DB) error {
-	return tx.Model(a).Update("views", a.Views).Error
+	return tx.Model(a).Select("views", "views_id").Updates(a).Error
 }
 
 func (a *App) UpdateLinkOff(tx *gorm.DB) error {

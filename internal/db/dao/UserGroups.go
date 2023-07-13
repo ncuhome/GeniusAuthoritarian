@@ -8,11 +8,11 @@ import (
 type UserGroups struct {
 	ID uint `gorm:"primarykey"`
 	// User.ID
-	UID  uint `gorm:"index;index:user_group_idx,unique;not null;column:uid;"`
-	User User `gorm:"foreignKey:UID;constraint:OnDelete:CASCADE"`
+	UID  uint  `gorm:"index;index:user_group_idx,unique;not null;column:uid;"`
+	User *User `gorm:"foreignKey:UID;constraint:OnDelete:CASCADE"`
 	// BaseGroup.ID
-	GID       uint      `gorm:"index;index:user_group_idx,unique;not null;column:gid"`
-	BaseGroup BaseGroup `gorm:"foreignKey:GID;constraint:OnDelete:CASCADE"`
+	GID       uint       `gorm:"index;index:user_group_idx,unique;not null;column:gid"`
+	BaseGroup *BaseGroup `gorm:"foreignKey:GID;constraint:OnDelete:CASCADE"`
 }
 
 func (a *UserGroups) sqlJoinUsers(tx *gorm.DB) *gorm.DB {

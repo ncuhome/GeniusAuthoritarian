@@ -9,8 +9,8 @@ type FeishuGroups struct {
 	Name             string `gorm:"not null;unique"`
 	OpenDepartmentId string `gorm:"not null;uniqueInde;type:varchar(255)"`
 	// BaseGroup.ID
-	GID   uint      `gorm:"uniqueIndex;not null;column:gid"`
-	Group BaseGroup `gorm:"foreignKey:GID;constraint:OnDelete:CASCADE"`
+	GID   uint       `gorm:"uniqueIndex;not null;column:gid"`
+	Group *BaseGroup `gorm:"foreignKey:GID;constraint:OnDelete:CASCADE"`
 }
 
 func (a *FeishuGroups) GetAll(tx *gorm.DB) ([]FeishuGroups, error) {

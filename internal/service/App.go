@@ -224,6 +224,10 @@ func (a AppSrv) GetPermitAll() ([]dto.AppShow, error) {
 	return (&dao.App{}).GetPermitAll(a.DB)
 }
 
+func (a AppSrv) GetForUpdateViews(opts ...daoUtil.ServiceOpt) ([]dao.App, error) {
+	return (&dao.App{}).GetForUpdateView(daoUtil.TxOpts(a.DB, opts...))
+}
+
 func (a AppSrv) DeleteByID(id, uid uint) error {
 	return (&dao.App{ID: id, UID: uid}).DeleteByIdForUID(a.DB)
 }
@@ -237,10 +241,11 @@ func (a AppSrv) UpdateAll(id uint, name, callback string, permitAllGroup bool) e
 	}).UpdatesByID(a.DB)
 }
 
-func (a AppSrv) UpdateViews(id uint, views uint64) error {
+func (a AppSrv) UpdateViews(id, viewsID uint, views uint64) error {
 	return (&dao.App{
-		ID:    id,
-		Views: views,
+		ID:      id,
+		Views:   views,
+		ViewsID: viewsID,
 	}).UpdateViewByID(a.DB)
 }
 
