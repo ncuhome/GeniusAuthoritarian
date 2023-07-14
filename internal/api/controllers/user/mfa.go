@@ -63,7 +63,7 @@ func MfaAdd(c *gin.Context) {
 	})
 }
 
-func MfaCheck(c *gin.Context) {
+func MfaAddCheck(c *gin.Context) {
 	var f struct {
 		Code string `json:"code" form:"code" binding:"required,len=6,numeric"`
 	}
