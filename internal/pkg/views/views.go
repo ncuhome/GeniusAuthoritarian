@@ -69,7 +69,7 @@ func Renew() error {
 				app.Views++
 				loginRecordIndex++
 
-				if loginRecordIndex > len(loginRecordList) {
+				if loginRecordIndex >= len(loginRecordList) {
 					goto doUpdate
 				}
 

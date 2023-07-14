@@ -17,5 +17,5 @@ type ViewID struct {
 	// LoginRecord.ID
 	ID uint
 	// App.ID
-	AID uint `gorm:"aid"`
+	AID uint `gorm:"column:aid"`
 }

@@ -132,7 +132,7 @@ func (a *App) GetAllWithGroup(tx *gorm.DB) ([]dto.AppShowWithGroup, error) {
 
 func (a *App) GetForUpdateView(tx *gorm.DB) ([]App, error) {
 	var t []App
-	return t, tx.Model(a).Select("id", "views_id", "views").Where("NOT link_off=?", true).Order("id").Find(&t).Error
+	return t, tx.Model(a).Select("id", "views_id", "views").Where("link_off IS NULL OR link_off=?", false).Order("id").Find(&t).Error
 }
 
 func (a *App) DeleteByIdForUID(tx *gorm.DB) error {
