@@ -106,7 +106,7 @@ func AddDepartmentSyncCron(spec string) error {
 			if e != nil {
 				log.Errorf("同步飞书部门失败: %v", e)
 			} else {
-				log.Infof("飞书部门同步成功，耗时 %dms", time.Now().Sub(startAt).Milliseconds())
+				log.Infof("飞书部门同步成功，总耗时 %dms", time.Now().Sub(startAt).Milliseconds())
 			}
 			return e
 		},

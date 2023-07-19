@@ -325,7 +325,7 @@ func AddUserSyncCron(spec string) error {
 			if e != nil {
 				log.Errorf("同步飞书用户列表失败: %v", e)
 			} else {
-				log.Infof("飞书用户列表同步成功，耗时 %dms", sync.Cost.Milliseconds())
+				log.Infof("飞书用户列表同步成功，差异处理耗时 %dms", sync.Cost.Milliseconds())
 				sync.PrintSyncResult()
 			}
 			return e
