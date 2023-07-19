@@ -2,13 +2,18 @@ package backoff
 
 import (
 	"github.com/Mmx233/tool"
-	"sync"
+	"sync/atomic"
 	"time"
+	"unsafe"
 )
 
 type Conf struct {
 	Content       func() error
 	MaxRetryDelay time.Duration
+}
+
+func TeeBool(b bool) *bool {
+	return &b
 }
 
 func New(c Conf) Backoff {
@@ -18,11 +23,12 @@ func New(c Conf) Backoff {
 	if c.MaxRetryDelay == 0 {
 		c.MaxRetryDelay = time.Minute * 20
 	}
+
 	return Backoff{
 		f:        c.Content,
 		retry:    time.Second,
 		maxRetry: c.MaxRetryDelay,
-		lock:     &sync.Mutex{},
+		running:  unsafe.Pointer(TeeBool(false)),
 	}
 }
 
@@ -32,16 +38,15 @@ type Backoff struct {
 	retry    time.Duration
 	maxRetry time.Duration
 
-	lock    *sync.Mutex
-	running bool
+	running unsafe.Pointer // *bool
 }
 
 func (a Backoff) Start() {
-	a.lock.Lock()
-	defer a.lock.Unlock()
-	if !a.running {
-		a.running = true
-		go a.Worker()
+	running := a.running
+	if !*(*bool)(running) {
+		if atomic.CompareAndSwapPointer(&a.running, running, unsafe.Pointer(TeeBool(true))) {
+			go a.Worker()
+		}
 	}
 }
 
@@ -66,5 +71,5 @@ func (a Backoff) Worker() {
 		}
 	}
 
-	a.running = false
+	a.running = unsafe.Pointer(TeeBool(false))
 }
