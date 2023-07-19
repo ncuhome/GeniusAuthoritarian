@@ -7,13 +7,23 @@ import (
 	"unsafe"
 )
 
+// Backoff 错误重试 积分退避算法
+type Backoff struct {
+	f        func() error
+	retry    time.Duration
+	maxRetry time.Duration
+
+	running *unsafe.Pointer // * => *bool
+}
+
 type Conf struct {
-	Content       func() error
+	Content func() error
+	// 最大重试等待时间
 	MaxRetryDelay time.Duration
 }
 
-func TeeBool(b bool) *bool {
-	return &b
+func TeeBool(b bool) unsafe.Pointer {
+	return unsafe.Pointer(&b)
 }
 
 func New(c Conf) Backoff {
@@ -24,27 +34,19 @@ func New(c Conf) Backoff {
 		c.MaxRetryDelay = time.Minute * 20
 	}
 
+	running := TeeBool(false)
 	return Backoff{
 		f:        c.Content,
 		retry:    time.Second,
 		maxRetry: c.MaxRetryDelay,
-		running:  unsafe.Pointer(TeeBool(false)),
+		running:  &running,
 	}
 }
 
-// Backoff 错误重试 积分退避算法
-type Backoff struct {
-	f        func() error
-	retry    time.Duration
-	maxRetry time.Duration
-
-	running unsafe.Pointer // *bool
-}
-
 func (a Backoff) Start() {
-	running := a.running
+	running := *a.running
 	if !*(*bool)(running) {
-		if atomic.CompareAndSwapPointer(&a.running, running, unsafe.Pointer(TeeBool(true))) {
+		if atomic.CompareAndSwapPointer(a.running, running, TeeBool(true)) {
 			go a.Worker()
 		}
 	}
@@ -71,5 +73,5 @@ func (a Backoff) Worker() {
 		}
 	}
 
-	a.running = unsafe.Pointer(TeeBool(false))
+	*a.running = TeeBool(false)
 }
