@@ -53,6 +53,6 @@ func (a *BaseGroup) GetByIdsForShow(tx *gorm.DB, ids ...uint) ([]dto.Group, erro
 	return t, a.sqlGetByIds(tx, ids...).Find(&t).Error
 }
 
-func (a *BaseGroup) CreateGroups(tx *gorm.DB, groups *[]BaseGroup) error {
+func (a *BaseGroup) CreateGroups(tx *gorm.DB, groups []BaseGroup) error {
 	return tx.Create(&groups).Error
 }

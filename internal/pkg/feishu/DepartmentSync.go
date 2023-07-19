@@ -4,7 +4,6 @@ import (
 	"container/list"
 	"github.com/Mmx233/daoUtil"
 	"github.com/ncuhome/GeniusAuthoritarian/internal/db/dao"
-	"github.com/ncuhome/GeniusAuthoritarian/internal/global"
 	"github.com/ncuhome/GeniusAuthoritarian/internal/pkg/agent"
 	"github.com/ncuhome/GeniusAuthoritarian/internal/service"
 	"github.com/ncuhome/GeniusAuthoritarian/pkg/backoff"
@@ -15,6 +14,11 @@ import (
 )
 
 func DepartmentSync() error {
+	departmentRelation, e := service.BaseGroups.LoadGroupsRelation()
+	if e != nil {
+		return e
+	}
+
 	departmentList, e := Api.LoadDepartmentList()
 	if e != nil {
 		return e
@@ -29,7 +33,7 @@ func DepartmentSync() error {
 					pairedDepartments[relate.department] = &dao.FeishuGroups{
 						Name:             item.Name,
 						OpenDepartmentId: item.OpenDepartmentId,
-						GID:              global.DepartmentRelation[relate.department],
+						GID:              departmentRelation[relate.department].ID,
 					}
 					goto next
 				}

@@ -21,10 +21,23 @@ func (a BaseGroupsSrv) LoadGroups() ([]dao.BaseGroup, error) {
 	return (&dao.BaseGroup{}).GetAll(a.DB)
 }
 
+func (a BaseGroupsSrv) LoadGroupsRelation() (map[string]dao.BaseGroup, error) {
+	groups, e := a.LoadGroups()
+	if e != nil {
+		return nil, e
+	}
+
+	var groupRelations = make(map[string]dao.BaseGroup, len(groups))
+	for _, group := range groups {
+		groupRelations[group.Name] = group
+	}
+	return groupRelations, nil
+}
+
 func (a BaseGroupsSrv) LoadGroupsForShow() ([]dto.Group, error) {
 	return (&dao.BaseGroup{}).GetAllForShow(a.DB)
 }
 
-func (a BaseGroupsSrv) CreateGroups(groups *[]dao.BaseGroup) error {
+func (a BaseGroupsSrv) CreateGroups(groups []dao.BaseGroup) error {
 	return (&dao.BaseGroup{}).CreateGroups(a.DB, groups)
 }

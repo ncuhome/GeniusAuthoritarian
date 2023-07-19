@@ -12,5 +12,3 @@ var Departments = []string{
 	departments.UCe,
 	departments.USenior,
 }
-
-var DepartmentRelation map[string]uint

@@ -1,8 +1,8 @@
 package main
 
 import (
-	"github.com/ncuhome/GeniusAuthoritarian/internal/pkg/GroupOperator"
 	"github.com/ncuhome/GeniusAuthoritarian/internal/pkg/agent"
+	"github.com/ncuhome/GeniusAuthoritarian/internal/pkg/department2BaseGroup"
 	"github.com/ncuhome/GeniusAuthoritarian/internal/pkg/feishu"
 	"github.com/ncuhome/GeniusAuthoritarian/internal/pkg/views"
 	"github.com/ncuhome/GeniusAuthoritarian/internal/router"
@@ -11,7 +11,7 @@ import (
 )
 
 func init() {
-	GroupOperator.InitGroupRelation()
+	department2BaseGroup.Init()
 	agent.Init()
 	feishu.InitSync()
 	views.InitRenewAgent()

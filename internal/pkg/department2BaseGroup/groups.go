@@ -1,4 +1,4 @@
-package GroupOperator
+package department2BaseGroup
 
 import (
 	"container/list"
@@ -8,26 +8,23 @@ import (
 	log "github.com/sirupsen/logrus"
 )
 
-func InitGroupRelation() {
-	e := LoadGroupRelation()
+func Init() {
+	e := CheckBaseGroups()
 	if e != nil {
-		log.Fatalf("载入部门 id 关系失败: %v", e)
+		log.Fatalln("写入基本组列表失败:", e)
 	}
 }
 
-func LoadGroupRelation() error {
+func CheckBaseGroups() error {
 	dbGroups, e := service.BaseGroups.LoadGroups()
 	if e != nil {
 		return e
 	}
 
-	var groupRelations = make(map[string]uint, len(global.Departments))
-
 	var notExistGroups = list.New() // string
 	for _, group := range global.Departments {
 		for _, dbGroup := range dbGroups {
 			if group == dbGroup.Name {
-				groupRelations[group] = dbGroup.ID
 				goto next
 			}
 		}
@@ -45,15 +42,11 @@ func LoadGroupRelation() error {
 			i++
 		}
 
-		e = service.BaseGroups.CreateGroups(&newGroups)
+		e = service.BaseGroups.CreateGroups(newGroups)
 		if e != nil {
 			return e
 		}
-		for _, group := range newGroups {
-			groupRelations[group.Name] = group.ID
-		}
 	}
 
-	global.DepartmentRelation = groupRelations
 	return nil
 }

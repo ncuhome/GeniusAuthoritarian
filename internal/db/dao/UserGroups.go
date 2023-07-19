@@ -19,6 +19,10 @@ func (a *UserGroups) sqlJoinUsers(tx *gorm.DB) *gorm.DB {
 	return tx.Joins("INNER JOIN users ON users.id=user_groups.uid AND users.deleted_at IS NULL")
 }
 
+func (a *UserGroups) sqlJoinBaseGroups(tx *gorm.DB) *gorm.DB {
+	return tx.Joins("INNER JOIN base_groups ON base_groups.id=user_groups.gid")
+}
+
 func (a *UserGroups) sqlGetUserGroupsByUID(tx *gorm.DB) *gorm.DB {
 	groupModel := &BaseGroup{}
 	tx = tx.Model(groupModel)
@@ -26,9 +30,11 @@ func (a *UserGroups) sqlGetUserGroupsByUID(tx *gorm.DB) *gorm.DB {
 	return tx.Where("user_groups.uid=?", a.UID)
 }
 
-func (a *UserGroups) Exist(tx *gorm.DB) (bool, error) {
+func (a *UserGroups) ExistByName(tx *gorm.DB, groupName string) (bool, error) {
 	var t bool
-	return t, tx.Model(a).Select("1").Where(a).Find(&t).Error
+	tx = tx.Model(a).Select("1")
+	tx = a.sqlJoinBaseGroups(tx)
+	return t, tx.Where("base_groups.name=? AND user_groups.uid=?", groupName, a.UID).Limit(1).Find(&t).Error
 }
 
 func (a *UserGroups) InsertAll(tx *gorm.DB, data []UserGroups) error {
