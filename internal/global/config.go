@@ -6,4 +6,4 @@ import (
 
 var Config models.Config
 
-const ThisAppName = "统一鉴权控制系统"
+const ThisAppName = "统一授权系统"
