@@ -12,11 +12,15 @@ type AppGroup struct {
 	BaseGroup *BaseGroup `gorm:"foreignKey:GID;constraint:OnDelete:CASCADE"`
 }
 
+func (a *AppGroup) sqlJoinApps(tx *gorm.DB) *gorm.DB {
+	return tx.Joins("INNER JOIN apps ON apps.id=app_groups.aid AND apps.deleted_at IS NULL")
+}
+
 func (a *AppGroup) sqlGetGroupsJoined(tx *gorm.DB) *gorm.DB {
 	groupModel := &BaseGroup{}
 	tx = tx.Model(groupModel)
 	tx = groupModel.sqlJoinAppGroups(tx)
-	tx = groupModel.sqlJoinApps(tx)
+	tx = a.sqlJoinApps(tx)
 	return tx
 }
 

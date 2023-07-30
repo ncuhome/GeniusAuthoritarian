@@ -2,6 +2,7 @@ package dao
 
 import (
 	"github.com/ncuhome/GeniusAuthoritarian/internal/db/dto"
+	"github.com/ncuhome/GeniusAuthoritarian/pkg/departments"
 	"gorm.io/gorm"
 )
 
@@ -11,6 +12,14 @@ type User struct {
 	Name      string         `gorm:"not null"`
 	Phone     string         `gorm:"not null;uniqueIndex;type:varchar(15)"`
 	MFA       string
+}
+
+func (a *User) sqlJoinUserGroups(tx *gorm.DB) *gorm.DB {
+	return tx.Joins("INNER JOIN user_groups ON user_groups.uid=users.id")
+}
+
+func (a *User) sqlJoinUserSshs(tx *gorm.DB) *gorm.DB {
+	return tx.Joins("LEFT JOIN user_sshes ON user_sshes.uid=users.id")
 }
 
 func (a *User) Insert(tx *gorm.DB) error {
@@ -38,6 +47,17 @@ func (a *User) GetUnscopedByPhoneSlice(tx *gorm.DB, phone []string) ([]User, err
 func (a *User) GetNotInPhoneSlice(tx *gorm.DB, phone []string) ([]User, error) {
 	var t []User
 	return t, tx.Model(a).Where("NOT phone IN ?", phone).Find(&t).Error
+}
+
+// GetNoSshDevIds 获取没有分发 ssh 账号的研发部门用户
+func (a *User) GetNoSshDevIds(tx *gorm.DB) ([]uint, error) {
+	tx = tx.Model(a)
+	tx = a.sqlJoinUserGroups(tx)
+	tx = a.sqlJoinUserSshs(tx)
+	tx = (&UserGroups{}).sqlJoinBaseGroups(tx)
+
+	var t []uint
+	return t, tx.Select("users.id").Where("base_groups.name=? AND user_sshes.id IS NULL", departments.UDev).Find(&t).Error
 }
 
 func (a *User) UpdateMfa(tx *gorm.DB) error {
