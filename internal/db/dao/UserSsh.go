@@ -8,8 +8,11 @@ type UserSsh struct {
 	UID  uint  `gorm:"uniqueIndex;not null;column:uid;"`
 	User *User `gorm:"foreignKey:UID;constraint:OnDelete:RESTRICT"`
 
-	PublicKey  string `gorm:"not null"`
-	PrivateKey string `gorm:"not null"`
+	PublicPem  string `gorm:"not null"`
+	PrivatePem string `gorm:"not null"`
+
+	PublicSsh  string `gorm:"not null"`
+	PrivateSsh string `gorm:"not null"`
 }
 
 func (a *UserSsh) Insert(tx *gorm.DB) error {
