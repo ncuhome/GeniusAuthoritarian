@@ -1,6 +1,7 @@
 package controllers
 
 import (
+	"errors"
 	"github.com/gin-gonic/gin"
 	"github.com/ncuhome/GeniusAuthoritarian/internal/api/callback"
 	"github.com/ncuhome/GeniusAuthoritarian/internal/service"
@@ -19,7 +20,7 @@ func LandingApp(c *gin.Context) {
 
 	callbackStr, e := service.App.FirstAppCallbackByID(f.ID)
 	if e != nil {
-		if e == gorm.ErrRecordNotFound {
+		if errors.Is(e, gorm.ErrRecordNotFound) {
 			callback.Error(c, callback.ErrAppNotFound)
 			return
 		}

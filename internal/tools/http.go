@@ -2,6 +2,7 @@ package tools
 
 import (
 	"context"
+	"errors"
 	"github.com/Mmx233/tool"
 	"github.com/gin-gonic/gin"
 	log "github.com/sirupsen/logrus"
@@ -48,7 +49,7 @@ func SoftHttpSrv(E *gin.Engine) error {
 	}(srv)
 
 	e := srv.ListenAndServe()
-	if e == http.ErrServerClosed {
+	if errors.Is(e, http.ErrServerClosed) {
 		<-shutdown
 		return nil
 	}

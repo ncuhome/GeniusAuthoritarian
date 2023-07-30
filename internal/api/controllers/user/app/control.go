@@ -1,6 +1,7 @@
 package controllers
 
 import (
+	"errors"
 	"github.com/Mmx233/daoUtil"
 	"github.com/gin-gonic/gin"
 	"github.com/ncuhome/GeniusAuthoritarian/internal/api/callback"
@@ -69,7 +70,7 @@ func ApplyApp(c *gin.Context) {
 		appGroupSrv := service.AppGroupSrv{DB: appSrc.DB}
 
 		if groups, e = appGroupSrv.BindForApp(newApp.ID, f.PermitGroups); e != nil {
-			if e == gorm.ErrRecordNotFound {
+			if errors.Is(e, gorm.ErrRecordNotFound) {
 				callback.Error(c, callback.ErrGroupNotFound)
 				return
 			}
@@ -121,7 +122,7 @@ func DeleteApp(c *gin.Context) {
 
 	appCode, e := appSrv.FirstAppCodeByID(f.ID, uid, daoUtil.LockForUpdate)
 	if e != nil {
-		if e == gorm.ErrRecordNotFound {
+		if errors.Is(e, gorm.ErrRecordNotFound) {
 			callback.Error(c, callback.ErrAppNotFound)
 			return
 		}

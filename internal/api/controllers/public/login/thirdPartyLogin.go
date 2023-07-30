@@ -1,6 +1,7 @@
 package controllers
 
 import (
+	"errors"
 	"github.com/gin-gonic/gin"
 	"github.com/ncuhome/GeniusAuthoritarian/internal/api/callback"
 	"github.com/ncuhome/GeniusAuthoritarian/internal/api/models/response"
@@ -216,7 +217,7 @@ func ThirdPartyLogin(c *gin.Context) {
 		var baseGroups []dao.BaseGroup
 		baseGroups, e = service.UserGroups.GetForAppCode(user.ID, appCode)
 		if e != nil {
-			if e == gorm.ErrRecordNotFound {
+			if errors.Is(e, gorm.ErrRecordNotFound) {
 				callback.ErrorWithTip(c, callback.ErrUnauthorized, "没有找到角色，请尝试使用其他登录方式或联系管理员")
 				return
 			}

@@ -53,11 +53,11 @@ func (a AppSrv) AppCodeExist(appCode string) (bool, error) {
 	if e != nil {
 		return false, e
 	} else if empty {
-		list, e := (&dao.App{}).GetAppCode(a.DB)
+		appCodeList, e := (&dao.App{}).GetAppCode(a.DB)
 		if e != nil {
 			return false, e
 		}
-		e = redis.AppCode.Add(list...)
+		e = redis.AppCode.Add(appCodeList...)
 		if e != nil {
 			return false, e
 		}
