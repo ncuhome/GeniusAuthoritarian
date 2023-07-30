@@ -1,0 +1,18 @@
+syntax = "proto3";
+
+package proto;
+
+option go_package = ".;proto";
+
+service SshAccounts {
+  rpc Watch(stream DelSshAccount) returns (stream NewSshAccount) {}
+}
+
+message NewSshAccount {
+  string username = 1;
+  string public_key = 2;
+}
+
+message DelSshAccount {
+  string username = 1;
+}
