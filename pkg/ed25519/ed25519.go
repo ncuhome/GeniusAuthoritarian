@@ -4,13 +4,10 @@ import (
 	"crypto/ed25519"
 	"golang.org/x/crypto/ssh"
 	"math/rand"
-	"time"
 )
 
-func Generate() (*Key, error) {
-	randSource := rand.NewSource(time.Now().UnixNano())
-
-	publicKey, privateKey, err := ed25519.GenerateKey(rand.New(randSource))
+func Generate(randRand *rand.Rand) (*Key, error) {
+	publicKey, privateKey, err := ed25519.GenerateKey(rand.New(randRand))
 	if err != nil {
 		return nil, err
 	}
