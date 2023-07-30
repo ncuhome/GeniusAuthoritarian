@@ -33,6 +33,7 @@ func init() {
 		&UserGroups{},
 		&FeishuGroups{},
 		&AppGroup{},
+		&UserSsh{},
 	); e != nil {
 		log.Fatalln("AutoMigration failed:", e)
 	}
