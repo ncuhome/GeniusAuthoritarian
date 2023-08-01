@@ -11,6 +11,7 @@ import (
 	grpc "google.golang.org/grpc"
 	codes "google.golang.org/grpc/codes"
 	status "google.golang.org/grpc/status"
+	emptypb "google.golang.org/protobuf/types/known/emptypb"
 )
 
 // This is a compile-time assertion to ensure that this generated file
@@ -26,7 +27,7 @@ const (
 //
 // For semantics around ctx use and closing/ending streaming RPCs, please refer to https://pkg.go.dev/google.golang.org/grpc/?tab=doc#ClientConn.NewStream.
 type SshAccountsClient interface {
-	Watch(ctx context.Context, opts ...grpc.CallOption) (SshAccounts_WatchClient, error)
+	Watch(ctx context.Context, in *emptypb.Empty, opts ...grpc.CallOption) (SshAccounts_WatchClient, error)
 }
 
 type sshAccountsClient struct {
@@ -37,18 +38,23 @@ func NewSshAccountsClient(cc grpc.ClientConnInterface) SshAccountsClient {
 	return &sshAccountsClient{cc}
 }
 
-func (c *sshAccountsClient) Watch(ctx context.Context, opts ...grpc.CallOption) (SshAccounts_WatchClient, error) {
+func (c *sshAccountsClient) Watch(ctx context.Context, in *emptypb.Empty, opts ...grpc.CallOption) (SshAccounts_WatchClient, error) {
 	stream, err := c.cc.NewStream(ctx, &SshAccounts_ServiceDesc.Streams[0], SshAccounts_Watch_FullMethodName, opts...)
 	if err != nil {
 		return nil, err
 	}
 	x := &sshAccountsWatchClient{stream}
+	if err := x.ClientStream.SendMsg(in); err != nil {
+		return nil, err
+	}
+	if err := x.ClientStream.CloseSend(); err != nil {
+		return nil, err
+	}
 	return x, nil
 }
 
 type SshAccounts_WatchClient interface {
-	Send(*DelSshAccount) error
-	Recv() (*NewSshAccount, error)
+	Recv() (*SshAccount, error)
 	grpc.ClientStream
 }
 
@@ -56,12 +62,8 @@ type sshAccountsWatchClient struct {
 	grpc.ClientStream
 }
 
-func (x *sshAccountsWatchClient) Send(m *DelSshAccount) error {
-	return x.ClientStream.SendMsg(m)
-}
-
-func (x *sshAccountsWatchClient) Recv() (*NewSshAccount, error) {
-	m := new(NewSshAccount)
+func (x *sshAccountsWatchClient) Recv() (*SshAccount, error) {
+	m := new(SshAccount)
 	if err := x.ClientStream.RecvMsg(m); err != nil {
 		return nil, err
 	}
@@ -72,7 +74,7 @@ func (x *sshAccountsWatchClient) Recv() (*NewSshAccount, error) {
 // All implementations must embed UnimplementedSshAccountsServer
 // for forward compatibility
 type SshAccountsServer interface {
-	Watch(SshAccounts_WatchServer) error
+	Watch(*emptypb.Empty, SshAccounts_WatchServer) error
 	mustEmbedUnimplementedSshAccountsServer()
 }
 
@@ -80,7 +82,7 @@ type SshAccountsServer interface {
 type UnimplementedSshAccountsServer struct {
 }
 
-func (UnimplementedSshAccountsServer) Watch(SshAccounts_WatchServer) error {
+func (UnimplementedSshAccountsServer) Watch(*emptypb.Empty, SshAccounts_WatchServer) error {
 	return status.Errorf(codes.Unimplemented, "method Watch not implemented")
 }
 func (UnimplementedSshAccountsServer) mustEmbedUnimplementedSshAccountsServer() {}
@@ -97,12 +99,15 @@ func RegisterSshAccountsServer(s grpc.ServiceRegistrar, srv SshAccountsServer) {
 }
 
 func _SshAccounts_Watch_Handler(srv interface{}, stream grpc.ServerStream) error {
-	return srv.(SshAccountsServer).Watch(&sshAccountsWatchServer{stream})
+	m := new(emptypb.Empty)
+	if err := stream.RecvMsg(m); err != nil {
+		return err
+	}
+	return srv.(SshAccountsServer).Watch(m, &sshAccountsWatchServer{stream})
 }
 
 type SshAccounts_WatchServer interface {
-	Send(*NewSshAccount) error
-	Recv() (*DelSshAccount, error)
+	Send(*SshAccount) error
 	grpc.ServerStream
 }
 
@@ -110,16 +115,8 @@ type sshAccountsWatchServer struct {
 	grpc.ServerStream
 }
 
-func (x *sshAccountsWatchServer) Send(m *NewSshAccount) error {
+func (x *sshAccountsWatchServer) Send(m *SshAccount) error {
 	return x.ServerStream.SendMsg(m)
-}
-
-func (x *sshAccountsWatchServer) Recv() (*DelSshAccount, error) {
-	m := new(DelSshAccount)
-	if err := x.ServerStream.RecvMsg(m); err != nil {
-		return nil, err
-	}
-	return m, nil
 }
 
 // SshAccounts_ServiceDesc is the grpc.ServiceDesc for SshAccounts service.
@@ -134,7 +131,6 @@ var SshAccounts_ServiceDesc = grpc.ServiceDesc{
 			StreamName:    "Watch",
 			Handler:       _SshAccounts_Watch_Handler,
 			ServerStreams: true,
-			ClientStreams: true,
 		},
 	},
 	Metadata: "ssh.proto",

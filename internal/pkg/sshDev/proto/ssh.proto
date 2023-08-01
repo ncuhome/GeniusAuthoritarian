@@ -4,15 +4,14 @@ package proto;
 
 option go_package = ".;proto";
 
+import "google/protobuf/empty.proto";
+
 service SshAccounts {
-  rpc Watch(stream DelSshAccount) returns (stream NewSshAccount) {}
+  rpc Watch(google.protobuf.Empty) returns (stream SshAccount) {}
 }
 
-message NewSshAccount {
-  string username = 1;
-  string public_key = 2;
-}
-
-message DelSshAccount {
-  string username = 1;
+message SshAccount {
+  bool is_del = 1;
+  string username = 2;
+  string public_key = 3;
 }
