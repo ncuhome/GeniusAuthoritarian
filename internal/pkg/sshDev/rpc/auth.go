@@ -1,4 +1,4 @@
-package sshDev
+package rpc
 
 import (
 	"context"

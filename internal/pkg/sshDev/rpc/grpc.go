@@ -1,7 +1,8 @@
-package sshDev
+package rpc
 
 import (
 	"container/list"
+	"github.com/ncuhome/GeniusAuthoritarian/internal/pkg/sshDev"
 	"github.com/ncuhome/GeniusAuthoritarian/internal/pkg/sshDev/proto"
 	"github.com/ncuhome/GeniusAuthoritarian/internal/service"
 	"google.golang.org/grpc"
@@ -10,7 +11,7 @@ import (
 	"sync"
 )
 
-var msgChannel chan []SshAccountMsg
+var MsgChannel chan []SshAccountMsg
 
 func Run(token string) error {
 	tcpListen, err := net.Listen("tcp", ":80")
@@ -18,8 +19,8 @@ func Run(token string) error {
 		return err
 	}
 
-	msgChannel = make(chan []SshAccountMsg)
-	rpcSshAccounts := RpcSshAccounts{}
+	MsgChannel = make(chan []SshAccountMsg)
+	rpcSshAccounts := SshAccounts{}
 	go rpcSshAccounts.Broadcaster()
 
 	grpcServer := grpc.NewServer(grpc.UnaryInterceptor(TokenAuth(token)))
@@ -28,14 +29,14 @@ func Run(token string) error {
 	return grpcServer.Serve(tcpListen)
 }
 
-type RpcSshAccounts struct {
+type SshAccounts struct {
 	proto.UnimplementedSshAccountsServer
 
-	list     list.List // *RpcSshAccountListElement
+	list     list.List // *SshAccountListElement
 	listLock sync.Mutex
 }
 
-func (a *RpcSshAccounts) Watch(_ *emptypb.Empty, server proto.SshAccounts_WatchServer) error {
+func (a *SshAccounts) Watch(_ *emptypb.Empty, server proto.SshAccounts_WatchServer) error {
 	// 发送现有账号
 	sshAccounts, err := service.UserSsh.GetAllExist()
 	if err != nil {
@@ -43,7 +44,7 @@ func (a *RpcSshAccounts) Watch(_ *emptypb.Empty, server proto.SshAccounts_WatchS
 	}
 	for _, account := range sshAccounts {
 		err = server.Send(&proto.SshAccount{
-			Username:  LinuxAccountName(account.UID),
+			Username:  sshDev.LinuxAccountName(account.UID),
 			PublicKey: account.PublicSsh,
 		})
 		if err != nil {
@@ -64,9 +65,9 @@ func (a *RpcSshAccounts) Watch(_ *emptypb.Empty, server proto.SshAccounts_WatchS
 	}
 }
 
-func (a *RpcSshAccounts) RegisterWatcher() (chan []SshAccountMsg, func()) {
+func (a *SshAccounts) RegisterWatcher() (chan []SshAccountMsg, func()) {
 	channel := make(chan []SshAccountMsg, 2) // 添加 buffer 防死锁
-	elContent := RpcSshAccountListElement{
+	elContent := SshAccountListElement{
 		Channel: channel,
 	}
 
@@ -98,14 +99,14 @@ func (a *RpcSshAccounts) RegisterWatcher() (chan []SshAccountMsg, func()) {
 	}
 }
 
-func (a *RpcSshAccounts) Broadcaster() {
+func (a *SshAccounts) Broadcaster() {
 	for {
-		messages := <-msgChannel
+		messages := <-MsgChannel
 
 		a.listLock.Lock()
 		el := a.list.Front()
 		for el != nil {
-			elContent := el.Value.(*RpcSshAccountListElement)
+			elContent := el.Value.(*SshAccountListElement)
 			if !elContent.IsQuited.Load() {
 				elContent.Channel <- messages
 			}

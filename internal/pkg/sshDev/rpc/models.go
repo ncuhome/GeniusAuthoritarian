@@ -1,4 +1,4 @@
-package sshDev
+package rpc
 
 import (
 	"github.com/ncuhome/GeniusAuthoritarian/internal/pkg/sshDev/proto"
@@ -19,7 +19,7 @@ func (a SshAccountMsg) Rpc() *proto.SshAccount {
 	}
 }
 
-type RpcSshAccountListElement struct {
+type SshAccountListElement struct {
 	Channel  chan []SshAccountMsg
 	IsQuited atomic.Bool
 }
