@@ -3,6 +3,7 @@ package sshDev
 import (
 	"container/list"
 	"github.com/ncuhome/GeniusAuthoritarian/internal/pkg/sshDev/proto"
+	"github.com/ncuhome/GeniusAuthoritarian/internal/service"
 	"google.golang.org/grpc"
 	"google.golang.org/protobuf/types/known/emptypb"
 	"net"
@@ -35,6 +36,21 @@ type RpcSshAccounts struct {
 }
 
 func (a *RpcSshAccounts) Watch(_ *emptypb.Empty, server proto.SshAccounts_WatchServer) error {
+	// 发送现有账号
+	sshAccounts, err := service.UserSsh.GetAllExist()
+	if err != nil {
+		return err
+	}
+	for _, account := range sshAccounts {
+		err = server.Send(&proto.SshAccount{
+			Username:  LinuxAccountName(account.UID),
+			PublicKey: account.PublicSsh,
+		})
+		if err != nil {
+			return err
+		}
+	}
+
 	msgChan, unregister := a.RegisterWatcher()
 	defer unregister()
 	for {

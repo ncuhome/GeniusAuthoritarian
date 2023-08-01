@@ -1,6 +1,7 @@
 package dao
 
 import (
+	"github.com/ncuhome/GeniusAuthoritarian/internal/db/dto"
 	"github.com/ncuhome/GeniusAuthoritarian/pkg/departments"
 	"gorm.io/gorm"
 )
@@ -34,4 +35,9 @@ func (a *UserSsh) GetInvalid(tx *gorm.DB) ([]UserSsh, error) {
 
 	var t []UserSsh
 	return t, tx.Group("user_sshes.id,users.deleted_at").Having("COUNT(base_groups.id)=0 OR users.deleted_at IS NOT NULL").Find(&t).Error
+}
+
+func (a *UserSsh) GetAll(tx *gorm.DB) ([]dto.SshDeploy, error) {
+	var t []dto.SshDeploy
+	return t, tx.Model(a).Find(&t).Error
 }
