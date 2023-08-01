@@ -1,7 +1,6 @@
 package sshDev
 
 import (
-	"fmt"
 	"github.com/ncuhome/GeniusAuthoritarian/internal/db/dao"
 	"github.com/ncuhome/GeniusAuthoritarian/internal/pkg/sshDev/rpc"
 	"github.com/ncuhome/GeniusAuthoritarian/internal/service"
@@ -11,10 +10,6 @@ import (
 )
 
 // 研发哥容器内 ssh 账号管理器
-
-func LinuxAccountName(uid uint) string {
-	return "home" + fmt.Sprint(uid)
-}
 
 func DoSync() error {
 	users, err := service.UserSsh.GetToCreateUid()
@@ -77,7 +72,7 @@ func DoSync() error {
 		i := 0
 		for _, userSsh := range userSshToCreate {
 			sshRpcMessages[i] = rpc.SshAccountMsg{
-				Username:  LinuxAccountName(userSsh.UID),
+				Username:  rpc.LinuxAccountName(userSsh.UID),
 				PublicKey: userSsh.PublicSsh,
 			}
 			i++
@@ -85,7 +80,7 @@ func DoSync() error {
 		for _, userSsh := range userToDelete {
 			sshRpcMessages[i] = rpc.SshAccountMsg{
 				IsDel:     true,
-				Username:  LinuxAccountName(userSsh.UID),
+				Username:  rpc.LinuxAccountName(userSsh.UID),
 				PublicKey: userSsh.PublicSsh,
 			}
 			i++
