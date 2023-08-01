@@ -2,9 +2,15 @@ package main
 
 import (
 	"github.com/ncuhome/GeniusAuthoritarian/internal/global"
+	"github.com/ncuhome/GeniusAuthoritarian/internal/pkg/sshDev"
 	"github.com/ncuhome/GeniusAuthoritarian/internal/pkg/sshDev/rpc"
 	log "github.com/sirupsen/logrus"
 )
+
+func init() {
+	// 建议放在用户同步的时间之后
+	sshDev.AddCron("0 6 * * *")
+}
 
 func main() {
 	log.Infoln("Sys Boost")

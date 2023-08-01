@@ -6,7 +6,6 @@ import (
 	"github.com/ncuhome/GeniusAuthoritarian/internal/db/dao"
 	"github.com/ncuhome/GeniusAuthoritarian/internal/db/redis"
 	"github.com/ncuhome/GeniusAuthoritarian/internal/pkg/agent"
-	"github.com/ncuhome/GeniusAuthoritarian/internal/pkg/sshDev"
 	"github.com/ncuhome/GeniusAuthoritarian/internal/service"
 	"github.com/ncuhome/GeniusAuthoritarian/pkg/backoff"
 	"github.com/ncuhome/GeniusAuthoritarian/pkg/feishuApi"
@@ -328,15 +327,6 @@ func AddUserSyncCron(spec string) error {
 			} else {
 				log.Infof("飞书用户列表同步成功，差异处理耗时 %dms", sync.Cost.Milliseconds())
 				sync.PrintSyncResult()
-			}
-
-			if e == nil {
-				errSshSync := sshDev.DoSync()
-				if errSshSync != nil {
-					log.Errorln("同步研发哥 SSH 账号失败:", errSshSync)
-				} else {
-					log.Infof("SshDev 研发哥 SSH 账号已同步")
-				}
 			}
 
 			return e
