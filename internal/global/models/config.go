@@ -11,6 +11,7 @@ type Config struct {
 	Feishu    Feishu       `yaml:"feishu"`
 	DingTalk  DingTalk     `yaml:"dingTalk"`
 	Jwt       Jwt          `yaml:"jwt"`
+	SshDev    SshDev       `yaml:"sshDev"`
 	TraceMode bool         `yaml:"traceMode" config:"omitempty"`
 }
 
@@ -26,4 +27,8 @@ type DingTalk struct {
 
 type Jwt struct {
 	SignKey string `yaml:"signKey"`
+}
+
+type SshDev struct {
+	Token string `yaml:"token"`
 }

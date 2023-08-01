@@ -1,5 +1,7 @@
 package views
 
+// 应用访问量增量刷新
+
 import (
 	"container/list"
 	"github.com/Mmx233/daoUtil"
