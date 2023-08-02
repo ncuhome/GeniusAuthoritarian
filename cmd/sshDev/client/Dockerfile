@@ -18,7 +18,7 @@ COPY ./runner /usr/bin/runner
 
 RUN chmod 700 /usr/bin/runner && \
     chown root /usr/bin/runner && \
-    addgroup -g 1000 -S common
+    addgroup -g 1001 -S common
 
 WORKDIR /data
 
