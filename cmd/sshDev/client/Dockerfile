@@ -15,11 +15,8 @@ RUN apk update && \
 COPY ./runner /usr/bin/runner
 
 RUN chmod 700 /usr/bin/runner && \
-    chown root /usr/bin/runner
-
-RUN addgroup -g 1000 -S common && \
-    mkdir /home
-
+    chown root /usr/bin/runner && \
+    addgroup -g 1000 -S common
 
 WORKDIR /data
 
