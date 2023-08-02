@@ -21,6 +21,10 @@ func Create(username string) error {
 	return exec.Command("adduser", "-s", "/bin/sh", "-G", "common", username).Run()
 }
 
+func Delete(username string) error {
+	return exec.Command("deluser", "--remove-home", username).Run()
+}
+
 func PrepareSshDir(username string) error {
 	dirPath := path.Join(UserHomePath(username), ".ssh")
 	if exist, err := tool.File.Exists(dirPath); err != nil {
