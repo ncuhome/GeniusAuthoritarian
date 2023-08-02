@@ -47,7 +47,7 @@ func WriteAuthorizedKeys(username, publicKey string) error {
 }
 
 func StartSshd() error {
-	command := exec.Command("/usr/sbin/sshd", "-D")
+	command := exec.Command("/usr/sbin/sshd", "-D", "-e")
 	command.Stdout = os.Stdout
 	command.Stderr = os.Stderr
 	return command.Start()
