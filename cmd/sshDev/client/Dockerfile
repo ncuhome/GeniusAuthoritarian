@@ -6,11 +6,11 @@ RUN apk update && \
     cp /usr/share/zoneinfo/Asia/Shanghai /etc/localtime && \
     echo 'Asia/Shanghai' >/etc/timezone && \
     rm -rf /var/cache/apk/* && \
-    sed -i 's/^#?PermitRootLogin\s.*/PermitRootLogin no/g' /etc/ssh/sshd_config && \
-    sed -i 's/^#?PubkeyAuthentication\s.*/PubkeyAuthentication yes/g' /etc/ssh/sshd_config && \
-    sed -i 's/^#?PasswordAuthentication\s.*/PasswordAuthentication no/g' /etc/ssh/sshd_config && \
-    sed -i 's/^#?PermitEmptyPasswords\s.*/PermitEmptyPasswords no/g' /etc/ssh/sshd_config && \
-    sed -i 's/^#?X11Forwarding\s.*/X11Forwarding no/g' /etc/ssh/sshd_config
+    sed -i 's/.PermitRootLogin.*/PermitRootLogin no/g' /etc/ssh/sshd_config && \
+    sed -i 's/.PubkeyAuthentication.*/PubkeyAuthentication yes/g' /etc/ssh/sshd_config && \
+    sed -i 's/.PasswordAuthentication.*/PasswordAuthentication no/g' /etc/ssh/sshd_config && \
+    sed -i 's/.PermitEmptyPasswords.*/PermitEmptyPasswords no/g' /etc/ssh/sshd_config && \
+    sed -i 's/.X11Forwarding.*/X11Forwarding no/g' /etc/ssh/sshd_config
 
 COPY ./runner /usr/bin/runner
 
