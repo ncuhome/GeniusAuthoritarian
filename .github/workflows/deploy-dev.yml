@@ -19,6 +19,7 @@ jobs:
           AUTH: harbor.ncuos.com/genius-auth/gate
           FE:   harbor.ncuos.com/genius-auth/fe
           SSH_SERVER: harbor.ncuos.com/genius-auth/ssh-server
+          SSH_CLIENT: harbor.ncuos.com/genius-auth/ssh-client
         run: |
           echo CORE_LATEST=${CORE}:latest >> $GITHUB_OUTPUT
           echo CORE_VERSION=${CORE}:${GITHUB_REF/refs\/tags\//} >> $GITHUB_OUTPUT
@@ -80,6 +81,18 @@ jobs:
           --tag ${{ steps.image.outputs.SSH_SERVER_VERSION }} \
           --tag ${{ steps.image.outputs.SSH_SERVER_LATEST }}
 
+      - name: Build sshDev Client Binary
+        env:
+          GOPRIVATE: github.com/ncuhome
+          CGO_ENABLED: 0
+        run: go build -gcflags=-trimpath=$GOPATH -asmflags=-trimpath=$GOPATH -ldflags '-extldflags "-static" -s -w' -o runner ./cmd/sshDev/client
+
+      - name: Build sshDev Client Docker Image
+        run: |
+          docker build . --file ./cmd/sshDev/client/Dockerfile \
+          --tag ${{ steps.image.outputs.SSH_CLIENT_VERSION }} \
+          --tag ${{ steps.image.outputs.SSH_CLIENT_LATEST }}
+
       - name: Push
         run: |
           docker push ${{ steps.image.outputs.CORE_VERSION }}
@@ -90,6 +103,8 @@ jobs:
           docker push ${{ steps.image.outputs.FE_LATEST }}
           docker push ${{ steps.image.outputs.SSH_SERVER_VERSION }}
           docker push ${{ steps.image.outputs.SSH_SERVER_LATEST }}
+          docker push ${{ steps.image.outputs.SSH_CLIENT_VERSION }}
+          docker push ${{ steps.image.outputs.SSH_CLIENT_LATEST }}
 
       - name: Update Core Deployment
         uses: MultiMx/K8sSetImageAction@v0.2
