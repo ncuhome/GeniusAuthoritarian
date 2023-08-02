@@ -12,7 +12,6 @@ RUN apk update && \
     sed -i 's/.PermitEmptyPasswords.*/PermitEmptyPasswords no/g' /etc/ssh/sshd_config && \
     sed -i 's/.KbdInteractiveAuthentication.*/KbdInteractiveAuthentication no/g' /etc/ssh/sshd_config && \
     sed -i 's/.X11Forwarding.*/X11Forwarding no/g' /etc/ssh/sshd_config && \
-    sed -i 's/.UsePAM.*/UsePAM yes/g' /etc/ssh/sshd_config && \
     ssh-keygen -A
 
 COPY ./runner /usr/bin/runner

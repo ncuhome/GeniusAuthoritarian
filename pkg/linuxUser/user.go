@@ -45,7 +45,7 @@ func PrepareSshDir(username string) error {
 
 func WriteAuthorizedKeys(username, publicKey string) error {
 	filePath := path.Join(UserHomePath(username), ".ssh", "authorized_keys")
-	f, err := os.OpenFile(filePath, os.O_CREATE|os.O_WRONLY|os.O_TRUNC, 400)
+	f, err := os.OpenFile(filePath, os.O_CREATE|os.O_WRONLY|os.O_TRUNC, 600)
 	if err != nil {
 		return err
 	}
@@ -57,11 +57,4 @@ func WriteAuthorizedKeys(username, publicKey string) error {
 		return err
 	}
 	return Chown(filePath, username)
-}
-
-func StartSshd() error {
-	command := exec.Command("/usr/sbin/sshd", "-D", "-e")
-	command.Stdout = os.Stdout
-	command.Stderr = os.Stderr
-	return command.Start()
 }
