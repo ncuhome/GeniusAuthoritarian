@@ -29,6 +29,8 @@ jobs:
           echo FE_VERSION=${FE}:${GITHUB_REF/refs\/tags\//} >> $GITHUB_OUTPUT
           echo SSH_SERVER_LATEST=${SSH_SERVER}:latest >> $GITHUB_OUTPUT
           echo SSH_SERVER_VERSION=${SSH_SERVER}:${GITHUB_REF/refs\/tags\//} >> $GITHUB_OUTPUT
+          echo SSH_CLIENT_LATEST=${SSH_SERVER}:latest >> $GITHUB_OUTPUT
+          echo SSH_CLIENT_VERSION=${SSH_SERVER}:${GITHUB_REF/refs\/tags\//} >> $GITHUB_OUTPUT
 
       - name: Build Site
         run: cd web && pnpm i && pnpm run build
