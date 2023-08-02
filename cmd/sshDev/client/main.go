@@ -12,18 +12,20 @@ import (
 )
 
 var Address string
+var Token string
 
 func init() {
 	Address = os.Getenv("Addr")
 	if Address == "" {
 		log.Fatalln("连接地址不能为空，请配置环境变量 Addr")
 	}
+	Token = os.Getenv("Token")
 }
 
 func main() {
 	creds := credentials.NewClientTLSFromCert(nil, "")
 
-	conn, err := grpc.Dial(Address, grpc.WithTransportCredentials(creds))
+	conn, err := grpc.Dial(Address, grpc.WithTransportCredentials(creds), grpc.WithPerRPCCredentials(&GrpcAuth{Token: Token}))
 	if err != nil {
 		log.Fatalln("连接 grpc 服务失败:", err)
 	}
@@ -70,4 +72,16 @@ func main() {
 			}
 		}
 	}
+}
+
+type GrpcAuth struct {
+	Token string
+}
+
+func (a *GrpcAuth) GetRequestMetadata(ctx context.Context, uri ...string) (map[string]string, error) {
+	return map[string]string{"authorization": a.Token}, nil
+}
+
+func (a *GrpcAuth) RequireTransportSecurity() bool {
+	return true
 }
