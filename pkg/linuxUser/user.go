@@ -7,6 +7,8 @@ import (
 	"path"
 )
 
+// 适用于 alpine
+
 func UserHomePath(username string) string {
 	return "/home/" + username
 }
@@ -16,11 +18,7 @@ func Exist(username string) (bool, error) {
 }
 
 func Create(username string) error {
-	return exec.Command("useradd", "-m", "-s", "/bin/sh", username).Run()
-}
-
-func Delete(username string) error {
-	return exec.Command("userdel", "-r", username).Run()
+	return exec.Command("adduser", "-s", "/bin/sh", "-G", "common", username).Run()
 }
 
 func PrepareSshDir(username string) error {

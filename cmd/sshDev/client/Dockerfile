@@ -17,6 +17,8 @@ COPY ./runner /usr/bin/runner
 RUN chmod 700 /usr/bin/runner
 RUN chown root /usr/bin/runner
 
+RUN addgroup -g 1000 -S common
+
 WORKDIR /data
 
 ENTRYPOINT [ "/usr/bin/runner" ]
