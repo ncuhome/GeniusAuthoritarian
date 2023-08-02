@@ -25,25 +25,38 @@ func Delete(username string) error {
 	return exec.Command("deluser", "--remove-home", username).Run()
 }
 
+func Chown(path, username string) error {
+	return exec.Command("chown", username, path).Run()
+}
+
 func PrepareSshDir(username string) error {
 	dirPath := path.Join(UserHomePath(username), ".ssh")
 	if exist, err := tool.File.Exists(dirPath); err != nil {
 		return err
 	} else if !exist {
-		return os.Mkdir(dirPath, 700)
+		err = os.Mkdir(dirPath, 700)
+		if err != nil {
+			return err
+		}
+		return Chown(dirPath, username)
 	}
 	return nil
 }
 
 func WriteAuthorizedKeys(username, publicKey string) error {
-	f, err := os.OpenFile(path.Join(UserHomePath(username), ".ssh", "authorized_keys"), os.O_CREATE|os.O_WRONLY|os.O_TRUNC, 400)
+	filePath := path.Join(UserHomePath(username), ".ssh", "authorized_keys")
+	f, err := os.OpenFile(filePath, os.O_CREATE|os.O_WRONLY|os.O_TRUNC, 400)
 	if err != nil {
 		return err
 	}
-	defer f.Close()
 
-	_, err = f.WriteString(publicKey)
-	return err
+	if _, err = f.WriteString(publicKey); err != nil {
+		return err
+	}
+	if err = f.Close(); err != nil {
+		return err
+	}
+	return Chown(filePath, username)
 }
 
 func StartSshd() error {
