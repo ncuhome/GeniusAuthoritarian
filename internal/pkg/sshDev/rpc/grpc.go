@@ -5,6 +5,8 @@ import (
 	"github.com/ncuhome/GeniusAuthoritarian/internal/pkg/sshDev/proto"
 	"github.com/ncuhome/GeniusAuthoritarian/internal/service"
 	"google.golang.org/grpc"
+	"google.golang.org/grpc/codes"
+	"google.golang.org/grpc/status"
 	"google.golang.org/protobuf/types/known/emptypb"
 	"net"
 	"sync"
@@ -42,7 +44,7 @@ func (a *SshAccounts) Watch(_ *emptypb.Empty, server proto.SshAccounts_WatchServ
 	// 发送现有账号
 	sshAccounts, err := service.UserSsh.GetAllExist()
 	if err != nil {
-		return err
+		return status.Error(codes.Internal, err.Error())
 	}
 	for _, account := range sshAccounts {
 		err = server.Send(&proto.SshAccount{

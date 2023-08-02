@@ -2,20 +2,21 @@ package rpc
 
 import (
 	"context"
-	"errors"
 	"google.golang.org/grpc"
+	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/metadata"
+	"google.golang.org/grpc/status"
 )
 
 func verifyToken(ctx context.Context, key string) error {
 	md, ok := metadata.FromIncomingContext(ctx)
 	if !ok {
-		return errors.New("unauthorized")
+		return status.Error(codes.Unauthenticated, "token not found")
 	}
 
 	token, ok := md["authorization"]
 	if !ok || len(token) == 0 || token[0] != key {
-		return errors.New("unauthorized")
+		return status.Error(codes.Unauthenticated, "insufficient permissions")
 	}
 
 	return nil
