@@ -20,6 +20,11 @@ func init() {
 		log.Fatalln("连接地址不能为空，请配置环境变量 Addr")
 	}
 	Token = os.Getenv("Token")
+
+	err := linuxUser.StartSshd()
+	if err != nil {
+		log.Fatalln("启动 sshd 失败:", err)
+	}
 }
 
 func main() {

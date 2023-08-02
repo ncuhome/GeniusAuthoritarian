@@ -45,3 +45,10 @@ func WriteAuthorizedKeys(username, publicKey string) error {
 	_, err = f.WriteString(publicKey)
 	return err
 }
+
+func StartSshd() error {
+	command := exec.Command("/usr/sbin/sshd")
+	command.Stdout = os.Stdout
+	command.Stderr = os.Stderr
+	return command.Start()
+}
