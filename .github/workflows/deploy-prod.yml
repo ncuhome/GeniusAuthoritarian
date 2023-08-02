@@ -73,7 +73,7 @@ jobs:
         env:
           GOPRIVATE: github.com/ncuhome
           CGO_ENABLED: 0
-        run: go build -gcflags=-trimpath=$GOPATH -asmflags=-trimpath=$GOPATH -ldflags '-extldflags "-static" -s -w' -o runner ./cmd/ssDev/server
+        run: go build -gcflags=-trimpath=$GOPATH -asmflags=-trimpath=$GOPATH -ldflags '-extldflags "-static" -s -w' -o runner ./cmd/sshDev/server
 
       - name: Build sshDev Server Docker Image
         run: |
