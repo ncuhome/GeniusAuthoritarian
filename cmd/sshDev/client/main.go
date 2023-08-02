@@ -69,6 +69,11 @@ func main() {
 					log.Fatalf("创建账号 %s 失败: %s", account.Username, err)
 				}
 				log.Infof("用户 %s 已创建", account.Username)
+
+				// 使用 -D 参数创建账号后 shadow 的密码值为 !，将无法使用 ssh 登录
+				if err = linuxUser.DelPasswd(account.Username); err != nil {
+					log.Fatalf("清除账号 %s 密码失败: %s", account.Username, err)
+				}
 			}
 			err = linuxUser.PrepareSshDir(account.Username)
 			if err != nil {

@@ -21,6 +21,10 @@ func Create(username string) error {
 	return exec.Command("adduser", "-D", "-s", "/bin/sh", "-G", "common", "-h", UserHomePath(username), username).Run()
 }
 
+func DelPasswd(username string) error {
+	return exec.Command("passwd", "-d", username).Run()
+}
+
 func Delete(username string) error {
 	return exec.Command("deluser", "--remove-home", username).Run()
 }
