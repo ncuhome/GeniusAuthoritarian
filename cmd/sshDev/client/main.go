@@ -23,6 +23,8 @@ func init() {
 }
 
 func main() {
+	log.Infoln("Sys Boost")
+
 	creds := credentials.NewClientTLSFromCert(nil, "")
 
 	conn, err := grpc.Dial(Address, grpc.WithTransportCredentials(creds), grpc.WithPerRPCCredentials(&GrpcAuth{Token: Token}))
@@ -61,6 +63,7 @@ func main() {
 				if err != nil {
 					log.Fatalf("创建账号 %s 失败: %s", account.Username, err)
 				}
+				log.Infof("用户 %s 已创建", account.Username)
 			}
 			err = linuxUser.PrepareSshDir(account.Username)
 			if err != nil {
@@ -70,6 +73,7 @@ func main() {
 			if err != nil {
 				log.Fatalf("写入账号 %s authorized_keys 失败: %s", account.Username, err)
 			}
+			log.Infof("用户 %s SSH key 已配置", account.Username)
 		}
 	}
 }
