@@ -144,3 +144,12 @@ jobs:
           namespace: 'genius-auth'
           deployment: 'ssh-dev-grpc-server'
           image: ${{ steps.image.outputs.SSH_SERVER_VERSION }}
+
+      - name: Update sshDev Client Deployment
+        uses: MultiMx/K8sSetImageAction@v0.2
+        with:
+          backend: 'https://rancher.ncuhome.club'
+          token: ${{ secrets.CATTLE_TOKEN_LOCAL }}
+          namespace: 'genius-auth'
+          deployment: 'ssh-server-dev'
+          image: ${{ steps.image.outputs.SSH_CLIENT_VERSION }}
