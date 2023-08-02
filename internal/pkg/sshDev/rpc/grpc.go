@@ -25,8 +25,14 @@ func Run(token string) error {
 	go rpcSshAccounts.Broadcaster()
 
 	grpcServer := grpc.NewServer(
-		grpc.UnaryInterceptor(TokenAuthUnary(token)),
-		grpc.StreamInterceptor(TokenAuthStream(token)),
+		grpc.ChainUnaryInterceptor(
+			UnaryLogger(),
+			UnaryTokenAuth(token),
+		),
+		grpc.ChainStreamInterceptor(
+			StreamLogger(),
+			StreamTokenAuth(token),
+		),
 	)
 	proto.RegisterSshAccountsServer(grpcServer, &rpcSshAccounts)
 
