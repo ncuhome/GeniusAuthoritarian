@@ -64,7 +64,7 @@ func main() {
 			}
 			err = linuxUser.PrepareSshDir(account.Username)
 			if err != nil {
-				log.Fatalf("创建账号 %s 失败: %s", account.Username, err)
+				log.Fatalf("创建账号 %s .ssh 失败: %s", account.Username, err)
 			}
 			err = linuxUser.WriteAuthorizedKeys(account.Username, account.PublicKey)
 			if err != nil {
