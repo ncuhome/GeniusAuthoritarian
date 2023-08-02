@@ -10,6 +10,7 @@ import (
 	"google.golang.org/protobuf/types/known/emptypb"
 	"net"
 	"sync"
+	"time"
 )
 
 var MsgChannel chan []SshAccountMsg
@@ -65,9 +66,16 @@ func (a *SshAccounts) Watch(_ *emptypb.Empty, server proto.SshAccounts_WatchServ
 	msgChan, unregister := a.RegisterWatcher()
 	defer unregister()
 	for {
-		messages := <-msgChan
-		for _, msg := range messages {
-			err := server.Send(msg.Rpc())
+		select {
+		case messages := <-msgChan:
+			for _, msg := range messages {
+				err := server.Send(msg.Rpc())
+				if err != nil {
+					return err
+				}
+			}
+		case <-time.After(time.Minute):
+			err := server.Send(&proto.SshAccount{})
 			if err != nil {
 				return err
 			}
