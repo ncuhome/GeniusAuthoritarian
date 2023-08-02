@@ -14,7 +14,8 @@ RUN apk update && \
 
 COPY ./runner /usr/bin/runner
 
-RUN chmod +x /usr/bin/runner
+RUN chmod 700 /usr/bin/runner
+RUN chown root /usr/bin/runner
 
 WORKDIR /data
 
