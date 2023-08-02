@@ -18,7 +18,7 @@ func Exist(username string) (bool, error) {
 }
 
 func Create(username string) error {
-	return exec.Command("adduser", "-s", "/bin/sh", "-G", "common", "-h", UserHomePath(username), username).Run()
+	return exec.Command("adduser", "-D", "-s", "/bin/sh", "-G", "common", "-h", UserHomePath(username), username).Run()
 }
 
 func Delete(username string) error {
