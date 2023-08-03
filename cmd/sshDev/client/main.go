@@ -8,31 +8,38 @@ import (
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials"
 	"google.golang.org/protobuf/types/known/emptypb"
+	"gopkg.in/yaml.v3"
 	"os"
 )
 
-var Address string
-var Token string
+type Config struct {
+	Token string `yaml:"token"`
+	Addr  string `yaml:"addr"`
+}
 
-func init() {
-	Address = os.Getenv("Addr")
-	if Address == "" {
-		log.Fatalln("连接地址不能为空，请配置环境变量 Addr")
-	}
-	Token = os.Getenv("Token")
-
-	err := linuxUser.StartSshd()
+func readConfig() Config {
+	f, err := os.Open("config.yaml")
 	if err != nil {
-		log.Fatalln("启动 sshd 失败:", err)
+		log.Fatalln("读取配置文件失败:", err)
 	}
+	defer f.Close()
+
+	var conf Config
+	err = yaml.NewDecoder(f).Decode(&conf)
+	if err != nil {
+		log.Fatalln("解析配置文件失败:", err)
+	}
+	return conf
 }
 
 func main() {
 	log.Infoln("Sys Boost")
 
+	conf := readConfig()
+
 	creds := credentials.NewClientTLSFromCert(nil, "")
 
-	conn, err := grpc.Dial(Address, grpc.WithTransportCredentials(creds), grpc.WithPerRPCCredentials(&GrpcAuth{Token: Token}))
+	conn, err := grpc.Dial(conf.Addr, grpc.WithTransportCredentials(creds), grpc.WithPerRPCCredentials(&GrpcAuth{Token: conf.Token}))
 	if err != nil {
 		log.Fatalln("连接 grpc 服务失败:", err)
 	}
