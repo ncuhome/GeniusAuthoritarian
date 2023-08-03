@@ -30,5 +30,5 @@ type Jwt struct {
 }
 
 type SshDev struct {
-	Token string `yaml:"token"`
+	Token string `yaml:"token" config:"omitempty"`
 }

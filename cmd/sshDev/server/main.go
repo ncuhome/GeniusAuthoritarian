@@ -9,6 +9,10 @@ import (
 )
 
 func init() {
+	if global.Config.SshDev.Token == "" {
+		log.Fatalln("请配置 Token")
+	}
+
 	agent.Init()
 	// 建议放在用户同步的时间之后
 	sshDev.AddCron("0 6 * * *")
