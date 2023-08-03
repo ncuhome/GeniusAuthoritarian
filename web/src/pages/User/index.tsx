@@ -2,7 +2,7 @@ import { FC, ReactNode, useMemo, useState, lazy } from "react";
 import { Routes, Route } from "react-router-dom";
 import "./style.css";
 
-const App = lazy(() => import("./pages/App"));
+const Dev = lazy(() => import("./pages/Dev"));
 import Navigation from "./pages/Navigation";
 import Profile from "./pages/Profile";
 
@@ -39,11 +39,11 @@ const UserRoutersExtra: {
 } = {
   研发: [
     {
-      name: "应用管理",
-      path: "app",
+      name: "研发中控",
+      path: "dev",
       element: (
         <Suspense>
-          <App />
+          <Dev />
         </Suspense>
       ),
     },
