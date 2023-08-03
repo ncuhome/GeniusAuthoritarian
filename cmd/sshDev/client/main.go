@@ -60,37 +60,40 @@ func main() {
 			// 心跳
 			continue
 		}
+
+		logger := log.WithField("username", account.Username)
+
 		if account.IsDel {
 			err = linuxUser.Delete(account.Username)
 			if err != nil {
-				log.Fatalf("删除账号 %s 失败: %s", account.Username, err)
+				logger.Fatalln("删除账号失败:", err)
 			}
 		} else {
 			exist, err := linuxUser.Exist(account.Username)
 			if err != nil {
-				log.Fatalf("检查账号 %s 存在失败: %s", account.Username, err)
+				logger.Fatalln("检查账号存在失败:", err)
 			}
 			if !exist {
 				err = linuxUser.Create(account.Username)
 				if err != nil {
-					log.Fatalf("创建账号 %s 失败: %s", account.Username, err)
+					logger.Fatalln("创建账号失败:", err)
 				}
-				log.Infof("用户 %s 已创建", account.Username)
+				logger.Infoln("用户已创建")
 
 				// 使用 -D 参数创建账号后 shadow 的密码值为 !，将无法使用 ssh 登录
 				if err = linuxUser.DelPasswd(account.Username); err != nil {
-					log.Fatalf("清除账号 %s 密码失败: %s", account.Username, err)
+					logger.Fatalln("清除密码失败:", err)
 				}
 			}
 			err = linuxUser.PrepareSshDir(account.Username)
 			if err != nil {
-				log.Fatalf("创建账号 %s .ssh 失败: %s", account.Username, err)
+				logger.Fatalln("创建 .ssh 失败:", err)
 			}
 			err = linuxUser.WriteAuthorizedKeys(account.Username, account.PublicKey)
 			if err != nil {
-				log.Fatalf("写入账号 %s authorized_keys 失败: %s", account.Username, err)
+				logger.Fatalln("写入 authorized_keys 失败:", err)
 			}
-			log.Infof("用户 %s SSH key 已配置", account.Username)
+			logger.Infoln("SSH key 已配置")
 		}
 	}
 }
