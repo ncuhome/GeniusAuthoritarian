@@ -14,10 +14,11 @@ func (a keys) String() string {
 }
 
 const (
-	_keySiteWhiteList keys = iota
+	keyUserIdentityCode keys = iota
 	keyThirdPartyLogin
 	keyAppCode
 	keyUserJwt
 	keyUserMfaLogin
 	keyMfaEnable
+	keySms
 )
