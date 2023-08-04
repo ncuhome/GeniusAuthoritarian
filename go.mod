@@ -19,6 +19,7 @@ require (
 	github.com/go-redis/redis/v8 v8.11.5
 	github.com/golang-jwt/jwt/v4 v4.5.0
 	github.com/ncuhome/GeniusAuthoritarianClient v1.1.3
+	github.com/ncuhome/urlencode v0.0.0-20210926043013-384b97aa8d44
 	github.com/pquerna/otp v1.4.0
 	github.com/robfig/cron/v3 v3.0.1
 	github.com/sirupsen/logrus v1.9.3

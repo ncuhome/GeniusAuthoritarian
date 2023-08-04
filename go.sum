@@ -150,6 +150,8 @@ github.com/modern-go/reflect2 v1.0.2 h1:xBagoLtFs94CBntxluKeaWgTMpvLxC4ur3nMaC9G
 github.com/modern-go/reflect2 v1.0.2/go.mod h1:yWuevngMOJpCy52FWWMvUC8ws7m/LJsjYzDa0/r8luk=
 github.com/ncuhome/GeniusAuthoritarianClient v1.1.3 h1:Pi10qgxgqdMTJdKnzMpvhKe1kYRvU4iWJeYJVMjcxbY=
 github.com/ncuhome/GeniusAuthoritarianClient v1.1.3/go.mod h1:LsUEKZaeT+4dkxevtTtjJMr4GqsX4fPDn35V0eNpIU4=
+github.com/ncuhome/urlencode v0.0.0-20210926043013-384b97aa8d44 h1:GpW1ISvT/rBqWwrs3/DbHbeo3FN64X1Xm+wgbjlSpM0=
+github.com/ncuhome/urlencode v0.0.0-20210926043013-384b97aa8d44/go.mod h1:H5SnFeoBS74uemfBRI89P6n8NI/dobqSUtydmitmt/M=
 github.com/niemeyer/pretty v0.0.0-20200227124842-a10e7caefd8e h1:fD57ERR4JtEqsWbfPhv4DMiApHyliiK5xCTNVSPiaAs=
 github.com/niemeyer/pretty v0.0.0-20200227124842-a10e7caefd8e/go.mod h1:zD1mROLANZcx1PVRCS0qkT7pwLkGfwJo4zjcN/Tysno=
 github.com/nxadm/tail v1.4.8 h1:nPr65rt6Y5JFSKQO7qToXr7pePgD6Gwiw05lkbyAQTE=
