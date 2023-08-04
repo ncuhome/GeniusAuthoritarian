@@ -4,6 +4,7 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/ncuhome/GeniusAuthoritarian/internal/api/middlewares"
 	"github.com/ncuhome/GeniusAuthoritarian/internal/api/router/user/admin"
+	"github.com/ncuhome/GeniusAuthoritarian/internal/api/router/user/dev"
 )
 
 func Router(G *gin.RouterGroup) {
@@ -14,5 +15,6 @@ func Router(G *gin.RouterGroup) {
 	routerGroups(G.Group("group"))
 	routerMfa(G.Group("mfa"))
 
+	dev.Router(G.Group("dev"))
 	admin.Router(G.Group("admin"))
 }
