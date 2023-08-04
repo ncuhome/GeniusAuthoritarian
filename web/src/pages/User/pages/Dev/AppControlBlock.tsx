@@ -32,7 +32,7 @@ export const AppControlBlock: FC = () => {
   const setApps = useUser((state) => state.setState("apps"));
   const setDialog = useUser((state) => state.setDialog);
 
-  useUserApiV1<App.Detailed[]>("app/owned/", {
+  useUserApiV1<App.Detailed[]>("dev/app/", {
     immutable: true,
     enableLoading: true,
     onSuccess: (data) => setApps(data),
@@ -67,7 +67,7 @@ export const AppControlBlock: FC = () => {
         content: `正在删除名称为 ${app.name} ，appCode 为 ${app.appCode} 的应用`,
       });
       if (!ok) return;
-      await apiV1User.delete("app/owned/", {
+      await apiV1User.delete("dev/app/", {
         params: {
           id: app.id,
         },
@@ -88,7 +88,7 @@ export const AppControlBlock: FC = () => {
         }`,
       });
       if (!ok) return;
-      await apiV1User.put("app/owned/linkOff", {
+      await apiV1User.put("dev/app/linkOff", {
           id: app.id,
           linkOff: !app.linkOff,
       });
@@ -107,7 +107,7 @@ export const AppControlBlock: FC = () => {
     if (!onModifyApp) return;
     setModifyingApp(true);
     try {
-      await apiV1User.put("app/owned/", {
+      await apiV1User.put("dev/app/", {
         id: onModifyApp.id,
         name,
         callback,
