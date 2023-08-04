@@ -68,6 +68,10 @@ func (a *User) FirstMfa(tx *gorm.DB) error {
 	return tx.Model(a).Select("mfa").Where(a, "id").First(a).Error
 }
 
+func (a *User) FirstPhoneByID(tx *gorm.DB) error {
+	return tx.Model(a).Select("phone").Where(a, "id").First(a).Error
+}
+
 func (a *User) FrozeByIDSlice(tx *gorm.DB, ids []uint) error {
 	return tx.Delete(a, "id IN ?", ids).Error
 }

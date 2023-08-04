@@ -78,3 +78,8 @@ func (a UserSrv) SetMfaSecret(uid uint, secret string) error {
 func (a UserSrv) DelMfa(uid uint) error {
 	return (&dao.User{ID: uid}).DelMfa(a.DB)
 }
+
+func (a UserSrv) FirstPhoneByID(uid uint) (string, error) {
+	model := dao.User{ID: uid}
+	return model.Phone, model.FirstPhoneByID(a.DB)
+}
