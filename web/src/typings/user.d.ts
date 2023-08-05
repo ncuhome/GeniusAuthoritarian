@@ -47,6 +47,7 @@ declare namespace User {
 
   namespace SSH {
     type Keys = {
+      username: string;
       pem: {
         public: string;
         private: string;

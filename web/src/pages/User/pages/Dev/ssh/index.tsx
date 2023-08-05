@@ -75,6 +75,17 @@ const Ssh: FC = () => {
           </FormControl>
 
           <TextField
+            label={"用户名"}
+            fullWidth
+            value={sshKey.username}
+            InputProps={{
+              readOnly: true,
+            }}
+            onClick={(e: any) => {
+              e.target.select();
+            }}
+          />
+          <TextField
             label={"公钥"}
             fullWidth
             multiline
