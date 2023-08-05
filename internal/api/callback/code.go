@@ -24,6 +24,7 @@ const (
 	cErrMfaRequired
 	cErrSmsCoolDown
 	cErrSendSmsFailed
+	cErrIdentityCodeNotCorrect
 )
 
 var (
@@ -141,5 +142,10 @@ var (
 		Code:       cErrSendSmsFailed,
 		Msg:        "短信发送失败，请重试",
 		HttpStatus: 500,
+	}
+	ErrIdentityCodeNotCorrect = &Msg{
+		Code:       cErrIdentityCodeNotCorrect,
+		Msg:        "身份校验码错误",
+		HttpStatus: 401,
 	}
 )

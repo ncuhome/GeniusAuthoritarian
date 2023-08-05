@@ -14,46 +14,63 @@ import (
 )
 
 func MfaAdd(c *gin.Context) {
+	var f struct {
+		Code string `json:"code" form:"code" binding:"required"` // 身份校验码（短信）
+	}
+	if err := c.ShouldBind(&f); err != nil {
+		callback.Error(c, callback.ErrForm, err)
+		return
+	}
+
 	uid := tools.GetUserInfo(c).ID
 
-	userSrv, e := service.User.Begin()
-	if e != nil {
-		callback.Error(c, callback.ErrDBOperation, e)
+	ok, err := redis.UserIdentityCode.Verify(uid, f.Code)
+	if err != nil {
+		callback.Error(c, callback.ErrUnexpected, err)
+		return
+	} else if !ok {
+		callback.Error(c, callback.ErrIdentityCodeNotCorrect)
+		return
+	}
+
+	userSrv, err := service.User.Begin()
+	if err != nil {
+		callback.Error(c, callback.ErrDBOperation, err)
 		return
 	}
 	defer userSrv.Rollback()
 
-	exist, e := userSrv.MfaExist(uid, daoUtil.LockForShare)
-	if e != nil {
-		callback.Error(c, callback.ErrDBOperation, e)
+	exist, err := userSrv.MfaExist(uid, daoUtil.LockForShare)
+	if err != nil {
+		callback.Error(c, callback.ErrDBOperation, err)
 		return
 	} else if exist {
-		callback.Error(c, callback.ErrMfaAlreadyExist, e)
+		callback.Error(c, callback.ErrMfaAlreadyExist, err)
 		return
 	}
 
-	mfaKey, e := tools.NewMfa(uid)
-	if e != nil {
-		callback.Error(c, callback.ErrUnexpected, e)
+	mfaKey, err := tools.NewMfa(uid)
+	if err != nil {
+		callback.Error(c, callback.ErrUnexpected, err)
 		return
 	}
 
-	qrcodeImage, e := mfaKey.Image(300, 300)
-	if e != nil {
-		callback.Error(c, callback.ErrUnexpected, e)
+	qrcodeImage, err := mfaKey.Image(300, 300)
+	if err != nil {
+		callback.Error(c, callback.ErrUnexpected, err)
 		return
 	}
 
 	var qrcodeBuffer = bytes.Buffer{}
-	if e = jpeg.Encode(&qrcodeBuffer, qrcodeImage, &jpeg.Options{
+	if err = jpeg.Encode(&qrcodeBuffer, qrcodeImage, &jpeg.Options{
 		Quality: 100,
-	}); e != nil {
-		callback.Error(c, callback.ErrUnexpected, e)
+	}); err != nil {
+		callback.Error(c, callback.ErrUnexpected, err)
 		return
 	}
 
-	if e = redis.MfaEnable.Set(uid, mfaKey.Secret(), time.Minute*15); e != nil {
-		callback.Error(c, callback.ErrUnexpected, e)
+	if err = redis.MfaEnable.Set(uid, mfaKey.Secret(), time.Minute*15); err != nil {
+		callback.Error(c, callback.ErrUnexpected, err)
 		return
 	}
 
