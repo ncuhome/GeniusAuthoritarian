@@ -10,4 +10,5 @@ func Router(G *gin.RouterGroup) {
 	G.Use(middlewares.LimitGroup(departments.UDev))
 
 	routerApp(G.Group("app"))
+	routerSsh(G.Group("ssh"))
 }

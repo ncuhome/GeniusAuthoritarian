@@ -42,6 +42,10 @@ func (a *UserSsh) GetAll(tx *gorm.DB) ([]dto.SshDeploy, error) {
 	return t, tx.Model(a).Find(&t).Error
 }
 
+func (a *UserSsh) FirstForUserShow(tx *gorm.DB) error {
+	return tx.Model(a).Where(a, "id").First(a).Error
+}
+
 func (a *UserSsh) DeleteByIds(tx *gorm.DB, id ...uint) error {
 	return tx.Model(a).Where("id IN ?", id).Delete(nil).Error
 }

@@ -60,11 +60,11 @@ func (a UserSrv) UserProfile(uid uint) (*dto.UserProfile, error) {
 }
 
 func (a UserSrv) MfaExist(uid uint, opts ...daoUtil.ServiceOpt) (bool, error) {
-	mfa, e := a.FindMfa(uid, opts...)
+	mfa, e := a.FirstMfa(uid, opts...)
 	return mfa != "", e
 }
 
-func (a UserSrv) FindMfa(uid uint, opts ...daoUtil.ServiceOpt) (string, error) {
+func (a UserSrv) FirstMfa(uid uint, opts ...daoUtil.ServiceOpt) (string, error) {
 	var t = dao.User{
 		ID: uid,
 	}

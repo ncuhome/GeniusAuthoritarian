@@ -153,7 +153,7 @@ func MfaDel(c *gin.Context) {
 
 	uid := tools.GetUserInfo(c).ID
 
-	mfaSecret, e := userSrv.FindMfa(uid, daoUtil.LockForUpdate)
+	mfaSecret, e := userSrv.FirstMfa(uid, daoUtil.LockForUpdate)
 	if e != nil {
 		callback.Error(c, callback.ErrDBOperation, e)
 		return

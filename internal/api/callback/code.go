@@ -25,6 +25,7 @@ const (
 	cErrSmsCoolDown
 	cErrSendSmsFailed
 	cErrIdentityCodeNotCorrect
+	cErrSshNotFound
 )
 
 var (
@@ -147,5 +148,10 @@ var (
 		Code:       cErrIdentityCodeNotCorrect,
 		Msg:        "身份校验码错误",
 		HttpStatus: 403,
+	}
+	ErrSshNotFound = &Msg{
+		Code:       cErrSshNotFound,
+		Msg:        "SSH 账号未分配，请次日再试或联系管理员",
+		HttpStatus: 404,
 	}
 )

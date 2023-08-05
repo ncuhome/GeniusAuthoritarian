@@ -49,3 +49,21 @@ func (a UserSshSrv) GetAllExist() ([]dto.SshDeploy, error) {
 func (a UserSshSrv) CreateAll(data []dao.UserSsh) error {
 	return (&dao.UserSsh{}).InsertAll(a.DB, data)
 }
+
+func (a UserSshSrv) FirstSshSecretsForUserShow(uid uint) (*dto.SshSecrets, error) {
+	model := dao.UserSsh{UID: uid}
+	err := model.FirstForUserShow(a.DB)
+	if err != nil {
+		return nil, err
+	}
+	return &dto.SshSecrets{
+		Pem: dto.SshKeyPair{
+			Public:  model.PublicPem,
+			Private: model.PrivatePem,
+		},
+		Ssh: dto.SshKeyPair{
+			Public:  model.PublicSsh,
+			Private: model.PrivateSsh,
+		},
+	}, nil
+}
