@@ -20,7 +20,8 @@ func init() {
 
 	Http = tool.NewHttpTool(tool.GenHttpClient(&tool.HttpClientOptions{
 		Transport: tool.GenHttpTransport(&tool.HttpTransportOptions{
-			Timeout: defaultTimeout,
+			Timeout:         defaultTimeout,
+			IdleConnTimeout: time.Hour,
 		}),
 		Timeout: defaultTimeout,
 	}))
