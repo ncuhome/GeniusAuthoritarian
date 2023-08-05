@@ -5,6 +5,7 @@ import (
 	"github.com/ncuhome/GeniusAuthoritarian/internal/db/dao"
 	"github.com/ncuhome/GeniusAuthoritarian/internal/pkg/agent"
 	"github.com/ncuhome/GeniusAuthoritarian/internal/pkg/sshDev/rpc"
+	"github.com/ncuhome/GeniusAuthoritarian/internal/pkg/sshDev/sshTool"
 	"github.com/ncuhome/GeniusAuthoritarian/internal/service"
 	"github.com/ncuhome/GeniusAuthoritarian/pkg/ed25519"
 	log "github.com/sirupsen/logrus"
@@ -94,7 +95,7 @@ func DoSync() error {
 		i := 0
 		for _, userSsh := range userSshToCreate {
 			sshRpcMessages[i] = rpc.SshAccountMsg{
-				Username:  rpc.LinuxAccountName(userSsh.UID),
+				Username:  sshTool.LinuxAccountName(userSsh.UID),
 				PublicKey: userSsh.PublicSsh,
 			}
 			i++
@@ -102,7 +103,7 @@ func DoSync() error {
 		for _, userSsh := range userToDelete {
 			sshRpcMessages[i] = rpc.SshAccountMsg{
 				IsDel:     true,
-				Username:  rpc.LinuxAccountName(userSsh.UID),
+				Username:  sshTool.LinuxAccountName(userSsh.UID),
 				PublicKey: userSsh.PublicSsh,
 			}
 			i++

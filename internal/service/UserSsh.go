@@ -3,6 +3,7 @@ package service
 import (
 	"github.com/ncuhome/GeniusAuthoritarian/internal/db/dao"
 	"github.com/ncuhome/GeniusAuthoritarian/internal/db/dto"
+	"github.com/ncuhome/GeniusAuthoritarian/internal/pkg/sshDev/sshTool"
 	"gorm.io/gorm"
 )
 
@@ -57,6 +58,7 @@ func (a UserSshSrv) FirstSshSecretsForUserShow(uid uint) (*dto.SshSecrets, error
 		return nil, err
 	}
 	return &dto.SshSecrets{
+		Username: sshTool.LinuxAccountName(model.UID),
 		Pem: dto.SshKeyPair{
 			Public:  model.PublicPem,
 			Private: model.PrivatePem,

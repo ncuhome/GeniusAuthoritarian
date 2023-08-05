@@ -6,8 +6,9 @@ type SshDeploy struct {
 }
 
 type SshSecrets struct {
-	Pem SshKeyPair `json:"pem"`
-	Ssh SshKeyPair `json:"ssh"`
+	Username string     `json:"username"`
+	Pem      SshKeyPair `json:"pem"`
+	Ssh      SshKeyPair `json:"ssh"`
 }
 
 type SshKeyPair struct {

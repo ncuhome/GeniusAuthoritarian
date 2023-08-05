@@ -3,6 +3,7 @@ package rpc
 import (
 	"container/list"
 	"github.com/ncuhome/GeniusAuthoritarian/internal/pkg/sshDev/proto"
+	"github.com/ncuhome/GeniusAuthoritarian/internal/pkg/sshDev/sshTool"
 	"github.com/ncuhome/GeniusAuthoritarian/internal/service"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/codes"
@@ -55,7 +56,7 @@ func (a *SshAccounts) Watch(_ *emptypb.Empty, server proto.SshAccounts_WatchServ
 	}
 	for _, account := range sshAccounts {
 		err = server.Send(&proto.SshAccount{
-			Username:  LinuxAccountName(account.UID),
+			Username:  sshTool.LinuxAccountName(account.UID),
 			PublicKey: account.PublicSsh,
 		})
 		if err != nil {
