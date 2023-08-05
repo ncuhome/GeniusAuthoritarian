@@ -24,3 +24,16 @@ func ProfileData(c *gin.Context) {
 		"loginRecord": loginRecord,
 	})
 }
+
+func MfaStatus(c *gin.Context) {
+	uid := tools.GetUserInfo(c).ID
+	exist, err := service.User.MfaExist(uid)
+	if err != nil {
+		callback.Error(c, callback.ErrDBOperation, err)
+		return
+	}
+
+	callback.Success(c, gin.H{
+		"mfa": exist,
+	})
+}

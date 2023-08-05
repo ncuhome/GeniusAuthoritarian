@@ -7,4 +7,5 @@ import (
 
 func routerProfile(G *gin.RouterGroup) {
 	G.GET("/", controllers.ProfileData)
+	G.GET("mfa", controllers.MfaStatus)
 }
