@@ -32,7 +32,7 @@ func (a Ums) transformEncoding(i io.Reader, encoder transform.Transformer) (stri
 func (a Ums) Send(msg string, phone string) error {
 	msgGbk, err := a.transformEncoding(bytes.NewBuffer([]byte(msg)), simplifiedchinese.GBK.NewEncoder())
 
-	res, err := a.http.GetRequest(&tool.DoHttpReq{
+	res, err := a.http.PostRequest(&tool.DoHttpReq{
 		Url: "http://smsapi.ums86.com:8888/sms/Api/Send.do",
 		Query: map[string]interface{}{
 			"SpCode":         a.conf.SpCode,
@@ -49,6 +49,9 @@ func (a Ums) Send(msg string, phone string) error {
 
 	defer res.Body.Close()
 	resStr, err := a.transformEncoding(res.Body, simplifiedchinese.GBK.NewDecoder())
+	if err != nil {
+		return err
+	}
 	data, err := url.ParseQuery(resStr)
 	if err != nil {
 		return err
