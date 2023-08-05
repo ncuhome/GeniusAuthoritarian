@@ -18,11 +18,7 @@ func (a SmsHelper) genKey(phone string) string {
 }
 
 func (a SmsHelper) TryLock(phone string) (bool, error) {
-	err := Client.SetNX(context.Background(), phone, a.genKey(phone), time.Minute).Err()
-	if err == Nil {
-		return false, nil
-	}
-	return err == nil, err
+	return Client.SetNX(context.Background(), phone, a.genKey(phone), time.Minute).Result()
 }
 
 func (a SmsHelper) IsLocked(phone string) (bool, error) {
