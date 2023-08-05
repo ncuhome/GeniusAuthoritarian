@@ -9,7 +9,7 @@ import (
 var Ums sms.Ums
 
 func init() {
-	sms.New(sms.UmsConf{
+	Ums = sms.New(sms.UmsConf{
 		SpCode:    global.Config.Sms.SpCode,
 		LoginName: global.Config.Sms.LoginName,
 		Password:  global.Config.Sms.Password,
