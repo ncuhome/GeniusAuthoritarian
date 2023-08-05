@@ -14,7 +14,7 @@ interface NewMfaAction {
 }
 
 const initialMfaForm: NewMfaForm = {
-  step: 2,
+  step: 0,
   smsCode: "",
   mfaCode: "",
 };
