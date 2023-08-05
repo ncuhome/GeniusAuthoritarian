@@ -18,7 +18,7 @@ const routes: Route[] = [
   },
   {
     label: "SSH 密钥",
-    description: "端口为 222，该账号仅用于端口转发",
+    description: "请通过 28 节点 222 端口连接，该账号仅用于端口转发",
     element: <Ssh />,
   },
 ];

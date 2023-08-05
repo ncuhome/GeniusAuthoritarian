@@ -44,4 +44,17 @@ declare namespace User {
       qrcode: string;
     };
   }
+
+  namespace SSH {
+    type Keys = {
+      pem: {
+        public: string;
+        private: string;
+      };
+      ssh: {
+        public: string;
+        private: string;
+      };
+    };
+  }
 }
