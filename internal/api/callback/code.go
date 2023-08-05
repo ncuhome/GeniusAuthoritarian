@@ -22,6 +22,8 @@ const (
 	cErrRequestFrequency
 	cErrNetContextChanged
 	cErrMfaRequired
+	cErrSmsCoolDown
+	cErrSendSmsFailed
 )
 
 var (
@@ -129,5 +131,15 @@ var (
 		Code:       cErrMfaRequired,
 		Msg:        "双因素校验码缺失",
 		HttpStatus: 403,
+	}
+	ErrSmsCoolDown = &Msg{
+		Code:       cErrSmsCoolDown,
+		Msg:        "短信冷却中，请稍后重试",
+		HttpStatus: 403,
+	}
+	ErrSendSmsFailed = &Msg{
+		Code:       cErrSendSmsFailed,
+		Msg:        "短信发送失败，请重试",
+		HttpStatus: 500,
 	}
 )

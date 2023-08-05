@@ -32,3 +32,7 @@ func (a SmsHelper) IsLocked(phone string) (bool, error) {
 	}
 	return err == nil, err
 }
+
+func (a SmsHelper) UnLock(phone string) error {
+	return Client.Del(context.Background(), a.genKey(phone)).Err()
+}
