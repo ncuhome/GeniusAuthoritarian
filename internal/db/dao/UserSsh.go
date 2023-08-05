@@ -43,7 +43,7 @@ func (a *UserSsh) GetAll(tx *gorm.DB) ([]dto.SshDeploy, error) {
 }
 
 func (a *UserSsh) FirstForUserShow(tx *gorm.DB) error {
-	return tx.Model(a).Where(a, "id").First(a).Error
+	return tx.Model(a).Where(a, "uid").First(a).Error
 }
 
 func (a *UserSsh) DeleteByIds(tx *gorm.DB, id ...uint) error {
