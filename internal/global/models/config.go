@@ -12,6 +12,7 @@ type Config struct {
 	DingTalk  DingTalk     `yaml:"dingTalk"`
 	Jwt       Jwt          `yaml:"jwt"`
 	SshDev    SshDev       `yaml:"sshDev"`
+	Sms       Sms          `yaml:"sms"`
 	TraceMode bool         `yaml:"traceMode" config:"omitempty"`
 }
 
@@ -31,4 +32,10 @@ type Jwt struct {
 
 type SshDev struct {
 	Token string `yaml:"token" config:"omitempty"`
+}
+
+type Sms struct {
+	SpCode    string `yaml:"spCode"`
+	LoginName string `yaml:"loginName"`
+	Password  string `yaml:"password"`
 }
