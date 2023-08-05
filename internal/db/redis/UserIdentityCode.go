@@ -27,10 +27,15 @@ func (a UserIdentityCodeHelper) New(uid uint) (string, error) {
 	return code, Client.Set(context.Background(), a.genKey(uid), code, time.Minute*5).Err()
 }
 
-func (a UserIdentityCodeHelper) Verify(uid uint, code string) (bool, error) {
+// VerifyAndDestroy 校验并销毁 code
+func (a UserIdentityCodeHelper) VerifyAndDestroy(uid uint, code string) (bool, error) {
 	rCode, err := Client.Get(context.Background(), a.genKey(uid)).Result()
 	if err != nil {
 		return false, err
 	}
-	return rCode == code, nil
+	return rCode == code, a.Destroy(uid)
+}
+
+func (a UserIdentityCodeHelper) Destroy(uid uint) error {
+	return Client.Del(context.Background(), a.genKey(uid)).Err()
 }

@@ -24,7 +24,7 @@ func MfaAdd(c *gin.Context) {
 
 	uid := tools.GetUserInfo(c).ID
 
-	ok, err := redis.UserIdentityCode.Verify(uid, f.Code)
+	ok, err := redis.UserIdentityCode.VerifyAndDestroy(uid, f.Code)
 	if err != nil {
 		callback.Error(c, callback.ErrUnexpected, err)
 		return
