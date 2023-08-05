@@ -61,7 +61,7 @@ var (
 	ErrFindUnit = &Msg{
 		Code:       cErrFindUnit,
 		Msg:        "找不到身份组，请联系管理员处理",
-		HttpStatus: 401,
+		HttpStatus: 403,
 	}
 	ErrUnexpected = &Msg{
 		Code:       cErrUnexpected,
@@ -146,6 +146,6 @@ var (
 	ErrIdentityCodeNotCorrect = &Msg{
 		Code:       cErrIdentityCodeNotCorrect,
 		Msg:        "身份校验码错误",
-		HttpStatus: 401,
+		HttpStatus: 403,
 	}
 )
