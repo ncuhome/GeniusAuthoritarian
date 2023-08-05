@@ -13,11 +13,11 @@ interface NewMfaAction {
     ) => (value: NewMfaForm[T]) => void;
 }
 
-const initialMfaForm :NewMfaForm = {
-    step: 0,
-    smsCode: "",
-    mfaCode: ""
-}
+const initialMfaForm: NewMfaForm = {
+  step: 2,
+  smsCode: "",
+  mfaCode: "",
+};
 
 export type UseAppForm = UseBoundStore<StoreApi<NewMfaForm & NewMfaAction>>;
 

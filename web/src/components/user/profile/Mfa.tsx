@@ -1,4 +1,5 @@
-import { FC, useEffect, useState } from "react";
+import { FC, useState } from "react";
+import { useInterval } from "@hooks/useInterval";
 import toast from "react-hot-toast";
 
 import {
@@ -6,18 +7,25 @@ import {
   Stack,
   StackProps,
   Dialog,
-  DialogTitle,
   DialogContent,
   DialogActions,
   ButtonGroup,
   Button,
+  Stepper,
+  Step,
+  StepLabel,
+  Box,
+  TextField,
+  Typography,
 } from "@mui/material";
 import { LoadingButton } from "@mui/lab";
 import { Done, Remove } from "@mui/icons-material";
 
 import { apiV1User } from "@api/v1/user/base";
 
+import { shallow } from "zustand/shallow";
 import useMfaCodeDialog from "@store/useMfaCodeDialog";
+import useNewMfaForm from "@store/useNewMfa";
 
 interface Props extends StackProps {
   enabled: boolean;
@@ -25,24 +33,63 @@ interface Props extends StackProps {
 }
 
 export const Mfa: FC<Props> = ({ enabled, setEnabled, ...props }) => {
-  const setMfaCodeCallback = useMfaCodeDialog(state => state.setState("callback"))
+  const setMfaCodeCallback = useMfaCodeDialog((state) =>
+    state.setState("callback")
+  );
+
+  const [newMfaStep, newMfaSmsCode, newMfaCode] = useNewMfaForm(
+    (state) => [state.step, state.smsCode, state.mfaCode],
+    shallow
+  );
+  const setNewMfaStep = useNewMfaForm((state) => state.setState("step"));
+  const setNewMfaSmsCode = useNewMfaForm((state) => state.setState("smsCode"));
+  const setNewMfaCode = useNewMfaForm((state) => state.setState("mfaCode"));
+  const resetNewMfaForm = useNewMfaForm((state) => state.reset);
+
+  const [newMfaNextStepLoading, setNewMfaNextStepLoading] = useState(false);
+
+  const [isSendingSms, setIsSendingSms] = useState(false);
+  const [smsCoolDown, setSmsCoolDown] = useState(0);
+  useInterval(
+    () => setSmsCoolDown((num) => num - 1),
+    smsCoolDown > 0 ? 1000 : null
+  );
 
   const [showNewMfa, setShowNewMfa] = useState(false);
   const [mfaNew, setMfaNew] = useState<User.Mfa.New | null>(null);
-  const [isLoadingMfaNew, setIsLoadingMfaNew] = useState(false);
 
   async function onEnableMfa() {
-    setIsLoadingMfaNew(true);
+    resetNewMfaForm();
+    setShowNewMfa(true);
+  }
+
+  async function onApplyNewMfa(smsCode: string, nextStep: number) {
+    setNewMfaNextStepLoading(true);
     try {
       const {
         data: { data },
-      } = await apiV1User.get("mfa/");
+      } = await apiV1User.get("mfa/", {
+        params: {
+          code: smsCode,
+        },
+      });
       setMfaNew(data);
-      setShowNewMfa(true);
+      setNewMfaStep(nextStep);
     } catch ({ msg }) {
       if (msg) toast.error(msg as string);
     }
-    setIsLoadingMfaNew(false);
+    setNewMfaNextStepLoading(false);
+  }
+
+  async function onSendSmsCode() {
+    setIsSendingSms(true);
+    try {
+      await apiV1User.post("identity/sms");
+      setSmsCoolDown(60);
+    } catch ({ msg }) {
+      if (msg) toast.error(msg as string);
+    }
+    setIsSendingSms(false);
   }
 
   async function onCheckMfaEnable(code: string) {
@@ -50,8 +97,8 @@ export const Mfa: FC<Props> = ({ enabled, setEnabled, ...props }) => {
       await apiV1User.post("mfa/", {
         code,
       });
-      setMfaCodeCallback(null)
       setEnabled(true);
+      setShowNewMfa(false);
       toast.success("已启用双因素认证");
     } catch ({ msg }) {
       if (msg) toast.error(msg as string);
@@ -65,7 +112,7 @@ export const Mfa: FC<Props> = ({ enabled, setEnabled, ...props }) => {
           code,
         },
       });
-      setMfaCodeCallback(null)
+      setMfaCodeCallback(null);
       setEnabled(false);
       toast.success("已关闭双因素认证");
     } catch ({ msg }) {
@@ -73,48 +120,47 @@ export const Mfa: FC<Props> = ({ enabled, setEnabled, ...props }) => {
     }
   }
 
-  return (
-    <>
-      <Stack flexDirection={"row"} alignItems={"center"} {...props}>
-        <Chip
-          label={enabled ? "双因素认证已开启" : "双因素未启用"}
-          variant={"outlined"}
-          icon={
-            enabled ? <Done color={"success"} fontSize="small" /> : <Remove />
-          }
-        />
-
-        <ButtonGroup
-          sx={{
-            ml: 2,
-          }}
-        >
-          {enabled ? (
-            <>
-              <Button
-                color={"warning"}
-                onClick={() => setMfaCodeCallback(onDisableMfa)}
-              >
-                关闭
-              </Button>
-            </>
-          ) : (
-            <>
-              <LoadingButton
+  function renderNewMfaStep(step: number) {
+    switch (step) {
+      case 0:
+        return (
+          <>
+            <Typography variant={"h6"} marginBottom={"1rem"}>
+              短信身份校验
+            </Typography>
+            <Stack flexDirection={"row"}>
+              <TextField
                 variant={"outlined"}
-                loading={isLoadingMfaNew}
-                onClick={onEnableMfa}
+                sx={{ width: "60%" }}
+                inputProps={{
+                  style: {
+                    height: "1rem",
+                  },
+                }}
+                value={newMfaSmsCode}
+                onChange={(e) => setNewMfaSmsCode(e.target.value)}
+              />
+              <Stack
+                flexDirection={"row"}
+                flexGrow={1}
+                paddingX={"1.3rem"}
+                boxSizing={"border-box"}
               >
-                开启
-              </LoadingButton>
-            </>
-          )}
-        </ButtonGroup>
-      </Stack>
-
-      <Dialog open={showNewMfa} onClose={() => setShowNewMfa(false)}>
-        <DialogTitle>双因素认证</DialogTitle>
-        <DialogContent>
+                <LoadingButton
+                  variant={"contained"}
+                  fullWidth
+                  disabled={!!smsCoolDown}
+                  loading={isSendingSms}
+                  onClick={onSendSmsCode}
+                >
+                  {smsCoolDown ? smsCoolDown + "s" : "发送"}
+                </LoadingButton>
+              </Stack>
+            </Stack>
+          </>
+        );
+      case 1:
+        return (
           <Stack
             alignItems={"center"}
             mb={2.5}
@@ -147,17 +193,116 @@ export const Mfa: FC<Props> = ({ enabled, setEnabled, ...props }) => {
               复制 totp url
             </Button>
           </Stack>
+        );
+      case 2:
+        return (
+          <>
+            <Typography variant={"h6"} marginBottom={"1rem"}>
+              双因素校验码
+            </Typography>
+            <TextField
+              variant={"outlined"}
+              value={newMfaCode}
+              onChange={(e) => setNewMfaCode(e.target.value)}
+            />
+          </>
+        );
+    }
+  }
+
+  async function onNextNewMfaStep(step: number) {
+    switch (step) {
+      case 0:
+        if (newMfaSmsCode == "") {
+          toast.error("请输入短信校验码");
+          return;
+        }
+        await onApplyNewMfa(newMfaSmsCode, step + 1);
+        break;
+      case 1:
+        setNewMfaStep(step + 1);
+        break;
+      case 2:
+        if (newMfaSmsCode == "") {
+          toast.error("请输入双因素校验码");
+          return;
+        } else if (newMfaCode.length != 6 && !isNaN(Number(newMfaSmsCode))) {
+          toast.error("双因素校验码错误");
+          return;
+        }
+        await onCheckMfaEnable(newMfaCode);
+        break;
+    }
+  }
+
+  return (
+    <>
+      <Stack flexDirection={"row"} alignItems={"center"} {...props}>
+        <Chip
+          label={enabled ? "双因素认证已开启" : "双因素未启用"}
+          variant={"outlined"}
+          icon={
+            enabled ? <Done color={"success"} fontSize="small" /> : <Remove />
+          }
+        />
+
+        <ButtonGroup
+          sx={{
+            ml: 2,
+          }}
+        >
+          {enabled ? (
+            <>
+              <Button
+                color={"warning"}
+                onClick={() => setMfaCodeCallback(onDisableMfa)}
+              >
+                关闭
+              </Button>
+            </>
+          ) : (
+            <>
+              <Button variant={"outlined"} onClick={onEnableMfa}>
+                开启
+              </Button>
+            </>
+          )}
+        </ButtonGroup>
+      </Stack>
+
+      <Dialog open={showNewMfa} onClose={() => setShowNewMfa(false)}>
+        <DialogContent>
+          <Stack>
+            <Stepper activeStep={newMfaStep}>
+              <Step>
+                <StepLabel>身份验证</StepLabel>
+              </Step>
+              <Step>
+                <StepLabel>双因素校验绑定</StepLabel>
+              </Step>
+              <Step>
+                <StepLabel>完成绑定</StepLabel>
+              </Step>
+            </Stepper>
+            <Box
+              sx={{
+                marginTop: "1.5rem",
+                paddingX: "1rem",
+                boxSizing: "border-box",
+              }}
+            >
+              <Stack>{renderNewMfaStep(newMfaStep)}</Stack>
+            </Box>
+          </Stack>
         </DialogContent>
         <DialogActions>
           <Button onClick={() => setShowNewMfa(false)}>取消</Button>
-          <Button
-            onClick={() => {
-              setShowNewMfa(false);
-              setMfaCodeCallback(onCheckMfaEnable);
-            }}
+          <LoadingButton
+            loading={newMfaNextStepLoading}
+            onClick={() => onNextNewMfaStep(newMfaStep)}
           >
-            下一步
-          </Button>
+            {newMfaStep == 2 ? "完成" : "下一步"}
+          </LoadingButton>
         </DialogActions>
       </Dialog>
     </>
