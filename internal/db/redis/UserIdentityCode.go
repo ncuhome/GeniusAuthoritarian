@@ -31,6 +31,9 @@ func (a UserIdentityCodeHelper) New(uid uint) (string, error) {
 func (a UserIdentityCodeHelper) VerifyAndDestroy(uid uint, code string) (bool, error) {
 	rCode, err := Client.Get(context.Background(), a.genKey(uid)).Result()
 	if err != nil {
+		if err == Nil {
+			err = nil
+		}
 		return false, err
 	}
 	return rCode == code, a.Destroy(uid)
