@@ -12,24 +12,8 @@ import (
 	"os"
 )
 
-type Config struct {
-	Token string `yaml:"token"`
-	Addr  string `yaml:"addr"`
-}
-
-func readConfig() Config {
-	f, err := os.Open("config.yaml")
-	if err != nil {
-		log.Fatalln("读取配置文件失败:", err)
-	}
-	defer f.Close()
-
-	var conf Config
-	err = yaml.NewDecoder(f).Decode(&conf)
-	if err != nil {
-		log.Fatalln("解析配置文件失败:", err)
-	}
-	return conf
+func init() {
+	linuxUser.DaemonSshd()
 }
 
 func main() {
@@ -108,4 +92,24 @@ func (a *GrpcAuth) GetRequestMetadata(ctx context.Context, uri ...string) (map[s
 
 func (a *GrpcAuth) RequireTransportSecurity() bool {
 	return true
+}
+
+type Config struct {
+	Token string `yaml:"token"`
+	Addr  string `yaml:"addr"`
+}
+
+func readConfig() Config {
+	f, err := os.Open("config.yaml")
+	if err != nil {
+		log.Fatalln("读取配置文件失败:", err)
+	}
+	defer f.Close()
+
+	var conf Config
+	err = yaml.NewDecoder(f).Decode(&conf)
+	if err != nil {
+		log.Fatalln("解析配置文件失败:", err)
+	}
+	return conf
 }
