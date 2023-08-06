@@ -75,8 +75,10 @@ func DoSync() error {
 	}
 	defer userSshSrv.Rollback()
 
-	if err = userSshSrv.CreateAll(userSshToCreate); err != nil {
-		return err
+	if len(userSshToCreate) != 0 {
+		if err = userSshSrv.CreateAll(userSshToCreate); err != nil {
+			return err
+		}
 	}
 
 	userToDelete, err := userSshSrv.DeleteInvalid()
