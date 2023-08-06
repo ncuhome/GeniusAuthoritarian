@@ -26,6 +26,7 @@ func SshAccountSet(account *proto.SshAccount) error {
 		if err != nil {
 			return err
 		}
+		logger.Infoln("用户已删除")
 	} else {
 		exist, err := linux.UserExist(account.Username)
 		if err != nil {
