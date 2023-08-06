@@ -3,8 +3,8 @@ package main
 import (
 	"github.com/ncuhome/GeniusAuthoritarian/internal/global"
 	"github.com/ncuhome/GeniusAuthoritarian/internal/pkg/agent"
-	"github.com/ncuhome/GeniusAuthoritarian/internal/pkg/sshDev"
-	"github.com/ncuhome/GeniusAuthoritarian/internal/pkg/sshDev/rpc"
+	"github.com/ncuhome/GeniusAuthoritarian/internal/pkg/sshDev/server"
+	"github.com/ncuhome/GeniusAuthoritarian/internal/pkg/sshDev/server/rpc"
 	log "github.com/sirupsen/logrus"
 )
 
@@ -15,7 +15,7 @@ func init() {
 
 	agent.Init()
 	// 建议放在用户同步的时间之后
-	sshDev.AddCron("0 6 * * *")
+	server.AddCron("0 6 * * *")
 }
 
 func main() {

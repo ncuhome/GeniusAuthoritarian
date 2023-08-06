@@ -1,10 +1,10 @@
-package sshDev
+package server
 
 import (
 	"github.com/Mmx233/tool"
 	"github.com/ncuhome/GeniusAuthoritarian/internal/db/dao"
 	"github.com/ncuhome/GeniusAuthoritarian/internal/pkg/agent"
-	"github.com/ncuhome/GeniusAuthoritarian/internal/pkg/sshDev/rpc"
+	rpc2 "github.com/ncuhome/GeniusAuthoritarian/internal/pkg/sshDev/server/rpc"
 	"github.com/ncuhome/GeniusAuthoritarian/internal/pkg/sshDev/sshTool"
 	"github.com/ncuhome/GeniusAuthoritarian/internal/service"
 	"github.com/ncuhome/GeniusAuthoritarian/pkg/ed25519"
@@ -93,24 +93,24 @@ func DoSync() error {
 	// 通知 sshDev client
 	length := len(userSshToCreate) + len(userToDelete)
 	if length != 0 {
-		sshRpcMessages := make([]rpc.SshAccountMsg, length)
+		sshRpcMessages := make([]rpc2.SshAccountMsg, length)
 		i := 0
 		for _, userSsh := range userSshToCreate {
-			sshRpcMessages[i] = rpc.SshAccountMsg{
+			sshRpcMessages[i] = rpc2.SshAccountMsg{
 				Username:  sshTool.LinuxAccountName(userSsh.UID),
 				PublicKey: userSsh.PublicSsh,
 			}
 			i++
 		}
 		for _, userSsh := range userToDelete {
-			sshRpcMessages[i] = rpc.SshAccountMsg{
+			sshRpcMessages[i] = rpc2.SshAccountMsg{
 				IsDel:     true,
 				Username:  sshTool.LinuxAccountName(userSsh.UID),
 				PublicKey: userSsh.PublicSsh,
 			}
 			i++
 		}
-		rpc.MsgChannel <- sshRpcMessages
+		rpc2.MsgChannel <- sshRpcMessages
 	}
 
 	return nil
