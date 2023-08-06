@@ -19,8 +19,7 @@ jobs:
           CORE: harbor.ncuos.com/genius-auth/core
           AUTH: harbor.ncuos.com/genius-auth/gate
           FE: harbor.ncuos.com/genius-auth/fe
-          SSH_SERVER: harbor.ncuos.com/genius-auth/ssh-server
-          SSH_CLIENT: harbor.ncuos.com/genius-auth/ssh-client
+          SSH_DEV: harbor.ncuos.com/genius-auth/ssh-server
         run: |
           echo CORE_LATEST=${CORE}:latest >> $GITHUB_OUTPUT
           echo CORE_VERSION=${CORE}:${GITHUB_REF/refs\/tags\//} >> $GITHUB_OUTPUT
@@ -28,10 +27,8 @@ jobs:
           echo AUTH_VERSION=${AUTH}:${GITHUB_REF/refs\/tags\//} >> $GITHUB_OUTPUT
           echo FE_LATEST=${FE}:latest >> $GITHUB_OUTPUT
           echo FE_VERSION=${FE}:${GITHUB_REF/refs\/tags\//} >> $GITHUB_OUTPUT
-          echo SSH_SERVER_LATEST=${SSH_SERVER}:latest >> $GITHUB_OUTPUT
-          echo SSH_SERVER_VERSION=${SSH_SERVER}:${GITHUB_REF/refs\/tags\//} >> $GITHUB_OUTPUT
-          echo SSH_CLIENT_LATEST=${SSH_CLIENT}:latest >> $GITHUB_OUTPUT
-          echo SSH_CLIENT_VERSION=${SSH_CLIENT}:${GITHUB_REF/refs\/tags\//} >> $GITHUB_OUTPUT
+          echo SSH_DEV_LATEST=${SSH_DEV}:latest >> $GITHUB_OUTPUT
+          echo SSH_DEV_VERSION=${SSH_DEV}:${GITHUB_REF/refs\/tags\//} >> $GITHUB_OUTPUT
 
       - name: Build Site
         run: cd web && pnpm i && pnpm run build
@@ -72,29 +69,17 @@ jobs:
           --tag ${{ steps.image.outputs.FE_VERSION }} \
           --tag ${{ steps.image.outputs.FE_LATEST }}
 
-      - name: Build sshDev Server Binary
+      - name: Build sshDev Binary
         env:
           GOPRIVATE: github.com/ncuhome
           CGO_ENABLED: 0
-        run: go build -gcflags=-trimpath=$GOPATH -asmflags=-trimpath=$GOPATH -ldflags '-extldflags "-static" -s -w' -o runner ./cmd/sshDev/server
+        run: go build -gcflags=-trimpath=$GOPATH -asmflags=-trimpath=$GOPATH -ldflags '-extldflags "-static" -s -w' -o runner ./cmd/sshDev
 
-      - name: Build sshDev Server Docker Image
-        run: |
-          docker build . --file Dockerfile \
-          --tag ${{ steps.image.outputs.SSH_SERVER_VERSION }} \
-          --tag ${{ steps.image.outputs.SSH_SERVER_LATEST }}
-
-      - name: Build sshDev Client Binary
-        env:
-          GOPRIVATE: github.com/ncuhome
-          CGO_ENABLED: 0
-        run: go build -gcflags=-trimpath=$GOPATH -asmflags=-trimpath=$GOPATH -ldflags '-extldflags "-static" -s -w' -o runner ./cmd/sshDev/client
-
-      - name: Build sshDev Client Docker Image
+      - name: Build sshDev Docker Image
         run: |
           docker build . --file ./cmd/sshDev/client/Dockerfile \
-          --tag ${{ steps.image.outputs.SSH_CLIENT_VERSION }} \
-          --tag ${{ steps.image.outputs.SSH_CLIENT_LATEST }}
+          --tag ${{ steps.image.outputs.SSH_DEV_VERSION }} \
+          --tag ${{ steps.image.outputs.SSH_DEV_LATEST }}
 
       - name: Push
         run: |
@@ -104,10 +89,8 @@ jobs:
           docker push ${{ steps.image.outputs.AUTH_LATEST }}
           docker push ${{ steps.image.outputs.FE_VERSION }}
           docker push ${{ steps.image.outputs.FE_LATEST }}
-          docker push ${{ steps.image.outputs.SSH_SERVER_VERSION }}
-          docker push ${{ steps.image.outputs.SSH_SERVER_LATEST }}
-          docker push ${{ steps.image.outputs.SSH_CLIENT_VERSION }}
-          docker push ${{ steps.image.outputs.SSH_CLIENT_LATEST }}
+          docker push ${{ steps.image.outputs.SSH_DEV_VERSION }}
+          docker push ${{ steps.image.outputs.SSH_DEV_LATEST }}
 
       - name: Update Core Dev Deployment
         uses: MultiMx/K8sSetImageAction@v0.2
@@ -137,23 +120,14 @@ jobs:
           deployment: 'fe'
           image: ${{ steps.image.outputs.FE_VERSION }}
 
-      - name: Update sshDev Server Dev Deployment
+      - name: Update sshDev Dev Deployment
         uses: MultiMx/K8sSetImageAction@v0.2
         with:
           backend: 'https://rancher.ncuhome.club'
           token: ${{ secrets.CATTLE_TOKEN_LOCAL }}
           namespace: 'genius-auth'
-          deployment: 'ssh-dev-grpc-server'
-          image: ${{ steps.image.outputs.SSH_SERVER_VERSION }}
-
-      - name: Update sshDev Client Dev Deployment
-        uses: MultiMx/K8sSetImageAction@v0.2
-        with:
-          backend: 'https://rancher.ncuhome.club'
-          token: ${{ secrets.CATTLE_TOKEN_LOCAL }}
-          namespace: 'genius-auth'
-          deployment: 'ssh-server-dev'
-          image: ${{ steps.image.outputs.SSH_CLIENT_VERSION }}
+          deployment: 'ssh-server'
+          image: ${{ steps.image.outputs.SSH_DEV_VERSION }}
 
       - name: Update Core Prod Deployment
         uses: MultiMx/K8sSetImageAction@v0.2
@@ -183,20 +157,11 @@ jobs:
           deployment: 'fe'
           image: ${{ steps.image.outputs.FE_VERSION }}
 
-      - name: Update sshDev Server Prod Deployment
+      - name: Update sshDev Prod Deployment
         uses: MultiMx/K8sSetImageAction@v0.2
         with:
           backend: 'https://rancher.ncuos.com'
           token: ${{ secrets.CATTLE_TOKEN }}
           namespace: 'genius-auth'
-          deployment: 'ssh-dev-grpc-server'
-          image: ${{ steps.image.outputs.SSH_SERVER_VERSION }}
-
-      - name: Update sshDev Client Prod Deployment
-        uses: MultiMx/K8sSetImageAction@v0.2
-        with:
-          backend: 'https://rancher.ncuos.com'
-          token: ${{ secrets.CATTLE_TOKEN }}
-          namespace: 'genius-auth'
-          deployment: 'ssh-server-dev'
-          image: ${{ steps.image.outputs.SSH_CLIENT_VERSION }}
+          deployment: 'ssh-server'
+          image: ${{ steps.image.outputs.SSH_DEV_VERSION }}
