@@ -10,4 +10,5 @@ func routerSsh(G *gin.RouterGroup) {
 	G.Use(middlewares.RequireMfa)
 
 	G.GET("/", controllers.ShowSshKey)
+	G.PUT("/", controllers.ResetSshKeyPair)
 }

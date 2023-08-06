@@ -1,6 +1,7 @@
 package service
 
 import (
+	"github.com/Mmx233/daoUtil"
 	"github.com/ncuhome/GeniusAuthoritarian/internal/db/dao"
 	"github.com/ncuhome/GeniusAuthoritarian/internal/db/dto"
 	"github.com/ncuhome/GeniusAuthoritarian/internal/pkg/sshDev/sshTool"
@@ -16,6 +17,10 @@ type UserSshSrv struct {
 func (a UserSshSrv) Begin() (UserSshSrv, error) {
 	a.DB = a.DB.Begin()
 	return a, a.Error
+}
+
+func (a UserSshSrv) Exist(uid uint, opt ...daoUtil.ServiceOpt) (bool, error) {
+	return (&dao.UserSsh{UID: uid}).Exist(daoUtil.TxOpts(a.DB, opt...))
 }
 
 // GetToCreateUid 获取没有生成 ssh 账号的 uid
@@ -68,4 +73,14 @@ func (a UserSshSrv) FirstSshSecretsForUserShow(uid uint) (*dto.SshSecrets, error
 			Private: model.PrivateSsh,
 		},
 	}, nil
+}
+
+func (a UserSshSrv) UpdateKeys(uid uint, publicPem, privatePem, publicSsh, privateSsh string) error {
+	return (&dao.UserSsh{
+		UID:        uid,
+		PublicPem:  publicPem,
+		PrivatePem: privatePem,
+		PublicSsh:  publicSsh,
+		PrivateSsh: privateSsh,
+	}).UpdateByUid(a.DB)
 }

@@ -151,7 +151,7 @@ var (
 	}
 	ErrSshNotFound = &Msg{
 		Code:       cErrSshNotFound,
-		Msg:        "SSH 账号未分配，请次日再试或联系管理员",
+		Msg:        "SSH 账号未分配，请联系管理员",
 		HttpStatus: 404,
 	}
 )

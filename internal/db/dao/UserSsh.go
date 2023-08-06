@@ -27,6 +27,15 @@ func (a *UserSsh) InsertAll(tx *gorm.DB, models []UserSsh) error {
 	return tx.Create(models).Error
 }
 
+func (a *UserSsh) Exist(tx *gorm.DB) (bool, error) {
+	var t bool
+	return t, tx.Model(a).Select("1").Where(a).Limit(1).Find(&t).Error
+}
+
+func (a *UserSsh) UpdateByUid(tx *gorm.DB) error {
+	return tx.Model(a).Where(a, "uid").Updates(a).Error
+}
+
 // GetInvalid 获取应该清除的 user ssh
 func (a *UserSsh) GetInvalid(tx *gorm.DB) ([]UserSsh, error) {
 	tx = tx.Model(a).Joins("LEFT JOIN users ON users.id=user_sshes.uid") // 无 deleted_at 限制，相当于 UnScoped
