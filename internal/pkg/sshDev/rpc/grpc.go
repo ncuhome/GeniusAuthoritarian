@@ -49,6 +49,10 @@ type SshAccounts struct {
 }
 
 func (a *SshAccounts) Watch(_ *emptypb.Empty, server proto.SshAccounts_WatchServer) error {
+	// 注册监听
+	msgChan, unregister := a.RegisterWatcher()
+	defer unregister()
+
 	// 发送现有账号
 	sshAccounts, err := service.UserSsh.GetAllExist()
 	if err != nil {
@@ -64,8 +68,6 @@ func (a *SshAccounts) Watch(_ *emptypb.Empty, server proto.SshAccounts_WatchServ
 		}
 	}
 
-	msgChan, unregister := a.RegisterWatcher()
-	defer unregister()
 	for {
 		select {
 		case messages := <-msgChan:
