@@ -10,7 +10,11 @@ import (
 	"google.golang.org/protobuf/types/known/emptypb"
 	"gopkg.in/yaml.v3"
 	"os"
+	"time"
 )
+
+// 账号同步记录
+var accounts = make(map[string]bool)
 
 func init() {
 	go linuxUser.DaemonSshd()
@@ -19,67 +23,50 @@ func init() {
 func main() {
 	log.Infoln("Sys Boost")
 
+	// 读取配置
 	conf := readConfig()
 
+	// 连接 grpc
 	creds := credentials.NewClientTLSFromCert(nil, "")
-
 	conn, err := grpc.Dial(conf.Addr, grpc.WithTransportCredentials(creds), grpc.WithPerRPCCredentials(&GrpcAuth{Token: conf.Token}))
 	if err != nil {
 		log.Fatalln("连接 grpc 服务失败:", err)
 	}
 	defer conn.Close()
+	log.Infoln("GRPC 已连接")
 
+beginSync:
+
+	// 创建 ssh 账号流
 	client := proto.NewSshAccountsClient(conn)
-	watch, err := client.Watch(context.Background(), &emptypb.Empty{})
+	ctx, cancelWatch := context.WithCancel(context.Background())
+	watch, err := client.Watch(ctx, &emptypb.Empty{})
 	if err != nil {
 		log.Fatalln("启动 SSH 账号 Watch 流失败:", err)
 	}
+	log.Infoln("已创建 SSH 账号 Watch 流")
 
+	// 账号流处理流程
 	for {
-		account, err := watch.Recv()
+		msg, err := watch.Recv()
 		if err != nil {
-			log.Fatalln("SSH 账号流异常:", err)
+			log.Errorln("SSH 账号 Watch 流异常:", err)
+			break
 		}
-		if account.Username == "" {
-			// 心跳
+
+		if msg.IsHeartBeat {
 			continue
 		}
 
-		logger := log.WithField("username", account.Username)
-
-		if account.IsDel {
-			err = linuxUser.Delete(account.Username)
-			if err != nil {
-				logger.Fatalln("删除账号失败:", err)
-			}
-		} else {
-			exist, err := linuxUser.Exist(account.Username)
-			if err != nil {
-				logger.Fatalln("检查账号存在失败:", err)
-			}
-			if !exist {
-				err = linuxUser.Create(account.Username)
-				if err != nil {
-					logger.Fatalln("创建账号失败:", err)
-				}
-				logger.Infoln("用户已创建")
-
-				// 使用 -D 参数创建账号后 shadow 的密码值为 !，将无法使用 ssh 登录
-				if err = linuxUser.DelPasswd(account.Username); err != nil {
-					logger.Fatalln("清除密码失败:", err)
-				}
-			}
-			err = linuxUser.PrepareSshDir(account.Username)
-			if err != nil {
-				logger.Fatalln("创建 .ssh 失败:", err)
-			}
-			err = linuxUser.WriteAuthorizedKeys(account.Username, account.PublicKey)
-			if err != nil {
-				logger.Fatalln("写入 authorized_keys 失败:", err)
-			}
-			logger.Infoln("SSH key 已配置")
+		if err = SshAccountSync(msg); err != nil {
+			log.Warnln("同步流程出错，即将开始重新同步……")
+			break
 		}
 	}
+
+	cancelWatch()
+	time.Sleep(time.Second * 3) // 减小重试频率
+	goto beginSync
 }
 
 type GrpcAuth struct {
@@ -112,4 +99,99 @@ func readConfig() Config {
 		log.Fatalln("解析配置文件失败:", err)
 	}
 	return conf
+}
+
+func DoAccountDelete(username string, logger *log.Entry) error {
+	if err := linuxUser.Delete(username); err != nil {
+		logger.Errorln("删除账号失败:", err)
+		return err
+	}
+	delete(accounts, username)
+	return nil
+}
+
+func SshAccountSet(account *proto.SshAccount) error {
+	logger := log.WithField("username", account.Username)
+
+	if account.IsDel {
+		err := DoAccountDelete(account.Username, logger)
+		if err != nil {
+			return err
+		}
+	} else {
+		exist, err := linuxUser.Exist(account.Username)
+		if err != nil {
+			logger.Errorln("检查账号存在失败:", err)
+			return err
+		}
+		if !exist {
+			err = linuxUser.Create(account.Username)
+			if err != nil {
+				logger.Errorln("创建账号失败:", err)
+				return err
+			} else {
+				accounts[account.Username] = true
+			}
+			logger.Infoln("用户已创建")
+
+			// 使用 -D 参数创建账号后 shadow 的密码值为 !，将无法使用 ssh 登录
+			if err = linuxUser.DelPasswd(account.Username); err != nil {
+				logger.Errorln("清除密码失败:", err)
+				return err
+			}
+		} else {
+			if err = linuxUser.DelPasswd(account.Username); err != nil {
+				logger.Errorln("清除密码失败:", err)
+				return err
+			}
+		}
+		err = linuxUser.PrepareSshDir(account.Username)
+		if err != nil {
+			logger.Errorln("创建 .ssh 失败:", err)
+			return err
+		}
+		err = linuxUser.WriteAuthorizedKeys(account.Username, account.PublicKey)
+		if err != nil {
+			logger.Errorln("写入 authorized_keys 失败:", err)
+			return err
+		}
+		logger.Infoln("SSH key 已配置")
+	}
+
+	return nil
+}
+
+func SshAccountSync(msg *proto.AccountStream) error {
+	if msg.IsInit {
+		// 查找本地多出来的账号
+		accountsInit := make(map[string]bool, len(msg.Accounts))
+		for _, account := range msg.Accounts {
+			accountsInit[account.Username] = true
+		}
+		for username := range accounts {
+			delete(accountsInit, username)
+		}
+		if len(accountsInit) != 0 {
+			newAccountsArray := make([]*proto.SshAccount, len(msg.Accounts)+len(accountsInit))
+			for i, account := range msg.Accounts {
+				newAccountsArray[i] = account
+			}
+			i := len(msg.Accounts)
+			for username := range accountsInit {
+				newAccountsArray[i] = &proto.SshAccount{
+					IsDel:    true,
+					Username: username,
+				}
+				i++
+			}
+		}
+	}
+
+	for _, account := range msg.Accounts {
+		err := SshAccountSet(account)
+		if err != nil {
+			return err
+		}
+	}
+	return nil
 }
