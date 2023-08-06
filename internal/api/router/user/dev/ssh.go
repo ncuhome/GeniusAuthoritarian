@@ -2,7 +2,7 @@ package dev
 
 import (
 	"github.com/gin-gonic/gin"
-	controllers "github.com/ncuhome/GeniusAuthoritarian/internal/api/controllers/user/ssh"
+	"github.com/ncuhome/GeniusAuthoritarian/internal/api/controllers/user/dev/ssh"
 )
 
 func routerSsh(G *gin.RouterGroup) {
