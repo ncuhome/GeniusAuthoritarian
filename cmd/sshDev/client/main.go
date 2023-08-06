@@ -13,7 +13,7 @@ import (
 )
 
 func init() {
-	linuxUser.DaemonSshd()
+	go linuxUser.DaemonSshd()
 }
 
 func main() {
