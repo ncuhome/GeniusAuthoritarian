@@ -5,6 +5,7 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/ncuhome/GeniusAuthoritarian/internal/api/callback"
 	"github.com/ncuhome/GeniusAuthoritarian/internal/db/dto"
+	"github.com/ncuhome/GeniusAuthoritarian/internal/pkg/sshDev/server/rpc"
 	"github.com/ncuhome/GeniusAuthoritarian/internal/pkg/sshDev/sshTool"
 	"github.com/ncuhome/GeniusAuthoritarian/internal/service"
 	"github.com/ncuhome/GeniusAuthoritarian/internal/tools"
@@ -62,6 +63,13 @@ func ResetSshKeyPair(c *gin.Context) {
 	if err = userSshSrv.Commit().Error; err != nil {
 		callback.Error(c, callback.ErrDBOperation, err)
 		return
+	}
+
+	rpc.MsgChannel <- []rpc.SshAccountMsg{
+		{
+			Username:  sshTool.LinuxAccountName(uid),
+			PublicKey: publicSshStr,
+		},
 	}
 
 	callback.Success(c, &dto.SshSecrets{
