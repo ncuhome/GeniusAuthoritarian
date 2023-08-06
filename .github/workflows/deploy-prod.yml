@@ -77,7 +77,7 @@ jobs:
 
       - name: Build sshDev Docker Image
         run: |
-          docker build . --file ./cmd/sshDev/client/Dockerfile \
+          docker build . --file ./cmd/sshDev/Dockerfile \
           --tag ${{ steps.image.outputs.SSH_DEV_VERSION }} \
           --tag ${{ steps.image.outputs.SSH_DEV_LATEST }}
 
