@@ -54,7 +54,7 @@ func (c *sshAccountsClient) Watch(ctx context.Context, in *emptypb.Empty, opts .
 }
 
 type SshAccounts_WatchClient interface {
-	Recv() (*SshAccount, error)
+	Recv() (*AccountStream, error)
 	grpc.ClientStream
 }
 
@@ -62,8 +62,8 @@ type sshAccountsWatchClient struct {
 	grpc.ClientStream
 }
 
-func (x *sshAccountsWatchClient) Recv() (*SshAccount, error) {
-	m := new(SshAccount)
+func (x *sshAccountsWatchClient) Recv() (*AccountStream, error) {
+	m := new(AccountStream)
 	if err := x.ClientStream.RecvMsg(m); err != nil {
 		return nil, err
 	}
@@ -107,7 +107,7 @@ func _SshAccounts_Watch_Handler(srv interface{}, stream grpc.ServerStream) error
 }
 
 type SshAccounts_WatchServer interface {
-	Send(*SshAccount) error
+	Send(*AccountStream) error
 	grpc.ServerStream
 }
 
@@ -115,7 +115,7 @@ type sshAccountsWatchServer struct {
 	grpc.ServerStream
 }
 
-func (x *sshAccountsWatchServer) Send(m *SshAccount) error {
+func (x *sshAccountsWatchServer) Send(m *AccountStream) error {
 	return x.ServerStream.SendMsg(m)
 }
 
