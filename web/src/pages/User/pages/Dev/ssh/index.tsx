@@ -1,4 +1,4 @@
-import { FC, useMemo, useState } from "react";
+import { FC, useState } from "react";
 import toast from "react-hot-toast";
 
 import {
@@ -27,15 +27,12 @@ const Ssh: FC = () => {
   const [keyMode, setKeyMode] = useState<"pem" | "ssh">("ssh");
   const [mfaEnabled, setMfaEnabled] = useState<boolean | null>(null);
 
-  const [isUnlockLoading, setIsUnlockLoading] = useState(true);
+  const [isUnlockLoading, setIsUnlockLoading] = useState(false);
 
-  useUserApiV1("profile/mfa", {
+  const { isLoading: isMfaStatusLoading } = useUserApiV1("profile/mfa", {
     immutable: sshKey !== null,
     enableLoading: true,
-    onSuccess: (data: any) => {
-      setMfaEnabled(data.mfa);
-      setIsUnlockLoading(false);
-    },
+    onSuccess: (data: any) => setMfaEnabled(data.mfa),
   });
 
   async function onShowSshKeys(code: string) {
@@ -132,7 +129,7 @@ const Ssh: FC = () => {
           <LoadingButton
             variant={"outlined"}
             disabled={mfaEnabled === false}
-            loading={isUnlockLoading}
+            loading={isUnlockLoading || isMfaStatusLoading}
             onClick={() => setMfaCodeCallback(onShowSshKeys)}
           >
             {mfaEnabled === false ? "请在个人资料页开启 MFA" : "解锁"}
