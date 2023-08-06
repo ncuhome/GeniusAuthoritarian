@@ -6,14 +6,14 @@ RUN apk update && \
     cp /usr/share/zoneinfo/Asia/Shanghai /etc/localtime && \
     echo 'Asia/Shanghai' >/etc/timezone && \
     rm -rf /var/cache/apk/* && \
-    sed -i 's/.PermitRootLogin.*/PermitRootLogin no/g' /etc/ssh/sshd_config && \
-    sed -i 's/.PubkeyAuthentication.*/PubkeyAuthentication yes/g' /etc/ssh/sshd_config && \
-    sed -i 's/.PasswordAuthentication.*/PasswordAuthentication no/g' /etc/ssh/sshd_config && \
-    sed -i 's/.PermitEmptyPasswords.*/PermitEmptyPasswords no/g' /etc/ssh/sshd_config && \
-    sed -i 's/.KbdInteractiveAuthentication.*/KbdInteractiveAuthentication no/g' /etc/ssh/sshd_config && \
-    sed -i 's/.X11Forwarding.*/X11Forwarding no/g' /etc/ssh/sshd_config && \
-    sed -i 's/.AllowTcpForwarding.*/AllowTcpForwarding yes/g' /etc/ssh/sshd_config && \
-    sed -i 's/.GatewayPorts.*/GatewayPorts yes/g' /etc/ssh/sshd_config && \
+    sed -i 's/.*PermitRootLogin.*/PermitRootLogin no/' /etc/ssh/sshd_config && \
+    sed -i 's/.*PubkeyAuthentication.*/PubkeyAuthentication yes/' /etc/ssh/sshd_config && \
+    sed -i 's/.*PasswordAuthentication.*/PasswordAuthentication no/' /etc/ssh/sshd_config && \
+    sed -i 's/.*PermitEmptyPasswords.*/PermitEmptyPasswords no/' /etc/ssh/sshd_config && \
+    sed -i 's/.*KbdInteractiveAuthentication.*/KbdInteractiveAuthentication no/' /etc/ssh/sshd_config && \
+    sed -i 's/.*X11Forwarding.*/X11Forwarding no/' /etc/ssh/sshd_config && \
+    sed -i 's/.*AllowTcpForwarding.*/AllowTcpForwarding yes/' /etc/ssh/sshd_config && \
+    sed -i 's/.*GatewayPorts.*/GatewayPorts yes/' /etc/ssh/sshd_config && \
     ssh-keygen -A
 
 COPY ./runner /usr/bin/runner
