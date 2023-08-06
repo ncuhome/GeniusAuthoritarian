@@ -6,7 +6,7 @@ import (
 	log "github.com/sirupsen/logrus"
 )
 
-// 本地账号字典
+// 本地账号字典，值为账号是否完成可登录配置
 var accounts = make(map[string]bool)
 
 func DoAccountDelete(username string, logger *log.Entry) error {
@@ -18,39 +18,44 @@ func DoAccountDelete(username string, logger *log.Entry) error {
 	return nil
 }
 
+func LinuxUserPreset(logger *log.Entry, username string) error {
+	// 使用 -D 参数创建账号后 shadow 的密码值为 !，将无法使用 ssh 登录
+	err := linux.DelUserPasswd(username)
+	if err != nil {
+		logger.Errorln("清除密码失败:", err)
+		return err
+	}
+
+	accounts[username] = true
+	return nil
+}
+
 func SshAccountSet(account *proto.SshAccount) error {
 	logger := log.WithField("username", account.Username)
 
+	var err error
 	if account.IsDel {
-		err := DoAccountDelete(account.Username, logger)
+		err = DoAccountDelete(account.Username, logger)
 		if err != nil {
 			return err
 		}
 		logger.Infoln("用户已删除")
 	} else {
-		exist, err := linux.UserExist(account.Username)
-		if err != nil {
-			logger.Errorln("检查账号存在失败:", err)
-			return err
-		}
+		ready, exist := accounts[account.Username]
 		if !exist {
 			err = linux.CreateUser(account.Username)
 			if err != nil {
 				logger.Errorln("创建账号失败:", err)
 				return err
-			} else {
-				accounts[account.Username] = true
 			}
+			accounts[account.Username] = false
 			logger.Infoln("用户已创建")
 
-			// 使用 -D 参数创建账号后 shadow 的密码值为 !，将无法使用 ssh 登录
-			if err = linux.DelUserPasswd(account.Username); err != nil {
-				logger.Errorln("清除密码失败:", err)
+			if err = LinuxUserPreset(logger, account.Username); err != nil {
 				return err
 			}
-		} else {
-			if err = linux.DelUserPasswd(account.Username); err != nil {
-				logger.Errorln("清除密码失败:", err)
+		} else if !ready {
+			if err = LinuxUserPreset(logger, account.Username); err != nil {
 				return err
 			}
 		}

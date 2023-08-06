@@ -59,12 +59,12 @@ beginSync:
 		}
 
 		if err = client.SshAccountSync(msg); err != nil {
-			log.Warnln("同步流程出错，即将开始重新同步……")
 			break
 		}
 	}
 
 	cancelWatch()
+	log.Warnln("同步流程出错，即将开始重新同步……")
 	time.Sleep(time.Second * 3) // 减小重试频率
 	goto beginSync
 }
