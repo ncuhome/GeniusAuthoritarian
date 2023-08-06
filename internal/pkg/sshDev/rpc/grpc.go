@@ -3,7 +3,6 @@ package rpc
 import (
 	"container/list"
 	"github.com/ncuhome/GeniusAuthoritarian/internal/pkg/sshDev/proto"
-	"github.com/ncuhome/GeniusAuthoritarian/internal/pkg/sshDev/sshTool"
 	"github.com/ncuhome/GeniusAuthoritarian/internal/service"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/codes"
@@ -58,27 +57,27 @@ func (a *SshAccounts) Watch(_ *emptypb.Empty, server proto.SshAccounts_WatchServ
 	if err != nil {
 		return status.Error(codes.Internal, err.Error())
 	}
-	for _, account := range sshAccounts {
-		err = server.Send(&proto.SshAccount{
-			Username:  sshTool.LinuxAccountName(account.UID),
-			PublicKey: account.PublicSsh,
-		})
-		if err != nil {
-			return err
-		}
+	err = server.Send(&proto.AccountStream{
+		Init:     true,
+		Accounts: TransformAccountArray(sshAccounts),
+	})
+	if err != nil {
+		return err
 	}
 
 	for {
 		select {
 		case messages := <-msgChan:
-			for _, msg := range messages {
-				err := server.Send(msg.Rpc())
-				if err != nil {
-					return err
-				}
+			err := server.Send(&proto.AccountStream{
+				Accounts: TransformMsgArray(messages),
+			})
+			if err != nil {
+				return err
 			}
 		case <-time.After(time.Minute):
-			err := server.Send(&proto.SshAccount{})
+			err := server.Send(&proto.AccountStream{
+				HeartBeat: true,
+			})
 			if err != nil {
 				return err
 			}
