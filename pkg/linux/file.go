@@ -1,4 +1,4 @@
-package linuxUser
+package linux
 
 import (
 	"github.com/Mmx233/tool"
@@ -6,28 +6,6 @@ import (
 	"os/exec"
 	"path"
 )
-
-// 适用于 alpine
-
-func UserHomePath(username string) string {
-	return "/home/" + username
-}
-
-func Exist(username string) (bool, error) {
-	return tool.File.Exists(UserHomePath(username))
-}
-
-func Create(username string) error {
-	return exec.Command("adduser", "-D", "-s", "/bin/sh", "-G", "common", "-h", UserHomePath(username), username).Run()
-}
-
-func DelPasswd(username string) error {
-	return exec.Command("passwd", "-d", username).Run()
-}
-
-func Delete(username string) error {
-	return exec.Command("deluser", "--remove-home", username).Run()
-}
 
 func Chown(path, username string) error {
 	return exec.Command("chown", username, path).Run()

@@ -4,7 +4,7 @@ import (
 	"context"
 	"github.com/ncuhome/GeniusAuthoritarian/internal/pkg/sshDev/client"
 	"github.com/ncuhome/GeniusAuthoritarian/internal/pkg/sshDev/proto"
-	"github.com/ncuhome/GeniusAuthoritarian/pkg/linuxUser"
+	"github.com/ncuhome/GeniusAuthoritarian/pkg/linux"
 	log "github.com/sirupsen/logrus"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials"
@@ -13,7 +13,7 @@ import (
 )
 
 func init() {
-	go linuxUser.DaemonSshd()
+	go linux.DaemonSshd()
 }
 
 func main() {

@@ -2,7 +2,7 @@ package client
 
 import (
 	"github.com/ncuhome/GeniusAuthoritarian/internal/pkg/sshDev/proto"
-	"github.com/ncuhome/GeniusAuthoritarian/pkg/linuxUser"
+	"github.com/ncuhome/GeniusAuthoritarian/pkg/linux"
 	log "github.com/sirupsen/logrus"
 )
 
@@ -10,7 +10,7 @@ import (
 var accounts = make(map[string]bool)
 
 func DoAccountDelete(username string, logger *log.Entry) error {
-	if err := linuxUser.Delete(username); err != nil {
+	if err := linux.DeleteUser(username); err != nil {
 		logger.Errorln("删除账号失败:", err)
 		return err
 	}
@@ -27,13 +27,13 @@ func SshAccountSet(account *proto.SshAccount) error {
 			return err
 		}
 	} else {
-		exist, err := linuxUser.Exist(account.Username)
+		exist, err := linux.UserExist(account.Username)
 		if err != nil {
 			logger.Errorln("检查账号存在失败:", err)
 			return err
 		}
 		if !exist {
-			err = linuxUser.Create(account.Username)
+			err = linux.CreateUser(account.Username)
 			if err != nil {
 				logger.Errorln("创建账号失败:", err)
 				return err
@@ -43,22 +43,22 @@ func SshAccountSet(account *proto.SshAccount) error {
 			logger.Infoln("用户已创建")
 
 			// 使用 -D 参数创建账号后 shadow 的密码值为 !，将无法使用 ssh 登录
-			if err = linuxUser.DelPasswd(account.Username); err != nil {
+			if err = linux.DelUserPasswd(account.Username); err != nil {
 				logger.Errorln("清除密码失败:", err)
 				return err
 			}
 		} else {
-			if err = linuxUser.DelPasswd(account.Username); err != nil {
+			if err = linux.DelUserPasswd(account.Username); err != nil {
 				logger.Errorln("清除密码失败:", err)
 				return err
 			}
 		}
-		err = linuxUser.PrepareSshDir(account.Username)
+		err = linux.PrepareSshDir(account.Username)
 		if err != nil {
 			logger.Errorln("创建 .ssh 失败:", err)
 			return err
 		}
-		err = linuxUser.WriteAuthorizedKeys(account.Username, account.PublicKey)
+		err = linux.WriteAuthorizedKeys(account.Username, account.PublicKey)
 		if err != nil {
 			logger.Errorln("写入 authorized_keys 失败:", err)
 			return err

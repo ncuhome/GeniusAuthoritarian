@@ -1,4 +1,4 @@
-package linuxUser
+package linux
 
 import (
 	log "github.com/sirupsen/logrus"
