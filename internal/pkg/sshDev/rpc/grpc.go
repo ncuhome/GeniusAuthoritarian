@@ -58,7 +58,7 @@ func (a *SshAccounts) Watch(_ *emptypb.Empty, server proto.SshAccounts_WatchServ
 		return status.Error(codes.Internal, err.Error())
 	}
 	err = server.Send(&proto.AccountStream{
-		Init:     true,
+		IsInit:   true,
 		Accounts: TransformAccountArray(sshAccounts),
 	})
 	if err != nil {
@@ -76,7 +76,7 @@ func (a *SshAccounts) Watch(_ *emptypb.Empty, server proto.SshAccounts_WatchServ
 			}
 		case <-time.After(time.Minute):
 			err := server.Send(&proto.AccountStream{
-				HeartBeat: true,
+				IsHeartBeat: true,
 			})
 			if err != nil {
 				return err

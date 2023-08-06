@@ -17,7 +17,7 @@ message SshAccount {
 }
 
 message AccountStream {
-  bool init = 1;
-  bool heart_beat = 2;
+  bool is_init = 1;
+  bool is_heart_beat = 2;
   repeated SshAccount accounts = 3;
 }
