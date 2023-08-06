@@ -15,8 +15,8 @@ import (
 
 var MsgChannel chan []SshAccountMsg
 
-func Run(token string) error {
-	tcpListen, err := net.Listen("tcp", ":80")
+func Run(token, addr string) error {
+	tcpListen, err := net.Listen("tcp", addr)
 	if err != nil {
 		return err
 	}

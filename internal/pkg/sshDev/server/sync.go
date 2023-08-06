@@ -15,7 +15,7 @@ import (
 
 // 研发哥容器内 ssh 账号管理器
 
-func AddCron(spec string) {
+func AddSshAccountCron(spec string) {
 	_, err := agent.AddRegular(&agent.Event{
 		T: spec,
 		E: func() {
