@@ -51,7 +51,7 @@ func SshAccountSet(account *proto.SshAccount) error {
 			return err
 		}
 		logger.Infoln("用户已删除")
-	} else if account.IsDel {
+	} else if account.IsKill {
 		if err = DoUserProcessKill(logger, account.Username); err != nil {
 			return err
 		}
