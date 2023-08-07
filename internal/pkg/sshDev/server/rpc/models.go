@@ -6,7 +6,8 @@ import (
 )
 
 type SshAccountMsg struct {
-	IsDel     bool
+	IsDel     bool // 是否为删除用户操作
+	IsKill    bool // 是否为结束用户进程操作
 	Username  string
 	PublicKey string
 }
@@ -14,6 +15,7 @@ type SshAccountMsg struct {
 func (a SshAccountMsg) Rpc() *proto.SshAccount {
 	return &proto.SshAccount{
 		IsDel:     a.IsDel,
+		IsKill:    a.IsKill,
 		Username:  a.Username,
 		PublicKey: a.PublicKey,
 	}

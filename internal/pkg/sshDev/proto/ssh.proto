@@ -12,8 +12,9 @@ service SshAccounts {
 
 message SshAccount {
   bool is_del = 1;
-  string username = 2;
-  string public_key = 3;
+  bool is_kill = 2;
+  string username = 3;
+  string public_key = 4;
 }
 
 message AccountStream {

@@ -9,12 +9,21 @@ import (
 // 本地账号字典，值为账号是否完成可登录配置
 var accounts = make(map[string]bool)
 
-func DoAccountDelete(username string, logger *log.Entry) error {
+func DoAccountDelete(logger *log.Entry, username string) error {
 	if err := linux.DeleteUser(username); err != nil {
 		logger.Errorln("删除账号失败:", err)
 		return err
 	}
 	delete(accounts, username)
+	return nil
+}
+
+func DoUserProcessKill(logger *log.Entry, username string) error {
+	if err := linux.UserKillAll(username); err != nil {
+		logger.Errorln("结束用户进程失败:", err)
+		return err
+	}
+	logger.Infoln("用户进程已清理")
 	return nil
 }
 
@@ -35,14 +44,17 @@ func SshAccountSet(account *proto.SshAccount) error {
 
 	var err error
 	if account.IsDel {
-		if err = linux.UserKillAll(account.Username); err != nil {
-			logger.Errorln("结束用户进程失败:", err)
+		if err = DoUserProcessKill(logger, account.Username); err != nil {
 			return err
 		}
-		if err = DoAccountDelete(account.Username, logger); err != nil {
+		if err = DoAccountDelete(logger, account.Username); err != nil {
 			return err
 		}
 		logger.Infoln("用户已删除")
+	} else if account.IsDel {
+		if err = DoUserProcessKill(logger, account.Username); err != nil {
+			return err
+		}
 	} else {
 		ready, exist := accounts[account.Username]
 		if !exist {
