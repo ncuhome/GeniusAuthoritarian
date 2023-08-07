@@ -35,8 +35,11 @@ func SshAccountSet(account *proto.SshAccount) error {
 
 	var err error
 	if account.IsDel {
-		err = DoAccountDelete(account.Username, logger)
-		if err != nil {
+		if err = linux.UserKillAll(account.Username); err != nil {
+			logger.Errorln("结束用户进程失败:", err)
+			return err
+		}
+		if err = DoAccountDelete(account.Username, logger); err != nil {
 			return err
 		}
 		logger.Infoln("用户已删除")

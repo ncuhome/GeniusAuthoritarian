@@ -26,3 +26,7 @@ func DelUserPasswd(username string) error {
 func DeleteUser(username string) error {
 	return exec.Command("deluser", "--remove-home", username).Run()
 }
+
+func UserKillAll(username string) error {
+	return exec.Command("killall", "-u", username).Run()
+}
