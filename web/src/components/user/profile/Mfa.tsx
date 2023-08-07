@@ -112,12 +112,12 @@ export const Mfa: FC<Props> = ({ enabled, setEnabled, ...props }) => {
           code,
         },
       });
-      setMfaCodeCallback(null);
       setEnabled(false);
       toast.success("已关闭双因素认证");
     } catch ({ msg }) {
       if (msg) toast.error(msg as string);
     }
+    setMfaCodeCallback(null);
   }
 
   function renderNewMfaStep(step: number) {

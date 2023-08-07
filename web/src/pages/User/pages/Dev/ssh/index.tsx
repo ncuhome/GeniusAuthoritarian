@@ -13,7 +13,13 @@ import {
   Box,
 } from "@mui/material";
 import { LoadingButton } from "@mui/lab";
-import { LockPerson, Link, Lock, RestartAlt } from "@mui/icons-material";
+import {
+  LockPerson,
+  Link,
+  Lock,
+  RestartAlt,
+  PersonOff,
+} from "@mui/icons-material";
 import Block from "@components/user/Block";
 import TipButton from "@components/TipButton";
 import TipIconButton from "@components/TipIconButton";
@@ -50,11 +56,11 @@ const Ssh: FC = () => {
           code,
         },
       });
-      setMfaCodeCallback(null);
       setSshKey(data);
     } catch ({ msg }) {
       if (msg) toast.error(msg as string);
     }
+    setMfaCodeCallback(null);
     setIsUnlockLoading(false);
   }
 
@@ -65,12 +71,24 @@ const Ssh: FC = () => {
       } = await apiV1User.put("dev/ssh/", {
         code,
       });
-      setMfaCodeCallback(null);
       setSshKey(data);
       toast.success("SSH 密钥已重新生成");
     } catch ({ msg }) {
       if (msg) toast.error(msg as string);
     }
+    setMfaCodeCallback(null);
+  }
+
+  async function onKillAllProcess(code: string) {
+    try {
+      await apiV1User.post("dev/ssh/killall", {
+        code,
+      });
+      toast.success("已发送 KILLALL 指令");
+    } catch ({ msg }) {
+      if (msg) toast.error(msg as string);
+    }
+    setMfaCodeCallback(null);
   }
 
   return (
@@ -83,6 +101,12 @@ const Ssh: FC = () => {
               onClick={() => setMfaCodeCallback(onResetSshKey)}
             >
               <RestartAlt />
+            </TipButton>
+            <TipButton
+              title={"结束进程 (终端)"}
+              onClick={() => setMfaCodeCallback(onKillAllProcess)}
+            >
+              <PersonOff />
             </TipButton>
           </ButtonGroup>
 
