@@ -39,6 +39,7 @@ func LinuxUserPreset(logger *log.Entry, username string) error {
 	return nil
 }
 
+// SshAccountSet 返回 error 代表流需要重启
 func SshAccountSet(account *proto.SshAccount) error {
 	logger := log.WithField("username", account.Username)
 
@@ -52,9 +53,7 @@ func SshAccountSet(account *proto.SshAccount) error {
 		}
 		logger.Infoln("用户已删除")
 	} else if account.IsKill {
-		if err = DoUserProcessKill(logger, account.Username); err != nil {
-			return err
-		}
+		_ = DoUserProcessKill(logger, account.Username)
 	} else {
 		ready, exist := accounts[account.Username]
 		if !exist {
