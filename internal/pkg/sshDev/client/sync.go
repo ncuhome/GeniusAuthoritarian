@@ -78,20 +78,20 @@ func SshAccountSet(account *proto.SshAccount) error {
 func SshAccountSync(msg *proto.AccountStream) error {
 	if msg.IsInit {
 		// 查找本地多出来的账号
-		accountsInit := make(map[string]bool, len(msg.Accounts))
-		for _, account := range msg.Accounts {
-			accountsInit[account.Username] = true
-		}
+		accountsShouldDelete := make(map[string]bool, len(accounts))
 		for username := range accounts {
-			delete(accountsInit, username)
+			accountsShouldDelete[username] = true
 		}
-		if len(accountsInit) != 0 {
-			newAccountsArray := make([]*proto.SshAccount, len(msg.Accounts)+len(accountsInit))
+		for _, account := range msg.Accounts {
+			delete(accountsShouldDelete, account.Username)
+		}
+		if len(accountsShouldDelete) != 0 {
+			newAccountsArray := make([]*proto.SshAccount, len(msg.Accounts)+len(accountsShouldDelete))
 			for i, account := range msg.Accounts {
 				newAccountsArray[i] = account
 			}
 			i := len(msg.Accounts)
-			for username := range accountsInit {
+			for username := range accountsShouldDelete {
 				newAccountsArray[i] = &proto.SshAccount{
 					IsDel:    true,
 					Username: username,
