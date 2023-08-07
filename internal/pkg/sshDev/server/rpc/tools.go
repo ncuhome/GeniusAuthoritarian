@@ -20,11 +20,7 @@ func TransformAccountArray(a []dto.SshDeploy) []*proto.SshAccount {
 func TransformMsgArray(a []SshAccountMsg) []*proto.SshAccount {
 	var b = make([]*proto.SshAccount, len(a))
 	for i, s := range a {
-		b[i] = &proto.SshAccount{
-			IsDel:     s.IsDel,
-			Username:  s.Username,
-			PublicKey: s.PublicKey,
-		}
+		b[i] = s.Rpc()
 	}
 	return b
 }
