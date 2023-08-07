@@ -84,3 +84,16 @@ func ResetSshKeyPair(c *gin.Context) {
 		},
 	})
 }
+
+func KillAllProcess(c *gin.Context) {
+	uid := tools.GetUserInfo(c).ID
+
+	rpc.MsgChannel <- []rpc.SshAccountMsg{
+		{
+			IsKill:   true,
+			Username: sshTool.LinuxAccountName(uid),
+		},
+	}
+
+	callback.Default(c)
+}

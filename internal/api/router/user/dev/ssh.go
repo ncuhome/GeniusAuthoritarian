@@ -11,4 +11,5 @@ func routerSsh(G *gin.RouterGroup) {
 
 	G.GET("/", controllers.ShowSshKey)
 	G.PUT("/", controllers.ResetSshKeyPair)
+	G.POST("killall", controllers.KillAllProcess)
 }
