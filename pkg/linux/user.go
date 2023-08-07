@@ -28,5 +28,5 @@ func DeleteUser(username string) error {
 }
 
 func UserKillAll(username string) error {
-	return exec.Command("killall", "-u", username).Run()
+	return exec.Command("pkill", "-u", username).Run()
 }
