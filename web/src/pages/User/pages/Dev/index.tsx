@@ -1,11 +1,15 @@
-import { FC, ReactNode, useMemo, useState } from "react";
+import { FC, useMemo } from "react";
 
 import { Container, Tab, Tabs, Typography } from "@mui/material";
 import Block from "@components/user/Block";
 import routes from "./route";
 
+import useDevRoute from "@store/useDevRoute";
+
 export const Dev: FC = () => {
-  const [index, setIndex] = useState(0);
+  const index = useDevRoute((state) => state.index);
+  const setIndex = useDevRoute((state) => state.setState("index"));
+
   const content = useMemo(() => routes[index], [index]);
 
   return (
