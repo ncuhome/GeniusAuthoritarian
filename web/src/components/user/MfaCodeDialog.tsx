@@ -38,19 +38,27 @@ export const MfaCodeDialog: FC = () => {
   }
 
   useEffect(() => {
-    if (callback) setCode("");
+    if (callback) {
+      setCode("");
+    }
   }, [callback]);
 
   return (
-    <Dialog open={Boolean(callback)} onClose={() => setCallback(null)}>
+    <Dialog
+      open={Boolean(callback)}
+      onAnimationStart={() => {
+        if (callback) inputEl.current?.focus();
+      }}
+      onClose={() => setCallback(null)}
+    >
       <DialogTitle>双因素认证校验</DialogTitle>
       <DialogContent
         sx={{
           width: "20rem",
+          maxWidth: "100%",
         }}
       >
         <TextField
-          autoFocus
           fullWidth
           margin="dense"
           inputRef={inputEl}

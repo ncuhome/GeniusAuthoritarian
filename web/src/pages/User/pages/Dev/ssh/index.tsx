@@ -183,7 +183,7 @@ const Ssh: FC = () => {
           <Stack
             alignItems={"center"}
             justifyContent={"center"}
-            height={"10rem"}
+            height={"15rem"}
           >
             <Stack
               justifyContent={"center"}
