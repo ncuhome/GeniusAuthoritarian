@@ -9,6 +9,7 @@
     min-height: 100%;
     display: flex;
     flex-direction: column;
+    padding-bottom: 1rem;
 }
 
 #user .MuiContainer-root > .MuiBox-root {
