@@ -1,7 +1,6 @@
 package linux
 
 import (
-	"github.com/Mmx233/tool"
 	"os/exec"
 )
 
@@ -9,10 +8,6 @@ import (
 
 func UserHomePath(username string) string {
 	return "/home/" + username
-}
-
-func UserExist(username string) (bool, error) {
-	return tool.File.Exists(UserHomePath(username))
 }
 
 func CreateUser(username string) error {

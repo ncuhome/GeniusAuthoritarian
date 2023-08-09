@@ -18,13 +18,13 @@ func DoAccountDelete(logger *log.Entry, username string) error {
 	return nil
 }
 
-func DoUserProcessKill(logger *log.Entry, username string) error {
+// DoUserProcessKill 当用户没有进程时，将会产生 error，所以忽略 error
+func DoUserProcessKill(logger *log.Entry, username string) {
 	if err := linux.UserKillAll(username); err != nil {
-		logger.Errorln("结束用户进程失败:", err)
-		return err
+		logger.Warnln("结束用户进程失败:", err)
+		return
 	}
 	logger.Infoln("用户进程已清理")
-	return nil
 }
 
 func LinuxUserPreset(logger *log.Entry, username string) error {
@@ -45,15 +45,13 @@ func SshAccountSet(account *proto.SshAccount) error {
 
 	var err error
 	if account.IsDel {
-		if err = DoUserProcessKill(logger, account.Username); err != nil {
-			return err
-		}
+		DoUserProcessKill(logger, account.Username)
 		if err = DoAccountDelete(logger, account.Username); err != nil {
 			return err
 		}
 		logger.Infoln("用户已删除")
 	} else if account.IsKill {
-		_ = DoUserProcessKill(logger, account.Username)
+		DoUserProcessKill(logger, account.Username)
 	} else {
 		ready, exist := accounts[account.Username]
 		if !exist {
