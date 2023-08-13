@@ -9,16 +9,14 @@ import {
   DialogTitle,
   TextField,
 } from "@mui/material";
-import { LoadingButton } from "@mui/lab";
 
 import useMfaCodeDialog from "@store/useMfaCodeDialog";
 
 export const MfaCodeDialog: FC = () => {
   const callback = useMfaCodeDialog((state) => state.callback);
-  const setCallback = useMfaCodeDialog((state) => state.setState("callback"));
+  const resetDialog = useMfaCodeDialog((state) => state.resetDialog);
 
   const [code, setCode] = useState("");
-  const [isLoading, setIsLoading] = useState(false);
   const inputEl = useRef<HTMLInputElement | null>(null);
 
   async function handleSubmit() {
@@ -32,9 +30,7 @@ export const MfaCodeDialog: FC = () => {
       inputEl.current?.focus();
       return;
     }
-    setIsLoading(true);
-    await callback!(code);
-    setIsLoading(false);
+    callback!(code);
   }
 
   useEffect(() => {
@@ -49,7 +45,7 @@ export const MfaCodeDialog: FC = () => {
       onAnimationStart={() => {
         if (callback) inputEl.current?.focus();
       }}
-      onClose={() => setCallback(null)}
+      onClose={resetDialog}
     >
       <DialogTitle>双因素认证校验</DialogTitle>
       <DialogContent>
@@ -71,10 +67,8 @@ export const MfaCodeDialog: FC = () => {
         />
       </DialogContent>
       <DialogActions>
-        <Button onClick={() => setCallback(null)}>取消</Button>
-        <LoadingButton loading={isLoading} onClick={handleSubmit}>
-          确认
-        </LoadingButton>
+        <Button onClick={resetDialog}>取消</Button>
+        <Button onClick={handleSubmit}>确认</Button>
       </DialogActions>
     </Dialog>
   );

@@ -1,16 +1,24 @@
 import { create } from "zustand";
 
 type MfaCodeDialog = {
-  callback: ((code: string) => Promise<void>) | null;
+  description?: string;
+  callback: ((code: string | null) => void) | null;
 
-  setState: <T extends keyof MfaCodeDialog>(
-    key: T
-  ) => (value: MfaCodeDialog[T]) => void;
+  setDialog: (callback: (code: string | null) => void, desc?: string) => void;
+  resetDialog: () => void;
 };
 
 const useMfaCodeDialog = create<MfaCodeDialog>()((set) => ({
   callback: null,
 
-  setState: (key) => (value) => set({ [key]: value }),
+  setDialog: (callback, desc) => {
+    set({
+      description: desc,
+      callback: callback,
+    });
+  },
+  resetDialog: () => {
+    set({ callback: null });
+  },
 }));
-export default useMfaCodeDialog
+export default useMfaCodeDialog;

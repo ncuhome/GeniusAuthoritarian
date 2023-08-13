@@ -23,8 +23,8 @@ import { Done, Remove } from "@mui/icons-material";
 
 import { apiV1User } from "@api/v1/user/base";
 
+import useMfaCode from "@hooks/useMfaCode";
 import { shallow } from "zustand/shallow";
-import useMfaCodeDialog from "@store/useMfaCodeDialog";
 import useNewMfaForm from "@store/useNewMfa";
 
 interface Props extends StackProps {
@@ -33,9 +33,7 @@ interface Props extends StackProps {
 }
 
 export const Mfa: FC<Props> = ({ enabled, setEnabled, ...props }) => {
-  const setMfaCodeCallback = useMfaCodeDialog((state) =>
-    state.setState("callback")
-  );
+  const onMfaCode = useMfaCode();
 
   const [newMfaStep, newMfaSmsCode, newMfaCode] = useNewMfaForm(
     (state) => [state.step, state.smsCode, state.mfaCode],
@@ -105,7 +103,8 @@ export const Mfa: FC<Props> = ({ enabled, setEnabled, ...props }) => {
     }
   }
 
-  async function onDisableMfa(code: string) {
+  async function onDisableMfa() {
+    const code = await onMfaCode();
     try {
       await apiV1User.delete("mfa/", {
         params: {
@@ -117,7 +116,6 @@ export const Mfa: FC<Props> = ({ enabled, setEnabled, ...props }) => {
     } catch ({ msg }) {
       if (msg) toast.error(msg as string);
     }
-    setMfaCodeCallback(null);
   }
 
   function renderNewMfaStep(step: number) {
@@ -253,10 +251,7 @@ export const Mfa: FC<Props> = ({ enabled, setEnabled, ...props }) => {
         >
           {enabled ? (
             <>
-              <Button
-                color={"warning"}
-                onClick={() => setMfaCodeCallback(onDisableMfa)}
-              >
+              <Button color={"warning"} onClick={onDisableMfa}>
                 关闭
               </Button>
             </>

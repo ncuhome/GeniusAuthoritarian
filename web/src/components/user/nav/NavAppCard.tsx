@@ -7,16 +7,14 @@ import { DataSaverOff, LinkOff } from "@mui/icons-material";
 
 import { apiV1User } from "@api/v1/user/base";
 
-import useMfaCodeDialog from "@store/useMfaCodeDialog";
+import useMfaCode from "@hooks/useMfaCode";
 
 interface Props {
   app: App.Info;
 }
 
 export const NavAppCard: FC<Props> = ({ app }) => {
-  const setMfaCodeCallback = useMfaCodeDialog((state) =>
-    state.setState("callback")
-  );
+  const onMfaCode = useMfaCode();
 
   const [elevation, setElevation] = useState(5);
 
@@ -36,7 +34,8 @@ export const NavAppCard: FC<Props> = ({ app }) => {
     } catch ({ msg, response }) {
       console.log(response, (response as any)?.data);
       if ((response as any)?.data?.code === 21) {
-        setMfaCodeCallback((code) => onLandingApp(id, code));
+        const code = await onMfaCode();
+        await onLandingApp(id, code);
       } else if (msg) toast.error(msg as string);
     }
   }

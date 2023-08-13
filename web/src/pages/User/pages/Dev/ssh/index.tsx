@@ -27,12 +27,10 @@ import TipIconButton from "@components/TipIconButton";
 import { useUserApiV1 } from "@api/v1/user/hook";
 import { apiV1User } from "@api/v1/user/base";
 
-import useMfaCodeDialog from "@store/useMfaCodeDialog";
+import useMfaCode from "@hooks/useMfaCode";
 
 const Ssh: FC = () => {
-  const setMfaCodeCallback = useMfaCodeDialog((state) =>
-    state.setState("callback")
-  );
+  const onMfaCode = useMfaCode();
 
   const [sshKey, setSshKey] = useState<User.SSH.Keys | null>(null);
   const [keyMode, setKeyMode] = useState<"pem" | "ssh">("ssh");
@@ -46,8 +44,9 @@ const Ssh: FC = () => {
     onSuccess: (data: any) => setMfaEnabled(data.mfa),
   });
 
-  async function onShowSshKeys(code: string) {
+  async function onShowSshKeys() {
     setIsUnlockLoading(true);
+    const code = await onMfaCode();
     try {
       const {
         data: { data },
@@ -60,11 +59,11 @@ const Ssh: FC = () => {
     } catch ({ msg }) {
       if (msg) toast.error(msg as string);
     }
-    setMfaCodeCallback(null);
     setIsUnlockLoading(false);
   }
 
-  async function onResetSshKey(code: string) {
+  async function onResetSshKey() {
+    const code = await onMfaCode();
     try {
       const {
         data: { data },
@@ -76,10 +75,10 @@ const Ssh: FC = () => {
     } catch ({ msg }) {
       if (msg) toast.error(msg as string);
     }
-    setMfaCodeCallback(null);
   }
 
-  async function onKillAllProcess(code: string) {
+  async function onKillAllProcess() {
+    const code = await onMfaCode();
     try {
       await apiV1User.post("dev/ssh/killall", {
         code,
@@ -88,7 +87,6 @@ const Ssh: FC = () => {
     } catch ({ msg }) {
       if (msg) toast.error(msg as string);
     }
-    setMfaCodeCallback(null);
   }
 
   return (
@@ -96,16 +94,10 @@ const Ssh: FC = () => {
       <Stack spacing={2}>
         <Stack flexDirection={"row"}>
           <ButtonGroup variant="outlined">
-            <TipButton
-              title={"重置 SSH 密钥"}
-              onClick={() => setMfaCodeCallback(onResetSshKey)}
-            >
+            <TipButton title={"重置 SSH 密钥"} onClick={onResetSshKey}>
               <RestartAlt />
             </TipButton>
-            <TipButton
-              title={"结束进程 (终端)"}
-              onClick={() => setMfaCodeCallback(onKillAllProcess)}
-            >
+            <TipButton title={"结束进程 (终端)"} onClick={onKillAllProcess}>
               <PersonOff />
             </TipButton>
           </ButtonGroup>
@@ -206,7 +198,7 @@ const Ssh: FC = () => {
               variant={"outlined"}
               disabled={mfaEnabled === false}
               loading={isUnlockLoading || isMfaStatusLoading}
-              onClick={() => setMfaCodeCallback(onShowSshKeys)}
+              onClick={onShowSshKeys}
             >
               {mfaEnabled === false ? "请在个人资料页开启 MFA" : "解锁"}
             </LoadingButton>
