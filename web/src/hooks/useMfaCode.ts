@@ -1,5 +1,6 @@
 import useMfaCodeDialog from "@store/useMfaCodeDialog";
 
+// 限 user 路由使用
 export const useMfaCode = (): ((desc?: string) => Promise<string>) => {
   const setDialog = useMfaCodeDialog((state) => state.setDialog);
   const resetDialog = useMfaCodeDialog((state) => state.resetDialog);

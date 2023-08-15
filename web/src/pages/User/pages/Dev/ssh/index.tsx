@@ -46,18 +46,22 @@ const Ssh: FC = () => {
 
   async function onShowSshKeys() {
     setIsUnlockLoading(true);
-    const code = await onMfaCode();
     try {
-      const {
-        data: { data },
-      } = await apiV1User.get("dev/ssh/", {
-        params: {
-          code,
-        },
-      });
-      setSshKey(data);
-    } catch ({ msg }) {
-      if (msg) toast.error(msg as string);
+      const code = await onMfaCode();
+      try {
+        const {
+          data: { data },
+        } = await apiV1User.get("dev/ssh/", {
+          params: {
+            code,
+          },
+        });
+        setSshKey(data);
+      } catch ({ msg }) {
+        if (msg) toast.error(msg as string);
+      }
+    } catch (err) {
+
     }
     setIsUnlockLoading(false);
   }

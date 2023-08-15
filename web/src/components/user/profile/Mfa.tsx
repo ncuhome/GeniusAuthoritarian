@@ -9,7 +9,6 @@ import {
   Dialog,
   DialogContent,
   DialogActions,
-  ButtonGroup,
   Button,
   Stepper,
   Step,
@@ -55,6 +54,8 @@ export const Mfa: FC<Props> = ({ enabled, setEnabled, ...props }) => {
 
   const [showNewMfa, setShowNewMfa] = useState(false);
   const [mfaNew, setMfaNew] = useState<User.Mfa.New | null>(null);
+
+  const [isCloseMfaLoading, setIsCloseMfaLoading] = useState(false);
 
   async function onEnableMfa() {
     resetNewMfaForm();
@@ -104,18 +105,24 @@ export const Mfa: FC<Props> = ({ enabled, setEnabled, ...props }) => {
   }
 
   async function onDisableMfa() {
-    const code = await onMfaCode();
+    setIsCloseMfaLoading(true)
     try {
-      await apiV1User.delete("mfa/", {
-        params: {
-          code,
-        },
-      });
-      setEnabled(false);
-      toast.success("已关闭双因素认证");
-    } catch ({ msg }) {
-      if (msg) toast.error(msg as string);
+      const code = await onMfaCode();
+      try {
+        await apiV1User.delete("mfa/", {
+          params: {
+            code,
+          },
+        });
+        setEnabled(false);
+        toast.success("已关闭双因素认证");
+      } catch ({ msg }) {
+        if (msg) toast.error(msg as string);
+      }
+    } catch (err) {
+
     }
+    setIsCloseMfaLoading(false)
   }
 
   function renderNewMfaStep(step: number) {
@@ -244,16 +251,21 @@ export const Mfa: FC<Props> = ({ enabled, setEnabled, ...props }) => {
           }
         />
 
-        <ButtonGroup
+        <Box
           sx={{
             ml: 2,
           }}
         >
           {enabled ? (
             <>
-              <Button color={"warning"} onClick={onDisableMfa}>
+              <LoadingButton
+                variant={"outlined"}
+                color={"warning"}
+                loading={isCloseMfaLoading}
+                onClick={onDisableMfa}
+              >
                 关闭
-              </Button>
+              </LoadingButton>
             </>
           ) : (
             <>
@@ -262,7 +274,7 @@ export const Mfa: FC<Props> = ({ enabled, setEnabled, ...props }) => {
               </Button>
             </>
           )}
-        </ButtonGroup>
+        </Box>
       </Stack>
 
       <Dialog open={showNewMfa} onClose={() => setShowNewMfa(false)}>

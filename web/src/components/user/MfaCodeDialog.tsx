@@ -19,6 +19,11 @@ export const MfaCodeDialog: FC = () => {
   const [code, setCode] = useState("");
   const inputEl = useRef<HTMLInputElement | null>(null);
 
+  const handleCancel = () => {
+    if(callback) callback(null)
+    resetDialog()
+  }
+
   async function handleSubmit() {
     if (!code) {
       toast.error("请输入校验码");
@@ -45,7 +50,7 @@ export const MfaCodeDialog: FC = () => {
       onAnimationStart={() => {
         if (callback) inputEl.current?.focus();
       }}
-      onClose={resetDialog}
+      onClose={handleCancel}
     >
       <DialogTitle>双因素认证校验</DialogTitle>
       <DialogContent>
@@ -67,7 +72,7 @@ export const MfaCodeDialog: FC = () => {
         />
       </DialogContent>
       <DialogActions>
-        <Button onClick={resetDialog}>取消</Button>
+        <Button onClick={handleCancel}>取消</Button>
         <Button onClick={handleSubmit}>确认</Button>
       </DialogActions>
     </Dialog>
