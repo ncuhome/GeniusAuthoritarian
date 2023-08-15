@@ -33,8 +33,11 @@ func (a Ums) Send(msg string, phone string) error {
 	msgGbk, err := a.transformEncoding(bytes.NewBuffer([]byte(msg)), simplifiedchinese.GBK.NewEncoder())
 
 	res, err := a.http.PostRequest(&tool.DoHttpReq{
-		Url: "http://smsapi.ums86.com:8888/sms/Api/Send.do",
-		Query: map[string]interface{}{
+		Url: "https://smsapi.ums86.com:9600/sms/Api/Send.do",
+		Header: map[string]interface{}{
+			"Content-Type": "application/x-www-form-urlencoded",
+		},
+		Body: map[string]interface{}{
 			"SpCode":         a.conf.SpCode,
 			"LoginName":      a.conf.LoginName,
 			"Password":       a.conf.Password,
@@ -46,7 +49,6 @@ func (a Ums) Send(msg string, phone string) error {
 	if err != nil {
 		return err
 	}
-
 	defer res.Body.Close()
 	resStr, err := a.transformEncoding(res.Body, simplifiedchinese.GBK.NewDecoder())
 	if err != nil {
@@ -58,6 +60,5 @@ func (a Ums) Send(msg string, phone string) error {
 	} else if data.Get("result") != "0" {
 		return errors.New(resStr)
 	}
-
 	return nil
 }
