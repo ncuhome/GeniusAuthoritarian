@@ -214,8 +214,7 @@ func ThirdPartyLogin(c *gin.Context) {
 			return
 		}
 	} else {
-		var baseGroups []dao.BaseGroup
-		baseGroups, e = service.UserGroups.GetForAppCode(user.ID, appCode)
+		groups, e = service.UserGroups.GetForAppCode(user.ID, appCode)
 		if e != nil {
 			if errors.Is(e, gorm.ErrRecordNotFound) {
 				callback.ErrorWithTip(c, callback.ErrUnauthorized, "没有找到角色，请尝试使用其他登录方式或联系管理员")
@@ -228,11 +227,6 @@ func ThirdPartyLogin(c *gin.Context) {
 		if len(groups) == 0 && !appInfo.PermitAllGroup {
 			callback.Error(c, callback.ErrFindUnit)
 			return
-		}
-
-		groups = make([]string, len(baseGroups))
-		for i, g := range baseGroups {
-			groups[i] = g.Name
 		}
 	}
 
