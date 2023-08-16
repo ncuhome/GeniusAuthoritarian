@@ -50,15 +50,15 @@ func (a Ums) Send(msg string, phone string) error {
 		return err
 	}
 	defer res.Body.Close()
-	resStr, err := a.transformEncoding(res.Body, simplifiedchinese.GBK.NewDecoder())
+	resBytes, err := io.ReadAll(res.Body)
 	if err != nil {
 		return err
 	}
-	data, err := url.ParseQuery(resStr)
+	data, err := url.ParseQuery(string(resBytes))
 	if err != nil {
 		return err
 	} else if data.Get("result") != "0" {
-		return errors.New(resStr)
+		return errors.New(string(resBytes))
 	}
 	return nil
 }
