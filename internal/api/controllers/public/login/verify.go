@@ -15,15 +15,15 @@ import (
 
 // 验证 token 并添加登录记录
 func doVerifyToken(c *gin.Context, tx *gorm.DB, token string) *jwt.LoginTokenClaims {
-	claims, valid, e := jwt.ParseLoginToken(token)
-	if e != nil || !valid {
-		callback.Error(c, callback.ErrUnauthorized, e)
+	claims, valid, err := jwt.ParseLoginToken(token)
+	if err != nil || !valid {
+		callback.Error(c, callback.ErrUnauthorized, err)
 		return nil
 	}
 
 	loginRecordSrv := service.LoginRecordSrv{DB: tx}
-	if e = loginRecordSrv.Add(claims.UID, claims.AppID, claims.IP); e != nil {
-		callback.Error(c, callback.ErrDBOperation, e)
+	if err = loginRecordSrv.Add(claims.UID, claims.AppID, claims.IP); err != nil {
+		callback.Error(c, callback.ErrDBOperation, err)
 		return nil
 	}
 
@@ -104,8 +104,8 @@ func Login(c *gin.Context) {
 	var f struct {
 		Token string `json:"token" form:"token" binding:"required"`
 	}
-	if e := c.ShouldBind(&f); e != nil {
-		callback.Error(c, callback.ErrForm, e)
+	if err := c.ShouldBind(&f); err != nil {
+		callback.Error(c, callback.ErrForm, err)
 		return
 	}
 
@@ -128,25 +128,25 @@ func Login(c *gin.Context) {
 	}
 
 	userGroupSrv := service.UserGroupsSrv{DB: tx}
-	groups, e := userGroupSrv.GetForUser(claims.UID)
-	if e != nil {
-		callback.Error(c, callback.ErrDBOperation, e)
+	groups, err := userGroupSrv.GetForUser(claims.UID)
+	if err != nil {
+		callback.Error(c, callback.ErrDBOperation, err)
 		return
 	}
 
-	if e = tx.Commit().Error; e != nil {
-		callback.Error(c, callback.ErrDBOperation, e)
+	if err = tx.Commit().Error; err != nil {
+		callback.Error(c, callback.ErrDBOperation, err)
 		return
 	}
 
-	token, e := jwt.GenerateUserToken(claims.UID, claims.Name, groups)
-	if e != nil {
-		callback.Error(c, callback.ErrUnexpected, e)
+	token, err := jwt.GenerateUserToken(claims.UID, claims.Name, groups)
+	if err != nil {
+		callback.Error(c, callback.ErrUnexpected, err)
 		return
 	}
 
-	if e = redis.UserJwt.Set(claims.UID, token, time.Hour*24*15); e != nil {
-		callback.Error(c, callback.ErrUnexpected, e)
+	if err = redis.UserJwt.Set(claims.UID, token, time.Hour*24*15); err != nil {
+		callback.Error(c, callback.ErrUnexpected, err)
 		return
 	}
 

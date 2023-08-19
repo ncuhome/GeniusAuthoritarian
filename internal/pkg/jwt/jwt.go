@@ -32,8 +32,8 @@ func GenerateUserToken(uid uint, name string, groups []string) (string, error) {
 	now := time.Now()
 	return GenerateToken(&UserToken{
 		RegisteredClaims: jwt.RegisteredClaims{
-			ExpiresAt: jwt.NewNumericDate(now.Add(time.Hour*24*15 + time.Second*5)),
-			IssuedAt:  jwt.NewNumericDate(now.Add(-time.Second * 5)),
+			ExpiresAt: jwt.NewNumericDate(now.Add(time.Hour * 24 * 15)),
+			IssuedAt:  jwt.NewNumericDate(now),
 		},
 		ID:     uid,
 		Name:   name,
@@ -46,15 +46,15 @@ func GenerateLoginToken(clams LoginTokenClaims) (string, error) {
 	now := time.Now()
 	valid := time.Minute * 5
 
-	id, e := redis.ThirdPartyLogin.NewLoginPoint(now.Unix(), valid, clams)
-	if e != nil {
-		return "", e
+	id, err := redis.ThirdPartyLogin.NewLoginPoint(now.Unix(), valid, clams)
+	if err != nil {
+		return "", err
 	}
 
 	return GenerateToken(&LoginToken{
 		RegisteredClaims: jwt.RegisteredClaims{
-			ExpiresAt: jwt.NewNumericDate(now.Add(valid + time.Second*5)),
-			IssuedAt:  jwt.NewNumericDate(now.Add(-time.Second * 5)),
+			ExpiresAt: jwt.NewNumericDate(now.Add(valid)),
+			IssuedAt:  jwt.NewNumericDate(now),
 		},
 		ID: id,
 	})
@@ -65,23 +65,23 @@ func GenerateMfaToken(clams LoginTokenClaims, mfaSecret, appCallback string) (st
 	now := time.Now()
 	valid := time.Minute * 5
 
-	token, e := GenerateToken(&MfaToken{
+	token, err := GenerateToken(&MfaToken{
 		RegisteredClaims: jwt.RegisteredClaims{
-			ExpiresAt: jwt.NewNumericDate(now.Add(valid + time.Second*5)),
-			IssuedAt:  jwt.NewNumericDate(now.Add(-time.Second * 5)),
+			ExpiresAt: jwt.NewNumericDate(now.Add(valid)),
+			IssuedAt:  jwt.NewNumericDate(now),
 		},
 		UID: clams.UID,
 	})
-	if e != nil {
-		return "", e
+	if err != nil {
+		return "", err
 	}
 
-	if e = redis.MfaLogin.Set(clams.UID, token, valid, MfaLoginClaims{
+	if err = redis.MfaLogin.Set(clams.UID, token, valid, MfaLoginClaims{
 		LoginTokenClaims: clams,
 		Mfa:              mfaSecret,
 		AppCallback:      appCallback,
-	}); e != nil {
-		return "", e
+	}); err != nil {
+		return "", err
 	}
 
 	return token, nil
