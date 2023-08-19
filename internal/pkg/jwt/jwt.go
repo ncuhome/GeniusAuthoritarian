@@ -15,9 +15,12 @@ func GenerateToken(claims jwt.Claims) (string, error) {
 
 func ParseToken[C jwt.Claims](token string, target C) (claims C, valid bool, e error) {
 	var t *jwt.Token
-	t, e = jwt.ParseWithClaims(token, target, func(t *jwt.Token) (interface{}, error) {
-		return key, nil
-	})
+	t, e = jwt.ParseWithClaims(
+		token, target, func(t *jwt.Token) (interface{}, error) {
+			return key, nil
+		},
+		jwt.WithLeeway(time.Second*3),
+	)
 	if e != nil {
 		return
 	}
