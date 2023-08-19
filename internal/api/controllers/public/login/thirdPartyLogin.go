@@ -96,15 +96,15 @@ func callThirdPartyLoginResult(c *gin.Context, info ThirdPartyLoginContext) {
 	}
 
 	if info.User.MFA == "" {
-		token, e := jwt.GenerateLoginToken(claims)
-		if e != nil {
-			callback.Error(c, callback.ErrUnexpected, e)
+		token, err := jwt.GenerateLoginToken(claims)
+		if err != nil {
+			callback.Error(c, callback.ErrUnexpected, err)
 			return
 		}
 
-		callbackUrl, e := tools.GenCallback(info.AppInfo.Callback, token)
-		if e != nil {
-			callback.Error(c, callback.ErrUnexpected, e)
+		callbackUrl, err := tools.GenCallback(info.AppInfo.Callback, token)
+		if err != nil {
+			callback.Error(c, callback.ErrUnexpected, err)
 			return
 		}
 
@@ -114,9 +114,9 @@ func callThirdPartyLoginResult(c *gin.Context, info ThirdPartyLoginContext) {
 			Callback: callbackUrl,
 		})
 	} else {
-		token, e := jwt.GenerateMfaToken(claims, info.User.MFA, info.AppInfo.Callback)
-		if e != nil {
-			callback.Error(c, callback.ErrUnexpected, e)
+		token, err := jwt.GenerateMfaToken(claims, info.User.MFA, info.AppInfo.Callback)
+		if err != nil {
+			callback.Error(c, callback.ErrUnexpected, err)
 			return
 		}
 
@@ -174,11 +174,11 @@ func ThirdPartyLogin(c *gin.Context) {
 
 	appCode := c.Param("appCode")
 
-	if ok, e := service.App.CheckAppCode(appCode); e != nil {
-		callback.Error(c, callback.ErrDBOperation, e)
+	if ok, err := service.App.CheckAppCode(appCode); err != nil {
+		callback.Error(c, callback.ErrDBOperation, err)
 		return
 	} else if !ok {
-		callback.Error(c, callback.ErrAppCodeNotFound, e)
+		callback.Error(c, callback.ErrAppCodeNotFound, err)
 		return
 	}
 
@@ -190,37 +190,37 @@ func ThirdPartyLogin(c *gin.Context) {
 		return
 	}
 
-	appInfo, e := service.App.FirstAppByAppCode(appCode)
-	if e != nil {
-		callback.Error(c, callback.ErrDBOperation, e)
+	appInfo, err := service.App.FirstAppByAppCode(appCode)
+	if err != nil {
+		callback.Error(c, callback.ErrDBOperation, err)
 		return
 	}
 
-	user, e := service.User.UserInfo(userIdentity.Phone)
-	if e != nil {
-		callback.Error(c, callback.ErrDBOperation, e)
+	user, err := service.User.UserInfo(userIdentity.Phone)
+	if err != nil {
+		callback.Error(c, callback.ErrDBOperation, err)
 		return
 	}
 
 	var groups []string
-	isCenterMember, e := service.UserGroups.IsCenterMember(user.ID)
-	if e != nil {
-		callback.Error(c, callback.ErrDBOperation, e)
+	isCenterMember, err := service.UserGroups.IsCenterMember(user.ID)
+	if err != nil {
+		callback.Error(c, callback.ErrDBOperation, err)
 		return
 	} else if isCenterMember {
-		groups, e = service.UserGroups.GetForUser(user.ID)
-		if e != nil {
-			callback.Error(c, callback.ErrDBOperation, e)
+		groups, err = service.UserGroups.GetForUser(user.ID)
+		if err != nil {
+			callback.Error(c, callback.ErrDBOperation, err)
 			return
 		}
 	} else {
-		groups, e = service.UserGroups.GetForAppCode(user.ID, appCode)
-		if e != nil {
-			if errors.Is(e, gorm.ErrRecordNotFound) {
+		groups, err = service.UserGroups.GetForAppCode(user.ID, appCode)
+		if err != nil {
+			if errors.Is(err, gorm.ErrRecordNotFound) {
 				callback.ErrorWithTip(c, callback.ErrUnauthorized, "没有找到角色，请尝试使用其他登录方式或联系管理员")
 				return
 			}
-			callback.Error(c, callback.ErrDBOperation, e)
+			callback.Error(c, callback.ErrDBOperation, err)
 			return
 		}
 

@@ -17,9 +17,9 @@ func VerifyMfa(c *gin.Context) {
 		return
 	}
 
-	claims, e := jwt.ParseMfaToken(f.Token)
-	if e != nil {
-		callback.Error(c, callback.ErrUnauthorized)
+	claims, err := jwt.ParseMfaToken(f.Token)
+	if err != nil {
+		callback.Error(c, callback.ErrUnauthorized, err)
 		return
 	}
 
@@ -28,24 +28,24 @@ func VerifyMfa(c *gin.Context) {
 		return
 	}
 
-	valid, e := tools.VerifyMfa(f.Code, claims.Mfa)
-	if e != nil {
-		callback.Error(c, callback.ErrUnexpected, e)
+	valid, err := tools.VerifyMfa(f.Code, claims.Mfa)
+	if err != nil {
+		callback.Error(c, callback.ErrUnexpected, err)
 		return
 	} else if !valid {
 		callback.Error(c, callback.ErrMfaCode)
 		return
 	}
 
-	token, e := jwt.GenerateLoginToken(claims.LoginTokenClaims)
-	if e != nil {
-		callback.Error(c, callback.ErrUnexpected, e)
+	token, err := jwt.GenerateLoginToken(claims.LoginTokenClaims)
+	if err != nil {
+		callback.Error(c, callback.ErrUnexpected, err)
 		return
 	}
 
-	callbackUrl, e := tools.GenCallback(claims.AppCallback, token)
-	if e != nil {
-		callback.Error(c, callback.ErrUnexpected, e)
+	callbackUrl, err := tools.GenCallback(claims.AppCallback, token)
+	if err != nil {
+		callback.Error(c, callback.ErrUnexpected, err)
 		return
 	}
 
