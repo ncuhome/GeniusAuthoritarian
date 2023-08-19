@@ -15,21 +15,24 @@ import (
 )
 
 func checkCallback(c *gin.Context, callbackStr string) {
-	callbackUrl, e := url.Parse(callbackStr)
-	if e != nil {
-		callback.Error(c, callback.ErrForm, e)
+	callbackUrl, err := url.Parse(callbackStr)
+	if err != nil {
+		callback.Error(c, callback.ErrForm, err)
+		return
+	} else if callbackUrl.Hostname() == "localhost" {
+		// 允许调用本地服务
 		return
 	} else if callbackUrl.Scheme != "https" {
 		callback.Error(c, callback.ErrForm)
 		return
 	}
 
-	exist, e := service.SiteWhiteList.Exist(callbackUrl.Host)
-	if e != nil {
-		callback.Error(c, callback.ErrDBOperation, e)
+	exist, err := service.SiteWhiteList.Exist(callbackUrl.Host)
+	if err != nil {
+		callback.Error(c, callback.ErrDBOperation, err)
 		return
 	} else if !exist {
-		callback.Error(c, callback.ErrSiteNotAllow, e)
+		callback.Error(c, callback.ErrSiteNotAllow, err)
 		return
 	}
 }
