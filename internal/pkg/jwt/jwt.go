@@ -29,10 +29,12 @@ func ParseToken[C jwt.Claims](token string, target C) (claims C, valid bool, e e
 
 // GenerateUserToken 生成有效期 15 天的后台 Token
 func GenerateUserToken(uid uint, name string, groups []string) (string, error) {
+	now := time.Now()
 	return GenerateToken(&UserToken{
 		RegisteredClaims: jwt.RegisteredClaims{
-			ExpiresAt: jwt.NewNumericDate(time.Now().Add(time.Hour * 24 * 15)),
-			IssuedAt:  jwt.NewNumericDate(time.Now()),
+			NotBefore: jwt.NewNumericDate(now.Add(-time.Second * 5)),
+			ExpiresAt: jwt.NewNumericDate(now.Add(time.Hour * 24 * 15)),
+			IssuedAt:  jwt.NewNumericDate(now),
 		},
 		ID:     uid,
 		Name:   name,
@@ -52,6 +54,7 @@ func GenerateLoginToken(clams LoginTokenClaims) (string, error) {
 
 	return GenerateToken(&LoginToken{
 		RegisteredClaims: jwt.RegisteredClaims{
+			NotBefore: jwt.NewNumericDate(now.Add(-time.Second * 5)),
 			ExpiresAt: jwt.NewNumericDate(now.Add(valid)),
 			IssuedAt:  jwt.NewNumericDate(now),
 		},
@@ -66,6 +69,7 @@ func GenerateMfaToken(clams LoginTokenClaims, mfaSecret, appCallback string) (st
 
 	token, e := GenerateToken(&MfaToken{
 		RegisteredClaims: jwt.RegisteredClaims{
+			NotBefore: jwt.NewNumericDate(now.Add(-time.Second * 5)),
 			ExpiresAt: jwt.NewNumericDate(now.Add(valid)),
 			IssuedAt:  jwt.NewNumericDate(now),
 		},
