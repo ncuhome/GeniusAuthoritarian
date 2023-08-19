@@ -35,7 +35,7 @@ interface Props {
 
 const hasValidScheme = (input: string) => {
   const isLocalhost = input.includes("://localhost");
-  return input.indexOf("https://") === 0 || (isLocalhost && input.indexOf("http://")) === 0;
+  return input.indexOf("https://") === 0 || (isLocalhost && input.indexOf("http://") === 0);
 }
 
 export const AppForm: FC<Props> = ({
