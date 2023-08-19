@@ -32,9 +32,8 @@ func GenerateUserToken(uid uint, name string, groups []string) (string, error) {
 	now := time.Now()
 	return GenerateToken(&UserToken{
 		RegisteredClaims: jwt.RegisteredClaims{
-			NotBefore: jwt.NewNumericDate(now.Add(-time.Second * 5)),
-			ExpiresAt: jwt.NewNumericDate(now.Add(time.Hour * 24 * 15)),
-			IssuedAt:  jwt.NewNumericDate(now),
+			ExpiresAt: jwt.NewNumericDate(now.Add(time.Hour*24*15 + time.Second*5)),
+			IssuedAt:  jwt.NewNumericDate(now.Add(-time.Second * 5)),
 		},
 		ID:     uid,
 		Name:   name,
@@ -54,9 +53,8 @@ func GenerateLoginToken(clams LoginTokenClaims) (string, error) {
 
 	return GenerateToken(&LoginToken{
 		RegisteredClaims: jwt.RegisteredClaims{
-			NotBefore: jwt.NewNumericDate(now.Add(-time.Second * 5)),
-			ExpiresAt: jwt.NewNumericDate(now.Add(valid)),
-			IssuedAt:  jwt.NewNumericDate(now),
+			ExpiresAt: jwt.NewNumericDate(now.Add(valid + time.Second*5)),
+			IssuedAt:  jwt.NewNumericDate(now.Add(-time.Second * 5)),
 		},
 		ID: id,
 	})
@@ -69,9 +67,8 @@ func GenerateMfaToken(clams LoginTokenClaims, mfaSecret, appCallback string) (st
 
 	token, e := GenerateToken(&MfaToken{
 		RegisteredClaims: jwt.RegisteredClaims{
-			NotBefore: jwt.NewNumericDate(now.Add(-time.Second * 5)),
-			ExpiresAt: jwt.NewNumericDate(now.Add(valid)),
-			IssuedAt:  jwt.NewNumericDate(now),
+			ExpiresAt: jwt.NewNumericDate(now.Add(valid + time.Second*5)),
+			IssuedAt:  jwt.NewNumericDate(now.Add(-time.Second * 5)),
 		},
 		UID: clams.UID,
 	})
