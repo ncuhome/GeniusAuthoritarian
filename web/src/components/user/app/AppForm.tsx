@@ -33,6 +33,11 @@ interface Props {
   loading?: boolean;
 }
 
+const hasValidScheme = (input: string) => {
+  const isLocalhost = input.includes("://localhost");
+  return input.indexOf("https://") === 0 || (isLocalhost && input.indexOf("http://")) === 0;
+}
+
 export const AppForm: FC<Props> = ({
   useForm,
   submitText,
@@ -148,8 +153,9 @@ export const AppForm: FC<Props> = ({
             color={callbackError ? "error" : "primary"}
             value={callback}
             onChange={(e) => {
-              if (e.target.value.indexOf("https://") !== 0) return;
-              setCallback(e.target.value);
+              const text = e.target.value;
+              if (!hasValidScheme(text)) return;
+              setCallback(text);
             }}
           />
         </Grid>
@@ -169,9 +175,8 @@ export const AppForm: FC<Props> = ({
           xs={12}
           sm={6}
           sx={{
-            transition: `padding .3s ease-out${
-              permitAll ? " .3s" : ""
-            }, opacity 0.3s ease-out${permitAll ? "" : " .3s"}`,
+            transition: `padding .3s ease-out${permitAll ? " .3s" : ""
+              }, opacity 0.3s ease-out${permitAll ? "" : " .3s"}`,
             py: permitAll ? "0!important" : undefined,
             opacity: permitAll ? "0" : undefined,
           }}
