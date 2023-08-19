@@ -47,7 +47,7 @@ func (a *ThirdPartyLoginHelper) NewLoginPoint(unix int64, valid time.Duration, c
 }
 
 func (a *ThirdPartyLoginHelper) VerifyLoginPoint(id uint64, unix int64, claims interface{}) (bool, error) {
-	value, e := Client.Get(context.Background(), a.loginPointKey(id)).Result()
+	value, e := Client.GetDel(context.Background(), a.loginPointKey(id)).Result()
 	if e != nil {
 		if e == Nil {
 			e = nil

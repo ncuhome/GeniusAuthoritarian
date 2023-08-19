@@ -96,20 +96,20 @@ func ParseUserToken(token string) (*UserToken, bool, error) {
 
 // ParseLoginToken 解析后自动销毁
 func ParseLoginToken(token string) (*LoginTokenClaims, bool, error) {
-	claims, valid, e := ParseToken(token, &LoginToken{})
-	if e != nil || !valid {
-		return nil, false, e
+	claims, valid, err := ParseToken(token, &LoginToken{})
+	if err != nil || !valid {
+		return nil, false, err
 	}
 
 	var redisClaims LoginTokenClaims
-	valid, e = redis.ThirdPartyLogin.VerifyLoginPoint(claims.ID, claims.IssuedAt.Unix(), &redisClaims)
-	if e != nil {
-		if e == redis.Nil {
-			e = nil
+	valid, err = redis.ThirdPartyLogin.VerifyLoginPoint(claims.ID, claims.IssuedAt.Unix(), &redisClaims)
+	if err != nil {
+		if err == redis.Nil {
+			err = nil
 		}
-		return nil, false, e
+		return nil, false, err
 	}
-	return &redisClaims, valid, DestroyAuthToken(claims.ID)
+	return &redisClaims, valid, nil
 }
 
 // ParseMfaToken 不会销毁，允许多次验证尝试
@@ -121,8 +121,4 @@ func ParseMfaToken(token string) (*MfaLoginClaims, error) {
 
 	var redisClaims MfaLoginClaims
 	return &redisClaims, redis.MfaLogin.Get(claims.UID, token, &redisClaims)
-}
-
-func DestroyAuthToken(cID uint64) error {
-	return redis.ThirdPartyLogin.DelLoginPoint(cID)
 }
