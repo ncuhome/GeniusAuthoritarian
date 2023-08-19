@@ -1,7 +1,7 @@
 package jwt
 
 import (
-	"github.com/golang-jwt/jwt/v4"
+	"github.com/golang-jwt/jwt/v5"
 	"github.com/ncuhome/GeniusAuthoritarian/internal/db/redis"
 	"github.com/ncuhome/GeniusAuthoritarian/internal/global"
 	"time"
