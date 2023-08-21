@@ -1,6 +1,8 @@
 package backoff
 
 import (
+	"errors"
+	"fmt"
 	"github.com/Mmx233/tool"
 	"sync/atomic"
 	"time"
@@ -48,11 +50,17 @@ func (a Backoff) Start() {
 // Worker
 // 请注意,此处使用的是普通接收器,当 worker 重新运行时 retry 会被重置
 func (a Backoff) Worker() {
-	defer tool.Recover()
-
 	for {
-		e := a.f()
-		if e == nil {
+		errChan := make(chan error)
+		go func() {
+			defer func() {
+				if p := tool.Recover(); p != nil {
+					errChan <- errors.New(fmt.Sprint(p))
+				}
+			}()
+			errChan <- a.f()
+		}()
+		if err := <-errChan; err == nil {
 			break
 		}
 
