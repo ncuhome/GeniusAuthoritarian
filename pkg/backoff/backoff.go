@@ -4,7 +4,6 @@ import (
 	"github.com/Mmx233/tool"
 	"sync/atomic"
 	"time"
-	"unsafe"
 )
 
 // Backoff 错误重试 积分退避算法
@@ -13,17 +12,13 @@ type Backoff struct {
 	retry    time.Duration
 	maxRetry time.Duration
 
-	running *unsafe.Pointer // * => *bool
+	running *atomic.Bool
 }
 
 type Conf struct {
 	Content func() error
 	// 最大重试等待时间
 	MaxRetryDelay time.Duration
-}
-
-func TeeBool(b bool) unsafe.Pointer {
-	return unsafe.Pointer(&b)
 }
 
 func New(c Conf) Backoff {
@@ -34,19 +29,17 @@ func New(c Conf) Backoff {
 		c.MaxRetryDelay = time.Minute * 20
 	}
 
-	running := TeeBool(false)
 	return Backoff{
 		f:        c.Content,
 		retry:    time.Second,
 		maxRetry: c.MaxRetryDelay,
-		running:  &running,
+		running:  &atomic.Bool{},
 	}
 }
 
 func (a Backoff) Start() {
-	running := *a.running
-	if !*(*bool)(running) {
-		if atomic.CompareAndSwapPointer(a.running, running, TeeBool(true)) {
+	if !a.running.Load() {
+		if a.running.CompareAndSwap(false, true) {
 			go a.Worker()
 		}
 	}
@@ -73,5 +66,5 @@ func (a Backoff) Worker() {
 		}
 	}
 
-	*a.running = TeeBool(false)
+	a.running.Store(false)
 }
