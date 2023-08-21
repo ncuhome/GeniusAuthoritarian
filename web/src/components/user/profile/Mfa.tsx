@@ -107,7 +107,7 @@ export const Mfa: FC<Props> = ({ enabled, setEnabled, ...props }) => {
   async function onDisableMfa() {
     setIsCloseMfaLoading(true)
     try {
-      const code = await onMfaCode();
+      const code = await onMfaCode("无法完成校验请联系管理员");
       try {
         await apiV1User.delete("mfa/", {
           params: {

@@ -67,7 +67,7 @@ const Ssh: FC = () => {
   }
 
   async function onResetSshKey() {
-    const code = await onMfaCode();
+    const code = await onMfaCode("重置密钥不会断开已连接终端");
     try {
       const {
         data: { data },

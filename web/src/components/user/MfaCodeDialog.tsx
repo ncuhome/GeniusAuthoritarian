@@ -8,11 +8,13 @@ import {
   DialogContent,
   DialogTitle,
   TextField,
+  Typography,
 } from "@mui/material";
 
 import useMfaCodeDialog from "@store/useMfaCodeDialog";
 
 export const MfaCodeDialog: FC = () => {
+  const desc = useMfaCodeDialog((state) => state.description);
   const callback = useMfaCodeDialog((state) => state.callback);
   const resetDialog = useMfaCodeDialog((state) => state.resetDialog);
 
@@ -20,9 +22,9 @@ export const MfaCodeDialog: FC = () => {
   const inputEl = useRef<HTMLInputElement | null>(null);
 
   const handleCancel = () => {
-    if(callback) callback(null)
-    resetDialog()
-  }
+    if (callback) callback(null);
+    resetDialog();
+  };
 
   async function handleSubmit() {
     if (!code) {
@@ -54,6 +56,17 @@ export const MfaCodeDialog: FC = () => {
     >
       <DialogTitle>双因素认证校验</DialogTitle>
       <DialogContent>
+        {desc ? (
+          <Typography
+            variant={"body2"}
+            sx={{
+              marginBottom: "0.4rem",
+              opacity: 0.7,
+            }}
+          >
+            Tip: {desc}
+          </Typography>
+        ) : undefined}
         <TextField
           fullWidth
           margin="dense"
