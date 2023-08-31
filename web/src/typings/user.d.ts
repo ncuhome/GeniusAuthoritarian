@@ -43,6 +43,10 @@ declare namespace User {
       url: string;
       qrcode: string;
     };
+
+    type Status = {
+      mfa: boolean;
+    };
   }
 
   namespace SSH {

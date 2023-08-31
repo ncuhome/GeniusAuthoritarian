@@ -1,4 +1,4 @@
-import { FC, useState } from "react";
+import { FC, useMemo, useState } from "react";
 import toast from "react-hot-toast";
 
 import {
@@ -34,15 +34,15 @@ const Ssh: FC = () => {
 
   const [sshKey, setSshKey] = useState<User.SSH.Keys | null>(null);
   const [keyMode, setKeyMode] = useState<"pem" | "ssh">("ssh");
-  const [mfaEnabled, setMfaEnabled] = useState<boolean | null>(null);
 
   const [isUnlockLoading, setIsUnlockLoading] = useState(false);
 
-  const { isLoading: isMfaStatusLoading } = useUserApiV1("profile/mfa", {
-    immutable: sshKey !== null,
-    enableLoading: true,
-    onSuccess: (data: any) => setMfaEnabled(data.mfa),
-  });
+  const { isLoading: isMfaStatusLoading, data: mfaData } =
+    useUserApiV1<User.Mfa.Status>("profile/mfa", {
+      immutable: sshKey !== null,
+      enableLoading: true,
+    });
+  const mfaEnabled = useMemo(() => mfaData?.mfa, [mfaData]);
 
   async function onShowSshKeys() {
     setIsUnlockLoading(true);
@@ -60,9 +60,7 @@ const Ssh: FC = () => {
       } catch ({ msg }) {
         if (msg) toast.error(msg as string);
       }
-    } catch (err) {
-
-    }
+    } catch (err) {}
     setIsUnlockLoading(false);
   }
 
