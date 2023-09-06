@@ -91,39 +91,24 @@ jobs:
           docker push ${{ steps.image.outputs.SSH_DEV_VERSION }}
           docker push ${{ steps.image.outputs.SSH_DEV_LATEST }}
 
-      - name: Update Core Deployment
-        uses: MultiMx/K8sSetImageAction@v0.2
+      - name: Update Deployments
+        uses: MultiMx/K8sQuickUpdateAction@v0.2
         with:
-          backend: 'https://rancher.ncuhome.club'
-          token: ${{ secrets.CATTLE_TOKEN_LOCAL }}
-          namespace: 'genius-auth'
-          deployment: 'core'
-          image: ${{ steps.image.outputs.CORE_VERSION }}
-          wait: true
-          
-      - name: Update Auth Deployment
-        uses: MultiMx/K8sSetImageAction@v0.2
-        with:
-          backend: 'https://rancher.ncuhome.club'
-          token: ${{ secrets.CATTLE_TOKEN_LOCAL }}
-          namespace: 'genius-auth'
-          deployment: 'auth'
-          image: ${{ steps.image.outputs.AUTH_VERSION }}
-
-      - name: Update Fe Deployment
-        uses: MultiMx/K8sSetImageAction@v0.2
-        with:
-          backend: 'https://rancher.ncuhome.club'
-          token: ${{ secrets.CATTLE_TOKEN_LOCAL }}
-          namespace: 'genius-auth'
-          deployment: 'fe'
-          image: ${{ steps.image.outputs.FE_VERSION }}
-
-      - name: Update sshDev Client Deployment
-        uses: MultiMx/K8sSetImageAction@v0.2
-        with:
-          backend: 'https://rancher.ncuhome.club'
-          token: ${{ secrets.CATTLE_TOKEN_LOCAL }}
-          namespace: 'genius-auth'
-          deployment: 'ssh-server'
-          image: ${{ steps.image.outputs.SSH_DEV_VERSION }}
+          k8s: |
+            dev:
+              backend: https://rancher.ncuhome.club
+              token: ${{ secrets.CATTLE_TOKEN_LOCAL }}
+          workloads: |
+            -
+              genius-auth:
+                core:
+                  image: ${{ steps.image.outputs.CORE_VERSION }}
+                  wait: true
+            -
+              genius-auth:
+                auth:
+                  image: ${{ steps.image.outputs.AUTH_VERSION }}
+                fe:
+                  image: ${{ steps.image.outputs.FE_VERSION }}
+                ssh-server:
+                  image: ${{ steps.image.outputs.SSH_DEV_VERSION }}
