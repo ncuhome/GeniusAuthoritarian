@@ -92,7 +92,7 @@ jobs:
           docker push ${{ steps.image.outputs.SSH_DEV_LATEST }}
 
       - name: Update Deployments
-        uses: MultiMx/K8sQuickUpdateAction@v0.2
+        uses: MultiMx/K8sQuickUpdateAction@v0.3
         with:
           k8s: |
             dev:
