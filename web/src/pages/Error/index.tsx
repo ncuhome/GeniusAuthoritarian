@@ -2,7 +2,7 @@ import { FC, useMemo } from "react";
 import { useLocation } from "react-router-dom";
 import "./styles.css";
 
-import { Box, Typography } from "@mui/material";
+import { Box, Typography, ButtonGroup, Button } from "@mui/material";
 import { ClearRounded } from "@mui/icons-material";
 
 export const Error: FC = () => {
@@ -69,6 +69,21 @@ export const Error: FC = () => {
             {content}
           </Typography>
         ) : undefined}
+
+        <Box mt={3.5}>
+          <ButtonGroup variant="text">
+            <Button
+              onClick={() =>
+                window.open(
+                  "https://applink.feishu.cn/client/chat/chatter/add_by_link?link_token=250la2bb-add8-4fde-ac94-57376aee2e40",
+                  "_blank"
+                )
+              }
+            >
+              反馈
+            </Button>
+          </ButtonGroup>
+        </Box>
       </Box>
     </Box>
   );
