@@ -29,13 +29,13 @@ export const Login: FC = () => {
       setAuth(res.token, res.groups);
       nav("/user/");
     } catch ({ msg }) {
-      if (msg) ThrowError(nav, "登录失败", msg as string);
+      if (msg) ThrowError(nav, "登录失败", msg as string, "");
     }
   }
 
   useMount(() => {
     if (token == "") {
-      ThrowError(nav, "登录失败", "参数缺失");
+      ThrowError(nav, "登录失败", "参数缺失", "");
       return;
     }
 

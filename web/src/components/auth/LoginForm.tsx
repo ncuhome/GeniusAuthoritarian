@@ -30,7 +30,7 @@ export const LoginForm: FC = () => {
       enableLoading: true,
       onError(err) {
         if (err.msg !== ErrNetwork) {
-          ThrowError(nav, "登录对象异常", err.msg);
+          ThrowError(nav, "登录对象异常", err.msg, appCode);
         }
       },
     }

@@ -1,5 +1,4 @@
 import { NavigateFunction } from "react-router-dom";
-import { ErrorState } from "@/typings/error";
 
 export function ThrowError(
   nav: NavigateFunction,
@@ -8,4 +7,8 @@ export function ThrowError(
   retryAppCode?: string
 ) {
   nav("/error", { state: { title, content, retryAppCode } as ErrorState });
+}
+
+export function GoLogin(nav: NavigateFunction, appCode: string) {
+  nav("/?appCode=" + appCode);
 }

@@ -42,7 +42,7 @@ export const ThirdPartyCallback = memo<Props>(
         if (!data.mfa) window.open(data.callback!, "_self");
         else setMfaToken(data.token);
       } catch ({ msg }) {
-        if (msg) ThrowError(nav, "登录失败", msg as string);
+          if (msg) ThrowError(nav, "登录失败", msg as string, appCode);
       }
     }
 
@@ -75,7 +75,7 @@ export const ThirdPartyCallback = memo<Props>(
 
     useMount(() => {
       if (!code) {
-        ThrowError(nav, "登录失败", "参数缺失");
+          ThrowError(nav, "登录失败", "参数缺失", appCode);
         return;
       }
       login();

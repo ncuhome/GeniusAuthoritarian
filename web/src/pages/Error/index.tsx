@@ -1,16 +1,18 @@
 import { FC, useMemo } from "react";
-import { useLocation } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
 import "./styles.css";
 
 import { Box, Typography, ButtonGroup, Button } from "@mui/material";
 import { ClearRounded } from "@mui/icons-material";
 
+import { GoLogin } from "@util/nav";
+
 export const Error: FC = () => {
+  const nav = useNavigate();
   const loc = useLocation();
   const state: ErrorState | undefined = useMemo(() => loc.state, [loc]);
 
   const title = useMemo(() => state?.title || "未知错误", [state]);
-  const content = useMemo(() => state?.content || "", [state]);
 
   return (
     <Box
@@ -59,19 +61,26 @@ export const Error: FC = () => {
         >
           {title}
         </Typography>
-        {content ? (
+        {state?.content ? (
           <Typography
             sx={{
               color: "#999",
               wordBreak: "break-all",
             }}
           >
-            {content}
+            {state.content}
           </Typography>
         ) : undefined}
 
         <Box mt={3.5}>
-          <ButtonGroup variant="text">
+          <ButtonGroup
+            variant="text"
+            sx={{
+              "&>button": {
+                border: "unset!important",
+              },
+            }}
+          >
             <Button
               onClick={() =>
                 window.open(
@@ -82,6 +91,12 @@ export const Error: FC = () => {
             >
               反馈
             </Button>
+
+            {state?.retryAppCode !== undefined ? (
+              <Button onClick={() => GoLogin(nav, state!.retryAppCode!)}>
+                重试
+              </Button>
+            ) : undefined}
           </ButtonGroup>
         </Box>
       </Box>
