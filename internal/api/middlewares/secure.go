@@ -10,7 +10,7 @@ import (
 )
 
 func Secure() gin.HandlerFunc {
-	middleware, e := secure.New(&secure.Config{
+	middleware, err := secure.New(&secure.Config{
 		Driver: &drivers.RedisDriver{
 			Client: redis.Client,
 		},
@@ -19,8 +19,8 @@ func Secure() gin.HandlerFunc {
 		},
 		RateLimit: 60, // API 每分钟最大请求数
 	})
-	if e != nil {
-		log.Fatalln(e)
+	if err != nil {
+		log.Fatalln(err)
 	}
 	return middleware.Handler
 }

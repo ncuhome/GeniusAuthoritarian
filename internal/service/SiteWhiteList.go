@@ -19,9 +19,9 @@ func (a SiteWhiteListSrv) Begin() (*SiteWhiteListSrv, error) {
 }
 
 func (a SiteWhiteListSrv) Exist(domain string) (bool, error) {
-	list, e := (&dao.SiteWhiteList{}).Get(a.DB)
-	if e != nil {
-		return false, e
+	list, err := (&dao.SiteWhiteList{}).Get(a.DB)
+	if err != nil {
+		return false, err
 	}
 
 	for _, v := range list {
@@ -33,9 +33,9 @@ func (a SiteWhiteListSrv) Exist(domain string) (bool, error) {
 }
 
 func (a SiteWhiteListSrv) CheckUrl(link string) (bool, error) {
-	u, e := url.Parse(link)
-	if e != nil {
-		return false, e
+	u, err := url.Parse(link)
+	if err != nil {
+		return false, err
 	}
 
 	return a.Exist(u.Hostname())

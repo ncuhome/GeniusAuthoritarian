@@ -14,7 +14,7 @@ import (
 )
 
 func InitRenewAgent() {
-	_, e := agent.AddRegular(&agent.Event{
+	_, err := agent.AddRegular(&agent.Event{
 		T: "0 6,12,16,20,23 * * *",
 		E: func() {
 			defer tool.Recover()
@@ -30,27 +30,27 @@ func InitRenewAgent() {
 			log.Infof("App views 刷新成功，耗时 %d ms", time.Now().Sub(startAt).Milliseconds())
 		},
 	})
-	if e != nil {
-		panic(e)
+	if err != nil {
+		panic(err)
 	}
 }
 
 func Renew() error {
-	appSrv, e := service.App.Begin()
-	if e != nil {
-		return e
+	appSrv, err := service.App.Begin()
+	if err != nil {
+		return err
 	}
 	defer appSrv.Rollback()
 
-	apps, e := appSrv.GetForUpdateViews(daoUtil.LockForUpdate)
-	if e != nil {
-		return e
+	apps, err := appSrv.GetForUpdateViews(daoUtil.LockForUpdate)
+	if err != nil {
+		return err
 	}
 
 	loginRecordSrv := service.LoginRecordSrv{DB: appSrv.DB}
-	loginRecordList, e := loginRecordSrv.GetMultipleViewsIDs(apps)
-	if e != nil {
-		return e
+	loginRecordList, err := loginRecordSrv.GetMultipleViewsIDs(apps)
+	if err != nil {
+		return err
 	}
 
 	if len(apps) != 0 && len(loginRecordList) != 0 {
@@ -87,9 +87,9 @@ func Renew() error {
 
 		for el := appUpdated.Front(); el != nil; el = el.Next() {
 			app := el.Value.(*dao.App)
-			e = appSrv.UpdateViews(app.ID, app.ViewsID, app.Views)
-			if e != nil {
-				return e
+			err = appSrv.UpdateViews(app.ID, app.ViewsID, app.Views)
+			if err != nil {
+				return err
 			}
 		}
 	}

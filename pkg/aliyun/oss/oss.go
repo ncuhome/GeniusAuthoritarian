@@ -7,13 +7,13 @@ import (
 )
 
 func NewRoot(endpoint, accessKey, secretKey, bucket string) (*Storage, error) {
-	c, e := oss.New(endpoint, accessKey, secretKey)
-	if e != nil {
-		return nil, e
+	c, err := oss.New(endpoint, accessKey, secretKey)
+	if err != nil {
+		return nil, err
 	}
-	b, e := c.Bucket(bucket)
-	if e != nil {
-		return nil, e
+	b, err := c.Bucket(bucket)
+	if err != nil {
+		return nil, err
 	}
 	return &Storage{
 		c: c,

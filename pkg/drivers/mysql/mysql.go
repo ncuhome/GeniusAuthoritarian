@@ -9,7 +9,7 @@ import (
 
 func New(conf *Config, gormConfig *gorm.Config) (*gorm.DB, error) {
 	//数据库初始化
-	db, e := gorm.Open(mysql.Open(fmt.Sprintf(
+	db, err := gorm.Open(mysql.Open(fmt.Sprintf(
 		"%s:%s@tcp(%s:%d)/%s?%s",
 		conf.Username,
 		conf.Password,
@@ -18,8 +18,8 @@ func New(conf *Config, gormConfig *gorm.Config) (*gorm.DB, error) {
 		conf.Database,
 		conf.Arg,
 	)), gormConfig)
-	if e != nil {
-		return nil, e
+	if err != nil {
+		return nil, err
 	}
 
 	//连接池设置

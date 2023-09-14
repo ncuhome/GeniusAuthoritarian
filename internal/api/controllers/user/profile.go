@@ -9,14 +9,14 @@ import (
 
 func ProfileData(c *gin.Context) {
 	uid := tools.GetUserInfo(c).ID
-	profile, e := service.User.UserProfile(uid)
-	if e != nil {
-		callback.Error(c, callback.ErrDBOperation, e)
+	profile, err := service.User.UserProfile(uid)
+	if err != nil {
+		callback.Error(c, callback.ErrDBOperation, err)
 		return
 	}
-	loginRecord, e := service.LoginRecord.UserHistory(uid, 10)
-	if e != nil {
-		callback.Error(c, callback.ErrDBOperation, e)
+	loginRecord, err := service.LoginRecord.UserHistory(uid, 10)
+	if err != nil {
+		callback.Error(c, callback.ErrDBOperation, err)
 		return
 	}
 	callback.Success(c, gin.H{

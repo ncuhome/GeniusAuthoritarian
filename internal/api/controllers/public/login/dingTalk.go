@@ -9,14 +9,14 @@ import (
 )
 
 func loginDingTalk(c *gin.Context, code string) *dto.UserThirdPartyIdentity {
-	userToken, e := dingTalk.Api.GetUserToken(code)
-	if e != nil {
-		callback.Error(c, callback.ErrRemoteOperationFailed, e)
+	userToken, err := dingTalk.Api.GetUserToken(code)
+	if err != nil {
+		callback.Error(c, callback.ErrRemoteOperationFailed, err)
 		return nil
 	}
-	userInfo, e := dingTalk.Api.GetUserInfo(*userToken.Body.AccessToken)
-	if e != nil {
-		callback.Error(c, callback.ErrRemoteOperationFailed, e)
+	userInfo, err := dingTalk.Api.GetUserInfo(*userToken.Body.AccessToken)
+	if err != nil {
+		callback.Error(c, callback.ErrRemoteOperationFailed, err)
 		return nil
 	}
 

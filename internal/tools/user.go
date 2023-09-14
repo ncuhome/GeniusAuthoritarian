@@ -12,9 +12,9 @@ func GetUserInfo(c *gin.Context) *jwt.UserToken {
 }
 
 func GenCallback(callback, token string) (string, error) {
-	callbackUrl, e := url.Parse(callback)
-	if e != nil {
-		return "", e
+	callbackUrl, err := url.Parse(callback)
+	if err != nil {
+		return "", err
 	}
 	callbackQuery := callbackUrl.Query()
 	callbackQuery.Set("token", token)

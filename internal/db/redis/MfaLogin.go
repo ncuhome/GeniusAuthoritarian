@@ -20,17 +20,17 @@ func (a MfaLoginHelper) genKey(uid uint, token string) string {
 }
 
 func (a MfaLoginHelper) Set(uid uint, token string, valid time.Duration, claims interface{}) error {
-	v, e := json.Marshal(claims)
-	if e != nil {
-		return e
+	v, err := json.Marshal(claims)
+	if err != nil {
+		return err
 	}
 	return Client.Set(context.Background(), a.genKey(uid, token), string(v), valid).Err()
 }
 
 func (a MfaLoginHelper) Get(uid uint, token string, claims interface{}) error {
-	value, e := Client.Get(context.Background(), a.genKey(uid, token)).Result()
-	if e != nil {
-		return e
+	value, err := Client.Get(context.Background(), a.genKey(uid, token)).Result()
+	if err != nil {
+		return err
 	}
 	return json.Unmarshal([]byte(value), claims)
 }

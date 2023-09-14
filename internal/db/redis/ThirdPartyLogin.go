@@ -26,38 +26,38 @@ type LoginPoint struct {
 	Data json.RawMessage
 }
 
-func (a *ThirdPartyLoginHelper) NewLoginPoint(unix int64, valid time.Duration, claims interface{}) (id uint64, e error) {
-	claimsRaw, e := json.Marshal(claims)
-	if e != nil {
-		return 0, e
+func (a *ThirdPartyLoginHelper) NewLoginPoint(unix int64, valid time.Duration, claims interface{}) (id uint64, err error) {
+	claimsRaw, err := json.Marshal(claims)
+	if err != nil {
+		return 0, err
 	}
 
 	loginPoint := LoginPoint{
 		Unix: unix,
 		Data: claimsRaw,
 	}
-	value, e := json.Marshal(loginPoint)
-	if e != nil {
-		return 0, e
+	value, err := json.Marshal(loginPoint)
+	if err != nil {
+		return 0, err
 	}
 
 	id = a.id.Add(1)
-	e = Client.Set(context.Background(), a.loginPointKey(id), value, valid).Err()
+	err = Client.Set(context.Background(), a.loginPointKey(id), value, valid).Err()
 	return
 }
 
 func (a *ThirdPartyLoginHelper) VerifyLoginPoint(id uint64, unix int64, claims interface{}) (bool, error) {
-	value, e := Client.GetDel(context.Background(), a.loginPointKey(id)).Result()
-	if e != nil {
-		if e == Nil {
-			e = nil
+	value, err := Client.GetDel(context.Background(), a.loginPointKey(id)).Result()
+	if err != nil {
+		if err == Nil {
+			err = nil
 		}
-		return false, e
+		return false, err
 	}
 
 	var loginPoint LoginPoint
-	if e = json.Unmarshal([]byte(value), &loginPoint); e != nil {
-		return false, e
+	if err = json.Unmarshal([]byte(value), &loginPoint); err != nil {
+		return false, err
 	}
 	return loginPoint.Unix == unix, json.Unmarshal(loginPoint.Data, claims)
 }

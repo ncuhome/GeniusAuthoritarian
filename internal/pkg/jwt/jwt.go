@@ -13,15 +13,15 @@ func GenerateToken(claims jwt.Claims) (string, error) {
 	return jwt.NewWithClaims(jwt.SigningMethodHS256, claims).SignedString(key)
 }
 
-func ParseToken[C jwt.Claims](token string, target C) (claims C, valid bool, e error) {
+func ParseToken[C jwt.Claims](token string, target C) (claims C, valid bool, err error) {
 	var t *jwt.Token
-	t, e = jwt.ParseWithClaims(
+	t, err = jwt.ParseWithClaims(
 		token, target, func(t *jwt.Token) (interface{}, error) {
 			return key, nil
 		},
 		jwt.WithLeeway(time.Second*3),
 	)
-	if e != nil {
+	if err != nil {
 		return
 	}
 
@@ -114,9 +114,9 @@ func ParseLoginToken(token string) (*LoginTokenClaims, bool, error) {
 
 // ParseMfaToken 不会销毁，允许多次验证尝试
 func ParseMfaToken(token string) (*MfaLoginClaims, error) {
-	claims, valid, e := ParseToken(token, &MfaToken{})
-	if e != nil || !valid {
-		return nil, e
+	claims, valid, err := ParseToken(token, &MfaToken{})
+	if err != nil || !valid {
+		return nil, err
 	}
 
 	var redisClaims MfaLoginClaims

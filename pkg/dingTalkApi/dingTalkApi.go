@@ -16,13 +16,13 @@ func New(c Config) *Client {
 		RegionId: tea.String("central"),
 	}
 
-	oc, e := oauth2_1_0.NewClient(config)
-	if e != nil {
+	oc, err := oauth2_1_0.NewClient(config)
+	if err != nil {
 		return nil
 	}
 
-	cc, e := contact_1_0.NewClient(config)
-	if e != nil {
+	cc, err := contact_1_0.NewClient(config)
+	if err != nil {
 		return nil
 	}
 
@@ -40,10 +40,10 @@ type Client struct {
 }
 
 func (c Client) GetUserInfo(accessToken string) (*contact_1_0.GetUserResponse, error) {
-	r, e := c.ContactClient.GetUserWithOptions(tea.String("me"), &contact_1_0.GetUserHeaders{
+	r, err := c.ContactClient.GetUserWithOptions(tea.String("me"), &contact_1_0.GetUserHeaders{
 		XAcsDingtalkAccessToken: &accessToken,
 	}, &service.RuntimeOptions{})
-	return r, e
+	return r, err
 }
 
 func (c Client) GetUserToken(authCode string) (*oauth2_1_0.GetUserTokenResponse, error) {

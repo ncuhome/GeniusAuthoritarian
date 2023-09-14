@@ -22,9 +22,9 @@ func (a BaseGroupsSrv) LoadGroups() ([]dao.BaseGroup, error) {
 }
 
 func (a BaseGroupsSrv) LoadGroupsRelation() (map[string]dao.BaseGroup, error) {
-	groups, e := a.LoadGroups()
-	if e != nil {
-		return nil, e
+	groups, err := a.LoadGroups()
+	if err != nil {
+		return nil, err
 	}
 
 	var groupRelations = make(map[string]dao.BaseGroup, len(groups))

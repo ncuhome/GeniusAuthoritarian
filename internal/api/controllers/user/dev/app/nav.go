@@ -13,24 +13,24 @@ func LandingApp(c *gin.Context) {
 	var f struct {
 		ID uint `json:"id" form:"id" binding:"required"`
 	}
-	if e := c.ShouldBind(&f); e != nil {
-		callback.Error(c, callback.ErrForm, e)
+	if err := c.ShouldBind(&f); err != nil {
+		callback.Error(c, callback.ErrForm, err)
 		return
 	}
 
-	callbackStr, e := service.App.FirstAppCallbackByID(f.ID)
-	if e != nil {
-		if errors.Is(e, gorm.ErrRecordNotFound) {
+	callbackStr, err := service.App.FirstAppCallbackByID(f.ID)
+	if err != nil {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
 			callback.Error(c, callback.ErrAppNotFound)
 			return
 		}
-		callback.Error(c, callback.ErrDBOperation, e)
+		callback.Error(c, callback.ErrDBOperation, err)
 		return
 	}
 
-	callbackUrl, e := url.Parse(callbackStr)
-	if e != nil {
-		callback.Error(c, callback.ErrUnexpected, e)
+	callbackUrl, err := url.Parse(callbackStr)
+	if err != nil {
+		callback.Error(c, callback.ErrUnexpected, err)
 		return
 	}
 

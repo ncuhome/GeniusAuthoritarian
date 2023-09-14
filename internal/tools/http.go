@@ -49,10 +49,10 @@ func SoftHttpSrv(E *gin.Engine) error {
 		close(shutdown)
 	}(srv)
 
-	e := srv.ListenAndServe()
-	if errors.Is(e, http.ErrServerClosed) {
+	err := srv.ListenAndServe()
+	if errors.Is(err, http.ErrServerClosed) {
 		<-shutdown
 		return nil
 	}
-	return e
+	return err
 }

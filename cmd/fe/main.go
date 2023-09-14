@@ -7,7 +7,7 @@ import (
 
 func main() {
 	log.Infoln("Sys Boost")
-	if e := router.Engine().Run(":80"); e != nil {
-		log.Fatalln("启动监听失败:", e)
+	if err := router.Engine().Run(":80"); err != nil {
+		log.Fatalln("启动监听失败:", err)
 	}
 }

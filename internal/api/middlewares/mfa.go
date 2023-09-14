@@ -13,8 +13,8 @@ func RequireMfa(c *gin.Context) {
 	var f struct {
 		Code string `json:"code" form:"code" binding:"required,len=6,numeric"`
 	}
-	if e := c.ShouldBind(&f); e != nil {
-		callback.Error(c, callback.ErrForm, e)
+	if err := c.ShouldBind(&f); err != nil {
+		callback.Error(c, callback.ErrForm, err)
 		return
 	}
 

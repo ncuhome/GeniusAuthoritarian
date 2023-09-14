@@ -18,13 +18,13 @@ func init() {
 		conf.Logger = logger.Default.LogMode(logger.Info)
 	}
 
-	var e error
-	DB, e = mysql.New(&global.Config.Mysql, conf)
-	if e != nil {
-		log.Fatalln("连接 Mysql 失败:", e)
+	var err error
+	DB, err = mysql.New(&global.Config.Mysql, conf)
+	if err != nil {
+		log.Fatalln("连接 Mysql 失败:", err)
 	}
 
-	if e = DB.AutoMigrate(
+	if err = DB.AutoMigrate(
 		&User{},
 		&SiteWhiteList{},
 		&BaseGroup{},
@@ -34,7 +34,7 @@ func init() {
 		&FeishuGroups{},
 		&AppGroup{},
 		&UserSsh{},
-	); e != nil {
-		log.Fatalln("AutoMigration failed:", e)
+	); err != nil {
+		log.Fatalln("AutoMigration failed:", err)
 	}
 }

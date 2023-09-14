@@ -46,22 +46,22 @@ func (a UserSrv) UserInfo(phone string) (*dao.User, error) {
 }
 
 func (a UserSrv) UserProfile(uid uint) (*dto.UserProfile, error) {
-	profile, e := (&dao.User{ID: uid}).FirstProfileByID(a.DB)
-	if e != nil {
-		return nil, e
+	profile, err := (&dao.User{ID: uid}).FirstProfileByID(a.DB)
+	if err != nil {
+		return nil, err
 	}
 
 	profile.MfaEnabled = profile.Mfa != ""
 
-	profile.Groups, e = (&dao.UserGroups{
+	profile.Groups, err = (&dao.UserGroups{
 		UID: uid,
 	}).GetUserGroupsForShowByUID(a.DB)
-	return profile, e
+	return profile, err
 }
 
 func (a UserSrv) MfaExist(uid uint, opts ...daoUtil.ServiceOpt) (bool, error) {
-	mfa, e := a.FirstMfa(uid, opts...)
-	return mfa != "", e
+	mfa, err := a.FirstMfa(uid, opts...)
+	return mfa != "", err
 }
 
 func (a UserSrv) FirstMfa(uid uint, opts ...daoUtil.ServiceOpt) (string, error) {

@@ -28,9 +28,9 @@ func (t *TenantToken) Load() (string, error) {
 	}
 
 	t.Token = ""
-	tokenRes, e := t.fs.GetTenantAccessToken()
-	if e != nil {
-		return "", e
+	tokenRes, err := t.fs.GetTenantAccessToken()
+	if err != nil {
+		return "", err
 	}
 
 	t.Token = tokenRes.TenantAccessToken

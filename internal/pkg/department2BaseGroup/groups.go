@@ -9,16 +9,16 @@ import (
 )
 
 func Init() {
-	e := CheckBaseGroups()
-	if e != nil {
-		log.Fatalln("写入基本组列表失败:", e)
+	err := CheckBaseGroups()
+	if err != nil {
+		log.Fatalln("写入基本组列表失败:", err)
 	}
 }
 
 func CheckBaseGroups() error {
-	dbGroups, e := service.BaseGroups.LoadGroups()
-	if e != nil {
-		return e
+	dbGroups, err := service.BaseGroups.LoadGroups()
+	if err != nil {
+		return err
 	}
 
 	var notExistGroups = list.New() // string
@@ -42,9 +42,9 @@ func CheckBaseGroups() error {
 			i++
 		}
 
-		e = service.BaseGroups.CreateGroups(newGroups)
-		if e != nil {
-			return e
+		err = service.BaseGroups.CreateGroups(newGroups)
+		if err != nil {
+			return err
 		}
 	}
 

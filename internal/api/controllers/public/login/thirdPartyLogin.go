@@ -132,8 +132,8 @@ func ThirdPartySelfLogin(c *gin.Context) {
 	var f struct {
 		Code string `json:"code" form:"code" binding:"required"`
 	}
-	if e := c.ShouldBind(&f); e != nil {
-		callback.Error(c, callback.ErrForm, e)
+	if err := c.ShouldBind(&f); err != nil {
+		callback.Error(c, callback.ErrForm, err)
 		return
 	}
 
@@ -147,9 +147,9 @@ func ThirdPartySelfLogin(c *gin.Context) {
 
 	appInfo := service.App.This(c.Request.Host)
 
-	user, e := service.User.UserInfo(userIdentity.Phone)
-	if e != nil {
-		callback.Error(c, callback.ErrDBOperation, e)
+	user, err := service.User.UserInfo(userIdentity.Phone)
+	if err != nil {
+		callback.Error(c, callback.ErrDBOperation, err)
 		return
 	}
 
@@ -167,8 +167,8 @@ func ThirdPartyLogin(c *gin.Context) {
 	var f struct {
 		Code string `json:"code" form:"code" binding:"required"`
 	}
-	if e := c.ShouldBind(&f); e != nil {
-		callback.Error(c, callback.ErrForm, e)
+	if err := c.ShouldBind(&f); err != nil {
+		callback.Error(c, callback.ErrForm, err)
 		return
 	}
 

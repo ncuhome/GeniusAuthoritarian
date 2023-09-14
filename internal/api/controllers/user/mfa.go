@@ -84,51 +84,51 @@ func MfaAddCheck(c *gin.Context) {
 	var f struct {
 		Code string `json:"code" form:"code" binding:"required,len=6,numeric"`
 	}
-	if e := c.ShouldBind(&f); e != nil {
-		callback.Error(c, callback.ErrForm, e)
+	if err := c.ShouldBind(&f); err != nil {
+		callback.Error(c, callback.ErrForm, err)
 		return
 	}
 
 	uid := tools.GetUserInfo(c).ID
 
-	mfaSecret, e := redis.MfaEnable.Get(uid)
-	if e != nil {
-		if e == redis.Nil {
+	mfaSecret, err := redis.MfaEnable.Get(uid)
+	if err != nil {
+		if err == redis.Nil {
 			callback.Error(c, callback.ErrMfaAddExpired)
 			return
 		}
-		callback.Error(c, callback.ErrDBOperation, e)
+		callback.Error(c, callback.ErrDBOperation, err)
 		return
 	}
 
-	valid, e := tools.VerifyMfa(f.Code, mfaSecret)
-	if e != nil {
-		callback.Error(c, callback.ErrUnexpected, e)
+	valid, err := tools.VerifyMfa(f.Code, mfaSecret)
+	if err != nil {
+		callback.Error(c, callback.ErrUnexpected, err)
 		return
 	} else if !valid {
 		callback.Error(c, callback.ErrMfaCode)
 		return
 	}
 
-	userSrv, e := service.User.Begin()
-	if e != nil {
-		callback.Error(c, callback.ErrDBOperation, e)
+	userSrv, err := service.User.Begin()
+	if err != nil {
+		callback.Error(c, callback.ErrDBOperation, err)
 		return
 	}
 	defer userSrv.Rollback()
 
-	if e = userSrv.SetMfaSecret(uid, mfaSecret); e != nil {
-		callback.Error(c, callback.ErrDBOperation, e)
+	if err = userSrv.SetMfaSecret(uid, mfaSecret); err != nil {
+		callback.Error(c, callback.ErrDBOperation, err)
 		return
 	}
 
-	if e = redis.MfaEnable.Del(uid); e != nil && e != redis.Nil {
-		callback.Error(c, callback.ErrUnexpected, e)
+	if err = redis.MfaEnable.Del(uid); err != nil && err != redis.Nil {
+		callback.Error(c, callback.ErrUnexpected, err)
 		return
 	}
 
-	if e = userSrv.Commit().Error; e != nil {
-		callback.Error(c, callback.ErrDBOperation, e)
+	if err = userSrv.Commit().Error; err != nil {
+		callback.Error(c, callback.ErrDBOperation, err)
 		return
 	}
 
@@ -139,45 +139,45 @@ func MfaDel(c *gin.Context) {
 	var f struct {
 		Code string `json:"code" form:"code" binding:"required,len=6,numeric"`
 	}
-	if e := c.ShouldBind(&f); e != nil {
-		callback.Error(c, callback.ErrForm, e)
+	if err := c.ShouldBind(&f); err != nil {
+		callback.Error(c, callback.ErrForm, err)
 		return
 	}
 
-	userSrv, e := service.User.Begin()
-	if e != nil {
-		callback.Error(c, callback.ErrDBOperation, e)
+	userSrv, err := service.User.Begin()
+	if err != nil {
+		callback.Error(c, callback.ErrDBOperation, err)
 		return
 	}
 	defer userSrv.Rollback()
 
 	uid := tools.GetUserInfo(c).ID
 
-	mfaSecret, e := userSrv.FirstMfa(uid, daoUtil.LockForUpdate)
-	if e != nil {
-		callback.Error(c, callback.ErrDBOperation, e)
+	mfaSecret, err := userSrv.FirstMfa(uid, daoUtil.LockForUpdate)
+	if err != nil {
+		callback.Error(c, callback.ErrDBOperation, err)
 		return
 	} else if mfaSecret == "" {
 		callback.Error(c, callback.ErrMfaNotExist)
 		return
 	}
 
-	valid, e := tools.VerifyMfa(f.Code, mfaSecret)
-	if e != nil {
-		callback.Error(c, callback.ErrUnexpected, e)
+	valid, err := tools.VerifyMfa(f.Code, mfaSecret)
+	if err != nil {
+		callback.Error(c, callback.ErrUnexpected, err)
 		return
 	} else if !valid {
 		callback.Error(c, callback.ErrMfaCode)
 		return
 	}
 
-	if e = userSrv.DelMfa(uid); e != nil {
-		callback.Error(c, callback.ErrDBOperation, e)
+	if err = userSrv.DelMfa(uid); err != nil {
+		callback.Error(c, callback.ErrDBOperation, err)
 		return
 	}
 
-	if e = userSrv.Commit().Error; e != nil {
-		callback.Error(c, callback.ErrDBOperation, e)
+	if err = userSrv.Commit().Error; err != nil {
+		callback.Error(c, callback.ErrDBOperation, err)
 		return
 	}
 

@@ -14,15 +14,15 @@ func UserAuth(c *gin.Context) {
 		return
 	}
 
-	claims, valid, e := jwt.ParseUserToken(token)
-	if e != nil || !valid {
-		callback.Error(c, callback.ErrUnauthorized, e)
+	claims, valid, err := jwt.ParseUserToken(token)
+	if err != nil || !valid {
+		callback.Error(c, callback.ErrUnauthorized, err)
 		return
 	}
 
-	valid, e = redis.UserJwt.Pair(claims.ID, token)
-	if e != nil {
-		callback.Error(c, callback.ErrUnexpected, e)
+	valid, err = redis.UserJwt.Pair(claims.ID, token)
+	if err != nil {
+		callback.Error(c, callback.ErrUnexpected, err)
 		return
 	} else if !valid {
 		callback.Error(c, callback.ErrUnauthorized)

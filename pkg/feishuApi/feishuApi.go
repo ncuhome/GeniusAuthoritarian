@@ -28,17 +28,17 @@ type Fs struct {
 }
 
 func (f Fs) doRequest(Method string, data interface{}, opt *tool.DoHttpReq) error {
-	res, e := f.Http.Request(Method, opt)
-	if e != nil {
-		return e
+	res, err := f.Http.Request(Method, opt)
+	if err != nil {
+		return err
 	}
 	defer res.Body.Close()
 
 	container := &Resp{
 		Data: data,
 	}
-	if e = json.NewDecoder(res.Body).Decode(container); e != nil {
-		return e
+	if err = json.NewDecoder(res.Body).Decode(container); err != nil {
+		return err
 	} else if container.Code != 0 {
 		return fmt.Errorf("feishu api: %s", container.Msg)
 	}
@@ -51,21 +51,21 @@ func (f Fs) doRequest(Method string, data interface{}, opt *tool.DoHttpReq) erro
 }
 
 func (f Fs) GetTenantAccessToken() (*TenantAccessTokenResp, error) {
-	res, e := f.Http.PostRequest(&tool.DoHttpReq{
+	res, err := f.Http.PostRequest(&tool.DoHttpReq{
 		Url: "https://open.feishu.cn/open-apis/auth/v3/tenant_access_token/internal",
 		Body: map[string]string{
 			"app_id":     f.appID,
 			"app_secret": f.secret,
 		},
 	})
-	if e != nil {
-		return nil, e
+	if err != nil {
+		return nil, err
 	}
 	defer res.Body.Close()
 
 	var data TenantAccessTokenResp
-	if e = json.NewDecoder(res.Body).Decode(&data); e != nil {
-		return nil, e
+	if err = json.NewDecoder(res.Body).Decode(&data); err != nil {
+		return nil, err
 	} else if data.Code != 0 {
 		return nil, fmt.Errorf("feishu api: %s", data.Msg)
 	}
@@ -85,9 +85,9 @@ func (f Fs) LoginLink(selfDomain, state string) string {
 }
 
 func (f Fs) GetUser(code string) (*FsUser, error) {
-	tenantToken, e := f.tenant.Load()
-	if e != nil {
-		return nil, e
+	tenantToken, err := f.tenant.Load()
+	if err != nil {
+		return nil, err
 	}
 	var data FsUser
 	data.fs = f
@@ -105,9 +105,9 @@ func (f Fs) GetUser(code string) (*FsUser, error) {
 }
 
 func (f Fs) LoadDepartmentList() (*ListDepartmentResp, error) {
-	tenantToken, e := f.tenant.Load()
-	if e != nil {
-		return nil, e
+	tenantToken, err := f.tenant.Load()
+	if err != nil {
+		return nil, err
 	}
 	var data ListDepartmentResp
 	return &data, f.doRequest("GET", &data, &tool.DoHttpReq{
@@ -123,9 +123,9 @@ func (f Fs) LoadDepartmentList() (*ListDepartmentResp, error) {
 }
 
 func (f Fs) doLoadUserListRequest(departmentID, pageToken string, pageSize uint) (*ListUserResp, error) {
-	tenantToken, e := f.tenant.Load()
-	if e != nil {
-		return nil, e
+	tenantToken, err := f.tenant.Load()
+	if err != nil {
+		return nil, err
 	}
 	var data ListUserResp
 	query := map[string]interface{}{
@@ -147,15 +147,15 @@ func (f Fs) doLoadUserListRequest(departmentID, pageToken string, pageSize uint)
 func (f Fs) doLoadAllUserListRequest(departmentID string) ([]ListUserContent, error) {
 	const pageSize = 99
 	var r []ListUserContent
-	res, e := f.doLoadUserListRequest(departmentID, "", pageSize)
-	if e != nil {
-		return nil, e
+	res, err := f.doLoadUserListRequest(departmentID, "", pageSize)
+	if err != nil {
+		return nil, err
 	}
 	r = res.Items
 	for res.HasMore {
-		res, e = f.doLoadUserListRequest(departmentID, res.PageToken, pageSize)
-		if e != nil {
-			return nil, e
+		res, err = f.doLoadUserListRequest(departmentID, res.PageToken, pageSize)
+		if err != nil {
+			return nil, err
 		}
 		r = append(r, res.Items...)
 	}
@@ -164,17 +164,17 @@ func (f Fs) doLoadAllUserListRequest(departmentID string) ([]ListUserContent, er
 
 // LoadUserList map key 为飞书部门 OpenID
 func (f Fs) LoadUserList() (map[string][]ListUserContent, error) {
-	departments, e := f.LoadDepartmentList()
-	if e != nil {
-		return nil, e
+	departments, err := f.LoadDepartmentList()
+	if err != nil {
+		return nil, err
 	}
 
 	result := make(map[string][]ListUserContent, len(departments.Items))
 	for _, department := range departments.Items {
 		var list []ListUserContent
-		list, e = f.doLoadAllUserListRequest(department.OpenDepartmentId)
-		if e != nil {
-			return nil, e
+		list, err = f.doLoadAllUserListRequest(department.OpenDepartmentId)
+		if err != nil {
+			return nil, err
 		}
 		result[department.OpenDepartmentId] = list
 	}

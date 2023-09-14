@@ -14,14 +14,14 @@ import (
 )
 
 func DepartmentSync() error {
-	departmentRelation, e := service.BaseGroups.LoadGroupsRelation()
-	if e != nil {
-		return e
+	departmentRelation, err := service.BaseGroups.LoadGroupsRelation()
+	if err != nil {
+		return err
 	}
 
-	departmentList, e := Api.LoadDepartmentList()
-	if e != nil {
-		return e
+	departmentList, err := Api.LoadDepartmentList()
+	if err != nil {
+		return err
 	}
 
 	// 匹配所有命中关键词的部门，以组名为索引避免出现多个匹配结果
@@ -50,15 +50,15 @@ func DepartmentSync() error {
 
 	var toDelete = list.New() // uint
 	var toCreate []dao.FeishuGroups
-	srv, e := service.FeishuGroups.Begin()
-	if e != nil {
-		return e
+	srv, err := service.FeishuGroups.Begin()
+	if err != nil {
+		return err
 	}
 	defer srv.Rollback()
 
-	dbFeishuDepartments, e := srv.GetAll(daoUtil.LockForUpdate)
-	if e != nil {
-		return e
+	dbFeishuDepartments, err := srv.GetAll(daoUtil.LockForUpdate)
+	if err != nil {
+		return err
 	}
 
 	// 计算数据库 diff
@@ -90,13 +90,13 @@ func DepartmentSync() error {
 			i++
 			el = el.Next()
 		}
-		if e = srv.DeleteSelected(toDeleteSlice); e != nil {
-			return e
+		if err = srv.DeleteSelected(toDeleteSlice); err != nil {
+			return err
 		}
 	}
 	if len(toCreate) != 0 {
-		if e = srv.CreateAll(toCreate); e != nil {
-			return e
+		if err = srv.CreateAll(toCreate); err != nil {
+			return err
 		}
 	}
 	return srv.Commit().Error
@@ -106,22 +106,22 @@ func AddDepartmentSyncCron(spec string) error {
 	worker := backoff.New(backoff.Conf{
 		Content: func() error {
 			startAt := time.Now()
-			e := DepartmentSync()
-			if e != nil {
-				log.Errorf("同步飞书部门失败: %v", e)
+			err := DepartmentSync()
+			if err != nil {
+				log.Errorf("同步飞书部门失败: %v", err)
 			} else {
 				log.Infof("飞书部门同步成功，总耗时 %dms", time.Now().Sub(startAt).Milliseconds())
 			}
-			return e
+			return err
 		},
 		MaxRetryDelay: time.Minute * 30,
 	})
 
-	_, e := agent.AddRegular(&agent.Event{
+	_, err := agent.AddRegular(&agent.Event{
 		T: spec,
 		E: worker.Start,
 	})
-	return e
+	return err
 }
 
 type fsDepartmentsRelation struct {

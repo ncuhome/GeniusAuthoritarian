@@ -11,7 +11,7 @@ func initConfig() {
 		Default:   &Config,
 		Overwrite: true,
 	})
-	if e := c.Load(); e != nil {
-		panic(e)
+	if err := c.Load(); err != nil {
+		panic(err)
 	}
 }

@@ -49,17 +49,17 @@ func (a AppSrv) New(uid uint, name, callback string, permitAll bool) (*dao.App, 
 }
 
 func (a AppSrv) AppCodeExist(appCode string) (bool, error) {
-	empty, e := redis.AppCode.IsEmpty()
-	if e != nil {
-		return false, e
+	empty, err := redis.AppCode.IsEmpty()
+	if err != nil {
+		return false, err
 	} else if empty {
-		appCodeList, e := (&dao.App{}).GetAppCode(a.DB)
-		if e != nil {
-			return false, e
+		appCodeList, err := (&dao.App{}).GetAppCode(a.DB)
+		if err != nil {
+			return false, err
 		}
-		e = redis.AppCode.Add(appCodeList...)
-		if e != nil {
-			return false, e
+		err = redis.AppCode.Add(appCodeList...)
+		if err != nil {
+			return false, err
 		}
 	}
 
@@ -107,17 +107,17 @@ func (a AppSrv) FirstAppByAppCode(appCode string) (*dao.App, error) {
 }
 
 func (a AppSrv) FirstAppDetailedByIDForUser(id, uid uint, opts ...daoUtil.ServiceOpt) (*dto.AppShowDetail, error) {
-	appDetailed, e := (&dao.App{
+	appDetailed, err := (&dao.App{
 		ID:  id,
 		UID: uid,
 	}).FirstDetailedByIdAndUID(daoUtil.TxOpts(a.DB, opts...))
-	if e != nil {
-		return nil, e
+	if err != nil {
+		return nil, err
 	}
 
-	groups, e := (&dao.BaseGroup{}).GetByAppIdsRelatedForShow(a.DB, appDetailed.ID)
-	if e != nil {
-		return nil, e
+	groups, err := (&dao.BaseGroup{}).GetByAppIdsRelatedForShow(a.DB, appDetailed.ID)
+	if err != nil {
+		return nil, err
 	}
 	appDetailed.Groups = make([]dto.Group, len(groups))
 	for i, group := range groups {
@@ -134,9 +134,9 @@ func (a AppSrv) FirstAppKeyPair(id uint) (string, string, error) {
 }
 
 func (a AppSrv) GetUserOwnedApp(uid uint) ([]dto.AppShowDetail, error) {
-	apps, e := (&dao.App{UID: uid}).GetByUIDForShowDetailed(a.DB)
-	if e != nil {
-		return nil, e
+	apps, err := (&dao.App{UID: uid}).GetByUIDForShowDetailed(a.DB)
+	if err != nil {
+		return nil, err
 	}
 
 	// 获取各 app 授权组
@@ -147,9 +147,9 @@ func (a AppSrv) GetUserOwnedApp(uid uint) ([]dto.AppShowDetail, error) {
 		}
 
 		var groupRelatedList []dto.GroupRelateApp
-		groupRelatedList, e = (&dao.BaseGroup{}).GetByAppIdsRelatedForShow(a.DB, appIds...)
-		if e != nil {
-			return nil, e
+		groupRelatedList, err = (&dao.BaseGroup{}).GetByAppIdsRelatedForShow(a.DB, appIds...)
+		if err != nil {
+			return nil, err
 		}
 
 		var groupCount = make(map[uint]int, len(apps))
@@ -177,15 +177,15 @@ func (a AppSrv) GetUserOwnedApp(uid uint) ([]dto.AppShowDetail, error) {
 
 func (a AppSrv) GetUserAccessible(uid uint, isCenterMember bool) ([]dto.AppGroupClassified, error) {
 	var appList []dto.AppShowWithGroup
-	var e error
+	var err error
 	appModel := dao.App{UID: uid}
 	if isCenterMember {
-		appList, e = appModel.GetAllWithGroup(a.DB)
+		appList, err = appModel.GetAllWithGroup(a.DB)
 	} else {
-		appList, e = appModel.GetAccessible(a.DB)
+		appList, err = appModel.GetAccessible(a.DB)
 	}
-	if e != nil {
-		return nil, e
+	if err != nil {
+		return nil, err
 	}
 
 	var lastGroupID uint

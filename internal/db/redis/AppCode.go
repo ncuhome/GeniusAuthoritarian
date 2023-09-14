@@ -13,8 +13,8 @@ type AppCodeHelper struct {
 }
 
 func (a AppCodeHelper) IsEmpty() (bool, error) {
-	num, e := Client.SCard(context.Background(), a.key).Result()
-	return num == 0, e
+	num, err := Client.SCard(context.Background(), a.key).Result()
+	return num == 0, err
 }
 
 func (a AppCodeHelper) Add(data ...string) error {
@@ -35,8 +35,8 @@ func (a AppCodeHelper) Load() ([]string, error) {
 	if cmd.Err() != nil {
 		return nil, cmd.Err()
 	}
-	if e := cmd.ScanSlice(&t); e != nil {
-		return nil, e
+	if err := cmd.ScanSlice(&t); err != nil {
+		return nil, err
 	}
 	if len(t) == 0 {
 		return nil, Nil

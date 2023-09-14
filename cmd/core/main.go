@@ -37,7 +37,7 @@ func main() {
 	}()
 
 	// :80
-	if e := tools.SoftHttpSrv(router.Engine()); e != nil {
-		log.Fatalln("启动监听失败:", e)
+	if err := tools.SoftHttpSrv(router.Engine()); err != nil {
+		log.Fatalln("启动监听失败:", err)
 	}
 }

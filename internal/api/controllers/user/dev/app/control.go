@@ -44,8 +44,8 @@ func ApplyApp(c *gin.Context) {
 		PermitAll    bool   `json:"permitAll" form:"permitAll"`
 		PermitGroups []uint `json:"permitGroups" form:"permitGroups"`
 	}
-	if e := c.ShouldBind(&f); e != nil {
-		callback.Error(c, callback.ErrForm, e)
+	if err := c.ShouldBind(&f); err != nil {
+		callback.Error(c, callback.ErrForm, err)
 		return
 	}
 
@@ -54,17 +54,17 @@ func ApplyApp(c *gin.Context) {
 		return
 	}
 
-	appSrc, e := service.App.Begin()
-	if e != nil {
-		callback.Error(c, callback.ErrForm, e)
+	appSrc, err := service.App.Begin()
+	if err != nil {
+		callback.Error(c, callback.ErrForm, err)
 		return
 	}
 	defer appSrc.Rollback()
 
 	uid := tools.GetUserInfo(c).ID
-	newApp, e := appSrc.New(uid, f.Name, f.Callback, f.PermitAll)
-	if e != nil {
-		callback.Error(c, callback.ErrDBOperation, e)
+	newApp, err := appSrc.New(uid, f.Name, f.Callback, f.PermitAll)
+	if err != nil {
+		callback.Error(c, callback.ErrDBOperation, err)
 		return
 	}
 
@@ -72,18 +72,18 @@ func ApplyApp(c *gin.Context) {
 	if !f.PermitAll && len(f.PermitGroups) != 0 {
 		appGroupSrv := service.AppGroupSrv{DB: appSrc.DB}
 
-		if groups, e = appGroupSrv.BindForApp(newApp.ID, f.PermitGroups); e != nil {
-			if errors.Is(e, gorm.ErrRecordNotFound) {
+		if groups, err = appGroupSrv.BindForApp(newApp.ID, f.PermitGroups); err != nil {
+			if errors.Is(err, gorm.ErrRecordNotFound) {
 				callback.Error(c, callback.ErrGroupNotFound)
 				return
 			}
-			callback.Error(c, callback.ErrDBOperation, e)
+			callback.Error(c, callback.ErrDBOperation, err)
 			return
 		}
 	}
 
-	if e = redis.AppCode.Add(newApp.AppCode); e != nil || appSrc.Commit().Error != nil {
-		callback.Error(c, callback.ErrUnexpected, e)
+	if err = redis.AppCode.Add(newApp.AppCode); err != nil || appSrc.Commit().Error != nil {
+		callback.Error(c, callback.ErrUnexpected, err)
 		return
 	}
 
@@ -109,42 +109,42 @@ func DeleteApp(c *gin.Context) {
 	var f struct {
 		ID uint `json:"id" form:"id" binding:"required"`
 	}
-	if e := c.ShouldBind(&f); e != nil {
-		callback.Error(c, callback.ErrForm, e)
+	if err := c.ShouldBind(&f); err != nil {
+		callback.Error(c, callback.ErrForm, err)
 		return
 	}
 
 	uid := tools.GetUserInfo(c).ID
 
-	appSrv, e := service.App.Begin()
-	if e != nil {
-		callback.Error(c, callback.ErrDBOperation, e)
+	appSrv, err := service.App.Begin()
+	if err != nil {
+		callback.Error(c, callback.ErrDBOperation, err)
 		return
 	}
 	defer appSrv.Rollback()
 
-	appCode, e := appSrv.FirstAppCodeByID(f.ID, uid, daoUtil.LockForUpdate)
-	if e != nil {
-		if errors.Is(e, gorm.ErrRecordNotFound) {
+	appCode, err := appSrv.FirstAppCodeByID(f.ID, uid, daoUtil.LockForUpdate)
+	if err != nil {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
 			callback.Error(c, callback.ErrAppNotFound)
 			return
 		}
-		callback.Error(c, callback.ErrDBOperation, e)
+		callback.Error(c, callback.ErrDBOperation, err)
 		return
 	}
 
-	if e = appSrv.DeleteByID(f.ID, uid); e != nil {
-		callback.Error(c, callback.ErrDBOperation, e)
+	if err = appSrv.DeleteByID(f.ID, uid); err != nil {
+		callback.Error(c, callback.ErrDBOperation, err)
 		return
 	}
 
-	if e = redis.AppCode.Del(appCode); e != nil {
+	if err = redis.AppCode.Del(appCode); err != nil {
 		callback.Error(c, callback.ErrUnexpected)
 		return
 	}
 
-	if e = appSrv.Commit().Error; e != nil {
-		callback.Error(c, callback.ErrDBOperation, e)
+	if err = appSrv.Commit().Error; err != nil {
+		callback.Error(c, callback.ErrDBOperation, err)
 		return
 	}
 
@@ -159,8 +159,8 @@ func ModifyApp(c *gin.Context) {
 		PermitAll    bool   `json:"permitAll" form:"permitAll"`
 		PermitGroups []uint `json:"permitGroups" form:"permitGroups"`
 	}
-	if e := c.ShouldBind(&f); e != nil {
-		callback.Error(c, callback.ErrForm, e)
+	if err := c.ShouldBind(&f); err != nil {
+		callback.Error(c, callback.ErrForm, err)
 		return
 	}
 
@@ -174,18 +174,18 @@ func ModifyApp(c *gin.Context) {
 		}
 	}
 
-	appSrv, e := service.App.Begin()
-	if e != nil {
-		callback.Error(c, callback.ErrDBOperation, e)
+	appSrv, err := service.App.Begin()
+	if err != nil {
+		callback.Error(c, callback.ErrDBOperation, err)
 		return
 	}
 	defer appSrv.Rollback()
 
 	uid := tools.GetUserInfo(c).ID
 
-	app, e := appSrv.FirstAppDetailedByIDForUser(f.ID, uid, daoUtil.LockForUpdate)
-	if e != nil {
-		callback.Error(c, callback.ErrDBOperation, e)
+	app, err := appSrv.FirstAppDetailedByIDForUser(f.ID, uid, daoUtil.LockForUpdate)
+	if err != nil {
+		callback.Error(c, callback.ErrDBOperation, err)
 		return
 	}
 
@@ -208,15 +208,15 @@ func ModifyApp(c *gin.Context) {
 	// 更新组关系
 	if app.PermitAllGroup != f.PermitAll {
 		if f.PermitAll {
-			e = appGroupSrv.DeleteAllForApp(app.ID)
-			if e != nil {
-				callback.Error(c, callback.ErrDBOperation, e)
+			err = appGroupSrv.DeleteAllForApp(app.ID)
+			if err != nil {
+				callback.Error(c, callback.ErrDBOperation, err)
 				return
 			}
 		} else if len(f.PermitGroups) > 0 {
-			app.Groups, e = appGroupSrv.BindForApp(app.ID, f.PermitGroups)
-			if e != nil {
-				callback.Error(c, callback.ErrDBOperation, e)
+			app.Groups, err = appGroupSrv.BindForApp(app.ID, f.PermitGroups)
+			if err != nil {
+				callback.Error(c, callback.ErrDBOperation, err)
 				return
 			}
 		}
@@ -270,28 +270,28 @@ func ModifyApp(c *gin.Context) {
 		}
 
 		if len(groupToRemove) > 0 {
-			if e = appGroupSrv.UnBindForApp(app.ID, groupToRemove); e != nil {
-				callback.Error(c, callback.ErrDBOperation, e)
+			if err = appGroupSrv.UnBindForApp(app.ID, groupToRemove); err != nil {
+				callback.Error(c, callback.ErrDBOperation, err)
 				return
 			}
 		}
 		if len(groupToCreate) > 0 {
-			if _, e = appGroupSrv.BindForApp(app.ID, groupToCreate); e != nil {
-				callback.Error(c, callback.ErrDBOperation, e)
+			if _, err = appGroupSrv.BindForApp(app.ID, groupToCreate); err != nil {
+				callback.Error(c, callback.ErrDBOperation, err)
 				return
 			}
 		}
 	}
 
 	if appInfoChanged {
-		if e = appSrv.UpdateAll(app.ID, f.Name, f.Callback, f.PermitAll); e != nil {
-			callback.Error(c, callback.ErrDBOperation, e)
+		if err = appSrv.UpdateAll(app.ID, f.Name, f.Callback, f.PermitAll); err != nil {
+			callback.Error(c, callback.ErrDBOperation, err)
 			return
 		}
 	}
 
-	if e = appSrv.Commit().Error; e != nil {
-		callback.Error(c, callback.ErrDBOperation, e)
+	if err = appSrv.Commit().Error; err != nil {
+		callback.Error(c, callback.ErrDBOperation, err)
 		return
 	}
 
@@ -303,27 +303,27 @@ func UpdateLinkState(c *gin.Context) {
 		ID      uint `json:"id" form:"id" binding:"required"`
 		LinkOff bool `json:"linkOff" form:"linkOff"`
 	}
-	if e := c.ShouldBind(&f); e != nil {
-		callback.Error(c, callback.ErrForm, e)
+	if err := c.ShouldBind(&f); err != nil {
+		callback.Error(c, callback.ErrForm, err)
 		return
 	}
 
-	appSrv, e := service.App.Begin()
-	if e != nil {
-		callback.Error(c, callback.ErrDBOperation, e)
+	appSrv, err := service.App.Begin()
+	if err != nil {
+		callback.Error(c, callback.ErrDBOperation, err)
 		return
 	}
 	defer appSrv.Rollback()
 
 	uid := tools.GetUserInfo(c).ID
 
-	if e = appSrv.UpdateLinkOff(uid, f.ID, f.LinkOff); e != nil {
-		callback.Error(c, callback.ErrDBOperation, e)
+	if err = appSrv.UpdateLinkOff(uid, f.ID, f.LinkOff); err != nil {
+		callback.Error(c, callback.ErrDBOperation, err)
 		return
 	}
 
-	if e = appSrv.Commit().Error; e != nil {
-		callback.Error(c, callback.ErrDBOperation, e)
+	if err = appSrv.Commit().Error; err != nil {
+		callback.Error(c, callback.ErrDBOperation, err)
 		return
 	}
 

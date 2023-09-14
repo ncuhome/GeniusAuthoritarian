@@ -33,9 +33,9 @@ type RelatedUserInfo struct {
 }
 
 func (a *UserSyncProcessor) Run() error {
-	GroupOpenIdToFeishuUserSliceMap, e := a.downloadUserList()
-	if e != nil {
-		return e
+	GroupOpenIdToFeishuUserSliceMap, err := a.downloadUserList()
+	if err != nil {
+		return err
 	}
 
 	var startAt = time.Now()
@@ -43,9 +43,9 @@ func (a *UserSyncProcessor) Run() error {
 	defer a.tx.Rollback()
 
 	// 过滤无效数据
-	validFeishuGroupIdMap, e := a.filterInvalidGroups(GroupOpenIdToFeishuUserSliceMap)
-	if e != nil {
-		return e
+	validFeishuGroupIdMap, err := a.filterInvalidGroups(GroupOpenIdToFeishuUserSliceMap)
+	if err != nil {
+		return err
 	}
 	a.filterInvalidUsers(GroupOpenIdToFeishuUserSliceMap)
 
@@ -54,14 +54,14 @@ func (a *UserSyncProcessor) Run() error {
 	UserPhoneToRelatedUserInfoMap := a.convertReverseMap(GroupDaoIdToFeishuUserSliceMap)
 
 	// 将数据同步入数据库
-	if e = a.doSyncUsers(UserPhoneToRelatedUserInfoMap); e != nil {
-		return e
+	if err = a.doSyncUsers(UserPhoneToRelatedUserInfoMap); err != nil {
+		return err
 	}
-	if e = a.doSyncUserGroups(UserPhoneToRelatedUserInfoMap); e != nil {
-		return e
+	if err = a.doSyncUserGroups(UserPhoneToRelatedUserInfoMap); err != nil {
+		return err
 	}
-	if e = a.tx.Commit().Error; e != nil {
-		return e
+	if err = a.tx.Commit().Error; err != nil {
+		return err
 	}
 
 	a.Cost = time.Now().Sub(startAt)
@@ -85,9 +85,9 @@ func (a *UserSyncProcessor) filterInvalidGroups(feishuUserList map[string][]feis
 		openID[i] = k
 		i++
 	}
-	validGroups, e := service.FeishuGroupsSrv{DB: a.tx}.GetByOpenID(openID, daoUtil.LockForShare)
-	if e != nil {
-		return nil, e
+	validGroups, err := service.FeishuGroupsSrv{DB: a.tx}.GetByOpenID(openID, daoUtil.LockForShare)
+	if err != nil {
+		return nil, err
 	}
 	var validGroupsMap = make(map[string]uint, len(validGroups))
 	for _, group := range validGroups {
@@ -179,9 +179,9 @@ func (a *UserSyncProcessor) doSyncUsers(reserveData map[string]*RelatedUserInfo)
 		i++
 	}
 	userSrv := service.UserSrv{DB: a.tx}
-	existUsers, e := userSrv.GetUnscopedUserByPhoneSlice(allPhone)
-	if e != nil {
-		return e
+	existUsers, err := userSrv.GetUnscopedUserByPhoneSlice(allPhone)
+	if err != nil {
+		return err
 	}
 	a.createdUser = len(allPhone) - len(existUsers)
 	for _, exUser := range existUsers {
@@ -203,8 +203,8 @@ func (a *UserSyncProcessor) doSyncUsers(reserveData map[string]*RelatedUserInfo)
 			i++
 		nextUser:
 		}
-		if e = userSrv.CreateAll(userToCreate); e != nil {
-			return e
+		if err = userSrv.CreateAll(userToCreate); err != nil {
+			return err
 		}
 		for _, user := range userToCreate { // 回填 Uid
 			reserveData[user.Phone].Data.ID = user.ID
@@ -219,14 +219,14 @@ func (a *UserSyncProcessor) doSyncUsers(reserveData map[string]*RelatedUserInfo)
 				i++
 			}
 		}
-		if e = userSrv.UnFrozeByIDSlice(userToUnfroze); e != nil {
-			return e
+		if err = userSrv.UnFrozeByIDSlice(userToUnfroze); err != nil {
+			return err
 		}
 	}
 
-	invalidUsers, e := userSrv.GetUserNotInPhoneSlice(allPhone)
-	if e != nil {
-		return e
+	invalidUsers, err := userSrv.GetUserNotInPhoneSlice(allPhone)
+	if err != nil {
+		return err
 	}
 	if len(invalidUsers) > 0 {
 		var invalidUID = make([]uint, len(invalidUsers))
@@ -234,8 +234,8 @@ func (a *UserSyncProcessor) doSyncUsers(reserveData map[string]*RelatedUserInfo)
 			delete(reserveData, user.Phone)
 			invalidUID[i] = user.ID
 		}
-		if e = userSrv.FrozeByIDSlice(invalidUID); e != nil {
-			return e
+		if err = userSrv.FrozeByIDSlice(invalidUID); err != nil {
+			return err
 		}
 		a.frozenUser = len(invalidUID)
 	}
@@ -245,9 +245,9 @@ func (a *UserSyncProcessor) doSyncUsers(reserveData map[string]*RelatedUserInfo)
 // 数据库操作：同步用户部门关系
 func (a *UserSyncProcessor) doSyncUserGroups(reserveData map[string]*RelatedUserInfo) error {
 	userGroupSrv := service.UserGroupsSrv{DB: a.tx}
-	existUserGroups, e := userGroupSrv.GetAll()
-	if e != nil {
-		return e
+	existUserGroups, err := userGroupSrv.GetAll()
+	if err != nil {
+		return err
 	}
 	var userGroupsToAdd = list.New()
 	var userGroupsToDelete = list.New() // uint
@@ -279,9 +279,9 @@ func (a *UserSyncProcessor) doSyncUserGroups(reserveData map[string]*RelatedUser
 				}
 			}
 			userGroupsToDelete.PushBack(exUserDepartment)
-			e = redis.UserJwt.Clear(user.Data.ID)
-			if e != nil && e != redis.Nil {
-				return e
+			err = redis.UserJwt.Clear(user.Data.ID)
+			if err != nil && err != redis.Nil {
+				return err
 			}
 		nextExUserDepartment:
 		}
@@ -296,8 +296,8 @@ func (a *UserSyncProcessor) doSyncUserGroups(reserveData map[string]*RelatedUser
 			i++
 			el = el.Next()
 		}
-		if e = userGroupSrv.CreateAll(userGroupsToAddModels); e != nil {
-			return e
+		if err = userGroupSrv.CreateAll(userGroupsToAddModels); err != nil {
+			return err
 		}
 	}
 	if userGroupsToDelete.Len() != 0 {
@@ -310,8 +310,8 @@ func (a *UserSyncProcessor) doSyncUserGroups(reserveData map[string]*RelatedUser
 			i++
 			el = el.Next()
 		}
-		if e = userGroupSrv.DeleteByIDSlice(userGroupsToDeleteSlice); e != nil {
-			return e
+		if err = userGroupSrv.DeleteByIDSlice(userGroupsToDeleteSlice); err != nil {
+			return err
 		}
 	}
 	return nil
@@ -321,22 +321,22 @@ func AddUserSyncCron(spec string) error {
 	worker := backoff.New(backoff.Conf{
 		Content: func() error {
 			sync := UserSyncProcessor{}
-			e := sync.Run()
-			if e != nil {
-				log.Errorf("同步飞书用户列表失败: %v", e)
+			err := sync.Run()
+			if err != nil {
+				log.Errorf("同步飞书用户列表失败: %v", err)
 			} else {
 				log.Infof("飞书用户列表同步成功，差异处理耗时 %dms", sync.Cost.Milliseconds())
 				sync.PrintSyncResult()
 			}
 
-			return e
+			return err
 		},
 		MaxRetryDelay: time.Minute * 60,
 	})
 
-	_, e := agent.AddRegular(&agent.Event{
+	_, err := agent.AddRegular(&agent.Event{
 		T: spec,
 		E: worker.Start,
 	})
-	return e
+	return err
 }

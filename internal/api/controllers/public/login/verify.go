@@ -40,8 +40,8 @@ func VerifyToken(c *gin.Context) {
 
 		ClientIp string `json:"clientIp" form:"clientIp"`
 	}
-	if e := c.ShouldBind(&f); e != nil {
-		callback.Error(c, callback.ErrForm, e)
+	if err := c.ShouldBind(&f); err != nil {
+		callback.Error(c, callback.ErrForm, err)
 		return
 	}
 
@@ -50,9 +50,9 @@ func VerifyToken(c *gin.Context) {
 		return
 	}
 
-	appSrv, e := service.App.Begin()
-	if e != nil {
-		callback.Error(c, callback.ErrDBOperation, e)
+	appSrv, err := service.App.Begin()
+	if err != nil {
+		callback.Error(c, callback.ErrDBOperation, err)
 		return
 	}
 	defer appSrv.Rollback()
@@ -67,9 +67,9 @@ func VerifyToken(c *gin.Context) {
 		return
 	}
 
-	appCode, appSecret, e := appSrv.FirstAppKeyPair(claims.AppID)
-	if e != nil {
-		callback.Error(c, callback.ErrDBOperation, e)
+	appCode, appSecret, err := appSrv.FirstAppKeyPair(claims.AppID)
+	if err != nil {
+		callback.Error(c, callback.ErrDBOperation, err)
 		return
 	} else if f.AppCode != appCode {
 		callback.Error(c, callback.ErrOperationIllegal)
@@ -86,8 +86,8 @@ func VerifyToken(c *gin.Context) {
 		return
 	}
 
-	if e = appSrv.Commit().Error; e != nil {
-		callback.Error(c, callback.ErrDBOperation, e)
+	if err = appSrv.Commit().Error; err != nil {
+		callback.Error(c, callback.ErrDBOperation, err)
 		return
 	}
 

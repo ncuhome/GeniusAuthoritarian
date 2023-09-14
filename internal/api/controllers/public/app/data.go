@@ -12,30 +12,30 @@ func AppInfo(c *gin.Context) {
 	var f struct {
 		AppCode string `json:"appCode" form:"appCode"`
 	}
-	if e := c.ShouldBind(&f); e != nil {
-		callback.Error(c, callback.ErrForm, e)
+	if err := c.ShouldBind(&f); err != nil {
+		callback.Error(c, callback.ErrForm, err)
 		return
 	}
 
 	var appName, appHost string
 	if f.AppCode != "" {
-		if ok, e := service.App.CheckAppCode(f.AppCode); e != nil {
-			callback.Error(c, callback.ErrDBOperation, e)
+		if ok, err := service.App.CheckAppCode(f.AppCode); err != nil {
+			callback.Error(c, callback.ErrDBOperation, err)
 			return
 		} else if !ok {
-			callback.Error(c, callback.ErrAppCodeNotFound, e)
+			callback.Error(c, callback.ErrAppCodeNotFound, err)
 			return
 		}
 
-		appInfo, e := service.App.FirstAppByAppCode(f.AppCode)
-		if e != nil {
-			callback.Error(c, callback.ErrDBOperation, e)
+		appInfo, err := service.App.FirstAppByAppCode(f.AppCode)
+		if err != nil {
+			callback.Error(c, callback.ErrDBOperation, err)
 			return
 		}
 
-		callbackUrl, e := url.Parse(appInfo.Callback)
-		if e != nil {
-			callback.Error(c, callback.ErrUnexpected, e)
+		callbackUrl, err := url.Parse(appInfo.Callback)
+		if err != nil {
+			callback.Error(c, callback.ErrUnexpected, err)
 			return
 		}
 

@@ -8,9 +8,9 @@ import (
 )
 
 func loginFeishu(c *gin.Context, code string) *dto.UserThirdPartyIdentity {
-	user, e := feishu.Api.GetUser(code)
-	if e != nil {
-		callback.Error(c, callback.ErrRemoteOperationFailed, e)
+	user, err := feishu.Api.GetUser(code)
+	if err != nil {
+		callback.Error(c, callback.ErrRemoteOperationFailed, err)
 		return nil
 	}
 	return &dto.UserThirdPartyIdentity{

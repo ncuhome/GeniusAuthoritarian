@@ -10,9 +10,9 @@ import (
 func ListOwnedApp(c *gin.Context) {
 	uid := tools.GetUserInfo(c).ID
 
-	apps, e := service.App.GetUserOwnedApp(uid)
-	if e != nil {
-		callback.Error(c, callback.ErrDBOperation, e)
+	apps, err := service.App.GetUserOwnedApp(uid)
+	if err != nil {
+		callback.Error(c, callback.ErrDBOperation, err)
 		return
 	}
 
@@ -22,21 +22,21 @@ func ListOwnedApp(c *gin.Context) {
 func ListAccessibleApp(c *gin.Context) {
 	uid := tools.GetUserInfo(c).ID
 
-	permitAllApps, e := service.App.GetPermitAll()
-	if e != nil {
-		callback.Error(c, callback.ErrDBOperation, e)
+	permitAllApps, err := service.App.GetPermitAll()
+	if err != nil {
+		callback.Error(c, callback.ErrDBOperation, err)
 		return
 	}
 
-	isCenterMember, e := service.UserGroups.IsCenterMember(uid)
-	if e != nil {
-		callback.Error(c, callback.ErrDBOperation, e)
+	isCenterMember, err := service.UserGroups.IsCenterMember(uid)
+	if err != nil {
+		callback.Error(c, callback.ErrDBOperation, err)
 		return
 	}
 
-	accessibleApps, e := service.App.GetUserAccessible(uid, isCenterMember)
-	if e != nil {
-		callback.Error(c, callback.ErrDBOperation, e)
+	accessibleApps, err := service.App.GetUserAccessible(uid, isCenterMember)
+	if err != nil {
+		callback.Error(c, callback.ErrDBOperation, err)
 		return
 	}
 

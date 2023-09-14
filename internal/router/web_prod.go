@@ -10,14 +10,14 @@ import (
 )
 
 func frontendHandler() gin.HandlerFunc {
-	fs, e := web.Fs()
-	if e != nil {
-		log.Fatalln(e)
+	fs, err := web.Fs()
+	if err != nil {
+		log.Fatalln(err)
 	}
 
-	handler, e := webServe.New(fs)
-	if e != nil {
-		log.Fatalln(e)
+	handler, err := webServe.New(fs)
+	if err != nil {
+		log.Fatalln(err)
 	}
 
 	return handler

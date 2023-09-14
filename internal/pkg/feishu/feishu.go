@@ -12,32 +12,32 @@ var Api = feishuApi.New(global.Config.Feishu.ClientID, global.Config.Feishu.Secr
 
 func InitSync() {
 	var count int64
-	e := dao.DB.Model(&dao.FeishuGroups{}).Count(&count).Error
-	if e != nil {
-		log.Fatalln(e)
+	err := dao.DB.Model(&dao.FeishuGroups{}).Count(&count).Error
+	if err != nil {
+		log.Fatalln(err)
 	}
 	if count == 0 {
-		if e = DepartmentSync(); e != nil {
-			log.Fatalf("同步飞书部门失败: %v", e)
+		if err = DepartmentSync(); err != nil {
+			log.Fatalf("同步飞书部门失败: %v", err)
 		}
 	}
-	if e = dao.DB.Model(&dao.User{}).Count(&count).Error; e != nil {
-		log.Fatalln(e)
+	if err = dao.DB.Model(&dao.User{}).Count(&count).Error; err != nil {
+		log.Fatalln(err)
 	}
 	if count == 0 {
 		var sync = UserSyncProcessor{}
-		if e = sync.Run(); e != nil {
-			log.Fatalf("同步飞书用户失败: %v", e)
+		if err = sync.Run(); err != nil {
+			log.Fatalf("同步飞书用户失败: %v", err)
 		} else {
 			log.Infoln("飞书用户列表已同步")
 			sync.PrintSyncResult()
 		}
 	}
 
-	if e = AddDepartmentSyncCron("0 5 * * *"); e != nil {
-		log.Fatalf("添加定时同步飞书部门任务失败: %v", e)
+	if err = AddDepartmentSyncCron("0 5 * * *"); err != nil {
+		log.Fatalf("添加定时同步飞书部门任务失败: %v", err)
 	}
-	if e = AddUserSyncCron("30 5 * * *"); e != nil {
-		log.Fatalf("添加定时同步飞书用户任务失败: %v", e)
+	if err = AddUserSyncCron("30 5 * * *"); err != nil {
+		log.Fatalf("添加定时同步飞书用户任务失败: %v", err)
 	}
 }
