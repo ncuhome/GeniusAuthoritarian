@@ -114,8 +114,8 @@ func (a *UserSyncProcessor) filterInvalidUsers(feishuUserList map[string][]feish
 	for k, users := range feishuUserList {
 		var lens int
 		for _, user := range users {
-			if !user.Status.IsActivated || user.Status.IsFrozen || !user.MobileVisible {
-				user.MobileVisible = false
+			if !user.Status.IsActivated || user.Status.IsFrozen || user.Mobile == "" {
+				user.Status.IsActivated = false
 			} else {
 				lens++
 			}
@@ -123,7 +123,7 @@ func (a *UserSyncProcessor) filterInvalidUsers(feishuUserList map[string][]feish
 		var filteredList = make([]feishuApi.ListUserContent, lens)
 		lens = 0
 		for _, user := range users {
-			if user.MobileVisible {
+			if user.Status.IsActivated {
 				filteredList[lens] = user
 				lens++
 			}
