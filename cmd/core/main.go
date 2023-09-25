@@ -2,7 +2,7 @@ package main
 
 import (
 	"github.com/ncuhome/GeniusAuthoritarian/internal/global"
-	"github.com/ncuhome/GeniusAuthoritarian/internal/pkg/agent"
+	"github.com/ncuhome/GeniusAuthoritarian/internal/pkg/cronAgent"
 	"github.com/ncuhome/GeniusAuthoritarian/internal/pkg/department2BaseGroup"
 	"github.com/ncuhome/GeniusAuthoritarian/internal/pkg/feishu"
 	sshDevServer "github.com/ncuhome/GeniusAuthoritarian/internal/pkg/sshDev/server"
@@ -15,7 +15,7 @@ import (
 
 func init() {
 	department2BaseGroup.Init()
-	agent.Init()
+	cronAgent.Init()
 	feishu.InitSync()
 	views.InitRenewAgent()
 	// 建议放在用户同步的时间之后

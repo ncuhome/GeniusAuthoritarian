@@ -5,7 +5,6 @@ import (
 	"github.com/Mmx233/daoUtil"
 	"github.com/ncuhome/GeniusAuthoritarian/internal/db/dao"
 	"github.com/ncuhome/GeniusAuthoritarian/internal/db/redis"
-	"github.com/ncuhome/GeniusAuthoritarian/internal/pkg/agent"
 	"github.com/ncuhome/GeniusAuthoritarian/internal/service"
 	"github.com/ncuhome/GeniusAuthoritarian/pkg/backoff"
 	"github.com/ncuhome/GeniusAuthoritarian/pkg/feishuApi"
@@ -13,6 +12,24 @@ import (
 	"gorm.io/gorm"
 	"time"
 )
+
+func NewUserSyncBackoff() backoff.Backoff {
+	return backoff.New(backoff.Conf{
+		Content: func() error {
+			sync := UserSyncProcessor{}
+			err := sync.Run()
+			if err != nil {
+				log.Errorf("同步飞书用户列表失败: %v", err)
+			} else {
+				log.Infof("飞书用户列表同步成功，差异处理耗时 %dms", sync.Cost.Milliseconds())
+				sync.PrintSyncResult()
+			}
+
+			return err
+		},
+		MaxRetryDelay: time.Minute * 60,
+	})
+}
 
 type UserSyncProcessor struct {
 	tx *gorm.DB
@@ -316,28 +333,4 @@ func (a *UserSyncProcessor) doSyncUserGroups(reserveData map[string]*RelatedUser
 		}
 	}
 	return nil
-}
-
-func AddUserSyncCron(spec string) error {
-	worker := backoff.New(backoff.Conf{
-		Content: func() error {
-			sync := UserSyncProcessor{}
-			err := sync.Run()
-			if err != nil {
-				log.Errorf("同步飞书用户列表失败: %v", err)
-			} else {
-				log.Infof("飞书用户列表同步成功，差异处理耗时 %dms", sync.Cost.Milliseconds())
-				sync.PrintSyncResult()
-			}
-
-			return err
-		},
-		MaxRetryDelay: time.Minute * 60,
-	})
-
-	_, err := agent.AddRegular(&agent.Event{
-		T: spec,
-		E: worker.Start,
-	})
-	return err
 }

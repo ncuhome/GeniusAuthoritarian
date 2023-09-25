@@ -4,7 +4,6 @@ import (
 	"container/list"
 	"github.com/Mmx233/daoUtil"
 	"github.com/ncuhome/GeniusAuthoritarian/internal/db/dao"
-	"github.com/ncuhome/GeniusAuthoritarian/internal/pkg/agent"
 	"github.com/ncuhome/GeniusAuthoritarian/internal/service"
 	"github.com/ncuhome/GeniusAuthoritarian/pkg/backoff"
 	"github.com/ncuhome/GeniusAuthoritarian/pkg/departments"
@@ -13,7 +12,23 @@ import (
 	"time"
 )
 
-func DepartmentSync() error {
+func NewDepartmentSyncBackOff() backoff.Backoff {
+	return backoff.New(backoff.Conf{
+		Content: func() error {
+			startAt := time.Now()
+			err := doDepartmentSync()
+			if err != nil {
+				log.Errorf("同步飞书部门失败: %v", err)
+			} else {
+				log.Infof("飞书部门同步成功，总耗时 %dms", time.Now().Sub(startAt).Milliseconds())
+			}
+			return err
+		},
+		MaxRetryDelay: time.Minute * 30,
+	})
+}
+
+func doDepartmentSync() error {
 	departmentRelation, err := service.BaseGroups.LoadGroupsRelation()
 	if err != nil {
 		return err
@@ -100,28 +115,6 @@ func DepartmentSync() error {
 		}
 	}
 	return srv.Commit().Error
-}
-
-func AddDepartmentSyncCron(spec string) error {
-	worker := backoff.New(backoff.Conf{
-		Content: func() error {
-			startAt := time.Now()
-			err := DepartmentSync()
-			if err != nil {
-				log.Errorf("同步飞书部门失败: %v", err)
-			} else {
-				log.Infof("飞书部门同步成功，总耗时 %dms", time.Now().Sub(startAt).Milliseconds())
-			}
-			return err
-		},
-		MaxRetryDelay: time.Minute * 30,
-	})
-
-	_, err := agent.AddRegular(&agent.Event{
-		T: spec,
-		E: worker.Start,
-	})
-	return err
 }
 
 type fsDepartmentsRelation struct {

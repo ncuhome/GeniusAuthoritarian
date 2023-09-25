@@ -3,7 +3,7 @@ package server
 import (
 	"github.com/Mmx233/tool"
 	"github.com/ncuhome/GeniusAuthoritarian/internal/db/dao"
-	"github.com/ncuhome/GeniusAuthoritarian/internal/pkg/agent"
+	"github.com/ncuhome/GeniusAuthoritarian/internal/pkg/cronAgent"
 	"github.com/ncuhome/GeniusAuthoritarian/internal/pkg/sshDev/server/rpc"
 	"github.com/ncuhome/GeniusAuthoritarian/internal/pkg/sshDev/sshTool"
 	"github.com/ncuhome/GeniusAuthoritarian/internal/service"
@@ -16,7 +16,7 @@ import (
 // 研发哥容器内 ssh 账号管理器
 
 func AddSshAccountCron(spec string) {
-	_, err := agent.AddRegular(&agent.Event{
+	_, err := cronAgent.AddRegular(&cronAgent.Event{
 		T: spec,
 		E: func() {
 			err := DoSync()

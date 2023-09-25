@@ -7,14 +7,14 @@ import (
 	"github.com/Mmx233/daoUtil"
 	"github.com/Mmx233/tool"
 	"github.com/ncuhome/GeniusAuthoritarian/internal/db/dao"
-	"github.com/ncuhome/GeniusAuthoritarian/internal/pkg/agent"
+	"github.com/ncuhome/GeniusAuthoritarian/internal/pkg/cronAgent"
 	"github.com/ncuhome/GeniusAuthoritarian/internal/service"
 	log "github.com/sirupsen/logrus"
 	"time"
 )
 
 func InitRenewAgent() {
-	_, err := agent.AddRegular(&agent.Event{
+	_, err := cronAgent.AddRegular(&cronAgent.Event{
 		T: "0 6,12,16,20,23 * * *",
 		E: func() {
 			defer tool.Recover()
