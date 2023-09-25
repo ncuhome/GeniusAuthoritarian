@@ -5,6 +5,7 @@ import (
 	"errors"
 	"fmt"
 	"github.com/go-redis/redis/v8"
+	"github.com/robfig/cron/v3"
 	"time"
 )
 
@@ -63,4 +64,31 @@ func (a SyncStat) Succeed(ctx context.Context) (bool, error) {
 		return false, nil
 	}
 	return true, err
+}
+
+func (a SyncStat) Inject(schedule cron.Schedule, f func() error) func() error {
+	return func() error {
+		ok, err := a.Succeed(context.Background())
+		if err != nil {
+			return err
+		} else if ok {
+			return nil
+		}
+
+		if err = a.MustLock(context.Background(), time.Second*120); err != nil {
+			return err
+		}
+		defer a.Unlock(context.Background())
+
+		if err = f(); err != nil {
+			return err
+		} else {
+			next := schedule.Next(time.Now())
+			ctx, cancel := context.WithTimeout(context.Background(), time.Second*5)
+			defer cancel()
+			_ = a.SetSuccess(ctx, next.Sub(time.Now())-time.Second*5)
+		}
+
+		return nil
+	}
 }
