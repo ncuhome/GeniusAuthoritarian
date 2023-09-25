@@ -113,10 +113,10 @@ func (a *UserSyncProcessor) filterInvalidGroups(feishuUserList map[string][]feis
 func (a *UserSyncProcessor) filterInvalidUsers(feishuUserList map[string][]feishuApi.ListUserContent) {
 	for k, users := range feishuUserList {
 		var lens int
-		for _, user := range users {
+		for i, user := range users {
 			if !user.Status.IsActivated || user.Status.IsFrozen || user.Mobile == "" || // 账号未异常
 				user.EmployeeType != 1 { // 仅允许正式员工状态账号
-				user.Status.IsActivated = false
+				users[i].Status.IsActivated = false
 			} else {
 				lens++
 			}
