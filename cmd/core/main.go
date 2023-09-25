@@ -1,6 +1,7 @@
 package main
 
 import (
+	"github.com/ncuhome/GeniusAuthoritarian/internal/db/redis"
 	"github.com/ncuhome/GeniusAuthoritarian/internal/global"
 	"github.com/ncuhome/GeniusAuthoritarian/internal/pkg/cronAgent"
 	"github.com/ncuhome/GeniusAuthoritarian/internal/pkg/department2BaseGroup"
@@ -17,9 +18,9 @@ func init() {
 	department2BaseGroup.Init()
 	cron := cronAgent.New()
 	feishu.InitSync(cron)
-	views.InitRenewAgent(cron)
+	views.InitRenewAgent(cron, redis.NewSyncStat("renew-views"))
 	// 建议放在用户同步的时间之后
-	sshDevServer.AddSshAccountCron(cron, "0 6 * * *")
+	sshDevServer.AddSshAccountCron(cron)
 }
 
 // 主程序，包含所有路由，不可多实例运行

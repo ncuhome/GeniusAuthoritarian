@@ -3,6 +3,7 @@ package server
 import (
 	"github.com/Mmx233/tool"
 	"github.com/ncuhome/GeniusAuthoritarian/internal/db/dao"
+	"github.com/ncuhome/GeniusAuthoritarian/internal/db/redis"
 	"github.com/ncuhome/GeniusAuthoritarian/internal/pkg/sshDev/server/rpc"
 	"github.com/ncuhome/GeniusAuthoritarian/internal/pkg/sshDev/sshTool"
 	"github.com/ncuhome/GeniusAuthoritarian/internal/service"
@@ -15,8 +16,8 @@ import (
 
 // 研发哥容器内 ssh 账号管理器
 
-func AddSshAccountCron(c *cron.Cron, spec string) {
-	_, err := c.AddFunc(spec, func() {
+func AddSshAccountCron(c *cron.Cron, stat redis.SyncStat) {
+	_, err := c.AddFunc("0 6 * * *", func() {
 		err := DoSync()
 		if err != nil {
 			log.Errorln("同步 SSH 账号失败:", err)
