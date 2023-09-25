@@ -4,13 +4,15 @@ import (
 	"errors"
 	"fmt"
 	"github.com/Mmx233/tool"
+	"github.com/robfig/cron/v3"
 	"sync/atomic"
 	"time"
 )
 
 // Backoff 错误重试 积分退避算法
 type Backoff struct {
-	f        func() error
+	Content func() error
+
 	retry    time.Duration
 	maxRetry time.Duration
 
@@ -32,7 +34,7 @@ func New(c Conf) Backoff {
 	}
 
 	return Backoff{
-		f:        c.Content,
+		Content:  c.Content,
 		retry:    time.Second,
 		maxRetry: c.MaxRetryDelay,
 		running:  &atomic.Bool{},
@@ -58,7 +60,7 @@ func (a Backoff) Worker() {
 					errChan <- errors.New(fmt.Sprint(p))
 				}
 			}()
-			errChan <- a.f()
+			errChan <- a.Content()
 		}()
 		if err := <-errChan; err == nil {
 			break
@@ -75,4 +77,8 @@ func (a Backoff) Worker() {
 	}
 
 	a.running.Store(false)
+}
+
+func (a Backoff) AddCron(c *cron.Cron, spec string) (cron.EntryID, error) {
+	return c.AddFunc(spec, a.Start)
 }
