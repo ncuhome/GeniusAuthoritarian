@@ -20,7 +20,9 @@ func init() {
 	feishu.InitSync(cron)
 	views.InitRenewAgent(cron, redis.NewSyncStat("renew-views"))
 	// 建议放在用户同步的时间之后
-	sshDevServer.AddSshAccountCron(cron)
+	sshDevServer.AddSshAccountCron(cron, redis.NewSyncStat("dev-ssh"))
+
+	cron.Start()
 }
 
 // 主程序，包含所有路由，不可多实例运行
