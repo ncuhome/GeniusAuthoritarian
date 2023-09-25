@@ -60,7 +60,7 @@ func MarshalOpenSshPrivateKey(key ed25519.PrivateKey) []byte {
 	pk1.Pub = pubKey
 
 	// Add our private key
-	pk1.Priv = []byte(key)
+	pk1.Priv = key
 
 	// Might be useful to put something in here at some point
 	pk1.Comment = ""
