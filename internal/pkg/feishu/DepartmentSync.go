@@ -2,25 +2,44 @@ package feishu
 
 import (
 	"container/list"
+	"context"
 	"github.com/Mmx233/daoUtil"
 	"github.com/ncuhome/GeniusAuthoritarian/internal/db/dao"
+	"github.com/ncuhome/GeniusAuthoritarian/internal/db/redis"
 	"github.com/ncuhome/GeniusAuthoritarian/internal/service"
 	"github.com/ncuhome/GeniusAuthoritarian/pkg/backoff"
 	"github.com/ncuhome/GeniusAuthoritarian/pkg/departments"
+	"github.com/robfig/cron/v3"
 	log "github.com/sirupsen/logrus"
 	"strings"
 	"time"
 )
 
-func NewDepartmentSyncBackOff() backoff.Backoff {
+func NewDepartmentSyncBackOff(stat redis.SyncStat, schedule cron.Schedule) backoff.Backoff {
 	return backoff.New(backoff.Conf{
 		Content: func() error {
-			startAt := time.Now()
-			err := doDepartmentSync()
+			ok, err := stat.Succeed(context.Background())
 			if err != nil {
+				return err
+			} else if ok {
+				return nil
+			}
+
+			if err = stat.MustLock(context.Background(), time.Second*120); err != nil {
+				return err
+			}
+			defer stat.Unlock(context.Background())
+
+			startAt := time.Now()
+			if err = doDepartmentSync(); err != nil {
 				log.Errorf("同步飞书部门失败: %v", err)
 			} else {
 				log.Infof("飞书部门同步成功，总耗时 %dms", time.Now().Sub(startAt).Milliseconds())
+
+				next := schedule.Next(time.Now())
+				ctx, cancel := context.WithTimeout(context.Background(), time.Second*5)
+				defer cancel()
+				_ = stat.SetSuccess(ctx, next.Sub(time.Now())-time.Second*5)
 			}
 			return err
 		},

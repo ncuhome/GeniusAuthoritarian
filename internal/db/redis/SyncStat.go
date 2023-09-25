@@ -2,6 +2,7 @@ package redis
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"github.com/go-redis/redis/v8"
 	"time"
@@ -25,6 +26,21 @@ type SyncStat struct {
 func (a SyncStat) TryLock(ctx context.Context, expire time.Duration) (bool, error) {
 	a.lockMark = fmt.Sprint(time.Now().UnixNano())
 	return Client.SetNX(ctx, a.lockKey, a.lockMark, expire).Result()
+}
+
+func (a SyncStat) MustLock(ctx context.Context, expire time.Duration) error {
+	var count uint8
+	for ; count < 255; count++ {
+		ok, err := a.TryLock(ctx, expire)
+		if err != nil {
+			return err
+		} else if ok {
+			return nil
+		}
+		time.Sleep(time.Millisecond * 100)
+	}
+
+	return errors.New("wait for sync lock timeout")
 }
 
 func (a SyncStat) Unlock(ctx context.Context) error {
