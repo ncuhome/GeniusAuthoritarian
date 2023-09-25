@@ -66,6 +66,7 @@ func (a SyncStat) Succeed(ctx context.Context) (bool, error) {
 	return true, err
 }
 
+// Inject 注入 backoff 内容函数，使其支持分布式锁与成功跳过
 func (a SyncStat) Inject(schedule cron.Schedule, f func() error) func() error {
 	return func() error {
 		ok, err := a.Succeed(context.Background())

@@ -8,14 +8,15 @@ import (
 	"github.com/ncuhome/GeniusAuthoritarian/internal/service"
 	"github.com/ncuhome/GeniusAuthoritarian/pkg/backoff"
 	"github.com/ncuhome/GeniusAuthoritarian/pkg/feishuApi"
+	"github.com/robfig/cron/v3"
 	log "github.com/sirupsen/logrus"
 	"gorm.io/gorm"
 	"time"
 )
 
-func NewUserSyncBackoff() backoff.Backoff {
+func NewUserSyncBackoff(stat redis.SyncStat, schedule cron.Schedule) backoff.Backoff {
 	return backoff.New(backoff.Conf{
-		Content: func() error {
+		Content: stat.Inject(schedule, func() error {
 			sync := UserSyncProcessor{}
 			err := sync.Run()
 			if err != nil {
@@ -26,7 +27,7 @@ func NewUserSyncBackoff() backoff.Backoff {
 			}
 
 			return err
-		},
+		}),
 		MaxRetryDelay: time.Minute * 60,
 	})
 }

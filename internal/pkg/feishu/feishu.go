@@ -26,13 +26,19 @@ func InitSync(c *cron.Cron) {
 		log.Fatalln(err)
 	}
 
-	userSyncBackoff := NewUserSyncBackoff()
+	userSyncSchedule, err := cronAgent.Parser.Parse("30 5 * * *")
+	if err != nil {
+		log.Fatalf("规划同步飞书用户定时任务失败: %v", err)
+	}
+
+	userSyncBackoff := NewUserSyncBackoff(
+		redis.NewSyncStat("feishu-user"),
+		userSyncSchedule,
+	)
 	if err = userSyncBackoff.Content(); err != nil {
 		log.Fatalln(err)
 	}
 
 	c.Schedule(deparmentSchedule, cron.FuncJob(departmentBackoff.Start))
-	if _, err = userSyncBackoff.AddCron(c, "30 5 * * *"); err != nil {
-		log.Fatalf("添加定时同步飞书用户任务失败: %v", err)
-	}
+	c.Schedule(userSyncSchedule, cron.FuncJob(userSyncBackoff.Start))
 }
