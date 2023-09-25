@@ -1,4 +1,4 @@
-//go:build !dev && web
+//go:build !dev
 
 package web
 

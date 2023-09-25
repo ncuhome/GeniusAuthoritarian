@@ -1,5 +1,3 @@
-//go:build web
-
 package router
 
 import (

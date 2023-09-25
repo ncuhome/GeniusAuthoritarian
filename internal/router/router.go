@@ -1,5 +1,3 @@
-//go:build !fe
-
 package router
 
 import (
