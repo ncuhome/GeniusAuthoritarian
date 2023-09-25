@@ -21,4 +21,5 @@ const (
 	keyUserMfaLogin
 	keyMfaEnable
 	keySms
+	keySyncStat
 )
