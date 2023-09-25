@@ -15,11 +15,11 @@ import (
 
 func init() {
 	department2BaseGroup.Init()
-	cronAgent.Init()
-	feishu.InitSync()
-	views.InitRenewAgent()
+	cron := cronAgent.New()
+	feishu.InitSync(cron)
+	views.InitRenewAgent(cron)
 	// 建议放在用户同步的时间之后
-	sshDevServer.AddSshAccountCron("0 6 * * *")
+	sshDevServer.AddSshAccountCron(cron, "0 6 * * *")
 }
 
 // 主程序，包含所有路由，不可多实例运行

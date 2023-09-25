@@ -7,28 +7,25 @@ import (
 	"github.com/Mmx233/daoUtil"
 	"github.com/Mmx233/tool"
 	"github.com/ncuhome/GeniusAuthoritarian/internal/db/dao"
-	"github.com/ncuhome/GeniusAuthoritarian/internal/pkg/cronAgent"
 	"github.com/ncuhome/GeniusAuthoritarian/internal/service"
+	"github.com/robfig/cron/v3"
 	log "github.com/sirupsen/logrus"
 	"time"
 )
 
-func InitRenewAgent() {
-	_, err := cronAgent.AddRegular(&cronAgent.Event{
-		T: "0 6,12,16,20,23 * * *",
-		E: func() {
-			defer tool.Recover()
+func InitRenewAgent(c *cron.Cron) {
+	_, err := c.AddFunc("0 6,12,16,20,23 * * *", func() {
+		defer tool.Recover()
 
-			startAt := time.Now()
+		startAt := time.Now()
 
-			e := Renew()
-			if e != nil {
-				log.Errorln("更新 app views 失败:", e)
-				return
-			}
+		e := Renew()
+		if e != nil {
+			log.Errorln("更新 app views 失败:", e)
+			return
+		}
 
-			log.Infof("App views 刷新成功，耗时 %d ms", time.Now().Sub(startAt).Milliseconds())
-		},
+		log.Infof("App views 刷新成功，耗时 %d ms", time.Now().Sub(startAt).Milliseconds())
 	})
 	if err != nil {
 		panic(err)

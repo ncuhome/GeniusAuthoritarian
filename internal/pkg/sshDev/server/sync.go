@@ -3,11 +3,11 @@ package server
 import (
 	"github.com/Mmx233/tool"
 	"github.com/ncuhome/GeniusAuthoritarian/internal/db/dao"
-	"github.com/ncuhome/GeniusAuthoritarian/internal/pkg/cronAgent"
 	"github.com/ncuhome/GeniusAuthoritarian/internal/pkg/sshDev/server/rpc"
 	"github.com/ncuhome/GeniusAuthoritarian/internal/pkg/sshDev/sshTool"
 	"github.com/ncuhome/GeniusAuthoritarian/internal/service"
 	"github.com/ncuhome/GeniusAuthoritarian/pkg/ed25519"
+	"github.com/robfig/cron/v3"
 	log "github.com/sirupsen/logrus"
 	"math/rand"
 	"time"
@@ -15,17 +15,14 @@ import (
 
 // 研发哥容器内 ssh 账号管理器
 
-func AddSshAccountCron(spec string) {
-	_, err := cronAgent.AddRegular(&cronAgent.Event{
-		T: spec,
-		E: func() {
-			err := DoSync()
-			if err != nil {
-				log.Errorln("同步 SSH 账号失败:", err)
-			} else {
-				log.Infoln("同步 SSH 账号成功")
-			}
-		},
+func AddSshAccountCron(c *cron.Cron, spec string) {
+	_, err := c.AddFunc(spec, func() {
+		err := DoSync()
+		if err != nil {
+			log.Errorln("同步 SSH 账号失败:", err)
+		} else {
+			log.Infoln("同步 SSH 账号成功")
+		}
 	})
 	if err != nil {
 		log.Fatalln("添加 SSH 账号同步任务失败:", err)
