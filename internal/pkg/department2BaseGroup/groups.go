@@ -2,15 +2,23 @@ package department2BaseGroup
 
 import (
 	"container/list"
+	"context"
 	"github.com/ncuhome/GeniusAuthoritarian/internal/db/dao"
+	"github.com/ncuhome/GeniusAuthoritarian/internal/db/redis"
 	"github.com/ncuhome/GeniusAuthoritarian/internal/global"
 	"github.com/ncuhome/GeniusAuthoritarian/internal/service"
 	log "github.com/sirupsen/logrus"
+	"time"
 )
 
-func Init() {
-	err := CheckBaseGroups()
+func Init(stat redis.SyncStat) {
+	err := stat.MustLock(context.Background(), time.Second*30)
 	if err != nil {
+		log.Fatalln("初始化 base groups 失败:", err)
+	}
+	defer stat.Unlock(context.Background())
+
+	if err = CheckBaseGroups(); err != nil {
 		log.Fatalln("写入基本组列表失败:", err)
 	}
 }

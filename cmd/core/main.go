@@ -15,7 +15,8 @@ import (
 )
 
 func init() {
-	department2BaseGroup.Init()
+	department2BaseGroup.Init(redis.NewSyncStat("init-base-groups"))
+
 	cron := cronAgent.New()
 	feishu.InitSync(cron)
 	views.InitRenewAgent(cron, redis.NewSyncStat("renew-views"))
