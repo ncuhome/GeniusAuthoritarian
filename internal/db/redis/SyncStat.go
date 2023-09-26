@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"github.com/go-redis/redis/v8"
 	"github.com/robfig/cron/v3"
+	log "github.com/sirupsen/logrus"
 	"time"
 )
 
@@ -49,9 +50,13 @@ func (a SyncStat) Unlock(ctx context.Context) error {
 	if err != nil {
 		return err
 	} else if mark != a.lockMark {
+		log.Errorln(mark, a.lockMark)
 		return nil
 	}
-	return Client.Del(ctx, a.lockKey).Err()
+
+	err = Client.Del(ctx, a.lockKey).Err()
+	log.Error(err)
+	return err
 }
 
 func (a SyncStat) SetSuccess(ctx context.Context, expire time.Duration) error {
