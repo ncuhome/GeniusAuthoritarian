@@ -85,9 +85,12 @@ func (a SyncStat) Inject(schedule cron.Schedule, f func() error) func() error {
 			return err
 		} else {
 			next := schedule.Next(time.Now())
-			ctx, cancel := context.WithTimeout(context.Background(), time.Second*5)
-			defer cancel()
-			_ = a.SetSuccess(ctx, next.Sub(time.Now())-time.Second*5)
+			expire := next.Sub(time.Now()) - time.Second*5
+			if expire > 0 {
+				ctx, cancel := context.WithTimeout(context.Background(), time.Second*5)
+				defer cancel()
+				_ = a.SetSuccess(ctx, expire)
+			}
 		}
 
 		return nil
