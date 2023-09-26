@@ -22,12 +22,19 @@ type SyncStat struct {
 	key     string
 	lockKey string
 
-	lockMark string
+	lockMark *string
 }
 
 func (a SyncStat) TryLock(ctx context.Context, expire time.Duration) (bool, error) {
-	a.lockMark = fmt.Sprint(time.Now().UnixNano())
-	return Client.SetNX(ctx, a.lockKey, a.lockMark, expire).Result()
+	newMark := fmt.Sprint(time.Now().UnixNano())
+	ok, err := Client.SetNX(ctx, a.lockKey, newMark, expire).Result()
+	if err != nil {
+		return false, err
+	} else if ok {
+		a.lockMark = &newMark
+	}
+
+	return ok, nil
 }
 
 func (a SyncStat) MustLock(ctx context.Context, expire time.Duration) error {
@@ -49,7 +56,7 @@ func (a SyncStat) Unlock(ctx context.Context) error {
 	mark, err := Client.Get(ctx, a.lockKey).Result()
 	if err != nil {
 		return err
-	} else if mark != a.lockMark {
+	} else if mark != *a.lockMark {
 		log.Errorln(mark, a.lockMark)
 		return nil
 	}
