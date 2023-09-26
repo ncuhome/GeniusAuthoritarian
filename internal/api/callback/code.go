@@ -26,6 +26,7 @@ const (
 	cErrSendSmsFailed
 	cErrIdentityCodeNotCorrect
 	cErrSshNotFound
+	cErrUserIdentity
 )
 
 var (
@@ -153,5 +154,10 @@ var (
 		Code:       cErrSshNotFound,
 		Msg:        "SSH 账号未分配，请联系管理员",
 		HttpStatus: 404,
+	}
+	ErrUserIdentity = &Msg{
+		Code:       cErrUserIdentity,
+		Msg:        "没有找到角色，请尝试使用其他登录方式或联系管理员",
+		HttpStatus: 403,
 	}
 )
