@@ -12,14 +12,24 @@ import (
 )
 
 func Init(stat redis.SyncStat) {
-	err := stat.MustLock(context.Background(), time.Second*30)
+	ok, err := stat.Succeed(context.Background())
 	if err != nil {
+		log.Fatalln(err)
+	} else if ok {
+		return
+	}
+
+	if err = stat.MustLock(context.Background(), time.Second*30); err != nil {
 		log.Fatalln("初始化 base groups 失败:", err)
 	}
 	defer stat.Unlock(context.Background())
 
 	if err = CheckBaseGroups(); err != nil {
 		log.Fatalln("写入基本组列表失败:", err)
+	}
+
+	if err = stat.SetSuccess(context.Background(), time.Minute); err != nil {
+		log.Fatalln(err)
 	}
 }
 
