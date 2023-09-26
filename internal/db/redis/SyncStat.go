@@ -21,22 +21,15 @@ type SyncStat struct {
 	key     string
 	lockKey string
 
-	lockMark *string
+	lockMark string
 }
 
-func (a SyncStat) TryLock(ctx context.Context, expire time.Duration) (bool, error) {
-	newMark := fmt.Sprint(time.Now().UnixNano())
-	ok, err := Client.SetNX(ctx, a.lockKey, newMark, expire).Result()
-	if err != nil {
-		return false, err
-	} else if ok {
-		a.lockMark = &newMark
-	}
-
-	return ok, nil
+func (a *SyncStat) TryLock(ctx context.Context, expire time.Duration) (bool, error) {
+	a.lockMark = fmt.Sprint(time.Now().UnixNano())
+	return Client.SetNX(ctx, a.lockKey, a.lockMark, expire).Result()
 }
 
-func (a SyncStat) MustLock(ctx context.Context, expire time.Duration) error {
+func (a *SyncStat) MustLock(ctx context.Context, expire time.Duration) error {
 	var count uint8
 	for ; count < 255; count++ {
 		ok, err := a.TryLock(ctx, expire)
@@ -51,21 +44,21 @@ func (a SyncStat) MustLock(ctx context.Context, expire time.Duration) error {
 	return errors.New("wait for sync lock timeout")
 }
 
-func (a SyncStat) Unlock(ctx context.Context) error {
+func (a *SyncStat) Unlock(ctx context.Context) error {
 	mark, err := Client.Get(ctx, a.lockKey).Result()
 	if err != nil {
 		return err
-	} else if mark != *a.lockMark {
+	} else if mark != a.lockMark {
 		return nil
 	}
 	return Client.Del(ctx, a.lockKey).Err()
 }
 
-func (a SyncStat) SetSuccess(ctx context.Context, expire time.Duration) error {
+func (a *SyncStat) SetSuccess(ctx context.Context, expire time.Duration) error {
 	return Client.Set(ctx, a.key, "1", expire).Err()
 }
 
-func (a SyncStat) Succeed(ctx context.Context) (bool, error) {
+func (a *SyncStat) Succeed(ctx context.Context) (bool, error) {
 	err := Client.Get(ctx, a.key).Err()
 	if err == redis.Nil {
 		return false, nil
@@ -74,7 +67,7 @@ func (a SyncStat) Succeed(ctx context.Context) (bool, error) {
 }
 
 // Inject 注入 backoff 内容函数，使其支持分布式锁与成功跳过
-func (a SyncStat) Inject(schedule cron.Schedule, f func() error) func() error {
+func (a *SyncStat) Inject(schedule cron.Schedule, f func() error) func() error {
 	return func() error {
 		ok, err := a.Succeed(context.Background())
 		if err != nil {
