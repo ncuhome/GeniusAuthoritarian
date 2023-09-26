@@ -68,10 +68,18 @@ func (a *SshAccounts) Watch(_ *emptypb.Empty, server proto.SshAccounts_WatchServ
 				return
 			}
 
-			var msgDecoded []SshAccountMsg
-			msgBytes := unsafe.Slice(unsafe.StringData(msg.Payload), len(msg.Payload))
-			err = json.Unmarshal(msgBytes, &msgDecoded)
-			msgChannel <- msgDecoded
+			if msg.PayloadSlice == nil && msg.Payload != "" {
+				msg.PayloadSlice = []string{msg.Payload}
+			} else {
+				continue
+			}
+
+			for _, payload := range msg.PayloadSlice {
+				var msgDecoded []SshAccountMsg
+				msgBytes := unsafe.Slice(unsafe.StringData(payload), len(payload))
+				err = json.Unmarshal(msgBytes, &msgDecoded)
+				msgChannel <- msgDecoded
+			}
 		}
 	}()
 
