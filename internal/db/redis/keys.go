@@ -22,4 +22,5 @@ const (
 	keyMfaEnable
 	keySms
 	keySyncStat
+	keySshDevSub
 )

@@ -1,6 +1,8 @@
 package server
 
 import (
+	"context"
+	"encoding/json"
 	"github.com/Mmx233/tool"
 	"github.com/ncuhome/GeniusAuthoritarian/internal/db/dao"
 	"github.com/ncuhome/GeniusAuthoritarian/internal/db/redis"
@@ -94,10 +96,6 @@ func DoSync() error {
 		return err
 	}
 
-	if err = userSshSrv.Commit().Error; err != nil {
-		return err
-	}
-
 	// 通知 sshDev client
 	length := len(userSshToCreate) + len(userToDelete)
 	if length != 0 {
@@ -118,8 +116,19 @@ func DoSync() error {
 			}
 			i++
 		}
-		rpc.MsgChannel <- sshRpcMessages
+
+		rpcMsgBytes, err := json.Marshal(&sshRpcMessages)
+		if err != nil {
+			return err
+		}
+		err = redis.Client.Publish(context.Background(), redis.KeySubscribeSshDev(), rpcMsgBytes).Err()
+		if err != nil {
+			return err
+		}
 	}
 
+	if err = userSshSrv.Commit().Error; err != nil {
+		return err
+	}
 	return nil
 }

@@ -2,14 +2,13 @@ package rpc
 
 import (
 	"github.com/ncuhome/GeniusAuthoritarian/internal/pkg/sshDev/proto"
-	"sync/atomic"
 )
 
 type SshAccountMsg struct {
-	IsDel     bool // 是否为删除用户操作
-	IsKill    bool // 是否为结束用户进程操作
-	Username  string
-	PublicKey string
+	IsDel     bool   `json:"isDel"`  // 是否为删除用户操作
+	IsKill    bool   `json:"isKill"` // 是否为结束用户进程操作
+	Username  string `json:"username"`
+	PublicKey string `json:"publicKey"`
 }
 
 func (a SshAccountMsg) Rpc() *proto.SshAccount {
@@ -19,9 +18,4 @@ func (a SshAccountMsg) Rpc() *proto.SshAccount {
 		Username:  a.Username,
 		PublicKey: a.PublicKey,
 	}
-}
-
-type SshAccountListElement struct {
-	Channel  chan []SshAccountMsg
-	IsQuited atomic.Bool
 }

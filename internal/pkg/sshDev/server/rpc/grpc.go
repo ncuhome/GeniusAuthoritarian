@@ -1,7 +1,10 @@
 package rpc
 
 import (
-	"container/list"
+	"context"
+	"encoding/json"
+	"errors"
+	redisPkg "github.com/ncuhome/GeniusAuthoritarian/internal/db/redis"
 	"github.com/ncuhome/GeniusAuthoritarian/internal/pkg/sshDev/proto"
 	"github.com/ncuhome/GeniusAuthoritarian/internal/service"
 	"google.golang.org/grpc"
@@ -9,21 +12,15 @@ import (
 	"google.golang.org/grpc/status"
 	"google.golang.org/protobuf/types/known/emptypb"
 	"net"
-	"sync"
 	"time"
+	"unsafe"
 )
-
-var MsgChannel chan []SshAccountMsg
 
 func Run(token, addr string) error {
 	tcpListen, err := net.Listen("tcp", addr)
 	if err != nil {
 		return err
 	}
-
-	MsgChannel = make(chan []SshAccountMsg)
-	rpcSshAccounts := SshAccounts{}
-	go rpcSshAccounts.Broadcaster()
 
 	grpcServer := grpc.NewServer(
 		grpc.ChainUnaryInterceptor(
@@ -35,22 +32,19 @@ func Run(token, addr string) error {
 			StreamTokenAuth(token),
 		),
 	)
-	proto.RegisterSshAccountsServer(grpcServer, &rpcSshAccounts)
+	proto.RegisterSshAccountsServer(grpcServer, &SshAccounts{})
 
 	return grpcServer.Serve(tcpListen)
 }
 
 type SshAccounts struct {
 	proto.UnimplementedSshAccountsServer
-
-	list     list.List // *SshAccountListElement
-	listLock sync.Mutex
 }
 
 func (a *SshAccounts) Watch(_ *emptypb.Empty, server proto.SshAccounts_WatchServer) error {
 	// 注册监听
-	msgChan, unregister := a.RegisterWatcher()
-	defer unregister()
+	sub := redisPkg.Client.Subscribe(context.Background(), redisPkg.KeySubscribeSshDev())
+	defer sub.Close()
 
 	// 发送现有账号
 	sshAccounts, err := service.UserSsh.GetAllExist()
@@ -65,9 +59,28 @@ func (a *SshAccounts) Watch(_ *emptypb.Empty, server proto.SshAccounts_WatchServ
 		return err
 	}
 
+	msgChannel := make(chan []SshAccountMsg)
+	go func() {
+		for {
+			msg, err := sub.ReceiveMessage(context.Background())
+			if err != nil {
+				close(msgChannel)
+				return
+			}
+
+			var msgDecoded []SshAccountMsg
+			msgBytes := unsafe.Slice(unsafe.StringData(msg.Payload), len(msg.Payload))
+			err = json.Unmarshal(msgBytes, &msgDecoded)
+			msgChannel <- msgDecoded
+		}
+	}()
+
 	for {
 		select {
-		case messages := <-msgChan:
+		case messages, ok := <-msgChannel:
+			if !ok {
+				return errors.New("ssh account status subscription exception")
+			}
 			err := server.Send(&proto.AccountStream{
 				Accounts: TransformMsgArray(messages),
 			})
@@ -82,56 +95,5 @@ func (a *SshAccounts) Watch(_ *emptypb.Empty, server proto.SshAccounts_WatchServ
 				return err
 			}
 		}
-	}
-}
-
-func (a *SshAccounts) RegisterWatcher() (chan []SshAccountMsg, func()) {
-	channel := make(chan []SshAccountMsg, 2) // 添加 buffer 防死锁
-	elContent := SshAccountListElement{
-		Channel: channel,
-	}
-
-	a.listLock.Lock()
-	el := a.list.PushBack(&elContent)
-	a.listLock.Unlock()
-
-	return channel, func() {
-		/*
-			先添加退出标记后清空管道
-			由于广播是单线程操作，就算正好未及时读取到退出标记也能正常工作
-		*/
-
-		elContent.IsQuited.Store(true)
-
-		// 清空管道
-		for {
-			select {
-			case <-channel:
-			default:
-				goto removeElement
-			}
-		}
-
-	removeElement:
-		a.listLock.Lock()
-		defer a.listLock.Unlock()
-		a.list.Remove(el)
-	}
-}
-
-func (a *SshAccounts) Broadcaster() {
-	for {
-		messages := <-MsgChannel
-
-		a.listLock.Lock()
-		el := a.list.Front()
-		for el != nil {
-			elContent := el.Value.(*SshAccountListElement)
-			if !elContent.IsQuited.Load() {
-				elContent.Channel <- messages
-			}
-			el = el.Next()
-		}
-		a.listLock.Unlock()
 	}
 }
