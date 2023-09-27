@@ -258,6 +258,7 @@ func (a *UserSyncProcessor) doSyncUsers(reserveData map[string]*RelatedUserInfo)
 		}
 		a.frozenUser = len(invalidUID)
 	}
+
 	return nil
 }
 
@@ -270,16 +271,16 @@ func (a *UserSyncProcessor) doSyncUserGroups(reserveData map[string]*RelatedUser
 	}
 	var userGroupsToAdd = list.New()
 	var userGroupsToDelete = list.New() // uint
-	var exUserGroupMap = make(map[uint][]uint, len(reserveData))
+	var exUserGroupMap = make(map[uint][]dao.UserGroups, len(reserveData))
 	for _, exUserGroup := range existUserGroups {
-		exUserGroupMap[exUserGroup.UID] = append(exUserGroupMap[exUserGroup.UID], exUserGroup.GID)
+		exUserGroupMap[exUserGroup.UID] = append(exUserGroupMap[exUserGroup.UID], exUserGroup)
 	}
 	for _, user := range reserveData {
 		for _, userDepartment := range user.Departments {
 			exGroups, ok := exUserGroupMap[user.Data.ID]
 			if ok {
 				for _, exGroup := range exGroups {
-					if userDepartment == exGroup {
+					if userDepartment == exGroup.GID {
 						goto nextUserDepartment
 					}
 				}
@@ -293,11 +294,11 @@ func (a *UserSyncProcessor) doSyncUserGroups(reserveData map[string]*RelatedUser
 		}
 		for _, exUserDepartment := range exUserGroupMap[user.Data.ID] {
 			for _, userDepartment := range user.Departments {
-				if userDepartment == exUserDepartment {
+				if userDepartment == exUserDepartment.GID {
 					goto nextExUserDepartment
 				}
 			}
-			userGroupsToDelete.PushBack(exUserDepartment)
+			userGroupsToDelete.PushBack(exUserDepartment.ID)
 			err = redis.UserJwt.Clear(user.Data.ID)
 			if err != nil && err != redis.Nil {
 				return err
