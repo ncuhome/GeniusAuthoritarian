@@ -29,19 +29,26 @@ func (a *SyncStat) TryLock(ctx context.Context, expire time.Duration) (bool, err
 	return Client.SetNX(ctx, a.lockKey, a.lockMark, expire).Result()
 }
 
-func (a *SyncStat) MustLock(ctx context.Context, expire time.Duration) error {
+func (a *SyncStat) ShouldLock(ctx context.Context, expire time.Duration) (bool, error) {
 	var count uint8
 	for ; count < 255; count++ {
-		ok, err := a.TryLock(ctx, expire)
+		ok, err := a.Succeed(ctx)
 		if err != nil {
-			return err
+			return false, err
 		} else if ok {
-			return nil
+			return false, nil
+		}
+
+		ok, err = a.TryLock(ctx, expire)
+		if err != nil {
+			return false, err
+		} else if ok {
+			return true, nil
 		}
 		time.Sleep(time.Millisecond * 100)
 	}
 
-	return errors.New("wait for sync lock timeout")
+	return false, errors.New("wait for sync lock timeout")
 }
 
 func (a *SyncStat) Unlock(ctx context.Context) error {
@@ -76,9 +83,13 @@ func (a *SyncStat) Inject(schedule cron.Schedule, f func() error) func() error {
 			return nil
 		}
 
-		if err = a.MustLock(context.Background(), time.Second*120); err != nil {
+		locked, err := a.ShouldLock(context.Background(), time.Second*120)
+		if err != nil {
 			return err
+		} else if !locked {
+			return nil
 		}
+
 		defer a.Unlock(context.Background())
 
 		if err = f(); err != nil {

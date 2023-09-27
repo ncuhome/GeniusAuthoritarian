@@ -19,9 +19,13 @@ func Init(stat redis.SyncStat) {
 		return
 	}
 
-	if err = stat.MustLock(context.Background(), time.Second*30); err != nil {
+	locked, err := stat.ShouldLock(context.Background(), time.Second*30)
+	if err != nil {
 		log.Fatalln("初始化 base groups 失败:", err)
+	} else if !locked {
+		return
 	}
+
 	defer stat.Unlock(context.Background())
 
 	if err = CheckBaseGroups(); err != nil {
