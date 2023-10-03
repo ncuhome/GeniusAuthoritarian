@@ -87,7 +87,7 @@ func (a *UserSyncProcessor) Run() error {
 }
 
 func (a *UserSyncProcessor) PrintSyncResult() {
-	log.Infof("创建用户 %d 个，解冻用户 %d 个，冻结用户 %d 个，添加用户组 %d 个，移除用户组 %d 个",
+	log.Infof("创建用户 %d 个，冻结用户 %d 个，解冻用户 %d 个，添加用户组 %d 个，移除用户组 %d 个",
 		a.createdUser, a.frozenUser, a.unFrozenUser, a.createdUserGroup, a.deletedUserGroup)
 }
 
