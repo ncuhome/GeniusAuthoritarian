@@ -26,7 +26,6 @@ func init() {
 	cron.Start()
 }
 
-// 主程序，包含所有路由，不可多实例运行
 func main() {
 	log.Infoln("Sys Boost")
 

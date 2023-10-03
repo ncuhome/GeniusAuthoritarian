@@ -16,7 +16,7 @@ type Msg struct {
 func Error(c *gin.Context, msg *Msg, errors ...error) {
 	log.Debugln(msg.Msg, errors)
 	c.JSON(msg.HttpStatus, msg)
-	c.AbortWithStatus(msg.HttpStatus)
+	c.Abort()
 }
 
 func ErrorWithTip(c *gin.Context, msg *Msg, tip any, errors ...error) {
