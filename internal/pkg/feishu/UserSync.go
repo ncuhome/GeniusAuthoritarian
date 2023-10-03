@@ -132,7 +132,7 @@ func (a *UserSyncProcessor) filterInvalidUsers(feishuUserList map[string][]feish
 	for k, users := range feishuUserList {
 		var lens int
 		for i, user := range users {
-			if !user.Status.IsActivated || user.Status.IsFrozen || user.Mobile == "" || // 账号未异常
+			if !user.Status.IsActivated || user.Status.IsFrozen || user.Status.IsResigned || user.Mobile == "" || // 账号未异常
 				user.EmployeeType != 1 { // 仅允许正式员工状态账号
 				users[i].Status.IsActivated = false
 			} else {
