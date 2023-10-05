@@ -57,7 +57,7 @@ var (
 	}
 	ErrUnauthorized = &Msg{
 		Code:       cErrUnauthorized,
-		Msg:        "身份校验失败，权限不足",
+		Msg:        "身份校验失败，身份失效或过期",
 		HttpStatus: 401,
 	}
 	ErrFindUnit = &Msg{
