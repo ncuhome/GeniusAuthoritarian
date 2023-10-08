@@ -12,6 +12,7 @@ var DB *gorm.DB
 
 func init() {
 	conf := &gorm.Config{
+		PrepareStmt:            true,
 		SkipDefaultTransaction: true,
 	}
 	if global.Config.TraceMode {
