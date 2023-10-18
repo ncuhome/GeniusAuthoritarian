@@ -13,6 +13,7 @@ type Config struct {
 	Jwt       Jwt          `yaml:"jwt"`
 	SshDev    SshDev       `yaml:"sshDev"`
 	Sms       Sms          `yaml:"sms"`
+	WebAuthn  WebAuthn     `yaml:"webAuthn"`
 	TraceMode bool         `yaml:"traceMode" config:"omitempty"`
 }
 
@@ -38,4 +39,9 @@ type Sms struct {
 	SpCode    string `yaml:"spCode"`
 	LoginName string `yaml:"loginName"`
 	Password  string `yaml:"password"`
+}
+
+type WebAuthn struct {
+	ID     string `yaml:"id"`
+	Origin string `yaml:"origin"`
 }
