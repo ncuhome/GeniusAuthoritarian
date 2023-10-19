@@ -60,3 +60,7 @@ func (a WebAuthnSrv) GetCredentials(uid uint) ([]webauthn.Credential, error) {
 	}
 	return cred, nil
 }
+
+func (a WebAuthnSrv) ListUserCredForShow(uid uint) ([]dto.UserCredential, error) {
+	return (&dao.UserWebauthn{UID: uid}).GetByUidForShow(a.DB)
+}
