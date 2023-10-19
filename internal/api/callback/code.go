@@ -27,6 +27,7 @@ const (
 	cErrIdentityCodeNotCorrect
 	cErrSshNotFound
 	cErrUserIdentity
+	cErrLoginSessionExpired
 )
 
 var (
@@ -158,6 +159,11 @@ var (
 	ErrUserIdentity = &Msg{
 		Code:       cErrUserIdentity,
 		Msg:        "没有找到角色，请尝试使用其他登录方式或联系管理员",
+		HttpStatus: 403,
+	}
+	ErrLoginSessionExpired = &Msg{
+		Code:       cErrLoginSessionExpired,
+		Msg:        "登录请求过期，请重新登录",
 		HttpStatus: 403,
 	}
 )
