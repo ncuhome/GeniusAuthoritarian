@@ -25,7 +25,7 @@ func (a WebAuthnSrv) Add(uid uint, cred webauthn.Credential) error {
 	if err != nil {
 		return err
 	}
-	credStr := unsafe.String(&credBytes[0], len(credBytes))
+	credStr := unsafe.String(unsafe.SliceData(credBytes), len(credBytes))
 	return (&dao.UserWebauthn{
 		UID:        uid,
 		Credential: credStr,
