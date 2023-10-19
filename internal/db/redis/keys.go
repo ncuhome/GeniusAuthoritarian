@@ -23,4 +23,5 @@ const (
 	keySms
 	keySyncStat
 	keySshDevSub
+	keyPasskey
 )

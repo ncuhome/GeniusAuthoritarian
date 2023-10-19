@@ -1,15 +1,15 @@
 package controllers
 
 import (
-	"encoding/json"
-	"github.com/gin-contrib/sessions"
+	"context"
 	"github.com/gin-gonic/gin"
 	"github.com/go-webauthn/webauthn/protocol"
 	"github.com/go-webauthn/webauthn/webauthn"
 	"github.com/ncuhome/GeniusAuthoritarian/internal/api/callback"
+	"github.com/ncuhome/GeniusAuthoritarian/internal/db/redis"
 	"github.com/ncuhome/GeniusAuthoritarian/internal/pkg/webAuthn"
 	log "github.com/sirupsen/logrus"
-	"unsafe"
+	"time"
 )
 
 func BeginPasskeyLogin(c *gin.Context) {
@@ -19,17 +19,10 @@ func BeginPasskeyLogin(c *gin.Context) {
 		return
 	}
 
-	sessionDataBytes, err := json.Marshal(&sessionData)
+	err = redis.NewPasskey().
+		StoreSession(context.Background(), c.ClientIP(), sessionData, time.Minute*5)
 	if err != nil {
-		callback.Error(c, callback.ErrUnexpected, err)
-		return
-	}
-	sessionDataStr := unsafe.String(unsafe.SliceData(sessionDataBytes), len(sessionDataBytes))
-
-	session := sessions.Default(c)
-	session.Set("passkey-login", sessionDataStr)
-	if err = session.Save(); err != nil {
-		callback.Error(c, callback.ErrUnexpected, err)
+		callback.Error(c, callback.ErrDBOperation, err)
 		return
 	}
 
@@ -43,21 +36,11 @@ func FinishPasskeyLogin(c *gin.Context) {
 		return
 	}
 
-	session := sessions.Default(c)
-	sessionDataInterface := session.Get("passkey-login")
-	if sessionDataInterface == nil {
-		callback.Error(c, callback.ErrLoginSessionExpired)
-		return
-	}
-	sessionDataStr, ok := sessionDataInterface.(string)
-	if !ok {
-		callback.Error(c, callback.ErrUnexpected)
-		return
-	}
-	sessionDataBytes := unsafe.Slice(unsafe.StringData(sessionDataStr), len(sessionDataStr))
 	var sessionData webauthn.SessionData
-	if err = json.Unmarshal(sessionDataBytes, &sessionData); err != nil {
-		callback.Error(c, callback.ErrUnexpected, err)
+	err = redis.NewPasskey().
+		ReadSession(context.Background(), c.ClientIP(), &sessionData)
+	if err != nil {
+		callback.Error(c, callback.ErrDBOperation, err)
 		return
 	}
 
