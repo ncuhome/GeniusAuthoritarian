@@ -1,6 +1,6 @@
-import {FC, useMemo} from "react";
+import { FC, useMemo } from "react";
 import toast from "react-hot-toast";
-import {unix} from "dayjs";
+import { unix } from "dayjs";
 
 import Block from "@components/user/Block";
 import Ip from "@components/user/profile/Ip";
@@ -18,8 +18,8 @@ import {
   TableRow,
   TableHead,
   Skeleton,
-  Stack,
   Typography,
+  Divider,
 } from "@mui/material";
 
 import { useUserApiV1 } from "@api/v1/user/hook";
@@ -82,31 +82,58 @@ export const Profile: FC = () => {
           <GridTextField label={"姓名"} value={profile?.user.name} />
           <GridTextField label={"电话"} value={profile?.user.phone} />
           <GridTextField label={"身份组"} value={userGroups} />
-          <GridItem>
-            {profile ? (
-              <Stack
-                alignItems={"center"}
-                height={"100%"}
-                flexDirection={"row"}
-              >
-                <Typography>MFA:</Typography>
-                <Mfa
-                  ml={1.8}
-                  enabled={profile.user.mfa}
-                  setEnabled={(enabled) =>
-                    setProfile({
-                      user: {
-                        ...profile.user,
-                        mfa: enabled,
-                      },
-                      loginRecord: profile.loginRecord,
-                    })
-                  }
-                />
-              </Stack>
-            ) : undefined}
-          </GridItem>
         </Grid>
+      </Block>
+
+      <Block
+        title={"Security"}
+        sx={{
+          "&>div": {
+            my: 2,
+            ml: 0.4,
+            "&>h6": {
+              fontWeight: "bold",
+            },
+            "&>hr": {
+              my: 0.5,
+              mb: 1,
+            },
+          },
+        }}
+      >
+        <Box>
+          <Typography variant={"subtitle1"}>双因素认证</Typography>
+          <Divider />
+          <Typography variant={"body2"}>
+            两步验证在第三方登录时增加一道额外的身份认证，可以预防飞书、钉钉账号被盗用的情况。启用此功能需要使用
+            Google Authenticator APP 或密码保险库如 1password
+            等工具保存密钥与生成一次性密码
+          </Typography>
+          <Box mt={1.3}>
+            {profile ? (
+              <Mfa
+                enabled={profile.user.mfa}
+                setEnabled={(enabled) =>
+                  setProfile({
+                    user: {
+                      ...profile.user,
+                      mfa: enabled,
+                    },
+                    loginRecord: profile.loginRecord,
+                  })
+                }
+              />
+            ) : (
+              <Skeleton
+                variant="rounded"
+                height={35}
+                sx={{
+                  maxWidth: "13rem",
+                }}
+              />
+            )}
+          </Box>
+        </Box>
       </Block>
 
       {profile && profile.loginRecord.length ? (
