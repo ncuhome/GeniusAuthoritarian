@@ -46,7 +46,7 @@ func (u User) WebAuthnCredentials() []webauthn.Credential {
 	return u.Credentials
 }
 
+// Deprecated: 此特性已经在新规范中弃用，返回空字符串
 func (u User) WebAuthnIcon() string {
-	// 此特性已经在新规范中弃用，返回空字符串即可
 	return ""
 }

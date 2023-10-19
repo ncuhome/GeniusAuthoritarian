@@ -10,7 +10,7 @@ func New(conf *Config) (*redis.Client, error) {
 	c := redis.NewClient(&redis.Options{
 		Addr:       conf.Addr,
 		Password:   conf.Password,
-		DB:         conf.DB,
+		DB:         0,
 		MaxConnAge: time.Hour * 5,
 	})
 	return c, c.Ping(context.Background()).Err()
