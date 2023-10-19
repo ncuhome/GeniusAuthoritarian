@@ -19,7 +19,3 @@ func init() {
 		log.Fatalln("webauthn init failed:", err)
 	}
 }
-
-func Options() {
-	Client.BeginRegistration()
-}
