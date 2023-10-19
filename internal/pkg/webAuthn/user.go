@@ -3,7 +3,6 @@ package webAuthn
 import (
 	"fmt"
 	"github.com/go-webauthn/webauthn/webauthn"
-	"github.com/ncuhome/GeniusAuthoritarian/internal/db/dao"
 	"github.com/ncuhome/GeniusAuthoritarian/internal/service"
 	"unsafe"
 )
@@ -14,18 +13,24 @@ type User struct {
 	Credentials []webauthn.Credential
 }
 
-func NewUser(model *dao.User) (*User, error) {
-	idStr := fmt.Sprint(model.ID)
+func NewUser(uid uint) (*User, error) {
+
+	idStr := fmt.Sprint(uid)
 	idBytes := unsafe.Slice(unsafe.StringData(idStr), len(idStr))
 
-	cred, err := service.WebAuthn.GetCredentials(model.ID)
+	name, err := service.WebAuthn.UserName(uid)
+	if err != nil {
+		return nil, err
+	}
+
+	cred, err := service.WebAuthn.GetCredentials(uid)
 	if err != nil {
 		return nil, err
 	}
 
 	return &User{
 		ID:          idBytes,
-		Name:        model.Name,
+		Name:        name,
 		Credentials: cred,
 	}, nil
 }

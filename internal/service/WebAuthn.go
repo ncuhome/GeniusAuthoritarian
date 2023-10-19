@@ -19,6 +19,11 @@ func (a WebAuthnSrv) Begin() (WebAuthnSrv, error) {
 	return a, a.Error
 }
 
+func (a WebAuthnSrv) UserName(id uint) (string, error) {
+	model := dao.User{ID: id}
+	return model.Name, model.FirstForPasskey(a.DB)
+}
+
 // Add 返回 dto 数据结构体
 func (a WebAuthnSrv) Add(uid uint, cred webauthn.Credential) error {
 	credBytes, err := json.Marshal(&cred)

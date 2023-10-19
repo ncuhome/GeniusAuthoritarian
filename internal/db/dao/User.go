@@ -39,6 +39,10 @@ func (a *User) FirstProfileByID(tx *gorm.DB) (*dto.UserProfile, error) {
 	return &t, tx.Model(a).First(&t, "id=?", a.ID).Error
 }
 
+func (a *User) FirstForPasskey(tx *gorm.DB) error {
+	return tx.Model(a).Select("name").Where(a, "id").First(a).Error
+}
+
 func (a *User) GetUnscopedByPhoneSlice(tx *gorm.DB, phone []string) ([]User, error) {
 	var t []User
 	return t, tx.Model(a).Unscoped().Where("phone IN ?", phone).Find(&t).Error
