@@ -15,6 +15,7 @@ func Router(G *gin.RouterGroup) {
 	routerGroups(G.Group("group"))
 	routerMfa(G.Group("mfa"))
 	routerIdentity(G.Group("identity"))
+	routerPasskey(G.Group("passkey"))
 
 	dev.Router(G.Group("dev"))
 	admin.Router(G.Group("admin"))
