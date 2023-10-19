@@ -43,7 +43,7 @@ func (p Passkey) ReadSession(ctx context.Context, ip string, session any) error 
 	return p.read(ctx, p.key(ip), session)
 }
 
-func (p Passkey) User(id uint) UserPasskey {
+func (p Passkey) NewUser(id uint) UserPasskey {
 	return UserPasskey{
 		p:   p,
 		key: keyPasskey.String() + "u" + fmt.Sprint(id),

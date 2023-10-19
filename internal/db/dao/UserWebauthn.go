@@ -7,7 +7,8 @@ type UserWebauthn struct {
 	UID  uint  `gorm:"index;not null;column:uid"`
 	User *User `gorm:"foreignKey:UID;constraint:OnDelete:CASCADE"`
 
-	Name string `gorm:"type:varchar(30)"` // 设备名
+	Name   string `gorm:"type:varchar(30)"` // 设备名
+	CredID string `gorm:"not null"`         // Credential ID
 
 	Credential string `gorm:"not null"` // json marshaled
 }

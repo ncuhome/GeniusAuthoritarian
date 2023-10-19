@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"github.com/go-webauthn/webauthn/webauthn"
 	"github.com/ncuhome/GeniusAuthoritarian/internal/db/dao"
+	"github.com/ncuhome/GeniusAuthoritarian/internal/db/dto"
 	"gorm.io/gorm"
 	"unsafe"
 )
@@ -24,17 +25,22 @@ func (a WebAuthnSrv) UserName(id uint) (string, error) {
 	return model.Name, model.FirstForPasskey(a.DB)
 }
 
-// Add 返回 dto 数据结构体
-func (a WebAuthnSrv) Add(uid uint, cred webauthn.Credential) error {
-	credBytes, err := json.Marshal(&cred)
+func (a WebAuthnSrv) Add(uid uint, cred *webauthn.Credential) (*dto.UserCredential, error) {
+	credBytes, err := json.Marshal(cred)
 	if err != nil {
-		return err
+		return nil, err
 	}
-	credStr := unsafe.String(unsafe.SliceData(credBytes), len(credBytes))
-	return (&dao.UserWebauthn{
+
+	credIdStr := unsafe.String(unsafe.SliceData(cred.ID), len(cred.ID))
+	model := dao.UserWebauthn{
 		UID:        uid,
-		Credential: credStr,
-	}).Insert(a.DB)
+		CredID:     credIdStr,
+		Credential: unsafe.String(unsafe.SliceData(credBytes), len(credBytes)),
+	}
+	return &dto.UserCredential{
+		ID:     model.ID,
+		CredID: credIdStr,
+	}, model.Insert(a.DB)
 }
 
 func (a WebAuthnSrv) GetCredentials(uid uint) ([]webauthn.Credential, error) {
