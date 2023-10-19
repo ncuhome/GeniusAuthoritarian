@@ -35,6 +35,7 @@ func init() {
 		&FeishuGroups{},
 		&AppGroup{},
 		&UserSsh{},
+		&UserWebauthn{},
 	); err != nil {
 		log.Fatalln("AutoMigration failed:", err)
 	}

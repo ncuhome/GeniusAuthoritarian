@@ -1,8 +1,11 @@
 package public
 
-import "github.com/gin-gonic/gin"
+import (
+	"github.com/gin-gonic/gin"
+	"github.com/ncuhome/GeniusAuthoritarian/internal/api/router/public/login"
+)
 
 func Router(G *gin.RouterGroup) {
-	routerLogin(G.Group("login"))
 	routerApp(G.Group("app"))
+	login.Router(G.Group("login"))
 }
