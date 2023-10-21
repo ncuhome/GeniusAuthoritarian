@@ -8,14 +8,7 @@ import {
 } from "@util/coerce";
 
 import PasskeyItem from "./PasskeyItem";
-import {
-  Button,
-  ButtonGroup,
-  Dialog,
-  DialogContent,
-  DialogActions,
-  List,
-} from "@mui/material";
+import { Button, ButtonGroup, List, Box } from "@mui/material";
 import { Add } from "@mui/icons-material";
 
 import { apiV1User } from "@api/v1/user/base";
@@ -99,15 +92,26 @@ export const Passkey: FC<Props> = ({ mfaEnabled }) => {
       </ButtonGroup>
 
       {data ? (
-        <List>
-          {data.map((item, index) => (
-            <PasskeyItem
-              key={item.id}
-              item={item}
-              divider={index !== data.length - 1}
-            />
-          ))}
-        </List>
+        <Box
+          sx={{
+            maxWidth: "100%",
+            overflowY: "auto",
+          }}
+        >
+          <List
+            sx={{
+              minWidth: "27rem",
+            }}
+          >
+            {data.map((item, index) => (
+              <PasskeyItem
+                key={item.id}
+                item={item}
+                divider={index !== data.length - 1}
+              />
+            ))}
+          </List>
+        </Box>
       ) : undefined}
     </>
   );
