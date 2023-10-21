@@ -14,7 +14,6 @@ type User struct {
 }
 
 func NewUser(uid uint) (*User, error) {
-
 	idStr := fmt.Sprint(uid)
 	idBytes := unsafe.Slice(unsafe.StringData(idStr), len(idStr))
 
