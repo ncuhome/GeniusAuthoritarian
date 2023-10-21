@@ -2,6 +2,8 @@ import { FC, useState } from "react";
 import useMfaCode from "@hooks/useMfaCode";
 import toast from "react-hot-toast";
 
+import { coerceToBase64Url, coerceToArrayBuffer } from "@util/coerce";
+
 import {
   Button,
   ButtonGroup,
@@ -36,22 +38,34 @@ export const Passkey: FC<Props> = ({ mfaEnabled }) => {
           code,
         },
       });
-      const encoder = new TextEncoder();
-      options.publicKey.challenge = encoder.encode(options.publicKey.challenge);
-      options.publicKey.user.id = encoder.encode(options.publicKey.user.id);
+      options.publicKey.challenge = coerceToArrayBuffer(options.publicKey.challenge)
+      options.publicKey.user.id = coerceToArrayBuffer(options.publicKey.user.id)
 
       try {
         const credential = await navigator.credentials.create(options);
-        if (Credential === null) {
-          toast.error(`创建凭据失败，凭据为 null`);
+        if (!(credential instanceof PublicKeyCredential)) {
+          toast.error(`创建凭据失败，凭据类型不正确`);
           return;
         }
+        const pubKeyCred = credential as any;
         try {
-          await apiV1User.post("passkey/register/", credential);
+          await apiV1User.post("passkey/register/", {
+            id: pubKeyCred.id,
+            authenticatorAttachment: pubKeyCred.authenticatorAttachment,
+            rawId: coerceToBase64Url(pubKeyCred.rawId),
+            response: {
+              AttestationObject: coerceToBase64Url(pubKeyCred.response.attestationObject),
+              clientDataJSON: coerceToBase64Url(
+                pubKeyCred.response.clientDataJSON
+              ),
+            },
+            type: pubKeyCred.type,
+          });
         } catch ({ msg }) {
           if (msg) toast.error(msg as any);
         }
       } catch (err) {
+        console.log(err);
         toast.error(`创建凭据失败: ${err}`);
       }
     } catch ({ msg }) {
