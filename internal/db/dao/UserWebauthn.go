@@ -32,8 +32,8 @@ func (a *UserWebauthn) GetByUidForShow(tx *gorm.DB) ([]dto.UserCredential, error
 		Where(a, "uid").Order("id DESC").Find(&t).Error
 }
 
-func (a *UserWebauthn) Updates(tx *gorm.DB) error {
-	return tx.Where(a, "id", "uid").Updates(a).Error
+func (a *UserWebauthn) UpdatesByID(tx *gorm.DB) error {
+	return tx.Where(a, "id").Updates(a).Error
 }
 
 func (a *UserWebauthn) UpdateLastUsedAt(tx *gorm.DB) *gorm.DB {
@@ -42,7 +42,7 @@ func (a *UserWebauthn) UpdateLastUsedAt(tx *gorm.DB) *gorm.DB {
 
 func (a *UserWebauthn) Exist(tx *gorm.DB) (bool, error) {
 	var t bool
-	return t, tx.Model(a).Where(a, "id", "uid").Limit(1).Find(&t).Find(&t).Error
+	return t, tx.Model(a).Select("1").Where(a, "id", "uid").Limit(1).Find(&t).Find(&t).Error
 }
 
 func (a *UserWebauthn) Delete(tx *gorm.DB) *gorm.DB {

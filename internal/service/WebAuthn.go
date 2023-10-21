@@ -2,6 +2,7 @@ package service
 
 import (
 	"encoding/json"
+	"github.com/Mmx233/daoUtil"
 	"github.com/go-webauthn/webauthn/webauthn"
 	"github.com/ncuhome/GeniusAuthoritarian/internal/db/dao"
 	"github.com/ncuhome/GeniusAuthoritarian/internal/db/dto"
@@ -92,4 +93,12 @@ func (a WebAuthnSrv) Delete(id, uid uint) error {
 		return gorm.ErrRecordNotFound
 	}
 	return nil
+}
+
+func (a WebAuthnSrv) Exist(id, uid uint, opt ...daoUtil.ServiceOpt) (bool, error) {
+	return (&dao.UserWebauthn{ID: id, UID: uid}).Exist(daoUtil.TxOpts(a.DB, opt...))
+}
+
+func (a WebAuthnSrv) Rename(id uint, name string) error {
+	return (&dao.UserWebauthn{ID: id, Name: name}).UpdatesByID(a.DB)
 }
