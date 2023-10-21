@@ -35,7 +35,9 @@ export function coerceResponseToBase64Url(response: { [k: string]: any }): {
 } {
   let result: { [k: string]: any } = {};
   for (const key in response) {
-    result[key] = coerceToBase64Url(response[key]);
+    const value = response[key];
+    if (typeof value === "function") continue;
+    result[key] = coerceToBase64Url(value);
   }
   return result;
 }

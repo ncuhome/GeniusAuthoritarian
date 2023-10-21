@@ -79,7 +79,7 @@ export const Passkey: FC<Props> = ({ mfaEnabled }) => {
               return data;
             return [newItem, ...data];
           });
-        } catch ({ msg }) {
+        } catch ({msg}) {
           if (msg) toast.error(msg as any);
         }
       } catch (err: any) {
