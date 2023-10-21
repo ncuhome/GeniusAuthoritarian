@@ -32,7 +32,7 @@ declare namespace User {
       callback?: string;
     };
 
-    type Mfa = {
+    type Verified = {
       token: string;
       callback: string;
     };

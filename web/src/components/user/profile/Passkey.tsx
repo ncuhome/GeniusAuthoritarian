@@ -1,8 +1,11 @@
-import { FC, useState } from "react";
+import { FC } from "react";
 import useMfaCode from "@hooks/useMfaCode";
 import toast from "react-hot-toast";
-
-import { coerceToBase64Url, coerceToArrayBuffer } from "@util/coerce";
+import {
+  coerceToArrayBuffer,
+  coerceToBase64Url,
+  coerceResponseToBase64Url,
+} from "@util/coerce";
 
 import PasskeyItem from "./PasskeyItem";
 import {
@@ -15,8 +18,9 @@ import {
 } from "@mui/material";
 import { Add } from "@mui/icons-material";
 
-import { useUserApiV1 } from "@api/v1/user/hook";
 import { apiV1User } from "@api/v1/user/base";
+
+import { useUserApiV1 } from "@api/v1/user/hook";
 
 interface Props {
   mfaEnabled?: boolean;
@@ -55,7 +59,7 @@ export const Passkey: FC<Props> = ({ mfaEnabled }) => {
           toast.error(`创建凭据失败，凭据类型不正确`);
           return;
         }
-        const pubKeyCred = credential as any;
+        const pubKeyCred = credential as PublicKeyCredential;
         try {
           const {
             data: { data: newItem },
@@ -63,14 +67,7 @@ export const Passkey: FC<Props> = ({ mfaEnabled }) => {
             id: pubKeyCred.id,
             authenticatorAttachment: pubKeyCred.authenticatorAttachment,
             rawId: coerceToBase64Url(pubKeyCred.rawId),
-            response: {
-              AttestationObject: coerceToBase64Url(
-                pubKeyCred.response.attestationObject
-              ),
-              clientDataJSON: coerceToBase64Url(
-                pubKeyCred.response.clientDataJSON
-              ),
-            },
+            response: coerceResponseToBase64Url(pubKeyCred.response),
             type: pubKeyCred.type,
           });
           mutate((data) => {
@@ -85,9 +82,8 @@ export const Passkey: FC<Props> = ({ mfaEnabled }) => {
         } catch ({ msg }) {
           if (msg) toast.error(msg as any);
         }
-      } catch (err) {
-        console.log(err);
-        toast.error(`创建凭据失败: ${err}`);
+      } catch (err: any) {
+        if (err.name != "NotAllowedError") toast.error(`创建凭据失败: ${err}`);
       }
     } catch ({ msg }) {
       if (msg) toast.error(msg as any);

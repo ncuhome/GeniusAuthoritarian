@@ -5,7 +5,13 @@ import { useNavigate } from "react-router-dom";
 import toast from "react-hot-toast";
 import feishuLogo from "@/assets/img/login/feishu.png";
 import dingLogo from "@/assets/img/login/ding.png";
+import passkeyLogo from "@/assets/img/login/passkeys.svg";
 import { ThrowError } from "@util/nav";
+import {
+  coerceResponseToBase64Url,
+  coerceToArrayBuffer,
+  coerceToBase64Url,
+} from "@util/coerce";
 
 import LoginItem from "@components/auth/LoginItem";
 import { Stack, Box, Typography, List, Paper, Skeleton } from "@mui/material";
@@ -14,6 +20,7 @@ import { ErrNetwork, apiV1 } from "@api/base";
 import { useApiV1 } from "@api/v1/hook";
 
 import useUser from "@store/useUser";
+import useTheme from "@store/useTheme";
 
 export const LoginForm: FC = () => {
   const nav = useNavigate();
@@ -21,6 +28,7 @@ export const LoginForm: FC = () => {
 
   const [appCode] = useQuery("appCode", "");
 
+  const isDarkTheme = useTheme((state) => state.dark);
   const token = useUser((state) => state.token);
 
   const { data: appInfo } = useApiV1<App.LoginInfo>(
@@ -51,6 +59,41 @@ export const LoginForm: FC = () => {
 
   const onGoFeishuLogin = () => onGoLogin("feishu");
   const onGoDingTalkLogin = () => onGoLogin("dingTalk");
+  const onPasskeyLogin = async () => {
+    try {
+      const {
+        data: { data: options },
+      } = await apiV1.get("public/login/passkey/");
+      options.publicKey.challenge = coerceToArrayBuffer(
+        options.publicKey.challenge
+      );
+      try {
+        const credential = await navigator.credentials.get(options);
+        if (!(credential instanceof PublicKeyCredential)) {
+          toast.error(`获取凭据失败，凭据类型不正确`);
+          return;
+        }
+        const pubKeyCred = credential as any;
+        try {
+          await apiV1.post("public/login/passkey/", {
+            credential: {
+              id: pubKeyCred.id,
+              rawId: coerceToBase64Url(pubKeyCred.rawId),
+              response: coerceResponseToBase64Url(pubKeyCred.response),
+              type: pubKeyCred.type,
+            },
+          });
+          alert("success");
+        } catch ({ msg }) {
+          if (msg) toast.error(msg as any);
+        }
+      } catch (err: any) {
+        if (err.name != "NotAllowedError") toast.error(`获取凭证失败: ${err}`);
+      }
+    } catch ({ msg }) {
+      if (msg) toast.error(msg as any);
+    }
+  };
 
   useMount(() => {
     if (token && !appCode) nav("/user");
@@ -147,6 +190,16 @@ export const LoginForm: FC = () => {
             logo={dingLogo}
             text={"钉钉"}
             onClick={onGoDingTalkLogin}
+          />
+          <LoginItem
+            logo={passkeyLogo}
+            text={"通行密钥"}
+            onClick={onPasskeyLogin}
+            sx={{
+              "& img": {
+                filter: isDarkTheme ? "invert(1)" : undefined,
+              },
+            }}
             disableDivider
           />
         </List>

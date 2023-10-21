@@ -30,7 +30,17 @@ export function coerceToBase64Url(thing: any) {
   return thing;
 }
 
-export function coerceToArrayBuffer(thing:any) {
+export function coerceResponseToBase64Url(response: { [k: string]: any }): {
+  [k: string]: any;
+} {
+  let result: { [k: string]: any } = {};
+  for (const key in response) {
+    result[key] = coerceToBase64Url(response[key]);
+  }
+  return result;
+}
+
+export function coerceToArrayBuffer(thing: any) {
   if (typeof thing === "string") {
     // base64url to base64
     thing = thing.replace(/-/g, "+").replace(/_/g, "/");

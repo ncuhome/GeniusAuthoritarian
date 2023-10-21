@@ -5,6 +5,7 @@ import {
   ListItemButton,
   ListItemIcon,
   ListItemText,
+  SxProps,
 } from "@mui/material";
 
 interface Props {
@@ -12,16 +13,12 @@ interface Props {
   text: string;
   disableDivider?: boolean;
   onClick: () => void;
+  sx?: SxProps;
 }
 
-export const LoginItem: FC<Props> = ({
-  logo,
-  text,
-  disableDivider,
-  onClick,
-}) => {
+export const LoginItem: FC<Props> = ({ logo, text, disableDivider, onClick, sx }) => {
   return (
-    <ListItem disablePadding divider={!disableDivider}>
+    <ListItem disablePadding divider={!disableDivider} sx={sx}>
       <ListItemButton onClick={onClick}>
         <ListItemIcon>
           <img
