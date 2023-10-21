@@ -5,6 +5,7 @@ import { unix } from "dayjs";
 import Block from "@components/user/Block";
 import Ip from "@components/user/profile/Ip";
 import Mfa from "@components/user/profile/Mfa";
+import Passkey from "@components/user/profile/Passkey";
 import {
   Container,
   Box,
@@ -98,6 +99,9 @@ export const Profile: FC = () => {
               my: 0.5,
               mb: 1,
             },
+            "& div": {
+              mt: 1.3,
+            },
           },
         }}
       >
@@ -109,7 +113,7 @@ export const Profile: FC = () => {
             Google Authenticator APP 或密码保险库如 1password
             等工具保存密钥与生成一次性密码
           </Typography>
-          <Box mt={1.3}>
+          <Box>
             {profile ? (
               <Mfa
                 enabled={profile.user.mfa}
@@ -132,6 +136,17 @@ export const Profile: FC = () => {
                 }}
               />
             )}
+          </Box>
+        </Box>
+
+        <Box>
+          <Typography variant={"subtitle1"}>通行密钥</Typography>
+          <Divider />
+          <Typography variant={"body2"}>
+            通行密钥可以是支持生物验证的手机电脑，可以是硬件密钥，也可以存入密码保险库跨设备同步。使用通行密钥可以免账户密码进行身份验证且自带双因素，是一种安全便捷的认证方式
+          </Typography>
+          <Box>
+            <Passkey />
           </Box>
         </Box>
       </Block>
