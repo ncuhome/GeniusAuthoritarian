@@ -1,0 +1,16 @@
+.user-block {
+  .user-child-block {
+    margin-left: 3.2px;
+    margin-top: 16px;
+    margin-bottom: 16px;
+
+    > h6 {
+      font-weight: bold;
+    }
+
+    > hr {
+      margin-bottom: 8px;
+      margin-top: 4px;
+    }
+  }
+}

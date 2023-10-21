@@ -3,6 +3,7 @@ import toast from "react-hot-toast";
 import { unix } from "dayjs";
 
 import Block from "@components/user/Block";
+import ChildBlock from "@components/user/ChildBlock";
 import Ip from "@components/user/profile/Ip";
 import Mfa from "@components/user/profile/Mfa";
 import Passkey from "@components/user/profile/Passkey";
@@ -86,69 +87,45 @@ export const Profile: FC = () => {
         </Grid>
       </Block>
 
-      <Block
-        title={"Security"}
-        sx={{
-          "&>div": {
-            my: 2,
-            ml: 0.4,
-            "&>h6": {
-              fontWeight: "bold",
-            },
-            "&>hr": {
-              my: 0.5,
-              mb: 1,
-            },
-            "& div": {
-              mt: 1.3,
-            },
-          },
-        }}
-      >
-        <Box>
-          <Typography variant={"subtitle1"}>双因素认证</Typography>
-          <Divider />
-          <Typography variant={"body2"}>
-            两步验证在第三方登录时增加一道额外的身份认证，可以预防飞书、钉钉账号被盗用的情况。启用此功能需要使用
-            Google Authenticator APP 或密码保险库如 1password
-            等工具保存密钥与生成一次性密码
-          </Typography>
-          <Box>
-            {profile ? (
-              <Mfa
-                enabled={profile.user.mfa}
-                setEnabled={(enabled) =>
-                  setProfile({
-                    user: {
-                      ...profile.user,
-                      mfa: enabled,
-                    },
-                    loginRecord: profile.loginRecord,
-                  })
-                }
-              />
-            ) : (
-              <Skeleton
-                variant="rounded"
-                height={35}
-                sx={{
-                  maxWidth: "13rem",
-                }}
-              />
-            )}
-          </Box>
-        </Box>
+      <Block title={"Security"}>
+        <ChildBlock
+          title={"双因素认证"}
+          desc={
+            "两步验证在第三方登录时增加一道额外的身份认证，可以预防飞书、钉钉账号被盗用的情况。启用此功能需要使用 Google Authenticator APP 或密码保险库如 1password 等工具保存密钥与生成一次性密码"
+          }
+        >
+          {profile ? (
+            <Mfa
+              enabled={profile.user.mfa}
+              setEnabled={(enabled) =>
+                setProfile({
+                  user: {
+                    ...profile.user,
+                    mfa: enabled,
+                  },
+                  loginRecord: profile.loginRecord,
+                })
+              }
+            />
+          ) : (
+            <Skeleton
+              variant="rounded"
+              height={35}
+              sx={{
+                maxWidth: "13rem",
+              }}
+            />
+          )}
+        </ChildBlock>
 
-        <Box>
-          <Typography variant={"subtitle1"}>通行密钥</Typography>
-          <Divider />
-          <Typography variant={"body2"}>
-            通行密钥可以是支持生物验证的手机电脑，可以是硬件密钥，也可以存入密码保险库跨设备同步。使用通行密钥可以免账户密码进行身份验证且自带双因素，是一种安全便捷的认证方式
-          </Typography>
-          <Box>
-            <Passkey />
-          </Box>
-        </Box>
+        <ChildBlock
+          title={"通行密钥"}
+          desc={
+            "通行密钥可以是支持生物验证的手机电脑，可以是硬件密钥，也可以存入密码保险库跨设备同步。使用通行密钥可以免账户密码进行身份验证且自带双因素，是一种安全便捷的认证方式"
+          }
+        >
+          <Passkey />
+        </ChildBlock>
       </Block>
 
       {profile && profile.loginRecord.length ? (

@@ -25,6 +25,7 @@
     "react-dom": "^18.2.0",
     "react-hot-toast": "^2.4.0",
     "react-router-dom": "^6.9.0",
+    "sass": "^1.69.4",
     "swr": "^2.1.5",
     "zustand": "^4.3.8"
   },

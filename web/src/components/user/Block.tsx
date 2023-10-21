@@ -1,4 +1,5 @@
 import { FC, PropsWithChildren } from "react";
+import "./Block.scss";
 
 import BlockTitle from "@components/user/BlockTitle";
 import { Paper, Box, Typography, SxProps } from "@mui/material";
@@ -11,7 +12,7 @@ interface Props extends PropsWithChildren {
 
 export const Block: FC<Props> = ({ title, subtitle, children, sx }) => {
   return (
-    <Box component={Paper} elevation={5} sx={sx}>
+    <Box component={Paper} elevation={5} sx={sx} className={"user-block"}>
       {title ? <BlockTitle>{title}</BlockTitle> : null}
       {subtitle ? (
         <Typography variant={"subtitle2"} color={"text.secondary"}>
