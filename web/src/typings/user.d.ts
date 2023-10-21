@@ -66,7 +66,8 @@ declare namespace User {
   namespace Passkey {
     type Cred = {
       id: number;
-      cred_id: string;
+      created_at: number;
+      last_used_at: number;
       name: string;
     };
   }

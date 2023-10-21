@@ -13,6 +13,11 @@ import { ThemeProvider, createTheme } from "@mui/material/styles";
 
 import useTheme from "@store/useTheme";
 
+import dayjs from "dayjs";
+import duration from "dayjs/plugin/duration";
+
+dayjs.extend(duration);
+
 export default function App() {
   const isDarkTheme = useTheme((state) => state.dark);
 

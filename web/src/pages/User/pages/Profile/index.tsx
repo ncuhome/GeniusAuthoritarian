@@ -20,8 +20,6 @@ import {
   TableRow,
   TableHead,
   Skeleton,
-  Typography,
-  Divider,
 } from "@mui/material";
 
 import { useUserApiV1 } from "@api/v1/user/hook";
