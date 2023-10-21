@@ -26,6 +26,9 @@ dependencies:
   '@mui/material':
     specifier: ^5.11.14
     version: 5.11.14(@emotion/react@11.10.6)(@emotion/styled@11.10.6)(@types/react@18.0.28)(react-dom@18.2.0)(react@18.2.0)
+  '@types/react-transition-group':
+    specifier: ^4.4.8
+    version: 4.4.8
   '@vitejs/plugin-legacy':
     specifier: ^4.0.2
     version: 4.0.2(terser@5.17.1)(vite@4.2.1)
@@ -53,6 +56,9 @@ dependencies:
   react-router-dom:
     specifier: ^6.9.0
     version: 6.9.0(react-dom@18.2.0)(react@18.2.0)
+  react-transition-group:
+    specifier: ^4.4.5
+    version: 4.4.5(react-dom@18.2.0)(react@18.2.0)
   sass:
     specifier: ^1.69.4
     version: 1.69.4
@@ -3183,7 +3189,7 @@ packages:
       '@mui/types': 7.2.3(@types/react@18.0.28)
       '@mui/utils': 5.11.13(react@18.2.0)
       '@types/react': 18.0.28
-      '@types/react-transition-group': 4.4.5
+      '@types/react-transition-group': 4.4.8
       clsx: 1.2.1
       csstype: 3.1.1
       prop-types: 15.8.1
@@ -3413,8 +3419,8 @@ packages:
       '@types/react': 18.0.28
     dev: false
 
-  /@types/react-transition-group@4.4.5:
-    resolution: {integrity: sha512-juKD/eiSM3/xZYzjuzH6ZwpP+/lejltmiS3QEzV/vmb/Q8+HfDmxu+Baga8UEMGBqV88Nbg4l2hY/K2DkyaLLA==}
+  /@types/react-transition-group@4.4.8:
+    resolution: { integrity: sha512-QmQ22q+Pb+HQSn04NL3HtrqHwYMf4h3QKArOy5F8U5nEVMaihBs3SR10WiOM1iwPz5jIo8x/u11al+iEGZZrvg== }
     dependencies:
       '@types/react': 18.0.28
     dev: false
@@ -3725,7 +3731,7 @@ packages:
     resolution: {integrity: sha512-nRCa7CK3VTrM2NmGkIy4cbK7IZlgBE/PYMn55rrXefr5xXDP0LdtfPnblFDoVdcAfslJ7or6iqAUnx0CCGIWQA==}
     dependencies:
       '@babel/runtime': 7.21.0
-      csstype: 3.1.1
+      csstype: 3.1.2
     dev: false
 
   /electron-to-chromium@1.4.334:

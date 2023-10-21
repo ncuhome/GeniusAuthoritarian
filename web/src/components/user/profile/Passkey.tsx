@@ -7,8 +7,9 @@ import {
   coerceResponseToBase64Url,
 } from "@util/coerce";
 
+import { TransitionGroup } from "react-transition-group";
 import PasskeyItem from "./PasskeyItem";
-import { Button, ButtonGroup, List, Box } from "@mui/material";
+import { Button, ButtonGroup, List, Box, Collapse } from "@mui/material";
 import { Add } from "@mui/icons-material";
 
 import { apiV1User } from "@api/v1/user/base";
@@ -29,6 +30,21 @@ export const Passkey: FC<Props> = ({ mfaEnabled }) => {
 
   const openMfaDialog = useMfaCode();
 
+  const onDelete = async (item: User.Passkey.Cred) => {
+    const code = await openMfaDialog();
+    try {
+      await apiV1User.delete("passkey/", {
+        params: {
+          code,
+          id: item.id,
+        },
+      });
+      mutate((data) => [...data!.filter((el) => el.id !== item.id)]);
+      toast.success("删除成功");
+    } catch ({ msg }) {
+      if (msg) toast.error(msg as any);
+    }
+  };
   const onRegister = async () => {
     const code = await openMfaDialog();
     try {
@@ -72,7 +88,7 @@ export const Passkey: FC<Props> = ({ mfaEnabled }) => {
               return data;
             return [newItem, ...data];
           });
-        } catch ({msg}) {
+        } catch ({ msg }) {
           if (msg) toast.error(msg as any);
         }
       } catch (err: any) {
@@ -103,13 +119,13 @@ export const Passkey: FC<Props> = ({ mfaEnabled }) => {
               minWidth: "27rem",
             }}
           >
-            {data.map((item, index) => (
-              <PasskeyItem
-                key={item.id}
-                item={item}
-                divider={index !== data.length - 1}
-              />
-            ))}
+            <TransitionGroup>
+              {data.map((item, index) => (
+                <Collapse key={item.id}>
+                  <PasskeyItem item={item} onDelete={() => onDelete(item)} />
+                </Collapse>
+              ))}
+            </TransitionGroup>
           </List>
         </Box>
       ) : undefined}

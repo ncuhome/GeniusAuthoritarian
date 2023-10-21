@@ -1,26 +1,30 @@
 import { FC, useEffect, useMemo, useState } from "react";
 import { unix, duration } from "dayjs";
+import useMfaCode from "@hooks/useMfaCode";
+import toast from "react-hot-toast";
 
 import {
   ListItem,
   ListItemText,
-  Collapse,
-  Divider,
   Stack,
   TextField,
   IconButton,
+  Divider,
 } from "@mui/material";
 import { DeleteOutline, ModeEditOutlineOutlined } from "@mui/icons-material";
 
+import { apiV1User } from "@api/v1/user/base";
+
 interface Props {
   item: User.Passkey.Cred;
-  divider: boolean;
+  onDelete: () => void;
 }
 
-export const PasskeyItem: FC<Props> = ({ item: itemProp, divider }) => {
+export const PasskeyItem: FC<Props> = ({ item: itemProp, onDelete }) => {
   const [item, setItem] = useState(itemProp);
-  const [deleted, setDeleted] = useState(false);
   const [isEditing, setIsEditing] = useState(false);
+
+  const openMfaDialog = useMfaCode();
 
   const lastUsed = useMemo(() => {
     if (item.last_used_at === 0) return "还未使用过";
@@ -35,6 +39,8 @@ export const PasskeyItem: FC<Props> = ({ item: itemProp, divider }) => {
     else word += `${time.seconds()} 秒`;
     return word + "前";
   }, [item.last_used_at]);
+
+  const onEdit = () => {};
 
   useEffect(() => {
     setItem(itemProp);
@@ -66,7 +72,7 @@ export const PasskeyItem: FC<Props> = ({ item: itemProp, divider }) => {
                   my: 1.5,
                 }}
               />
-              <IconButton color={"error"}>
+              <IconButton color={"error"} onClick={onDelete}>
                 <DeleteOutline />
               </IconButton>
             </Stack>
@@ -82,12 +88,7 @@ export const PasskeyItem: FC<Props> = ({ item: itemProp, divider }) => {
       );
   };
 
-  return (
-    <>
-      <Collapse in={!deleted}>{renderItem(item, isEditing)}</Collapse>
-      {divider ? <Divider variant={"middle"} component="li" /> : undefined}
-    </>
-  );
+  return renderItem(item, isEditing);
 };
 
 export default PasskeyItem;
