@@ -14,10 +14,11 @@ import { DeleteOutline, ModeEditOutlineOutlined } from "@mui/icons-material";
 
 interface Props {
   item: User.Passkey.Cred;
+  onRename: (name: string) => Promise<void>;
   onDelete: () => void;
 }
 
-export const PasskeyItem: FC<Props> = ({ item, onDelete }) => {
+export const PasskeyItem: FC<Props> = ({ item, onRename, onDelete }) => {
   const name = useMemo(
     () => (item.name ? item.name : `Device${item.id}`),
     [item.name]
@@ -51,6 +52,10 @@ export const PasskeyItem: FC<Props> = ({ item, onDelete }) => {
                 sx={{
                   mr: 1,
                 }}
+                onClick={async () => {
+                  await onRename(newName);
+                  setIsEditing(false);
+                }}
               >
                 保存
               </Button>
@@ -60,6 +65,7 @@ export const PasskeyItem: FC<Props> = ({ item, onDelete }) => {
         >
           <TextField
             value={newName}
+            onChange={(e) => setNewName(e.target.value)}
             inputProps={{
               style: {
                 height: "0.8rem",

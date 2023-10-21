@@ -30,6 +30,27 @@ export const Passkey: FC<Props> = ({ mfaEnabled }) => {
 
   const openMfaDialog = useMfaCode();
 
+  const onRename = async (id: number, name: string) => {
+    if (name.length === 0) {
+      toast.error("新名称不能为空");
+      return;
+    }
+    if (name.length > 15) {
+      toast.error("名称最高 15 字");
+      return;
+    }
+    try {
+      await apiV1User.patch("passkey/", {
+        id,
+        name,
+      });
+      const index = data!.findIndex((el) => el.id === id);
+      data![index].name = name;
+      mutate([...data!]);
+    } catch ({ msg }) {
+      if (msg) toast.error(msg as any);
+    }
+  };
   const onDelete = async (item: User.Passkey.Cred) => {
     const code = await openMfaDialog();
     try {
@@ -122,7 +143,11 @@ export const Passkey: FC<Props> = ({ mfaEnabled }) => {
             <TransitionGroup>
               {data.map((item, index) => (
                 <Collapse key={item.id}>
-                  <PasskeyItem item={item} onDelete={() => onDelete(item)} />
+                  <PasskeyItem
+                    item={item}
+                    onRename={(name) => onRename(item.id, name)}
+                    onDelete={() => onDelete(item)}
+                  />
                 </Collapse>
               ))}
             </TransitionGroup>
