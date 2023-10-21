@@ -28,6 +28,7 @@ const (
 	cErrSshNotFound
 	cErrUserIdentity
 	cErrLoginSessionExpired
+	cErrPasskeyNotExist
 )
 
 var (
@@ -165,5 +166,10 @@ var (
 		Code:       cErrLoginSessionExpired,
 		Msg:        "登录请求过期，请重新登录",
 		HttpStatus: 403,
+	}
+	ErrPasskeyNotExist = &Msg{
+		Code:       cErrPasskeyNotExist,
+		Msg:        "该通行密钥不存在",
+		HttpStatus: 404,
 	}
 )

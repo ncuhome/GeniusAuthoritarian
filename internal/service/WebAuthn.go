@@ -79,3 +79,17 @@ func (a WebAuthnSrv) UpdateLastUsedAt(uid uint, rawId string) error {
 	}
 	return nil
 }
+
+func (a WebAuthnSrv) Delete(id, uid uint) error {
+	result := (&dao.UserWebauthn{
+		ID:  id,
+		UID: uid,
+	}).Delete(a.DB)
+	if result.Error != nil {
+		return result.Error
+	}
+	if result.RowsAffected == 0 {
+		return gorm.ErrRecordNotFound
+	}
+	return nil
+}

@@ -44,3 +44,7 @@ func (a *UserWebauthn) Exist(tx *gorm.DB) (bool, error) {
 	var t bool
 	return t, tx.Model(a).Where(a, "id", "uid").Limit(1).Find(&t).Find(&t).Error
 }
+
+func (a *UserWebauthn) Delete(tx *gorm.DB) *gorm.DB {
+	return tx.Model(a).Where(a, "id", "uid").Delete(a)
+}
