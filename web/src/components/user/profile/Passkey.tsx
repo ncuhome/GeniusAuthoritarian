@@ -4,6 +4,7 @@ import toast from "react-hot-toast";
 
 import { coerceToBase64Url, coerceToArrayBuffer } from "@util/coerce";
 
+import PasskeyItem from "./PasskeyItem";
 import {
   Button,
   ButtonGroup,
@@ -22,9 +23,12 @@ interface Props {
 }
 
 export const Passkey: FC<Props> = ({ mfaEnabled }) => {
-  const { data, mutate } = useUserApiV1(mfaEnabled ? "passkey/" : null, {
-    enableLoading: true,
-  });
+  const { data, mutate } = useUserApiV1<User.Passkey.Cred[]>(
+    mfaEnabled ? "passkey/" : null,
+    {
+      enableLoading: true,
+    }
+  );
 
   const openMfaDialog = useMfaCode();
 
@@ -38,8 +42,12 @@ export const Passkey: FC<Props> = ({ mfaEnabled }) => {
           code,
         },
       });
-      options.publicKey.challenge = coerceToArrayBuffer(options.publicKey.challenge)
-      options.publicKey.user.id = coerceToArrayBuffer(options.publicKey.user.id)
+      options.publicKey.challenge = coerceToArrayBuffer(
+        options.publicKey.challenge
+      );
+      options.publicKey.user.id = coerceToArrayBuffer(
+        options.publicKey.user.id
+      );
 
       try {
         const credential = await navigator.credentials.create(options);
@@ -49,17 +57,30 @@ export const Passkey: FC<Props> = ({ mfaEnabled }) => {
         }
         const pubKeyCred = credential as any;
         try {
-          await apiV1User.post("passkey/register/", {
+          const {
+            data: { data: newItem },
+          } = await apiV1User.post("passkey/register/", {
             id: pubKeyCred.id,
             authenticatorAttachment: pubKeyCred.authenticatorAttachment,
             rawId: coerceToBase64Url(pubKeyCred.rawId),
             response: {
-              AttestationObject: coerceToBase64Url(pubKeyCred.response.attestationObject),
+              AttestationObject: coerceToBase64Url(
+                pubKeyCred.response.attestationObject
+              ),
               clientDataJSON: coerceToBase64Url(
                 pubKeyCred.response.clientDataJSON
               ),
             },
             type: pubKeyCred.type,
+          });
+          mutate((data) => {
+            if (
+              !data ||
+              data.length === 0 ||
+              data.findIndex((item) => item.id === newItem.id) != -1
+            )
+              return data;
+            return [newItem, ...data];
           });
         } catch ({ msg }) {
           if (msg) toast.error(msg as any);
@@ -80,6 +101,18 @@ export const Passkey: FC<Props> = ({ mfaEnabled }) => {
           {mfaEnabled === false ? "需要启用双因素认证" : "添加通行密钥"}
         </Button>
       </ButtonGroup>
+
+      {data ? (
+        <List>
+          {data.map((item, index) => (
+            <PasskeyItem
+              key={item.id}
+              item={item}
+              divider={index !== data.length - 1}
+            />
+          ))}
+        </List>
+      ) : undefined}
     </>
   );
 };

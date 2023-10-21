@@ -62,4 +62,12 @@ declare namespace User {
       };
     };
   }
+
+  namespace Passkey {
+    type Cred = {
+      id: number;
+      cred_id: string;
+      name: string;
+    };
+  }
 }
