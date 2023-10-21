@@ -36,7 +36,8 @@ func (a WebAuthnSrv) Add(uid uint, cred *webauthn.Credential) (*dto.UserCredenti
 		Credential: unsafe.String(unsafe.SliceData(credBytes), len(credBytes)),
 	}
 	return &dto.UserCredential{
-		ID: model.ID,
+		ID:        model.ID,
+		CreatedAt: model.CreatedAt,
 	}, model.Insert(a.DB)
 }
 

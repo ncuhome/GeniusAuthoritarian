@@ -27,7 +27,7 @@ func (a *UserWebauthn) GetByUID(tx *gorm.DB) ([]string, error) {
 
 func (a *UserWebauthn) GetByUidForShow(tx *gorm.DB) ([]dto.UserCredential, error) {
 	var t = make([]dto.UserCredential, 0)
-	return t, tx.Model(a).Select("id", "name", "").
+	return t, tx.Model(a).Select("id", "name", "created_at", "last_used_at").
 		Where(a, "uid").Order("id DESC").Find(&t).Error
 }
 
