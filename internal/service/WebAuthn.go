@@ -6,6 +6,7 @@ import (
 	"github.com/ncuhome/GeniusAuthoritarian/internal/db/dao"
 	"github.com/ncuhome/GeniusAuthoritarian/internal/db/dto"
 	"gorm.io/gorm"
+	"time"
 	"unsafe"
 )
 
@@ -62,4 +63,19 @@ func (a WebAuthnSrv) GetCredentials(uid uint) ([]webauthn.Credential, error) {
 
 func (a WebAuthnSrv) ListUserCredForShow(uid uint) ([]dto.UserCredential, error) {
 	return (&dao.UserWebauthn{UID: uid}).GetByUidForShow(a.DB)
+}
+
+func (a WebAuthnSrv) UpdateLastUsedAt(uid uint, rawId string) error {
+	result := (&dao.UserWebauthn{
+		UID:        uid,
+		CredID:     rawId,
+		LastUsedAt: int(time.Now().Unix()),
+	}).UpdateLastUsedAt(a.DB)
+	if result.Error != nil {
+		return result.Error
+	}
+	if result.RowsAffected == 0 {
+		return gorm.ErrRecordNotFound
+	}
+	return nil
 }

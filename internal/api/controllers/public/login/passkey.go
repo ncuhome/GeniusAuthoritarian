@@ -8,6 +8,7 @@ import (
 	"github.com/ncuhome/GeniusAuthoritarian/internal/api/callback"
 	"github.com/ncuhome/GeniusAuthoritarian/internal/db/redis"
 	"github.com/ncuhome/GeniusAuthoritarian/internal/pkg/webAuthn"
+	"github.com/ncuhome/GeniusAuthoritarian/internal/service"
 	"strconv"
 	"time"
 	"unsafe"
@@ -57,15 +58,35 @@ func FinishPasskeyLogin(c *gin.Context) {
 		return
 	}
 
-	_, err = webAuthn.Client.ValidateDiscoverableLogin(func(_, userHandle []byte) (user webauthn.User, err error) {
+	var uid uint
+	credential, err := webAuthn.Client.ValidateDiscoverableLogin(func(_, userHandle []byte) (user webauthn.User, err error) {
 		userId, err := strconv.ParseUint(unsafe.String(unsafe.SliceData(userHandle), len(userHandle)), 10, 64)
 		if err != nil {
 			return nil, err
 		}
-		return webAuthn.NewUser(uint(userId))
+		uid = uint(userId)
+		return webAuthn.NewUser(uid)
 	}, sessionData, parsedCredential)
 	if err != nil {
 		callback.Error(c, callback.ErrUnauthorized, err)
+		return
+	}
+
+	webAuthnSrv, err := service.WebAuthn.Begin()
+	if err != nil {
+		callback.Error(c, callback.ErrDBOperation, err)
+		return
+	}
+	defer webAuthnSrv.Rollback()
+
+	err = webAuthnSrv.UpdateLastUsedAt(uid, credential.Descriptor().CredentialID.String())
+	if err != nil {
+		callback.Error(c, callback.ErrDBOperation, err)
+		return
+	}
+
+	if err = webAuthnSrv.Commit().Error; err != nil {
+		callback.Error(c, callback.ErrDBOperation, err)
 		return
 	}
 

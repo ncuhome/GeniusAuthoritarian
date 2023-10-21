@@ -36,6 +36,10 @@ func (a *UserWebauthn) Updates(tx *gorm.DB) error {
 	return tx.Where(a, "id", "uid").Updates(a).Error
 }
 
+func (a *UserWebauthn) UpdateLastUsedAt(tx *gorm.DB) *gorm.DB {
+	return tx.Model(a).Where(a, "cred_id", "uid").Update("last_used_at", a.LastUsedAt)
+}
+
 func (a *UserWebauthn) Exist(tx *gorm.DB) (bool, error) {
 	var t bool
 	return t, tx.Model(a).Where(a, "id", "uid").Limit(1).Find(&t).Find(&t).Error
