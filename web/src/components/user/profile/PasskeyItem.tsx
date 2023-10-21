@@ -1,7 +1,5 @@
-import { FC, useEffect, useMemo, useState } from "react";
+import { FC, useMemo, useState } from "react";
 import { unix, duration } from "dayjs";
-import useMfaCode from "@hooks/useMfaCode";
-import toast from "react-hot-toast";
 
 import {
   ListItem,
@@ -10,21 +8,23 @@ import {
   TextField,
   IconButton,
   Divider,
+  Button,
 } from "@mui/material";
 import { DeleteOutline, ModeEditOutlineOutlined } from "@mui/icons-material";
-
-import { apiV1User } from "@api/v1/user/base";
 
 interface Props {
   item: User.Passkey.Cred;
   onDelete: () => void;
 }
 
-export const PasskeyItem: FC<Props> = ({ item: itemProp, onDelete }) => {
-  const [item, setItem] = useState(itemProp);
-  const [isEditing, setIsEditing] = useState(false);
+export const PasskeyItem: FC<Props> = ({ item, onDelete }) => {
+  const name = useMemo(
+    () => (item.name ? item.name : `Device${item.id}`),
+    [item.name]
+  );
 
-  const openMfaDialog = useMfaCode();
+  const [isEditing, setIsEditing] = useState(false);
+  const [newName, setNewName] = useState("");
 
   const lastUsed = useMemo(() => {
     if (item.last_used_at === 0) return "还未使用过";
@@ -40,19 +40,33 @@ export const PasskeyItem: FC<Props> = ({ item: itemProp, onDelete }) => {
     return word + "前";
   }, [item.last_used_at]);
 
-  const onEdit = () => {};
-
-  useEffect(() => {
-    setItem(itemProp);
-  }, [itemProp]);
-
   const renderItem = (item: User.Passkey.Cred, isEditing: boolean) => {
     if (isEditing)
       return (
-        <ListItem>
-          <Stack flexDirection={"row"}>
-            <TextField value={item.name} />
-          </Stack>
+        <ListItem
+          secondaryAction={
+            <Stack flexDirection={"row"}>
+              <Button
+                variant={"outlined"}
+                sx={{
+                  mr: 1,
+                }}
+              >
+                保存
+              </Button>
+              <Button onClick={() => setIsEditing(false)}>取消</Button>
+            </Stack>
+          }
+        >
+          <TextField
+            value={newName}
+            inputProps={{
+              style: {
+                height: "0.8rem",
+                width: "10rem",
+              },
+            }}
+          />
         </ListItem>
       );
     else
@@ -60,7 +74,12 @@ export const PasskeyItem: FC<Props> = ({ item: itemProp, onDelete }) => {
         <ListItem
           secondaryAction={
             <Stack flexDirection={"row"}>
-              <IconButton>
+              <IconButton
+                onClick={() => {
+                  setNewName(name);
+                  setIsEditing(true);
+                }}
+              >
                 <ModeEditOutlineOutlined />
               </IconButton>
               <Divider
@@ -79,7 +98,7 @@ export const PasskeyItem: FC<Props> = ({ item: itemProp, onDelete }) => {
           }
         >
           <ListItemText
-            primary={item.name ? item.name : `Device${item.id}`}
+            primary={name}
             secondary={`创建于 ${unix(item.created_at).format(
               "YYYY/MM/DD"
             )}，${lastUsed}`}
