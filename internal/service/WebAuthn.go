@@ -33,6 +33,7 @@ func (a WebAuthnSrv) Add(uid uint, cred *webauthn.Credential) (*dto.UserCredenti
 
 	model := dao.UserWebauthn{
 		UID:        uid,
+		CredID:     cred.Descriptor().CredentialID.String(),
 		Credential: unsafe.String(unsafe.SliceData(credBytes), len(credBytes)),
 	}
 	return &dto.UserCredential{
