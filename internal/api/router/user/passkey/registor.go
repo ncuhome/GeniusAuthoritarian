@@ -7,6 +7,6 @@ import (
 )
 
 func routerRegister(G *gin.RouterGroup) {
-	G.GET("/", middlewares.ShouldMfa, controllers.BeginPasskeyRegistration)
+	G.GET("/", middlewares.RequireMfa, controllers.BeginPasskeyRegistration)
 	G.POST("/", controllers.FinishPasskeyRegistration)
 }
