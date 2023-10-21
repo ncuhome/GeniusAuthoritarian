@@ -1,6 +1,15 @@
-import { FC } from "react";
+import { FC, useState } from "react";
+import useMfaCode from "@hooks/useMfaCode";
+import toast from "react-hot-toast";
 
-import { Button, ButtonGroup, Collapse, List } from "@mui/material";
+import {
+  Button,
+  ButtonGroup,
+  Dialog,
+  DialogContent,
+  DialogActions,
+  List,
+} from "@mui/material";
 import { Add } from "@mui/icons-material";
 
 import { useUserApiV1 } from "@api/v1/user/hook";
@@ -15,7 +24,40 @@ export const Passkey: FC<Props> = ({ mfaEnabled }) => {
     enableLoading: true,
   });
 
-  const onRegister = async () => {};
+  const openMfaDialog = useMfaCode();
+
+  const onRegister = async () => {
+    const code = await openMfaDialog();
+    try {
+      const {
+        data: { data: options },
+      } = await apiV1User.get("passkey/register/", {
+        params: {
+          code,
+        },
+      });
+      const encoder = new TextEncoder();
+      options.publicKey.challenge = encoder.encode(options.publicKey.challenge);
+      options.publicKey.user.id = encoder.encode(options.publicKey.user.id);
+
+      try {
+        const credential = await navigator.credentials.create(options);
+        if (Credential === null) {
+          toast.error(`创建凭据失败，凭据为 null`);
+          return;
+        }
+        try {
+          await apiV1User.post("passkey/register/", credential);
+        } catch ({ msg }) {
+          if (msg) toast.error(msg as any);
+        }
+      } catch (err) {
+        toast.error(`创建凭据失败: ${err}`);
+      }
+    } catch ({ msg }) {
+      if (msg) toast.error(msg as any);
+    }
+  };
 
   return (
     <>
