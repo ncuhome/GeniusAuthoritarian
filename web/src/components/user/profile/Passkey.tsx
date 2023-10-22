@@ -6,7 +6,6 @@ import {
   coerceToBase64Url,
   coerceResponseToBase64Url,
 } from "@util/coerce";
-import { client } from "@passwordless-id/webauthn";
 
 import { TransitionGroup } from "react-transition-group";
 import PasskeyItem from "./PasskeyItem";
@@ -27,7 +26,7 @@ export const Passkey: FC<Props> = ({ mfaEnabled }) => {
   });
   const registeredItem = useRef(-1);
 
-  const passkeyAvailable = useMemo(() => client.isAvailable(), []);
+  const passkeyAvailable = useMemo(() => !!window.PublicKeyCredential, []);
 
   const openMfaDialog = useMfaCode();
 
@@ -124,11 +123,19 @@ export const Passkey: FC<Props> = ({ mfaEnabled }) => {
 
   return (
     <>
-      <ButtonGroup variant={"outlined"}>
-        <Button startIcon={<Add />} onClick={onRegister} disabled={!mfaEnabled}>
-          {mfaEnabled === false ? "需要启用双因素认证" : "添加通行密钥"}
-        </Button>
-      </ButtonGroup>
+      {passkeyAvailable ? (
+        <ButtonGroup variant={"outlined"}>
+          <Button
+            startIcon={<Add />}
+            onClick={onRegister}
+            disabled={!mfaEnabled}
+          >
+            {mfaEnabled === false ? "需要启用双因素认证" : "添加通行密钥"}
+          </Button>
+        </ButtonGroup>
+      ) : (
+        <Alert severity="warning">此设备不支持通行密钥认证</Alert>
+      )}
 
       {data ? (
         <Box
