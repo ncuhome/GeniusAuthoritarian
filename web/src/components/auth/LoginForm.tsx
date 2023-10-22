@@ -20,7 +20,6 @@ import { ErrNetwork, apiV1 } from "@api/base";
 import { useApiV1 } from "@api/v1/hook";
 
 import useUser from "@store/useUser";
-import useTheme from "@store/useTheme";
 
 export const LoginForm: FC = () => {
   const nav = useNavigate();
@@ -28,7 +27,6 @@ export const LoginForm: FC = () => {
 
   const [appCode] = useQuery("appCode", "");
 
-  const isDarkTheme = useTheme((state) => state.dark);
   const token = useUser((state) => state.token);
 
   const { data: appInfo } = useApiV1<App.LoginInfo>(
@@ -203,7 +201,7 @@ export const LoginForm: FC = () => {
             onClick={onPasskeyLogin}
             sx={{
               "& img": {
-                filter: isDarkTheme ? "invert(1)" : undefined,
+                filter: "invert(1)",
               },
             }}
             disableDivider

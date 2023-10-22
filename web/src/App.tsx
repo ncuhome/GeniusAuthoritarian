@@ -1,7 +1,6 @@
 import { lazy, useMemo } from "react";
 import useMount from "@hooks/useMount";
 import { BrowserRouter, Route, Routes } from "react-router-dom";
-import { Toaster } from "react-hot-toast";
 
 const User = lazy(() => import("./pages/User"));
 const Authoritarian = lazy(() => import("./pages/Authoritarian"));
@@ -42,37 +41,31 @@ export default function App() {
   });
 
   return (
-    <ThemeProvider theme={theme}>
+    <ThemeProvider
+      theme={createTheme({
+        palette: {
+          mode: "dark",
+        },
+      })}
+    >
       <Box
-        color={"text.primary"}
         sx={{
           height: "100vh",
-          backgroundColor: isDarkTheme ? "#242424" : "#fff",
-          colorScheme: isDarkTheme ? "dark" : "light",
+          backgroundColor: "#242424",
+          colorScheme: "dark",
         }}
       >
-        <Toaster
-          toastOptions={
-            isDarkTheme
-              ? {
-                  style: {
-                    borderRadius: "20px",
-                    background: "#2f2f2f",
-                    color: "#fff",
-                  },
-                }
-              : undefined
-          }
-        />
         <BrowserRouter>
           <Routes>
             <Route path={"error"} element={<Error />} />
             <Route
               path={"user/*"}
               element={
-                <Suspense>
-                  <User />
-                </Suspense>
+                <ThemeProvider theme={theme}>
+                  <Suspense>
+                    <User />
+                  </Suspense>
+                </ThemeProvider>
               }
             />
             <Route

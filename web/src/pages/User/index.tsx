@@ -10,6 +10,7 @@ import MfaCodeDialog from "@components/user/MfaCodeDialog";
 import Suspense from "@components/Suspense";
 import PageNotFound from "@components/PageNotFound";
 import NavHeader from "@components/user/NavHeader";
+import { Toaster } from "react-hot-toast";
 import {
   Box,
   Stack,
@@ -22,6 +23,7 @@ import {
 
 import { shallow } from "zustand/shallow";
 import useUser from "@store/useUser";
+import useTheme from "@store/useTheme";
 
 type RouterElement = {
   name: string;
@@ -57,6 +59,8 @@ export const User: FC = () => {
   );
   const groups = useUser((state) => state.groups);
 
+  const isDarkTheme = useTheme((state) => state.dark);
+
   const UserRouters = useMemo<RouterElement[]>(() => {
     let routers = BaseUserRouters;
     for (let i = 0; i < groups.length; i++) {
@@ -76,52 +80,78 @@ export const User: FC = () => {
   });
 
   return (
-    <Stack id={"user"}>
-      <Box
+    <>
+      <Toaster
+        toastOptions={
+          isDarkTheme
+            ? {
+                style: {
+                  borderRadius: "20px",
+                  background: "#2f2f2f",
+                  color: "#fff",
+                },
+              }
+            : {
+                style: {
+                  borderRadius: "20px",
+                },
+              }
+        }
+      />
+      <Stack
+        id={"user"}
         sx={{
-          width: "100%",
-          position: "sticky",
-          height: "3.5rem",
+          backgroundColor: isDarkTheme ? undefined : "#fff",
+          colorScheme: isDarkTheme ? undefined : "light",
+          color: "text.primary",
         }}
       >
-        <NavHeader
-          routers={UserRouters}
-          currentTab={currentTab}
-          onChangeTab={setCurrentTab}
-        />
-      </Box>
-      <Box
-        sx={{
-          overflowY: "overlay",
-          minHeight: "calc(100% - 3.5rem)",
-        }}
-      >
-        <Routes>
-          {UserRouters.map((tab) => (
-            <Route key={tab.path} {...tab} />
-          ))}
-          <Route path={"*"} element={<PageNotFound />} />
-        </Routes>
-      </Box>
+        <Box
+          sx={{
+            width: "100%",
+            position: "sticky",
+            height: "3.5rem",
+          }}
+        >
+          <NavHeader
+            routers={UserRouters}
+            currentTab={currentTab}
+            onChangeTab={setCurrentTab}
+          />
+        </Box>
+        <Box
+          sx={{
+            overflowY: "overlay",
+            minHeight: "calc(100% - 3.5rem)",
+          }}
+        >
+          <Routes>
+            {UserRouters.map((tab) => (
+              <Route key={tab.path} {...tab} />
+            ))}
+            <Route path={"*"} element={<PageNotFound />} />
+          </Routes>
+        </Box>
 
-      <MfaCodeDialog />
+        <MfaCodeDialog />
 
-      <Dialog
-        sx={{ "& .MuiDialog-paper": { width: "60%", maxHeight: 435 } }}
-        maxWidth="xs"
-        open={openDialog}
-        onClose={() => dialogResolver?.(false)}
-      >
-        <DialogTitle>{dialog.title}</DialogTitle>
-        {dialog.content ? (
-          <DialogContent>{dialog.content}</DialogContent>
-        ) : null}
-        <DialogActions>
-          <Button onClick={() => dialogResolver?.(false)}>取消</Button>
-          <Button onClick={() => dialogResolver?.(true)}>确认</Button>
-        </DialogActions>
-      </Dialog>
-    </Stack>
+        <Dialog
+          sx={{ "& .MuiDialog-paper": { width: "60%", maxHeight: 435 } }}
+          maxWidth="xs"
+          open={openDialog}
+          onClose={() => dialogResolver?.(false)}
+        >
+          <DialogTitle>{dialog.title}</DialogTitle>
+          {dialog.content ? (
+            <DialogContent>{dialog.content}</DialogContent>
+          ) : null}
+          <DialogActions>
+            <Button onClick={() => dialogResolver?.(false)}>取消</Button>
+            <Button onClick={() => dialogResolver?.(true)}>确认</Button>
+          </DialogActions>
+        </Dialog>
+      </Stack>
+    </>
   );
 };
 export default User;
