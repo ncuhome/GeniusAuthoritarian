@@ -76,6 +76,38 @@ func loadUserIdentity(c *gin.Context, code string) *dto.UserThirdPartyIdentity {
 	}
 }
 
+func checkUserPermission(c *gin.Context, user *dao.User, appCode string, permitAllGroup bool) (groups []string, ok bool) {
+	isCenterMember, err := service.UserGroups.IsCenterMember(user.ID)
+	if err != nil {
+		callback.Error(c, callback.ErrDBOperation, err)
+		return
+	} else if isCenterMember {
+		groups, err = service.UserGroups.GetForUser(user.ID)
+		if err != nil {
+			callback.Error(c, callback.ErrDBOperation, err)
+			return
+		}
+	} else {
+		groups, err = service.UserGroups.GetForAppCode(user.ID, appCode)
+		if err != nil {
+			if errors.Is(err, gorm.ErrRecordNotFound) {
+				callback.Error(c, callback.ErrUserIdentity)
+				return
+			}
+			callback.Error(c, callback.ErrDBOperation, err)
+			return
+		}
+
+		if len(groups) == 0 && !permitAllGroup {
+			callback.Error(c, callback.ErrFindUnit)
+			return
+		}
+	}
+
+	ok = true
+	return
+}
+
 type ThirdPartyLoginContext struct {
 	User      *dao.User
 	AppInfo   *dao.App
@@ -178,7 +210,7 @@ func ThirdPartyLogin(c *gin.Context) {
 		callback.Error(c, callback.ErrDBOperation, err)
 		return
 	} else if !ok {
-		callback.Error(c, callback.ErrAppCodeNotFound, err)
+		callback.Error(c, callback.ErrAppCodeNotFound)
 		return
 	}
 
@@ -206,32 +238,9 @@ func ThirdPartyLogin(c *gin.Context) {
 		return
 	}
 
-	var groups []string
-	isCenterMember, err := service.UserGroups.IsCenterMember(user.ID)
-	if err != nil {
-		callback.Error(c, callback.ErrDBOperation, err)
+	groups, ok := checkUserPermission(c, user, appCode, appInfo.PermitAllGroup)
+	if !ok {
 		return
-	} else if isCenterMember {
-		groups, err = service.UserGroups.GetForUser(user.ID)
-		if err != nil {
-			callback.Error(c, callback.ErrDBOperation, err)
-			return
-		}
-	} else {
-		groups, err = service.UserGroups.GetForAppCode(user.ID, appCode)
-		if err != nil {
-			if errors.Is(err, gorm.ErrRecordNotFound) {
-				callback.Error(c, callback.ErrUserIdentity)
-				return
-			}
-			callback.Error(c, callback.ErrDBOperation, err)
-			return
-		}
-
-		if len(groups) == 0 && !appInfo.PermitAllGroup {
-			callback.Error(c, callback.ErrFindUnit)
-			return
-		}
 	}
 
 	callThirdPartyLoginResult(c, ThirdPartyLoginContext{

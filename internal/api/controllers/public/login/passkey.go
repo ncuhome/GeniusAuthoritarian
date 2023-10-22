@@ -2,13 +2,17 @@ package controllers
 
 import (
 	"context"
+	"errors"
 	"github.com/gin-gonic/gin"
 	"github.com/go-webauthn/webauthn/protocol"
 	"github.com/go-webauthn/webauthn/webauthn"
 	"github.com/ncuhome/GeniusAuthoritarian/internal/api/callback"
 	"github.com/ncuhome/GeniusAuthoritarian/internal/db/redis"
+	"github.com/ncuhome/GeniusAuthoritarian/internal/pkg/jwt"
 	"github.com/ncuhome/GeniusAuthoritarian/internal/pkg/webAuthn"
 	"github.com/ncuhome/GeniusAuthoritarian/internal/service"
+	"github.com/ncuhome/GeniusAuthoritarian/internal/tools"
+	"gorm.io/gorm"
 	"strconv"
 	"time"
 	"unsafe"
@@ -32,8 +36,8 @@ func BeginPasskeyLogin(c *gin.Context) {
 }
 
 func FinishPasskeyLogin(c *gin.Context) {
-	//todo 获取应用信息、验证权限等
 	var f struct {
+		AppCode    string                                `json:"app_code" form:"app_code"`
 		Credential *protocol.CredentialAssertionResponse `json:"credential" binding:"required"`
 	}
 	if err := c.ShouldBind(&f); err != nil {
@@ -72,6 +76,48 @@ func FinishPasskeyLogin(c *gin.Context) {
 		return
 	}
 
+	appInfo, err := service.App.FirstAppByAppCode(f.AppCode)
+	if err != nil {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			callback.Error(c, callback.ErrAppCodeNotFound)
+			return
+		}
+		callback.Error(c, callback.ErrDBOperation, err)
+		return
+	}
+
+	user, err := service.User.UserInfoByID(uid)
+	if err != nil {
+		callback.Error(c, callback.ErrDBOperation, err)
+		return
+	}
+
+	groups, ok := checkUserPermission(c, user, f.AppCode, appInfo.PermitAllGroup)
+	if !ok {
+		return
+	}
+
+	claims := jwt.LoginTokenClaims{
+		UID:       user.ID,
+		Name:      user.Name,
+		IP:        c.ClientIP(),
+		Groups:    groups,
+		AppID:     appInfo.ID,
+		AvatarUrl: "",
+	}
+
+	token, err := jwt.GenerateLoginToken(claims)
+	if err != nil {
+		callback.Error(c, callback.ErrUnexpected, err)
+		return
+	}
+
+	callbackUrl, err := tools.GenCallback(appInfo.Callback, token)
+	if err != nil {
+		callback.Error(c, callback.ErrUnexpected, err)
+		return
+	}
+
 	webAuthnSrv, err := service.WebAuthn.Begin()
 	if err != nil {
 		callback.Error(c, callback.ErrDBOperation, err)
@@ -90,7 +136,8 @@ func FinishPasskeyLogin(c *gin.Context) {
 		return
 	}
 
-	//todo 返回 token 与 callback
-
-	callback.Default(c)
+	callback.Success(c, gin.H{
+		"token":    token,
+		"callback": callbackUrl,
+	})
 }

@@ -30,6 +30,10 @@ func (a *User) InsertAll(tx *gorm.DB, users []User) error {
 	return tx.Create(users).Error
 }
 
+func (a *User) FirstByID(tx *gorm.DB) error {
+	return tx.Where(a, "id").First(a).Error
+}
+
 func (a *User) FirstByPhone(tx *gorm.DB) error {
 	return tx.First(a, "phone=?", a.Phone).Error
 }

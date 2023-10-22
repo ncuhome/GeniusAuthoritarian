@@ -45,6 +45,13 @@ func (a UserSrv) UserInfo(phone string) (*dao.User, error) {
 	return &user, user.FirstByPhone(a.DB)
 }
 
+func (a UserSrv) UserInfoByID(id uint) (*dao.User, error) {
+	var user = dao.User{
+		ID: id,
+	}
+	return &user, user.FirstByID(a.DB)
+}
+
 func (a UserSrv) UserProfile(uid uint) (*dto.UserProfile, error) {
 	profile, err := (&dao.User{ID: uid}).FirstProfileByID(a.DB)
 	if err != nil {
