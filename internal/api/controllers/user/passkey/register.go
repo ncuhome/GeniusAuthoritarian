@@ -24,9 +24,14 @@ func BeginPasskeyRegistration(c *gin.Context) {
 	options, session, err := webAuthn.Client.BeginRegistration(
 		user,
 		webauthn.WithAuthenticatorSelection(protocol.AuthenticatorSelection{
-			ResidentKey:      protocol.ResidentKeyRequirementRequired,
-			UserVerification: protocol.VerificationRequired,
+			ResidentKey:        protocol.ResidentKeyRequirementRequired,
+			RequireResidentKey: protocol.ResidentKeyRequired(),
+			UserVerification:   protocol.VerificationRequired,
 		}),
+		webauthn.WithExtensions(map[string]interface{}{
+			"credProps": true,
+		}),
+		webauthn.WithConveyancePreference(protocol.PreferNoAttestation),
 	)
 	if err != nil {
 		callback.Error(c, callback.ErrUnexpected, err)
