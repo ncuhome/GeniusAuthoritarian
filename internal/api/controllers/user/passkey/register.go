@@ -3,6 +3,7 @@ package controllers
 import (
 	"context"
 	"github.com/gin-gonic/gin"
+	"github.com/go-webauthn/webauthn/protocol"
 	"github.com/go-webauthn/webauthn/webauthn"
 	"github.com/ncuhome/GeniusAuthoritarian/internal/api/callback"
 	"github.com/ncuhome/GeniusAuthoritarian/internal/db/redis"
@@ -20,7 +21,13 @@ func BeginPasskeyRegistration(c *gin.Context) {
 		callback.Error(c, callback.ErrDBOperation, err)
 		return
 	}
-	options, session, err := webAuthn.Client.BeginRegistration(user)
+	options, session, err := webAuthn.Client.BeginRegistration(
+		user,
+		webauthn.WithAuthenticatorSelection(protocol.AuthenticatorSelection{
+			ResidentKey:      protocol.ResidentKeyRequirementRequired,
+			UserVerification: protocol.VerificationRequired,
+		}),
+	)
 	if err != nil {
 		callback.Error(c, callback.ErrUnexpected, err)
 	}
