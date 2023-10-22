@@ -1,4 +1,5 @@
-import axios, { AxiosError } from "axios";
+import axios from "axios";
+import { ApiError } from "@/typings/global";
 
 export const BaseURL = `/api/`;
 export const BaseUrlV1 = `${BaseURL}v1/`;
@@ -9,7 +10,7 @@ const apiV1 = axios.create({
   baseURL: BaseUrlV1,
 });
 
-export function apiV1ErrorHandler(err: any): any {
+export function apiV1ErrorHandler(err: ApiError<any>): any {
   switch (true) {
     case err.name === "CanceledError":
       break;
@@ -17,12 +18,12 @@ export function apiV1ErrorHandler(err: any): any {
       err.msg = ErrNetwork;
       break;
     default:
-      err.msg = err.response.data.msg;
+      err.msg = err.response?.data?.msg;
   }
   return err;
 }
 
-apiV1.interceptors.response.use(undefined, (err: AxiosError) => {
+apiV1.interceptors.response.use(undefined, (err: ApiError<any>) => {
   return Promise.reject(apiV1ErrorHandler(err));
 });
 
