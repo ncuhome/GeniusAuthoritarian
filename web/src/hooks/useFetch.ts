@@ -2,7 +2,6 @@ import { useEffect } from "react";
 import { useLoadingToast } from "@hooks/useLoadingToast";
 import useSWR, { SWRConfiguration } from "swr";
 import { AxiosInstance } from "axios";
-import { ApiError, ApiResponse } from "@/typings/global";
 
 export const createFetchHook = (api: AxiosInstance) => {
   const fetcher = (url: string) => api.get(url).then((res) => res.data.data);

@@ -1,5 +1,4 @@
 import axios from "axios";
-import { ApiError } from "@/typings/global";
 
 export const BaseURL = `/api/`;
 export const BaseUrlV1 = `${BaseURL}v1/`;
