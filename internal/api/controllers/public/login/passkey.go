@@ -7,6 +7,7 @@ import (
 	"github.com/go-webauthn/webauthn/protocol"
 	"github.com/go-webauthn/webauthn/webauthn"
 	"github.com/ncuhome/GeniusAuthoritarian/internal/api/callback"
+	"github.com/ncuhome/GeniusAuthoritarian/internal/db/dao"
 	"github.com/ncuhome/GeniusAuthoritarian/internal/db/redis"
 	"github.com/ncuhome/GeniusAuthoritarian/internal/pkg/jwt"
 	"github.com/ncuhome/GeniusAuthoritarian/internal/pkg/webAuthn"
@@ -76,14 +77,19 @@ func FinishPasskeyLogin(c *gin.Context) {
 		return
 	}
 
-	appInfo, err := service.App.FirstAppByAppCode(f.AppCode)
-	if err != nil {
-		if errors.Is(err, gorm.ErrRecordNotFound) {
-			callback.Error(c, callback.ErrAppCodeNotFound)
+	var appInfo *dao.App
+	if f.AppCode == "" {
+		appInfo = service.App.This(c.Request.Host)
+	} else {
+		appInfo, err = service.App.FirstAppByAppCode(f.AppCode)
+		if err != nil {
+			if errors.Is(err, gorm.ErrRecordNotFound) {
+				callback.Error(c, callback.ErrAppCodeNotFound)
+				return
+			}
+			callback.Error(c, callback.ErrDBOperation, err)
 			return
 		}
-		callback.Error(c, callback.ErrDBOperation, err)
-		return
 	}
 
 	user, err := service.User.UserInfoByID(uid)
