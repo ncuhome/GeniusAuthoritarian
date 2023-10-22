@@ -16,6 +16,7 @@ import {
 import LoginItem from "@components/auth/LoginItem";
 import { Stack, Box, Typography, List, Paper, Skeleton } from "@mui/material";
 
+import { AxiosError } from "axios";
 import { ErrNetwork, apiV1 } from "@api/base";
 import { useApiV1 } from "@api/v1/hook";
 
@@ -65,37 +66,34 @@ export const LoginForm: FC = () => {
       options.publicKey.challenge = coerceToArrayBuffer(
         options.publicKey.challenge
       );
-      try {
-        const credential = await navigator.credentials.get(options);
-        if (!(credential instanceof PublicKeyCredential)) {
-          toast.error(`获取凭据失败，凭据类型不正确`);
-          return;
-        }
-        const pubKeyCred = credential as any;
-        try {
-          const {
-            data: { data },
-          } = await apiV1.post<{ data: User.Login.Verified }>(
-            "public/login/passkey/",
-            {
-              app_code: appCode,
-              credential: {
-                id: pubKeyCred.id,
-                rawId: coerceToBase64Url(pubKeyCred.rawId),
-                response: coerceResponseToBase64Url(pubKeyCred.response),
-                type: pubKeyCred.type,
-              },
-            }
-          );
-          window.open(data.callback, "_self");
-        } catch ({ msg }) {
-          if (msg) toast.error(msg as any);
-        }
-      } catch (err: any) {
-        if (err.name != "NotAllowedError") toast.error(`获取凭证失败: ${err}`);
+      const credential = await navigator.credentials.get(options);
+      if (!(credential instanceof PublicKeyCredential)) {
+        toast.error(`获取凭据失败，凭据类型不正确`);
+        return;
       }
-    } catch ({ msg }) {
-      if (msg) toast.error(msg as any);
+      const pubKeyCred = credential as any;
+      const {
+        data: { data },
+      } = await apiV1.post<{ data: User.Login.Verified }>(
+        "public/login/passkey/",
+        {
+          app_code: appCode,
+          credential: {
+            id: pubKeyCred.id,
+            rawId: coerceToBase64Url(pubKeyCred.rawId),
+            response: coerceResponseToBase64Url(pubKeyCred.response),
+            type: pubKeyCred.type,
+          },
+        }
+      );
+      window.open(data.callback, "_self");
+    } catch (err: any) {
+      if (err instanceof AxiosError) {
+        err = err as ApiError<void>;
+        if (err.msg) toast.error(err.msg);
+      } else {
+        if (err.name != "NotAllowedError") toast.error(`创建凭据失败: ${err}`);
+      }
     }
   };
 

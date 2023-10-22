@@ -22,4 +22,4 @@ export const useTheme = create<ThemeState>()(
     }
   )
 );
-export default useTheme
+export default useTheme;

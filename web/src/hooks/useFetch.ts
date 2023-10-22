@@ -2,6 +2,7 @@ import { useEffect } from "react";
 import { useLoadingToast } from "@hooks/useLoadingToast";
 import useSWR, { SWRConfiguration } from "swr";
 import { AxiosInstance } from "axios";
+import { ApiError, ApiResponse } from "@/typings/global";
 
 export const createFetchHook = (api: AxiosInstance) => {
   const fetcher = (url: string) => api.get(url).then((res) => res.data.data);
@@ -18,7 +19,7 @@ export const createFetchHook = (api: AxiosInstance) => {
       config.revalidateOnReconnect = false;
     }
 
-    const swr = useSWR<T>(url, fetcher, config);
+    const swr = useSWR<T, ApiError<ApiResponse<T>>>(url, fetcher, config);
 
     if (config?.enableLoading) {
       const [showToast, closeToast] = useLoadingToast();
@@ -28,7 +29,6 @@ export const createFetchHook = (api: AxiosInstance) => {
         return closeToast;
       }, [swr.error]);
     }
-
     return swr;
   };
 };

@@ -12,6 +12,7 @@ import PasskeyItem from "./PasskeyItem";
 import { Button, ButtonGroup, List, Box, Collapse, Alert } from "@mui/material";
 import { Add } from "@mui/icons-material";
 
+import { AxiosError } from "axios";
 import { apiV1User } from "@api/v1/user/base";
 
 import { useUserApiV1 } from "@api/v1/user/hook";
@@ -62,8 +63,9 @@ export const Passkey: FC<Props> = ({ mfaEnabled }) => {
       });
       mutate((data) => [...data!.filter((el) => el.id !== item.id)]);
       toast.success("删除成功");
-    } catch ({ msg }) {
-      if (msg) toast.error(msg as any);
+    } catch (err) {
+      console.log(err instanceof AxiosError);
+      // if (msg) toast.error(msg as any);
     }
   };
   const onRegister = async () => {
@@ -82,42 +84,38 @@ export const Passkey: FC<Props> = ({ mfaEnabled }) => {
       options.publicKey.user.id = coerceToArrayBuffer(
         options.publicKey.user.id
       );
-
-      try {
-        const credential = await navigator.credentials.create(options);
-        if (!(credential instanceof PublicKeyCredential)) {
-          toast.error(`创建凭据失败，凭据类型不正确`);
-          return;
-        }
-        const pubKeyCred = credential as PublicKeyCredential;
-        try {
-          const {
-            data: { data: newItem },
-          } = await apiV1User.post("passkey/register/", {
-            id: pubKeyCred.id,
-            authenticatorAttachment: pubKeyCred.authenticatorAttachment,
-            rawId: coerceToBase64Url(pubKeyCred.rawId),
-            response: coerceResponseToBase64Url(pubKeyCred.response),
-            type: pubKeyCred.type,
-          });
-          registeredItem.current = newItem.id;
-          mutate((data) => {
-            if (
-              !data ||
-              data.length === 0 ||
-              data.findIndex((item) => item.id === newItem.id) != -1
-            )
-              return data;
-            return [newItem, ...data];
-          });
-        } catch ({ msg }) {
-          if (msg) toast.error(msg as any);
-        }
-      } catch (err: any) {
+      const credential = await navigator.credentials.create(options);
+      if (!(credential instanceof PublicKeyCredential)) {
+        toast.error(`创建凭据失败，凭据类型不正确`);
+        return;
+      }
+      const pubKeyCred = credential as PublicKeyCredential;
+      const {
+        data: { data: newItem },
+      } = await apiV1User.post("passkey/register/", {
+        id: pubKeyCred.id,
+        authenticatorAttachment: pubKeyCred.authenticatorAttachment,
+        rawId: coerceToBase64Url(pubKeyCred.rawId),
+        response: coerceResponseToBase64Url(pubKeyCred.response),
+        type: pubKeyCred.type,
+      });
+      registeredItem.current = newItem.id;
+      mutate((data) => {
+        if (
+          !data ||
+          data.length === 0 ||
+          data.findIndex((item) => item.id === newItem.id) != -1
+        )
+          return data;
+        return [newItem, ...data];
+      });
+    } catch (err: any) {
+      if (err instanceof AxiosError) {
+        err = err as ApiError<void>;
+        if (err.msg) toast.error(err.msg);
+      } else {
         if (err.name != "NotAllowedError") toast.error(`创建凭据失败: ${err}`);
       }
-    } catch ({ msg }) {
-      if (msg) toast.error(msg as any);
     }
   };
 
