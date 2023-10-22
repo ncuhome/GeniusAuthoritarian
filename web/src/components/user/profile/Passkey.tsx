@@ -1,4 +1,4 @@
-import { FC } from "react";
+import { FC, useRef } from "react";
 import useMfaCode from "@hooks/useMfaCode";
 import toast from "react-hot-toast";
 import {
@@ -27,6 +27,7 @@ export const Passkey: FC<Props> = ({ mfaEnabled }) => {
       enableLoading: true,
     }
   );
+  const registeredItem = useRef(-1);
 
   const openMfaDialog = useMfaCode();
 
@@ -100,6 +101,7 @@ export const Passkey: FC<Props> = ({ mfaEnabled }) => {
             response: coerceResponseToBase64Url(pubKeyCred.response),
             type: pubKeyCred.type,
           });
+          registeredItem.current = newItem.id;
           mutate((data) => {
             if (
               !data ||
@@ -147,6 +149,7 @@ export const Passkey: FC<Props> = ({ mfaEnabled }) => {
                     item={item}
                     onRename={(name) => onRename(item.id, name)}
                     onDelete={() => onDelete(item)}
+                    enableRename={item.id === registeredItem.current}
                   />
                 </Collapse>
               ))}
