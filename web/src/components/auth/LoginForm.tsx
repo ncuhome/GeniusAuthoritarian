@@ -75,15 +75,21 @@ export const LoginForm: FC = () => {
         }
         const pubKeyCred = credential as any;
         try {
-          await apiV1.post("public/login/passkey/", {
-            credential: {
-              id: pubKeyCred.id,
-              rawId: coerceToBase64Url(pubKeyCred.rawId),
-              response: coerceResponseToBase64Url(pubKeyCred.response),
-              type: pubKeyCred.type,
-            },
-          });
-          alert("success");
+          const {
+            data: { data },
+          } = await apiV1.post<{ data: User.Login.Verified }>(
+            "public/login/passkey/",
+            {
+              app_code: appCode,
+              credential: {
+                id: pubKeyCred.id,
+                rawId: coerceToBase64Url(pubKeyCred.rawId),
+                response: coerceResponseToBase64Url(pubKeyCred.response),
+                type: pubKeyCred.type,
+              },
+            }
+          );
+          window.open(data.callback, "_self");
         } catch ({ msg }) {
           if (msg) toast.error(msg as any);
         }
