@@ -1,4 +1,4 @@
-import { FC, useRef } from "react";
+import { FC, useMemo, useRef } from "react";
 import useMfaCode from "@hooks/useMfaCode";
 import toast from "react-hot-toast";
 import {
@@ -6,10 +6,11 @@ import {
   coerceToBase64Url,
   coerceResponseToBase64Url,
 } from "@util/coerce";
+import { client } from "@passwordless-id/webauthn";
 
 import { TransitionGroup } from "react-transition-group";
 import PasskeyItem from "./PasskeyItem";
-import { Button, ButtonGroup, List, Box, Collapse } from "@mui/material";
+import { Button, ButtonGroup, List, Box, Collapse, Alert } from "@mui/material";
 import { Add } from "@mui/icons-material";
 
 import { apiV1User } from "@api/v1/user/base";
@@ -21,13 +22,12 @@ interface Props {
 }
 
 export const Passkey: FC<Props> = ({ mfaEnabled }) => {
-  const { data, mutate } = useUserApiV1<User.Passkey.Cred[]>(
-    mfaEnabled ? "passkey/" : null,
-    {
-      enableLoading: true,
-    }
-  );
+  const { data, mutate } = useUserApiV1<User.Passkey.Cred[]>("passkey/", {
+    enableLoading: true,
+  });
   const registeredItem = useRef(-1);
+
+  const passkeyAvailable = useMemo(() => client.isAvailable(), []);
 
   const openMfaDialog = useMfaCode();
 
