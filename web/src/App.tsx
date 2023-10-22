@@ -53,6 +53,7 @@ export default function App() {
           height: "100vh",
           backgroundColor: "#242424",
           colorScheme: "dark",
+          color: "text.primary",
         }}
       >
         <BrowserRouter>
