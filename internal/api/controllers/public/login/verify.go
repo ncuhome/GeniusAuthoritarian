@@ -63,7 +63,7 @@ func VerifyToken(c *gin.Context) {
 	}
 
 	if f.ClientIp != "" && claims.IP != f.ClientIp {
-		callback.Error(c, callback.ErrNetContextChanged)
+		callback.Error(c, callback.ErrNetContextChanged, "context="+claims.IP, "got="+f.ClientIp)
 		return
 	}
 
