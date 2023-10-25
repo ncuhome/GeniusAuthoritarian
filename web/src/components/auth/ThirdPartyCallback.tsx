@@ -99,11 +99,7 @@ export const ThirdPartyCallback = memo<Props>(
             maxWidth: "85%",
           }}
         >
-          <Typography
-            variant={"h5"}
-            fontWeight={"bold"}
-            letterSpacing={"2px"}
-          >
+          <Typography variant={"h5"} fontWeight={"bold"} letterSpacing={"2px"}>
             双因素认证
           </Typography>
           <TextField
@@ -112,7 +108,7 @@ export const ThirdPartyCallback = memo<Props>(
             fullWidth
             value={mfaCode}
             onChange={(e) => {
-              if (!Number(e.target.value) && e.target.value != "") return;
+              if (isNaN(Number(e.target.value)) && e.target.value != "") return;
               setMfaCode(e.target.value);
             }}
             inputRef={mfaInput}
