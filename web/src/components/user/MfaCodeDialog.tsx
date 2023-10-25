@@ -75,7 +75,7 @@ export const MfaCodeDialog: FC = () => {
           name={"twofactor_token"}
           value={code}
           onChange={(e) => {
-            if (!Number(e.target.value) && e.target.value != "") return;
+            if (isNaN(Number(e.target.value)) && e.target.value != "") return;
             setCode(e.target.value);
           }}
           sx={{
