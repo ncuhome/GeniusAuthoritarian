@@ -1,6 +1,7 @@
 package jwt
 
 import (
+	"context"
 	"github.com/golang-jwt/jwt/v5"
 	"github.com/ncuhome/GeniusAuthoritarian/internal/db/redis"
 	"github.com/ncuhome/GeniusAuthoritarian/internal/global"
@@ -56,17 +57,18 @@ func ParseUserToken(token string) (*UserToken, bool, error) {
 }
 
 // GenerateLoginToken 生成有效期 5 分钟的登录校验 Token
-func GenerateLoginToken(clams LoginTokenClaims) (string, error) {
-	now := time.Now()
+func GenerateLoginToken(claims LoginTokenClaims) (string, error) {
 	valid := time.Minute * 5
 
-	id, err := redis.ThirdPartyLogin.NewLoginPoint(now.Unix(), valid, clams)
+	typedClaims := NewTypedClaims("LoginToken", valid)
+
+	id, err := redis.NewThirdPartyLogin(typedClaims.IssuedAt.Time).CreateStorePoint(context.Background(), valid, claims)
 	if err != nil {
 		return "", err
 	}
 
 	return GenerateToken(&LoginToken{
-		TypedClaims: NewTypedClaims("LoginToken", valid),
+		TypedClaims: typedClaims,
 		ID:          id,
 	})
 }
@@ -79,7 +81,7 @@ func ParseLoginToken(token string) (*LoginTokenClaims, bool, error) {
 	}
 
 	var redisClaims LoginTokenClaims
-	valid, err = redis.ThirdPartyLogin.VerifyLoginPoint(claims.ID, claims.IssuedAt.Unix(), &redisClaims)
+	valid, err = redis.NewThirdPartyLogin(claims.IssuedAt.Time).NewStorePoint(claims.ID).VerifyAndDestroy(context.Background(), &redisClaims)
 	if err != nil {
 		if err == redis.Nil {
 			err = nil

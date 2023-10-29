@@ -3,6 +3,7 @@ package redis
 import (
 	"fmt"
 	"github.com/go-redis/redis/v8"
+	"sync/atomic"
 )
 
 type keys uint8
@@ -24,4 +25,10 @@ const (
 	keySyncStat
 	keySshDevSub
 	keyPasskey
+	keyU2F
+)
+
+var (
+	idThirdPartyLogin,
+	idUserJwt atomic.Uint64
 )

@@ -9,6 +9,7 @@ type Claims interface {
 	GetType() string
 }
 
+// TypedClaims type 字段用于区分不同类型的 token，防止类型窜用导致的安全漏洞
 type TypedClaims struct {
 	jwt.RegisteredClaims
 	Type string `json:"type"`
