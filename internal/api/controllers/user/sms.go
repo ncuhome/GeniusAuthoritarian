@@ -20,13 +20,14 @@ func SendVerifySms(c *gin.Context) {
 
 	phone = strings.TrimPrefix(phone, "+86")
 
-	code, err := redis.UserIdentityCode.New(uid)
+	code, err := redis.NewUserIdentityCode(uid).New()
 	if err != nil {
 		callback.Error(c, callback.ErrUnexpected, err)
 		return
 	}
 
-	ok, err := redis.Sms.TryLock(phone)
+	smsRedis := redis.NewSms(phone)
+	ok, err := smsRedis.TryLock()
 	if err != nil {
 		callback.Error(c, callback.ErrUnexpected, err)
 		return
@@ -38,7 +39,7 @@ func SendVerifySms(c *gin.Context) {
 	err = sms.Ums.Send("你的验证码为"+code, phone)
 	if err != nil {
 		callback.Error(c, callback.ErrSendSmsFailed, err)
-		_ = redis.Sms.UnLock(phone)
+		_ = smsRedis.UnLock()
 		return
 	}
 

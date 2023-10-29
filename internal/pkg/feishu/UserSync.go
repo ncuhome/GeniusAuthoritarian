@@ -276,6 +276,7 @@ func (a *UserSyncProcessor) doSyncUserGroups(reserveData map[string]*RelatedUser
 		exUserGroupMap[exUserGroup.UID] = append(exUserGroupMap[exUserGroup.UID], exUserGroup)
 	}
 	for _, user := range reserveData {
+		userJwtRedis := redis.NewUserJwt(user.Data.ID)
 		for _, userDepartment := range user.Departments {
 			exGroups, ok := exUserGroupMap[user.Data.ID]
 			if ok {
@@ -289,7 +290,7 @@ func (a *UserSyncProcessor) doSyncUserGroups(reserveData map[string]*RelatedUser
 				UID: user.Data.ID,
 				GID: userDepartment,
 			})
-			_ = redis.UserJwt.Clear(user.Data.ID)
+			_ = userJwtRedis.Clear()
 		nextUserDepartment:
 		}
 		for _, exUserDepartment := range exUserGroupMap[user.Data.ID] {
@@ -299,7 +300,7 @@ func (a *UserSyncProcessor) doSyncUserGroups(reserveData map[string]*RelatedUser
 				}
 			}
 			userGroupsToDelete.PushBack(exUserDepartment.ID)
-			err = redis.UserJwt.Clear(user.Data.ID)
+			err = userJwtRedis.Clear()
 			if err != nil && err != redis.Nil {
 				return err
 			}

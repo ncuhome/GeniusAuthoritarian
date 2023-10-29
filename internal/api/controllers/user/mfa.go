@@ -24,7 +24,7 @@ func MfaAdd(c *gin.Context) {
 
 	uid := tools.GetUserInfo(c).ID
 
-	ok, err := redis.UserIdentityCode.VerifyAndDestroy(uid, f.Code)
+	ok, err := redis.NewUserIdentityCode(uid).VerifyAndDestroy(f.Code)
 	if err != nil {
 		callback.Error(c, callback.ErrUnexpected, err)
 		return
@@ -69,7 +69,7 @@ func MfaAdd(c *gin.Context) {
 		return
 	}
 
-	if err = redis.MfaEnable.Set(uid, mfaKey.Secret(), time.Minute*15); err != nil {
+	if err = redis.NewMfaEnable(uid).Set(mfaKey.Secret(), time.Minute*15); err != nil {
 		callback.Error(c, callback.ErrUnexpected, err)
 		return
 	}
@@ -91,7 +91,8 @@ func MfaAddCheck(c *gin.Context) {
 
 	uid := tools.GetUserInfo(c).ID
 
-	mfaSecret, err := redis.MfaEnable.Get(uid)
+	mfaEnableRedis := redis.NewMfaEnable(uid)
+	mfaSecret, err := mfaEnableRedis.Get()
 	if err != nil {
 		if err == redis.Nil {
 			callback.Error(c, callback.ErrMfaAddExpired)
@@ -122,7 +123,7 @@ func MfaAddCheck(c *gin.Context) {
 		return
 	}
 
-	if err = redis.MfaEnable.Del(uid); err != nil && err != redis.Nil {
+	if err = mfaEnableRedis.Del(); err != nil && err != redis.Nil {
 		callback.Error(c, callback.ErrUnexpected, err)
 		return
 	}

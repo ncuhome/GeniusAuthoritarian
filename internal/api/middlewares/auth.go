@@ -20,7 +20,7 @@ func UserAuth(c *gin.Context) {
 		return
 	}
 
-	valid, err = redis.UserJwt.Pair(claims.ID, token)
+	valid, err = redis.NewUserJwt(claims.ID).Pair(token)
 	if err != nil {
 		callback.Error(c, callback.ErrUnexpected, err)
 		return

@@ -101,7 +101,7 @@ func GenerateMfaToken(clams LoginTokenClaims, mfaSecret, appCallback string) (st
 		return "", err
 	}
 
-	if err = redis.MfaLogin.Set(clams.UID, token, valid, MfaLoginClaims{
+	if err = redis.NewMfaLogin(clams.UID, token).Set(valid, MfaLoginClaims{
 		LoginTokenClaims: clams,
 		Mfa:              mfaSecret,
 		AppCallback:      appCallback,
@@ -120,10 +120,11 @@ func ParseMfaToken(token string) (*MfaLoginClaims, error) {
 	}
 
 	var redisClaims MfaLoginClaims
-	return &redisClaims, redis.MfaLogin.Get(claims.UID, token, &redisClaims)
+	return &redisClaims, redis.NewMfaLogin(claims.UID, token).Get(&redisClaims)
 }
 
-/*// GenerateU2fToken 生成后台 U2F 身份令牌
-func GenerateU2fToken() {
-
-}*/
+/*// GenerateU2fToken 生成后台 U2F 身份令牌，五分钟有效
+func GenerateU2fToken(uid uint, ip string) (string, time.Time, error) {
+	valid := time.Minute * 5
+}
+*/

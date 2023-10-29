@@ -6,22 +6,24 @@ import (
 	"time"
 )
 
-var MfaEnable = MfaEnableHelper{
-	key: keyMfaEnable.String(),
+func NewMfaEnable(uid uint) MfaEnable {
+	return MfaEnable{
+		key: keyMfaEnable.String() + fmt.Sprint(uid),
+	}
 }
 
-type MfaEnableHelper struct {
+type MfaEnable struct {
 	key string
 }
 
-func (a MfaEnableHelper) Set(uid uint, secret string, valid time.Duration) error {
-	return Client.Set(context.Background(), a.key+fmt.Sprint(uid), secret, valid).Err()
+func (a MfaEnable) Set(secret string, valid time.Duration) error {
+	return Client.Set(context.Background(), a.key, secret, valid).Err()
 }
 
-func (a MfaEnableHelper) Get(uid uint) (string, error) {
-	return Client.Get(context.Background(), a.key+fmt.Sprint(uid)).Result()
+func (a MfaEnable) Get() (string, error) {
+	return Client.Get(context.Background(), a.key).Result()
 }
 
-func (a MfaEnableHelper) Del(uid uint) error {
-	return Client.Del(context.Background(), a.key+fmt.Sprint(uid)).Err()
+func (a MfaEnable) Del() error {
+	return Client.Del(context.Background(), a.key).Err()
 }

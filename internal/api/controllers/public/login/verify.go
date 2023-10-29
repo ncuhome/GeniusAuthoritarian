@@ -145,7 +145,7 @@ func Login(c *gin.Context) {
 		return
 	}
 
-	if err = redis.UserJwt.Set(claims.UID, token, time.Hour*24*15); err != nil {
+	if err = redis.NewUserJwt(claims.UID).Set(token, time.Hour*24*15); err != nil {
 		callback.Error(c, callback.ErrUnexpected, err)
 		return
 	}

@@ -5,30 +5,28 @@ import (
 	"time"
 )
 
-var Sms = SmsHelper{
-	key: keySms.String(),
+func NewSms(phone string) Sms {
+	return Sms{
+		key: keySms.String() + "-" + phone,
+	}
 }
 
-type SmsHelper struct {
+type Sms struct {
 	key string
 }
 
-func (a SmsHelper) genKey(phone string) string {
-	return a.key + "-" + phone
+func (a Sms) TryLock() (bool, error) {
+	return Client.SetNX(context.Background(), a.key, "1", time.Minute).Result()
 }
 
-func (a SmsHelper) TryLock(phone string) (bool, error) {
-	return Client.SetNX(context.Background(), phone, a.genKey(phone), time.Minute).Result()
-}
-
-func (a SmsHelper) IsLocked(phone string) (bool, error) {
-	err := Client.Get(context.Background(), a.genKey(phone)).Err()
+func (a Sms) IsLocked() (bool, error) {
+	err := Client.Get(context.Background(), a.key).Err()
 	if err == Nil {
 		return false, nil
 	}
 	return err == nil, err
 }
 
-func (a SmsHelper) UnLock(phone string) error {
-	return Client.Del(context.Background(), a.genKey(phone)).Err()
+func (a Sms) UnLock() error {
+	return Client.Del(context.Background(), a.key).Err()
 }

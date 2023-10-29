@@ -26,8 +26,8 @@ func BeginPasskeyLogin(c *gin.Context) {
 		return
 	}
 
-	err = redis.NewPasskey().
-		StoreSession(context.Background(), c.ClientIP(), sessionData, time.Minute*5)
+	err = redis.NewPasskey(c.ClientIP()).
+		StoreSession(context.Background(), sessionData, time.Minute*5)
 	if err != nil {
 		callback.Error(c, callback.ErrDBOperation, err)
 		return
@@ -52,8 +52,8 @@ func FinishPasskeyLogin(c *gin.Context) {
 	}
 
 	var sessionData webauthn.SessionData
-	err = redis.NewPasskey().
-		ReadSession(context.Background(), c.ClientIP(), &sessionData)
+	err = redis.NewPasskey(c.ClientIP()).
+		ReadSession(context.Background(), &sessionData)
 	if err != nil {
 		if err == redis.Nil {
 			callback.Error(c, callback.ErrLoginSessionExpired)

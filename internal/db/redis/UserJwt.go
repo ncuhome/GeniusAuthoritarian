@@ -6,26 +6,24 @@ import (
 	"time"
 )
 
-var UserJwt = UserJwtHelper{
-	key:           keyUserJwt.String(),
-	compareLength: 5,
+func NewUserJwt(uid uint) UserJwt {
+	return UserJwt{
+		key:           keyUserJwt.String() + fmt.Sprint(uid),
+		compareLength: 5,
+	}
 }
 
-type UserJwtHelper struct {
+type UserJwt struct {
 	key           string
 	compareLength int
 }
 
-func (a UserJwtHelper) userKey(uid uint) string {
-	return a.key + fmt.Sprint(uid)
+func (a UserJwt) Set(token string, valid time.Duration) error {
+	return Client.Set(context.Background(), a.key, token[:a.compareLength], valid).Err()
 }
 
-func (a UserJwtHelper) Set(uid uint, token string, valid time.Duration) error {
-	return Client.Set(context.Background(), a.userKey(uid), token[:a.compareLength], valid).Err()
-}
-
-func (a UserJwtHelper) Pair(uid uint, token string) (bool, error) {
-	value, err := Client.Get(context.Background(), a.userKey(uid)).Result()
+func (a UserJwt) Pair(token string) (bool, error) {
+	value, err := Client.Get(context.Background(), a.key).Result()
 	if err != nil {
 		if err == Nil {
 			err = nil
@@ -35,6 +33,6 @@ func (a UserJwtHelper) Pair(uid uint, token string) (bool, error) {
 	return value == token[:a.compareLength], nil
 }
 
-func (a UserJwtHelper) Clear(uid uint) error {
-	return Client.Del(context.Background(), a.userKey(uid)).Err()
+func (a UserJwt) Clear() error {
+	return Client.Del(context.Background(), a.key).Err()
 }

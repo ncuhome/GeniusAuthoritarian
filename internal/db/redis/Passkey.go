@@ -7,15 +7,14 @@ import (
 	"time"
 )
 
-func NewPasskey() Passkey {
-	return Passkey{}
+func NewPasskey(ip string) Passkey {
+	return Passkey{
+		key: keyPasskey.String() + "ip" + ip,
+	}
 }
 
 type Passkey struct {
-}
-
-func (p Passkey) key(ip string) string {
-	return keyPasskey.String() + "ip" + ip
+	key string
 }
 
 func (p Passkey) store(ctx context.Context, key string, session any, expire time.Duration) error {
@@ -26,10 +25,6 @@ func (p Passkey) store(ctx context.Context, key string, session any, expire time
 	return Client.Set(ctx, key, data, expire).Err()
 }
 
-func (p Passkey) StoreSession(ctx context.Context, ip string, session any, expire time.Duration) error {
-	return p.store(ctx, p.key(ip), session, expire)
-}
-
 func (p Passkey) read(ctx context.Context, key string, session any) error {
 	data, err := Client.GetDel(ctx, key).Bytes()
 	if err != nil {
@@ -38,15 +33,19 @@ func (p Passkey) read(ctx context.Context, key string, session any) error {
 	return json.Unmarshal(data, session)
 }
 
+func (p Passkey) StoreSession(ctx context.Context, session any, expire time.Duration) error {
+	return p.store(ctx, p.key, session, expire)
+}
+
 // ReadSession 读取后自动销毁
-func (p Passkey) ReadSession(ctx context.Context, ip string, session any) error {
-	return p.read(ctx, p.key(ip), session)
+func (p Passkey) ReadSession(ctx context.Context, session any) error {
+	return p.read(ctx, p.key, session)
 }
 
 func (p Passkey) NewUser(id uint) UserPasskey {
 	return UserPasskey{
 		p:   p,
-		key: keyPasskey.String() + "u" + fmt.Sprint(id),
+		key: p.key + "u" + fmt.Sprint(id),
 	}
 }
 
