@@ -137,14 +137,6 @@ func MfaAddCheck(c *gin.Context) {
 }
 
 func MfaDel(c *gin.Context) {
-	var f struct {
-		Code string `json:"code" form:"code" binding:"required,len=6,numeric"`
-	}
-	if err := c.ShouldBind(&f); err != nil {
-		callback.Error(c, callback.ErrForm, err)
-		return
-	}
-
 	userSrv, err := service.User.Begin()
 	if err != nil {
 		callback.Error(c, callback.ErrDBOperation, err)
@@ -160,15 +152,6 @@ func MfaDel(c *gin.Context) {
 		return
 	} else if mfaSecret == "" {
 		callback.Error(c, callback.ErrMfaNotExist)
-		return
-	}
-
-	valid, err := tools.VerifyMfa(f.Code, mfaSecret)
-	if err != nil {
-		callback.Error(c, callback.ErrUnexpected, err)
-		return
-	} else if !valid {
-		callback.Error(c, callback.ErrMfaCode)
 		return
 	}
 
