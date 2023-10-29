@@ -7,7 +7,7 @@ import (
 )
 
 func routerSsh(G *gin.RouterGroup) {
-	G.Use(middlewares.RequireMfa)
+	G.Use(middlewares.RequireU2F)
 
 	G.GET("/", controllers.ShowSshKey)
 	G.PUT("/", controllers.ResetSshKeyPair)
