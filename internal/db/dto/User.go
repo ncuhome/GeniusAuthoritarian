@@ -13,3 +13,10 @@ type UserProfile struct {
 	MfaEnabled bool    `json:"mfa" gorm:"-"`
 	Groups     []Group `json:"groups" gorm:"-"`
 }
+
+type UserU2fStatus struct {
+	Prefer  string `json:"prefer"`
+	Phone   bool   `json:"phone"`
+	Mfa     bool   `json:"mfa"`
+	Passkey bool   `json:"passkey"`
+}

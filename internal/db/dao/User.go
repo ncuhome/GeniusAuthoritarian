@@ -12,6 +12,7 @@ type User struct {
 	Name      string         `gorm:"not null"`
 	Phone     string         `gorm:"not null;uniqueIndex;type:varchar(15)"`
 	MFA       string
+	PreferU2F string `gorm:"column:prefer_u2f"`
 }
 
 func (a *User) sqlJoinUserGroups(tx *gorm.DB) *gorm.DB {
@@ -47,6 +48,14 @@ func (a *User) FirstForPasskey(tx *gorm.DB) error {
 	return tx.Model(a).Select("name").Where(a, "id").First(a).Error
 }
 
+func (a *User) FirstMfa(tx *gorm.DB) error {
+	return tx.Model(a).Select("mfa").Where(a, "id").First(a).Error
+}
+
+func (a *User) FirstPhoneByID(tx *gorm.DB) error {
+	return tx.Model(a).Select("phone").Where(a, "id").First(a).Error
+}
+
 func (a *User) GetUnscopedByPhoneSlice(tx *gorm.DB, phone []string) ([]User, error) {
 	var t []User
 	return t, tx.Model(a).Unscoped().Where("phone IN ?", phone).Find(&t).Error
@@ -68,20 +77,20 @@ func (a *User) GetNoSshDevIds(tx *gorm.DB) ([]uint, error) {
 	return t, tx.Select("users.id").Where("base_groups.name=? AND user_sshes.id IS NULL", departments.UDev).Find(&t).Error
 }
 
-func (a *User) UpdateMfa(tx *gorm.DB) error {
-	return tx.Model(a).Select("mfa").Where(a, "id").Updates(a).Error
-}
-
-func (a *User) FirstMfa(tx *gorm.DB) error {
-	return tx.Model(a).Select("mfa").Where(a, "id").First(a).Error
-}
-
-func (a *User) FirstPhoneByID(tx *gorm.DB) error {
-	return tx.Model(a).Select("phone").Where(a, "id").First(a).Error
+func (a *User) U2fStatus(tx *gorm.DB) (*dto.UserU2fStatus, error) {
+	var t dto.UserU2fStatus
+	return &t, tx.Model(a).Select("users.prefer_u2f AS prefer", "1 AS phone", "users.mfa", "user_web_authns.id AS passkey").
+		Joins("LEFT JOIN user_web_authns ON user_web_authns.uid=users.id").
+		Where(a, "id").
+		Limit(1).Find(&t).Error
 }
 
 func (a *User) FrozeByIDSlice(tx *gorm.DB, ids []uint) error {
 	return tx.Delete(a, "id IN ?", ids).Error
+}
+
+func (a *User) UpdateMfa(tx *gorm.DB) error {
+	return tx.Model(a).Select("mfa").Where(a, "id").Updates(a).Error
 }
 
 func (a *User) UnfrozeByIDSlice(tx *gorm.DB, ids []uint) error {

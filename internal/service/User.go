@@ -45,6 +45,10 @@ func (a UserSrv) UserInfo(phone string) (*dao.User, error) {
 	return &user, user.FirstByPhone(a.DB)
 }
 
+func (a UserSrv) U2fStatus(id uint) (*dto.UserU2fStatus, error) {
+	return (&dao.User{ID: id}).U2fStatus(a.DB)
+}
+
 func (a UserSrv) UserInfoByID(id uint) (*dao.User, error) {
 	var user = dao.User{
 		ID: id,
