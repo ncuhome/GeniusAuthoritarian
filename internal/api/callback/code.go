@@ -29,6 +29,7 @@ const (
 	cErrUserIdentity
 	cErrLoginSessionExpired
 	cErrPasskeyNotExist
+	cErrU2fTokenExpired
 )
 
 var (
@@ -171,5 +172,10 @@ var (
 		Code:       cErrPasskeyNotExist,
 		Msg:        "该通行密钥不存在",
 		HttpStatus: 404,
+	}
+	ErrU2fTokenExpired = &Msg{
+		Code:       cErrU2fTokenExpired,
+		Msg:        "二步校验令牌失效，请重试",
+		HttpStatus: 403,
 	}
 )
