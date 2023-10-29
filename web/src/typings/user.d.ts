@@ -71,4 +71,18 @@ declare namespace User {
       name: string;
     };
   }
+
+  namespace U2F {
+    type Status = {
+      prefer: string;
+      phone: boolean;
+      mfa: boolean;
+      passkey: boolean;
+    };
+
+    type Result = {
+      token: string;
+      valid_before: number;
+    };
+  }
 }
