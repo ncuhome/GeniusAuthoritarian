@@ -79,8 +79,8 @@ func (a *User) GetNoSshDevIds(tx *gorm.DB) ([]uint, error) {
 
 func (a *User) U2fStatus(tx *gorm.DB) (*dto.UserU2fStatus, error) {
 	var t dto.UserU2fStatus
-	return &t, tx.Model(a).Select("users.prefer_u2f AS prefer", "1 AS phone", "users.mfa", "user_web_authns.id AS passkey").
-		Joins("LEFT JOIN user_web_authns ON user_web_authns.uid=users.id").
+	return &t, tx.Model(a).Select("users.prefer_u2f AS prefer", "1 AS phone", "(users.mfa IS NOT NULL AND users.mfa!='') AS mfa", "user_webauthns.id AS passkey").
+		Joins("LEFT JOIN user_webauthns ON user_webauthns.uid=users.id").
 		Where(a, "id").
 		Limit(1).Find(&t).Error
 }
