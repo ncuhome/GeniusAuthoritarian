@@ -28,12 +28,18 @@ func (a TokenStore) genKey(id uint64) string {
 }
 
 func (a TokenStore) CreateStorePoint(ctx context.Context, iat time.Time, valid time.Duration, claims interface{}) (uint64, error) {
-	value, err := json.Marshal(&StorePointData{
-		Iat:    iat.Unix(),
-		Claims: claims,
-	})
-	if err != nil {
-		return 0, err
+	var value []byte
+	if claims == nil {
+		value = []byte{'1'}
+	} else {
+		var err error
+		value, err = json.Marshal(&StorePointData{
+			Iat:    iat.Unix(),
+			Claims: claims,
+		})
+		if err != nil {
+			return 0, err
+		}
 	}
 
 	id := a.idAtom.Add(1)
