@@ -30,5 +30,6 @@ const (
 
 var (
 	idThirdPartyLogin,
-	idMfaLogin atomic.Uint64
+	idMfaLogin,
+	idU2F atomic.Uint64
 )

@@ -58,6 +58,8 @@ type MfaRedisClaims struct {
 
 type U2fToken struct {
 	TypedClaims
+	// 无意义 ID
+	ID  uint64 `json:"id"`
 	UID uint   `json:"uid"`
 	IP  string `json:"ip"`
 }
