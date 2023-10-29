@@ -4,8 +4,22 @@ import (
 	"github.com/golang-jwt/jwt/v5"
 )
 
-type UserToken struct {
+type Claims interface {
+	jwt.Claims
+	GetType() string
+}
+
+type TypedClaims struct {
 	jwt.RegisteredClaims
+	Type string `json:"type"`
+}
+
+func (a *TypedClaims) GetType() string {
+	return a.Type
+}
+
+type UserToken struct {
+	TypedClaims
 	// dao.User.ID
 	ID     uint     `json:"id"`
 	Name   string   `json:"name"`
@@ -13,7 +27,7 @@ type UserToken struct {
 }
 
 type LoginToken struct {
-	jwt.RegisteredClaims
+	TypedClaims
 	// 无意义 ID
 	ID uint64 `json:"id"`
 }
@@ -29,7 +43,7 @@ type LoginTokenClaims struct {
 }
 
 type MfaToken struct {
-	jwt.RegisteredClaims
+	TypedClaims
 	UID uint `json:"uid"`
 }
 
@@ -37,4 +51,10 @@ type MfaLoginClaims struct {
 	LoginTokenClaims
 	Mfa         string `json:"mfa"`
 	AppCallback string `json:"appCallback"`
+}
+
+type U2fClaims struct {
+	TypedClaims
+	UID uint   `json:"uid"`
+	IP  string `json:"ip"`
 }
