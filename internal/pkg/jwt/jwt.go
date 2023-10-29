@@ -43,13 +43,15 @@ func ParseToken[C Claims](Type, token string, target C) (claims C, valid bool, e
 }
 
 // GenerateUserToken 生成有效期 15 天的后台 Token
-func GenerateUserToken(uid uint, name string, groups []string) (string, error) {
-	return GenerateToken(&UserToken{
+func GenerateUserToken(uid uint, name string, groups []string) (string, *UserToken, error) {
+	claims := &UserToken{
 		TypedClaims: NewTypedClaims("UserToken", time.Hour*24*15),
 		ID:          uid,
 		Name:        name,
 		Groups:      groups,
-	})
+	}
+	token, err := GenerateToken(claims)
+	return token, claims, err
 }
 
 func ParseUserToken(token string) (*UserToken, bool, error) {
@@ -57,72 +59,68 @@ func ParseUserToken(token string) (*UserToken, bool, error) {
 }
 
 // GenerateLoginToken 生成有效期 5 分钟的登录校验 Token
-func GenerateLoginToken(claims LoginTokenClaims) (string, error) {
+func GenerateLoginToken(claims LoginRedisClaims) (string, error) {
 	valid := time.Minute * 5
 
-	typedClaims := NewTypedClaims("LoginToken", valid)
-
-	id, err := redis.NewThirdPartyLogin(typedClaims.IssuedAt.Time).CreateStorePoint(context.Background(), valid, claims)
+	tokenClaims := &LoginToken{
+		TypedClaims: NewTypedClaims("LoginToken", valid),
+	}
+	var err error
+	tokenClaims.ID, err = redis.NewThirdPartyLogin().CreateStorePoint(context.Background(), tokenClaims.IssuedAt.Time, valid, claims)
 	if err != nil {
 		return "", err
 	}
 
-	return GenerateToken(&LoginToken{
-		TypedClaims: typedClaims,
-		ID:          id,
-	})
+	return GenerateToken(tokenClaims)
 }
 
 // ParseLoginToken 解析后自动销毁
-func ParseLoginToken(token string) (*LoginTokenClaims, bool, error) {
+func ParseLoginToken(token string) (*LoginRedisClaims, bool, error) {
 	claims, valid, err := ParseToken("LoginToken", token, &LoginToken{})
 	if err != nil || !valid {
 		return nil, false, err
 	}
 
-	var redisClaims LoginTokenClaims
-	valid, err = redis.NewThirdPartyLogin(claims.IssuedAt.Time).NewStorePoint(claims.ID).VerifyAndDestroy(context.Background(), &redisClaims)
+	var redisClaims LoginRedisClaims
+	err = redis.NewThirdPartyLogin().NewStorePoint(claims.ID).GetAndDestroy(context.Background(), claims.IssuedAt.Time, &redisClaims)
 	if err != nil {
 		if err == redis.Nil {
 			err = nil
 		}
 		return nil, false, err
 	}
-	return &redisClaims, valid, nil
+	return &redisClaims, true, nil
 }
 
 // GenerateMfaToken 生成绑定 TOTP MFA 中间身份令牌，五分钟有效
-func GenerateMfaToken(clams LoginTokenClaims, mfaSecret, appCallback string) (string, error) {
+func GenerateMfaToken(claims LoginRedisClaims, mfaSecret, appCallback string) (string, error) {
 	valid := time.Minute * 5
 
-	token, err := GenerateToken(&MfaToken{
+	mfaTokenClaims := &MfaToken{
 		TypedClaims: NewTypedClaims("MfaToken", valid),
-		UID:         clams.UID,
-	})
-	if err != nil {
-		return "", err
+		UID:         claims.UID,
 	}
-
-	if err = redis.NewMfaLogin(clams.UID, token).Set(valid, MfaLoginClaims{
-		LoginTokenClaims: clams,
+	var err error
+	if mfaTokenClaims.ID, err = redis.NewMfaLogin(claims.UID).CreateStorePoint(context.Background(), mfaTokenClaims.IssuedAt.Time, valid, &MfaRedisClaims{
+		LoginRedisClaims: claims,
 		Mfa:              mfaSecret,
 		AppCallback:      appCallback,
 	}); err != nil {
 		return "", err
 	}
 
-	return token, nil
+	return GenerateToken(mfaTokenClaims)
 }
 
 // ParseMfaToken 不会销毁，允许多次验证尝试
-func ParseMfaToken(token string) (*MfaLoginClaims, error) {
+func ParseMfaToken(token string) (*MfaRedisClaims, error) {
 	claims, valid, err := ParseToken("MfaToken", token, &MfaToken{})
 	if err != nil || !valid {
 		return nil, err
 	}
 
-	var redisClaims MfaLoginClaims
-	return &redisClaims, redis.NewMfaLogin(claims.UID, token).Get(&redisClaims)
+	var redisClaims MfaRedisClaims
+	return &redisClaims, redis.NewMfaLogin(claims.UID).NewStorePoint(claims.ID).Get(context.Background(), claims.IssuedAt.Time, &redisClaims)
 }
 
 /*// GenerateU2fToken 生成后台 U2F 身份令牌，五分钟有效

@@ -14,7 +14,7 @@ import (
 )
 
 // 验证 token 并添加登录记录
-func doVerifyToken(c *gin.Context, tx *gorm.DB, token string) *jwt.LoginTokenClaims {
+func doVerifyToken(c *gin.Context, tx *gorm.DB, token string) *jwt.LoginRedisClaims {
 	claims, valid, err := jwt.ParseLoginToken(token)
 	if err != nil || !valid {
 		callback.Error(c, callback.ErrUnauthorized, err)
@@ -139,13 +139,13 @@ func Login(c *gin.Context) {
 		return
 	}
 
-	token, err := jwt.GenerateUserToken(claims.UID, claims.Name, groups)
+	token, userTokenClaims, err := jwt.GenerateUserToken(claims.UID, claims.Name, groups)
 	if err != nil {
 		callback.Error(c, callback.ErrUnexpected, err)
 		return
 	}
 
-	if err = redis.NewUserJwt(claims.UID).Set(token, time.Hour*24*15); err != nil {
+	if err = redis.NewUserJwt(claims.UID).Set(userTokenClaims.IssuedAt.Time, time.Hour*24*15); err != nil {
 		callback.Error(c, callback.ErrUnexpected, err)
 		return
 	}

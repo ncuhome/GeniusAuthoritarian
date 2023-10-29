@@ -30,5 +30,5 @@ const (
 
 var (
 	idThirdPartyLogin,
-	idUserJwt atomic.Uint64
+	idMfaLogin atomic.Uint64
 )

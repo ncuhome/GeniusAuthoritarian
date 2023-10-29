@@ -1,4 +1,4 @@
-package tokenStorePoint
+package tokenStore
 
 type StorePointData struct {
 	Iat    int64       `json:"iat"`

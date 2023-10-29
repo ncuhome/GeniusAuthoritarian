@@ -37,7 +37,7 @@ func VerifyMfa(c *gin.Context) {
 		return
 	}
 
-	token, err := jwt.GenerateLoginToken(claims.LoginTokenClaims)
+	token, err := jwt.GenerateLoginToken(claims.LoginRedisClaims)
 	if err != nil {
 		callback.Error(c, callback.ErrUnexpected, err)
 		return

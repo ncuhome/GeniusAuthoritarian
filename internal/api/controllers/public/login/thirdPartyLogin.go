@@ -118,7 +118,7 @@ type ThirdPartyLoginContext struct {
 
 // 根据数据完成请求响应
 func callThirdPartyLoginResult(c *gin.Context, info ThirdPartyLoginContext) {
-	claims := jwt.LoginTokenClaims{
+	claims := jwt.LoginRedisClaims{
 		UID:       info.User.ID,
 		Name:      info.User.Name,
 		IP:        info.Ip,

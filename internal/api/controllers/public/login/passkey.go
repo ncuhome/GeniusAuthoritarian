@@ -103,7 +103,7 @@ func FinishPasskeyLogin(c *gin.Context) {
 		return
 	}
 
-	claims := jwt.LoginTokenClaims{
+	claims := jwt.LoginRedisClaims{
 		UID:       user.ID,
 		Name:      user.Name,
 		IP:        c.ClientIP(),

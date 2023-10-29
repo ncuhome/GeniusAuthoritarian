@@ -33,7 +33,7 @@ type LoginToken struct {
 	ID uint64 `json:"id"`
 }
 
-type LoginTokenClaims struct {
+type LoginRedisClaims struct {
 	UID       uint     `json:"uid"`
 	AvatarUrl string   `json:"avatarUrl"`
 	Name      string   `json:"name"`
@@ -45,16 +45,18 @@ type LoginTokenClaims struct {
 
 type MfaToken struct {
 	TypedClaims
-	UID uint `json:"uid"`
+	// 无意义 ID
+	ID  uint64 `json:"id"`
+	UID uint   `json:"uid"`
 }
 
-type MfaLoginClaims struct {
-	LoginTokenClaims
+type MfaRedisClaims struct {
+	LoginRedisClaims
 	Mfa         string `json:"mfa"`
 	AppCallback string `json:"appCallback"`
 }
 
-type U2fClaims struct {
+type U2fToken struct {
 	TypedClaims
 	UID uint   `json:"uid"`
 	IP  string `json:"ip"`

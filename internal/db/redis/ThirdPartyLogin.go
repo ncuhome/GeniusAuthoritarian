@@ -1,10 +1,9 @@
 package redis
 
 import (
-	"github.com/ncuhome/GeniusAuthoritarian/internal/pkg/tokenStorePoint"
-	"time"
+	"github.com/ncuhome/GeniusAuthoritarian/internal/pkg/tokenStore"
 )
 
-func NewThirdPartyLogin(iat time.Time) tokenStorePoint.TokenStore {
-	return tokenStorePoint.NewTokenStore(Client, &idThirdPartyLogin, keyThirdPartyLogin.String(), iat)
+func NewThirdPartyLogin() tokenStore.TokenStore {
+	return tokenStore.NewTokenStore(Client, &idThirdPartyLogin, keyThirdPartyLogin.String())
 }
