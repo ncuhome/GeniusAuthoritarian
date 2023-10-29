@@ -38,12 +38,16 @@ export const PasskeyItem: FC<Props> = ({
     const time = duration(new Date().getTime() - item.last_used_at * 1000);
     let word = "上次使用于 ";
     const month = time.months();
-    if (month > 0) word += `${month} 月`;
-    const day = time.days();
-    if (day > 0) word += `${day} 天`;
-    const minute = time.minutes();
-    if (minute > 0) word += `${minute} 分钟`;
-    else word += `${time.seconds()} 秒`;
+    if (month > 0) word += `${month} 个月`;
+    else {
+      const day = time.days();
+      if (day > 0) word += `${day} 天`;
+      else {
+        const minute = time.minutes();
+        if (minute > 0) word += `${minute} 分钟`;
+        else word += `${time.seconds()} 秒`;
+      }
+    }
     return word + "前";
   }, [item.last_used_at]);
 

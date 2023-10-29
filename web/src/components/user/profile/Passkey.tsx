@@ -148,7 +148,7 @@ export const Passkey: FC<Props> = ({ mfaEnabled }) => {
             }}
           >
             <TransitionGroup>
-              {data.map((item, index) => (
+              {data.map((item) => (
                 <Collapse key={item.id}>
                   <PasskeyItem
                     item={item}
