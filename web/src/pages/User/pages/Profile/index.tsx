@@ -122,7 +122,7 @@ export const Profile: FC = () => {
             "通行密钥可以是支持生物识别的手机电脑，可以是硬件密钥，也可以存入密码保险库跨设备同步。使用通行密钥可以免账户密码进行身份验证且自带双因素，是一种安全便捷的认证方式"
           }
         >
-          <Passkey mfaEnabled={profile?.user.mfa} />
+          <Passkey />
         </ChildBlock>
       </Block>
 
