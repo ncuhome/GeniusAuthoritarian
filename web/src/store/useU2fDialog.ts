@@ -1,4 +1,5 @@
 import { create } from "zustand";
+import { apiV1User } from "@api/v1/user/base";
 
 interface U2fDialog extends User.U2F.Status {
   open: boolean;
@@ -12,11 +13,11 @@ interface U2fDialog extends User.U2F.Status {
   openDialog: (tip?: string) => Promise<User.U2F.Result>;
   closeDialog: () => void;
   setStatus: (status: User.U2F.Status) => void;
-  setPrefer: (prefer: User.U2F.Methods) => void;
   setToken: (token: User.U2F.Result) => void;
+  setPrefer: (method: User.U2F.Methods) => Promise<void>;
 }
 
-export const useU2fDialog = create<U2fDialog>()((set) => ({
+export const useU2fDialog = create<U2fDialog>()((set, getState) => ({
   prefer: "",
   phone: false,
   mfa: false,
@@ -31,8 +32,14 @@ export const useU2fDialog = create<U2fDialog>()((set) => ({
   },
   closeDialog: () => set({ open: false }),
   setStatus: (status) => set(status),
-  setPrefer: (prefer: User.U2F.Methods) => set({ prefer }),
   setToken: (u2f) => set({ u2f }),
+  setPrefer: async (method: User.U2F.Methods) => {
+    if (method === getState().prefer) return;
+    await apiV1User.put("u2f/prefer", {
+      prefer: method,
+    });
+    set({ prefer: method });
+  },
 }));
 
 export default useU2fDialog;

@@ -1,15 +1,12 @@
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import toast from "react-hot-toast";
 
 import { useUserApiV1 } from "@api/v1/user/hook";
-import { apiV1User } from "@api/v1/user/base";
 
-import { shallow } from "zustand/shallow";
 import useU2fDialog from "@store/useU2fDialog";
 
 interface U2F {
   isLoading: boolean;
-  setPrefer: (method: User.U2F.Methods) => Promise<void>;
   refreshToken: (tip?: string) => Promise<string>;
 }
 
@@ -41,13 +38,6 @@ export const useU2F = (): U2F => {
     if (data) onDataLoaded(data);
   }, [data]);
 
-  const setPrefer = async (method: User.U2F.Methods) => {
-    await apiV1User.put("u2f/prefer", {
-      prefer: method,
-    });
-    useU2fDialog.getState().setPrefer(method);
-  };
-
   const refreshToken = useCallback(async (tip?: string) => {
     if (dataPromise.current) await dataPromise.current;
     if (!dataLoaded.current) {
@@ -66,7 +56,6 @@ export const useU2F = (): U2F => {
 
   return {
     isLoading,
-    setPrefer,
     refreshToken,
   };
 };

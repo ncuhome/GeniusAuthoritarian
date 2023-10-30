@@ -1,6 +1,6 @@
 import { FC, useMemo } from "react";
-import toast from "react-hot-toast";
 import { unix } from "dayjs";
+import toast from "react-hot-toast";
 
 import Block from "@components/user/Block";
 import ChildBlock from "@components/user/ChildBlock";
@@ -20,11 +20,15 @@ import {
   TableRow,
   TableHead,
   Skeleton,
+  Checkbox,
+  FormControlLabel,
+  Stack,
 } from "@mui/material";
 
 import { useUserApiV1 } from "@api/v1/user/hook";
 
 import useUser from "@store/useUser";
+import useU2fDialog from "@store/useU2fDialog";
 
 const GridItem: FC<GridProps> = ({ children, ...props }) => (
   <Grid item xs={12} sm={6} {...props}>
@@ -75,6 +79,17 @@ export const Profile: FC = () => {
     onSuccess: (data) => setProfile(data),
   });
 
+  const prefer = useU2fDialog((state) => state.prefer);
+  const setPrefer = useU2fDialog((state) => state.setPrefer);
+
+  const onChangePrefer = async (target: User.U2F.Methods) => {
+    try {
+      await setPrefer(target);
+    } catch ({ msg }) {
+      if (msg) toast.error(msg as string);
+    }
+  };
+
   return (
     <Container>
       <Block title={"Profile"}>
@@ -86,6 +101,41 @@ export const Profile: FC = () => {
       </Block>
 
       <Block title={"Security"}>
+        <ChildBlock
+          title={"首选校验方式"}
+          desc={"更改 U2F 校验时默认选择的校验方式"}
+        >
+          <Stack flexDirection={"row"}>
+            <FormControlLabel
+              label={"电话"}
+              control={
+                <Checkbox
+                  checked={prefer === "phone"}
+                  onClick={(e) => onChangePrefer("phone")}
+                />
+              }
+            />
+            <FormControlLabel
+              label={"双因素认证"}
+              control={
+                <Checkbox
+                  checked={prefer === "mfa"}
+                  onClick={(e) => onChangePrefer("mfa")}
+                />
+              }
+            />
+            <FormControlLabel
+              label={"通行密钥"}
+              control={
+                <Checkbox
+                  checked={prefer === "passkey"}
+                  onClick={(e) => onChangePrefer("passkey")}
+                />
+              }
+            />
+          </Stack>
+        </ChildBlock>
+
         <ChildBlock
           title={"双因素认证"}
           desc={
