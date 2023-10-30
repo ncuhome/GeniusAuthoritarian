@@ -84,5 +84,7 @@ declare namespace User {
       token: string;
       valid_before: number;
     };
+
+    type Methods = "phone" | "mfa" | "passkey";
   }
 }
