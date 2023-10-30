@@ -8,6 +8,7 @@ import (
 
 func Router(G *gin.RouterGroup) {
 	G.GET("/", controllers.ListPasskey)
+	G.GET("options", controllers.PasskeyOptions)
 	G.DELETE("/", middlewares.RequireU2F, controllers.DeletePasskey)
 	G.PATCH("/", controllers.RenamePasskey)
 
