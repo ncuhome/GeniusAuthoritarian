@@ -73,7 +73,7 @@ declare namespace User {
   }
 
   namespace U2F {
-    type Methods = "phone" | "mfa" | "passkey";
+      type Methods = "phone" | "mfa" | "passkey" | "";
 
     type Status = {
       prefer: Methods;

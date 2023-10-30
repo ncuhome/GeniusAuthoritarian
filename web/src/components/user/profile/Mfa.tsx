@@ -22,7 +22,7 @@ import { Done, Remove } from "@mui/icons-material";
 
 import { apiV1User } from "@api/v1/user/base";
 
-import useMfaCode from "@hooks/useMfaCode";
+import useU2F from "@hooks/useU2F";
 import { shallow } from "zustand/shallow";
 import useNewMfaForm from "@store/useNewMfa";
 
@@ -32,7 +32,11 @@ interface Props extends StackProps {
 }
 
 export const Mfa: FC<Props> = ({ enabled, setEnabled, ...props }) => {
-  const onMfaCode = useMfaCode();
+  const {
+    available: u2fAvaible,
+    isLoading: isU2fLoading,
+    refreshToken,
+  } = useU2F();
 
   const [newMfaStep, newMfaSmsCode, newMfaCode] = useNewMfaForm(
     (state) => [state.step, state.smsCode, state.mfaCode],
@@ -54,8 +58,6 @@ export const Mfa: FC<Props> = ({ enabled, setEnabled, ...props }) => {
 
   const [showNewMfa, setShowNewMfa] = useState(false);
   const [mfaNew, setMfaNew] = useState<User.Mfa.New | null>(null);
-
-  const [isCloseMfaLoading, setIsCloseMfaLoading] = useState(false);
 
   async function onEnableMfa() {
     resetNewMfaForm();
@@ -105,13 +107,12 @@ export const Mfa: FC<Props> = ({ enabled, setEnabled, ...props }) => {
   }
 
   async function onDisableMfa() {
-    setIsCloseMfaLoading(true)
     try {
-      const code = await onMfaCode("无法完成校验请联系管理员");
+      const token = await refreshToken();
       try {
         await apiV1User.delete("mfa/", {
           params: {
-            code,
+            token,
           },
         });
         setEnabled(false);
@@ -119,10 +120,7 @@ export const Mfa: FC<Props> = ({ enabled, setEnabled, ...props }) => {
       } catch ({ msg }) {
         if (msg) toast.error(msg as string);
       }
-    } catch (err) {
-
-    }
-    setIsCloseMfaLoading(false)
+    } catch (err) {}
   }
 
   function renderNewMfaStep(step: number) {
@@ -261,7 +259,8 @@ export const Mfa: FC<Props> = ({ enabled, setEnabled, ...props }) => {
               <LoadingButton
                 variant={"outlined"}
                 color={"warning"}
-                loading={isCloseMfaLoading}
+                disabled={!u2fAvaible}
+                loading={isU2fLoading}
                 onClick={onDisableMfa}
               >
                 关闭

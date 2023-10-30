@@ -6,6 +6,7 @@ const Dev = lazy(() => import("./pages/Dev"));
 import Navigation from "./pages/Navigation";
 import Profile from "./pages/Profile";
 
+import U2fDialog from "@components/user/U2fDialog";
 import MfaCodeDialog from "@components/user/MfaCodeDialog";
 import Suspense from "@components/Suspense";
 import PageNotFound from "@components/PageNotFound";
@@ -134,6 +135,7 @@ export const User: FC = () => {
         </Box>
 
         <MfaCodeDialog />
+        <U2fDialog />
 
         <Dialog
           sx={{ "& .MuiDialog-paper": { width: "60%", maxHeight: 435 } }}
