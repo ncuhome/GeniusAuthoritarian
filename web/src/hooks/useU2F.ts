@@ -10,7 +10,7 @@ import useU2fDialog from "@store/useU2fDialog";
 interface U2F {
   isLoading: boolean;
   setPrefer: (method: User.U2F.Methods) => Promise<void>;
-  refreshToken: () => Promise<string>;
+  refreshToken: (tip?: string) => Promise<string>;
 }
 
 export const useU2F = (): U2F => {
@@ -42,7 +42,7 @@ export const useU2F = (): U2F => {
     useU2fDialog.getState().setPrefer(method);
   };
 
-  const refreshToken = useCallback(async () => {
+  const refreshToken = useCallback(async (tip?: string) => {
     if (dataPromise.current) await dataPromise.current;
     if (!dataLoaded.current) {
       dataPromise.current = new Promise((resolve) => {
@@ -52,7 +52,7 @@ export const useU2F = (): U2F => {
       await dataPromise.current;
     }
 
-    const result = await useU2fDialog.getState().openDialog();
+    const result = await useU2fDialog.getState().openDialog(tip);
     useU2fDialog.getState().setToken(result);
     return result.token;
   }, []);

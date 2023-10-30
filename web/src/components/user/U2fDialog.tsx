@@ -25,6 +25,7 @@ import useU2fDialog from "@store/useU2fDialog";
 
 const U2fDialog: FC = () => {
   const open = useU2fDialog((state) => state.open);
+  const tip = useU2fDialog((state) => state.tip);
   const u2fStatus = useU2fDialog(
     (state) => ({
       prefer: state.prefer,
@@ -130,31 +131,34 @@ const U2fDialog: FC = () => {
     switch (tabValue) {
       case "phone":
         return (
-          <Stack flexDirection={"row"}>
-            <TextField
-              variant={"outlined"}
-              label={"验证码"}
-              sx={{ width: "60%" }}
-              value={smsCode}
-              onChange={(e) => {
-                if (!isNaN(Number(e.target.value))) setSmsCode(e.target.value);
-              }}
-            />
-            <Stack
-              flexDirection={"row"}
-              flexGrow={1}
-              paddingLeft={"5%"}
-              boxSizing={"border-box"}
-            >
-              <LoadingButton
-                variant={"contained"}
-                fullWidth
-                disabled={!!smsCoolDown}
-                loading={isSendingSms}
-                onClick={onSendSmsCode}
+          <Stack alignItems={"center"}>
+            <Stack flexDirection={"row"} width={"100%"} maxWidth={"21rem"}>
+              <TextField
+                variant={"outlined"}
+                label={"验证码"}
+                sx={{ width: "60%" }}
+                value={smsCode}
+                onChange={(e) => {
+                  if (!isNaN(Number(e.target.value)))
+                    setSmsCode(e.target.value);
+                }}
+              />
+              <Stack
+                flexDirection={"row"}
+                flexGrow={1}
+                paddingLeft={"5%"}
+                boxSizing={"border-box"}
               >
-                {smsCoolDown ? smsCoolDown + "s" : "发送"}
-              </LoadingButton>
+                <LoadingButton
+                  variant={"contained"}
+                  fullWidth
+                  disabled={!!smsCoolDown}
+                  loading={isSendingSms}
+                  onClick={onSendSmsCode}
+                >
+                  {smsCoolDown ? smsCoolDown + "s" : "发送"}
+                </LoadingButton>
+              </Stack>
             </Stack>
           </Stack>
         );
@@ -182,11 +186,11 @@ const U2fDialog: FC = () => {
   };
 
   return (
-    <Dialog open={open} onClose={onCancel}>
+    <Dialog fullWidth open={open} onClose={onCancel}>
       <DialogTitle>U2F 身份校验</DialogTitle>
       <DialogContent>
         <DialogContentText>
-          你正在进行敏感操作，需要额外的身份校验
+          {tip ? tip : "你正在进行敏感操作，需要额外的身份校验"}
         </DialogContentText>
 
         <Tabs

@@ -2,13 +2,14 @@ import { create } from "zustand";
 
 interface U2fDialog extends User.U2F.Status {
   open: boolean;
+  tip?: string;
 
   resolve?: (value: User.U2F.Result | PromiseLike<User.U2F.Result>) => void;
   reject?: (reason?: any) => void;
 
   u2f?: User.U2F.Result;
 
-  openDialog: () => Promise<User.U2F.Result>;
+  openDialog: (tip?: string) => Promise<User.U2F.Result>;
   closeDialog: () => void;
   setStatus: (status: User.U2F.Status) => void;
   setPrefer: (prefer: User.U2F.Methods) => void;
@@ -23,9 +24,9 @@ export const useU2fDialog = create<U2fDialog>()((set) => ({
 
   open: false,
 
-  openDialog: () => {
+  openDialog: (tip?: string) => {
     return new Promise<User.U2F.Result>((resolve, reject) => {
-      set({ open: true, resolve, reject });
+      set({ open: true, tip, resolve, reject });
     });
   },
   closeDialog: () => set({ open: false }),
