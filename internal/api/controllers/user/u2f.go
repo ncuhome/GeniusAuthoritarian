@@ -35,7 +35,7 @@ func BeginU2F(c *gin.Context) {
 	switch method {
 	case "phone":
 		var f struct {
-			Code string `json:"code" form:"code" binding:"required,len=6,numeric"`
+			Code string `json:"code" form:"code" binding:"required,len=5,numeric"`
 		}
 		if err := c.ShouldBind(&f); err != nil {
 			callback.Error(c, callback.ErrForm, err)

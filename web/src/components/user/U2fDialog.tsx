@@ -71,7 +71,7 @@ const U2fDialog: FC = () => {
           toast.error("验证码不能为空");
           return;
         }
-        if (smsCode.length != 6) {
+        if (smsCode.length != 5) {
           toast.error("短信验证码有误");
           return;
         }
