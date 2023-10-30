@@ -115,7 +115,7 @@ export const Profile: FC = () => {
     <Container>
       <Block title={"Profile"}>
         <Grid container spacing={2} marginTop={0} marginBottom={3}>
-          <GridTextField label={"姓名"} value={profile?.user.name} />
+          <GridTextField label={"短信"} value={profile?.user.name} />
           <GridTextField label={"电话"} value={profile?.user.phone} />
           <GridTextField label={"身份组"} value={userGroups} />
         </Grid>
