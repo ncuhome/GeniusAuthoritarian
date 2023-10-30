@@ -73,8 +73,10 @@ declare namespace User {
   }
 
   namespace U2F {
+    type Methods = "phone" | "mfa" | "passkey";
+
     type Status = {
-      prefer: string;
+      prefer: Methods;
       phone: boolean;
       mfa: boolean;
       passkey: boolean;
@@ -84,7 +86,5 @@ declare namespace User {
       token: string;
       valid_before: number;
     };
-
-    type Methods = "phone" | "mfa" | "passkey";
   }
 }

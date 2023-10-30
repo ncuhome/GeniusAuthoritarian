@@ -2,6 +2,7 @@ import { useCallback, useMemo, useRef, useState } from "react";
 import toast from "react-hot-toast";
 
 import { useUserApiV1 } from "@api/v1/user/hook";
+import { apiV1User } from "@api/v1/user/base";
 
 import { shallow } from "zustand/shallow";
 import useU2fDialog from "@store/useU2fDialog";
@@ -51,8 +52,10 @@ export const useU2F = (): U2F => {
   );
 
   const setPrefer = async (method: User.U2F.Methods) => {
-    // todo 接口未编写
-    // useU2fDialog.getState().setPrefer()
+    await apiV1User.put("u2f/prefer", {
+      prefer: method,
+    });
+    useU2fDialog.getState().setPrefer(method);
   };
 
   const refreshToken = useCallback(async () => {
