@@ -77,7 +77,7 @@ func (a Point) GetAndDestroy(ctx context.Context, iat time.Time, claims interfac
 }
 
 func (a Point) Get(ctx context.Context, iat time.Time, claims interface{}) error {
-	value, err := a.s.client.GetDel(ctx, a.key).Bytes()
+	value, err := a.s.client.Get(ctx, a.key).Bytes()
 	if err != nil {
 		return err
 	}

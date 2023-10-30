@@ -14,6 +14,8 @@ import {
   Typography,
   Stack,
   TextField,
+  Alert,
+  AlertTitle,
 } from "@mui/material";
 import { LoadingButton } from "@mui/lab";
 import {
@@ -43,6 +45,9 @@ const U2fDialog: FC = () => {
     }),
     shallow
   );
+  const u2fToken = useU2fDialog((state) => state.u2f);
+
+  const [tokenAvailable, setTokenAvailable] = useState(false);
 
   const [tabValue, setTabValue] = useState<User.U2F.Methods>("");
   const [isLoading, setIsLoading] = useState(false);
@@ -57,6 +62,16 @@ const U2fDialog: FC = () => {
 
   const [mfaCode, setMfaCode] = useState("");
 
+  const isTokenAvailable = () => {
+    return !!u2fToken && u2fToken.valid_before > Date.now() / 1000;
+  };
+  useInterval(
+    () => {
+      if (!isTokenAvailable()) setTokenAvailable(false);
+    },
+    tokenAvailable ? 1000 : null
+  );
+
   const onCancel = () => {
     const states = useU2fDialog.getState();
     states.closeDialog();
@@ -64,6 +79,12 @@ const U2fDialog: FC = () => {
   };
 
   const onSubmit = async (method: string = tabValue) => {
+    if (tokenAvailable) {
+      const states = useU2fDialog.getState();
+      if (states.resolve) states.resolve(u2fToken!);
+      states.closeDialog();
+      return;
+    }
     let data: any;
     switch (method) {
       case "phone":
@@ -147,7 +168,8 @@ const U2fDialog: FC = () => {
     if (open) {
       setMfaCode("");
       setSmsCode("");
-      if (tabValue === "passkey") onSubmit();
+      if (isTokenAvailable()) setTokenAvailable(true);
+      else if (tabValue === "passkey") onSubmit();
     }
   }, [open]);
   useEffect(() => {
@@ -163,6 +185,9 @@ const U2fDialog: FC = () => {
       case "phone":
         return (
           <Stack alignItems={"center"}>
+            <Typography mb={2.5}>
+              每天上限五条，出现异常情况请过会儿再试
+            </Typography>
             <Stack flexDirection={"row"} width={"100%"} maxWidth={"21rem"}>
               <TextField
                 variant={"outlined"}
@@ -208,18 +233,18 @@ const U2fDialog: FC = () => {
         );
       case "passkey":
         return (
-            <Stack alignItems={"center"}>
-              <SensorOccupiedOutlined
-                  sx={{
-                    fontSize: "6rem",
-                    mt: 2,
-                    mb: 4,
-                  }}
-              />
-              <Button variant={"outlined"} onClick={() => onSubmit()}>
-                重试
-              </Button>
-            </Stack>
+          <Stack alignItems={"center"}>
+            <SensorOccupiedOutlined
+              sx={{
+                fontSize: "6rem",
+                mt: 2,
+                mb: 4,
+              }}
+            />
+            <Button variant={"outlined"} onClick={() => onSubmit()}>
+              重试
+            </Button>
+          </Stack>
         );
       default:
         return (
@@ -235,31 +260,42 @@ const U2fDialog: FC = () => {
     <Dialog fullWidth open={open} onClose={onCancel}>
       <DialogTitle>U2F 身份校验</DialogTitle>
       <DialogContent>
-        <DialogContentText>
-          {tip ? tip : "你正在进行敏感操作，需要额外的身份校验"}
-        </DialogContentText>
+        {!tip && tokenAvailable ? undefined : (
+          <DialogContentText>
+            {tip ? tip : "你正在进行敏感操作，需要额外的身份校验"}
+          </DialogContentText>
+        )}
 
-        <Tabs
-          value={tabValue}
-          onChange={(e, value: string) => {
-            setTabValue(value as User.U2F.Methods);
-            if (value === "passkey") return onSubmit("passkey");
-          }}
-          variant="fullWidth"
-          sx={{
-            mt: 2,
-            mb: 3,
-          }}
-        >
-          <Tab label={"短信"} value={"phone"} disabled={!u2fStatus.phone} />
-          <Tab label={"MFA"} value={"mfa"} disabled={!u2fStatus.mfa} />
-          <Tab
-            label={"通行密钥"}
-            value={"passkey"}
-            disabled={!u2fStatus.passkey}
-          />
-        </Tabs>
-        {renderTabPanel()}
+        {tokenAvailable ? (
+          <Alert severity="success">
+            <AlertTitle>已认证</AlertTitle>
+            最近 5 分钟已通过验证，无需再次校验。你可以通过刷新提前移除校验状态
+          </Alert>
+        ) : (
+          <>
+            <Tabs
+              value={tabValue}
+              onChange={(e, value: string) => {
+                setTabValue(value as User.U2F.Methods);
+                if (value === "passkey") return onSubmit("passkey");
+              }}
+              variant="fullWidth"
+              sx={{
+                mt: 2,
+                mb: 3,
+              }}
+            >
+              <Tab label={"短信"} value={"phone"} disabled={!u2fStatus.phone} />
+              <Tab label={"MFA"} value={"mfa"} disabled={!u2fStatus.mfa} />
+              <Tab
+                label={"通行密钥"}
+                value={"passkey"}
+                disabled={!u2fStatus.passkey}
+              />
+            </Tabs>
+            {renderTabPanel()}
+          </>
+        )}
       </DialogContent>
       <DialogActions>
         <Button onClick={onCancel}>取消</Button>

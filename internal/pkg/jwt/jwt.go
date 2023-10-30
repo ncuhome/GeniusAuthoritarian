@@ -141,14 +141,13 @@ func GenerateU2fToken(uid uint, ip string) (string, *U2fToken, error) {
 	return token, tokenClaims, err
 }
 
-// ParseU2fToken 自动销毁
 func ParseU2fToken(token, ip string) (bool, error) {
 	claims, valid, err := ParseToken("U2F", token, &U2fToken{})
 	if err != nil || !valid || claims.IP != ip {
 		return false, err
 	}
 
-	err = redis.NewU2F(claims.UID).NewStorePoint(claims.ID).GetAndDestroy(context.Background(), claims.IssuedAt.Time, nil)
+	err = redis.NewU2F(claims.UID).NewStorePoint(claims.ID).Get(context.Background(), claims.IssuedAt.Time, nil)
 	if err != nil {
 		if err == redis.Nil {
 			err = nil
