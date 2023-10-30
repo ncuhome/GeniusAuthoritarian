@@ -37,7 +37,6 @@ const U2fDialog: FC = () => {
 
   const [tabValue, setTabValue] = useState<User.U2F.Methods>("");
   const [isLoading, setIsLoading] = useState(false);
-  const submitHandler = useRef(() => {});
 
   const [smsCode, setSmsCode] = useState("");
   const [isSendingSms, setIsSendingSms] = useState(false);
@@ -49,40 +48,47 @@ const U2fDialog: FC = () => {
 
   const [mfaCode, setMfaCode] = useState("");
 
-  const onSwitchTab = (target: User.U2F.Methods) => {
-    switch (target) {
-      case "phone":
-        submitHandler.current = () => {
-          if (smsCode.length != 6) {
-            toast.error("短信验证码有误");
-            return;
-          }
-          return onSubmit("phone", { code: smsCode });
-        };
-        break;
-      case "mfa":
-        //todo
-        break;
-      case "passkey":
-        //todo
-        break;
-    }
-    setTabValue(target);
-  };
-
   const onCancel = () => {
     const states = useU2fDialog.getState();
     states.closeDialog();
     if (states.reject) states.reject("user canceled");
   };
 
-  const onSubmit = async (method: User.U2F.Methods, data: any) => {
+  const onSubmit = async () => {
     setIsLoading(true);
+    let data: any;
+    switch (tabValue) {
+      case "phone":
+        if (smsCode === "") {
+          toast.error("验证码不能为空");
+          return;
+        }
+        if (smsCode.length != 6) {
+          toast.error("短信验证码有误");
+          return;
+        }
+        data = { code: smsCode };
+        break;
+      case "mfa":
+        if (mfaCode === "") {
+          toast.error("校验码不能为空");
+          return;
+        }
+        if (mfaCode.length != 6) {
+          toast.error("校验码有误");
+          return;
+        }
+        data = { code: mfaCode };
+        break;
+      case "passkey":
+        //todo
+        break;
+    }
     try {
       const {
         data: { data: result },
       } = await apiV1User.post<{ data: User.U2F.Result }>(
-        `u2f/${method}`,
+        `u2f/${tabValue}`,
         data
       );
       const states = useU2fDialog.getState();
@@ -106,11 +112,25 @@ const U2fDialog: FC = () => {
     setIsSendingSms(false);
   }
 
+  useEffect(() => {
+    if (open) {
+      setMfaCode("");
+      setSmsCode("");
+    }
+  }, [open]);
+  useEffect(() => {
+    if (u2fStatus.prefer != "" && u2fStatus[u2fStatus.prefer])
+      setTabValue(u2fStatus.prefer);
+    else if (u2fStatus.passkey) setTabValue("passkey");
+    else if (u2fStatus.mfa) setTabValue("mfa");
+    else if (u2fStatus.phone) setTabValue("phone");
+  }, [u2fStatus]);
+
   const renderTabPanel = () => {
     switch (tabValue) {
       case "phone":
         return (
-          <Stack flexDirection={"row"} mt={3}>
+          <Stack flexDirection={"row"}>
             <TextField
               variant={"outlined"}
               label={"验证码"}
@@ -138,6 +158,19 @@ const U2fDialog: FC = () => {
             </Stack>
           </Stack>
         );
+      case "mfa":
+        return (
+            <Stack alignItems={"center"}>
+              <TextField
+                  variant={"outlined"}
+                  label={"校验码"}
+                  value={mfaCode}
+                  onChange={(e) => {
+                    if (!isNaN(Number(e.target.value))) setMfaCode(e.target.value);
+                  }}
+              />
+            </Stack>
+        );
       default:
         return (
           <Stack alignItems={"center"} spacing={1}>
@@ -147,20 +180,6 @@ const U2fDialog: FC = () => {
         );
     }
   };
-
-  useEffect(() => {
-    if (open) {
-      setMfaCode("");
-      setSmsCode("");
-    }
-  }, [open]);
-  useEffect(() => {
-    if (u2fStatus.prefer != "" && u2fStatus[u2fStatus.prefer])
-      onSwitchTab(u2fStatus.prefer);
-    else if (u2fStatus.passkey) onSwitchTab("passkey");
-    else if (u2fStatus.mfa) onSwitchTab("mfa");
-    else if (u2fStatus.phone) onSwitchTab("phone");
-  }, [u2fStatus]);
 
   return (
     <Dialog open={open} onClose={onCancel}>
@@ -173,11 +192,12 @@ const U2fDialog: FC = () => {
         <Tabs
           value={tabValue}
           onChange={(e, value: string) =>
-            onSwitchTab(value as User.U2F.Methods)
+            setTabValue(value as User.U2F.Methods)
           }
           variant="fullWidth"
           sx={{
-            my: 2,
+            mt: 2,
+            mb: 3,
           }}
         >
           <Tab label={"短信"} value={"phone"} disabled={!u2fStatus.phone} />
@@ -191,14 +211,14 @@ const U2fDialog: FC = () => {
         {renderTabPanel()}
       </DialogContent>
       <DialogActions>
+        <Button onClick={onCancel}>取消</Button>
         <LoadingButton
           disabled={tabValue === ""}
           loading={isLoading}
-          onClick={() => submitHandler.current()}
+          onClick={onSubmit}
         >
           确定
         </LoadingButton>
-        <Button onClick={onCancel}>取消</Button>
       </DialogActions>
     </Dialog>
   );

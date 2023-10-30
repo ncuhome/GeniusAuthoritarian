@@ -32,11 +32,7 @@ interface Props extends StackProps {
 }
 
 export const Mfa: FC<Props> = ({ enabled, setEnabled, ...props }) => {
-  const {
-    available: u2fAvaible,
-    isLoading: isU2fLoading,
-    refreshToken,
-  } = useU2F();
+  const { isLoading: isU2fLoading, refreshToken } = useU2F();
 
   const [newMfaStep, newMfaSmsCode, newMfaCode] = useNewMfaForm(
     (state) => [state.step, state.smsCode, state.mfaCode],
@@ -259,7 +255,6 @@ export const Mfa: FC<Props> = ({ enabled, setEnabled, ...props }) => {
               <LoadingButton
                 variant={"outlined"}
                 color={"warning"}
-                disabled={!u2fAvaible}
                 loading={isU2fLoading}
                 onClick={onDisableMfa}
               >
