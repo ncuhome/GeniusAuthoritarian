@@ -7,7 +7,6 @@ import Navigation from "./pages/Navigation";
 import Profile from "./pages/Profile";
 
 import U2fDialog from "@components/user/U2fDialog";
-import MfaCodeDialog from "@components/user/MfaCodeDialog";
 import Suspense from "@components/Suspense";
 import PageNotFound from "@components/PageNotFound";
 import NavHeader from "@components/user/NavHeader";
@@ -134,7 +133,6 @@ export const User: FC = () => {
           </Routes>
         </Box>
 
-        <MfaCodeDialog />
         <U2fDialog />
 
         <Dialog
