@@ -23,6 +23,7 @@ import {
   Checkbox,
   FormControlLabel,
   Stack,
+  Tooltip,
 } from "@mui/material";
 
 import { useUserApiV1 } from "@api/v1/user/hook";
@@ -128,18 +129,27 @@ export const Profile: FC = () => {
           {u2fStatus ? (
             <Stack flexDirection={"row"}>
               {u2fMethods.map((m) => (
-                <FormControlLabel
-                  key={m.value}
-                  label={m.label}
-                  control={
-                    <Checkbox
-                      checked={u2fStatus?.prefer === m.value}
-                      onChange={(e) =>
-                        onChangePrefer(e.target.checked ? m.value : "")
-                      }
-                    />
-                  }
-                />
+                <Tooltip
+                  title={!(u2fStatus as any)[m.value] ? "未启用" : undefined}
+                  placement={"top-start"}
+                  arrow
+                >
+                  <FormControlLabel
+                    key={m.value}
+                    label={m.label}
+                    control={
+                      <Checkbox
+                        checked={u2fStatus?.prefer === m.value}
+                        onChange={(e) =>
+                          onChangePrefer(e.target.checked ? m.value : "")
+                        }
+                        color={
+                          !(u2fStatus as any)[m.value] ? "warning" : undefined
+                        }
+                      />
+                    }
+                  />
+                </Tooltip>
               ))}
             </Stack>
           ) : (
