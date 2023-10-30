@@ -1,5 +1,4 @@
 import { FC, useMemo, useRef } from "react";
-import useMfaCode from "@hooks/useMfaCode";
 import toast from "react-hot-toast";
 import {
   coerceToArrayBuffer,
@@ -9,19 +8,18 @@ import {
 
 import { TransitionGroup } from "react-transition-group";
 import PasskeyItem from "./PasskeyItem";
-import { Button, ButtonGroup, List, Box, Collapse, Alert } from "@mui/material";
+import { List, Box, Collapse, Alert } from "@mui/material";
+import { LoadingButton } from "@mui/lab";
 import { Add } from "@mui/icons-material";
+
+import useU2F from "@hooks/useU2F";
 
 import { AxiosError } from "axios";
 import { apiV1User } from "@api/v1/user/base";
 
 import { useUserApiV1 } from "@api/v1/user/hook";
 
-interface Props {
-  mfaEnabled?: boolean;
-}
-
-export const Passkey: FC<Props> = ({ mfaEnabled }) => {
+export const Passkey: FC = () => {
   const { data, mutate } = useUserApiV1<User.Passkey.Cred[]>("passkey/", {
     enableLoading: true,
   });
@@ -29,7 +27,7 @@ export const Passkey: FC<Props> = ({ mfaEnabled }) => {
 
   const passkeyAvailable = useMemo(() => !!window.PublicKeyCredential, []);
 
-  const openMfaDialog = useMfaCode();
+  const { isLoading: isU2fLoading, refreshToken } = useU2F();
 
   const onRename = async (id: number, name: string) => {
     if (name.length === 0) {
@@ -53,11 +51,11 @@ export const Passkey: FC<Props> = ({ mfaEnabled }) => {
     }
   };
   const onDelete = async (item: User.Passkey.Cred) => {
-    const code = await openMfaDialog();
+    const token = await refreshToken();
     try {
       await apiV1User.delete("passkey/", {
         params: {
-          code,
+          token,
           id: item.id,
         },
       });
@@ -69,13 +67,13 @@ export const Passkey: FC<Props> = ({ mfaEnabled }) => {
     }
   };
   const onRegister = async () => {
-    const code = await openMfaDialog();
+    const token = await refreshToken();
     try {
       const {
         data: { data: options },
       } = await apiV1User.get("passkey/register/", {
         params: {
-          code,
+          token,
         },
       });
       options.publicKey.challenge = coerceToArrayBuffer(
@@ -122,15 +120,14 @@ export const Passkey: FC<Props> = ({ mfaEnabled }) => {
   return (
     <>
       {passkeyAvailable ? (
-        <ButtonGroup variant={"outlined"}>
-          <Button
-            startIcon={<Add />}
-            onClick={onRegister}
-            disabled={!mfaEnabled}
-          >
-            {mfaEnabled === false ? "需要启用双因素认证" : "添加通行密钥"}
-          </Button>
-        </ButtonGroup>
+        <LoadingButton
+          variant="outlined"
+          loading={isU2fLoading}
+          startIcon={<Add />}
+          onClick={onRegister}
+        >
+          添加通行密钥
+        </LoadingButton>
       ) : (
         <Alert severity="warning">此设备不支持通行密钥认证</Alert>
       )}
