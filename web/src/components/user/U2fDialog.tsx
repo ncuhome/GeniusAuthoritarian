@@ -224,6 +224,7 @@ const U2fDialog: FC = () => {
             <TextField
               variant={"outlined"}
               label={"校验码"}
+              name={"twofactor_token"}
               value={mfaCode}
               onChange={(e) => {
                 if (!isNaN(Number(e.target.value))) setMfaCode(e.target.value);

@@ -131,7 +131,7 @@ export const Profile: FC = () => {
               {u2fMethods.map((m) => (
                 <Tooltip
                   title={!(u2fStatus as any)[m.value] ? "未启用" : undefined}
-                  placement={"top-start"}
+                  placement={"top"}
                   arrow
                 >
                   <FormControlLabel
