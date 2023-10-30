@@ -133,3 +133,33 @@ func BeginU2F(c *gin.Context) {
 		"valid_before": claims.ExpiresAt.Time.Unix(),
 	})
 }
+
+func UpdateU2fPrefer(c *gin.Context) {
+	var f struct {
+		Prefer string `json:"prefer" form:"prefer" binding:"required,eq=phone|eq=mfa|eq=passkey"`
+	}
+	if err := c.ShouldBind(&f); err != nil {
+		callback.Error(c, callback.ErrForm, err)
+		return
+	}
+
+	userSrv, err := service.User.Begin()
+	if err != nil {
+		callback.Error(c, callback.ErrDBOperation, err)
+		return
+	}
+	defer userSrv.Rollback()
+
+	err = userSrv.UpdateUserPreferU2F(tools.GetUserInfo(c).ID, f.Prefer)
+	if err != nil {
+		callback.Error(c, callback.ErrDBOperation, err)
+		return
+	}
+
+	if err = userSrv.Commit().Error; err != nil {
+		callback.Error(c, callback.ErrDBOperation, err)
+		return
+	}
+
+	callback.Default(c)
+}

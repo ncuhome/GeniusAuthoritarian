@@ -8,4 +8,6 @@ import (
 func routerU2F(G *gin.RouterGroup) {
 	G.GET("/", controllers.AvailableU2fMethod)
 	G.POST("/:method", controllers.BeginU2F)
+
+	G.PUT("prefer", controllers.UpdateU2fPrefer)
 }

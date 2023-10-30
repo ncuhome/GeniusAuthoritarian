@@ -97,6 +97,10 @@ func (a *User) UnfrozeByIDSlice(tx *gorm.DB, ids []uint) error {
 	return tx.Model(a).Unscoped().Where("id IN ?", ids).Update("deleted_at", gorm.Expr("NULL")).Error
 }
 
+func (a *User) UpdateU2fPreferByID(tx *gorm.DB) error {
+	return tx.Model(a).Where(a, "id").Update("prefer_u2f", a.PreferU2F).Error
+}
+
 func (a *User) DelMfa(tx *gorm.DB) error {
 	return tx.Model(a).Model(a).Where(a, "id").Update("mfa", "").Error
 }

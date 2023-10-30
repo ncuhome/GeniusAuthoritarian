@@ -56,8 +56,8 @@ func (a UserSrv) UserInfoByID(id uint) (*dao.User, error) {
 	return &user, user.FirstByID(a.DB)
 }
 
-func (a UserSrv) UserProfile(uid uint) (*dto.UserProfile, error) {
-	profile, err := (&dao.User{ID: uid}).FirstProfileByID(a.DB)
+func (a UserSrv) UserProfile(id uint) (*dto.UserProfile, error) {
+	profile, err := (&dao.User{ID: id}).FirstProfileByID(a.DB)
 	if err != nil {
 		return nil, err
 	}
@@ -65,32 +65,36 @@ func (a UserSrv) UserProfile(uid uint) (*dto.UserProfile, error) {
 	profile.MfaEnabled = profile.Mfa != ""
 
 	profile.Groups, err = (&dao.UserGroups{
-		UID: uid,
+		UID: id,
 	}).GetUserGroupsForShowByUID(a.DB)
 	return profile, err
 }
 
-func (a UserSrv) MfaExist(uid uint, opts ...daoUtil.ServiceOpt) (bool, error) {
-	mfa, err := a.FirstMfa(uid, opts...)
+func (a UserSrv) MfaExist(id uint, opts ...daoUtil.ServiceOpt) (bool, error) {
+	mfa, err := a.FirstMfa(id, opts...)
 	return mfa != "", err
 }
 
-func (a UserSrv) FirstMfa(uid uint, opts ...daoUtil.ServiceOpt) (string, error) {
+func (a UserSrv) FirstMfa(id uint, opts ...daoUtil.ServiceOpt) (string, error) {
 	var t = dao.User{
-		ID: uid,
+		ID: id,
 	}
 	return t.MFA, t.FirstMfa(daoUtil.TxOpts(a.DB, opts...))
 }
 
-func (a UserSrv) SetMfaSecret(uid uint, secret string) error {
-	return (&dao.User{ID: uid, MFA: secret}).UpdateMfa(a.DB)
+func (a UserSrv) SetMfaSecret(id uint, secret string) error {
+	return (&dao.User{ID: id, MFA: secret}).UpdateMfa(a.DB)
 }
 
-func (a UserSrv) DelMfa(uid uint) error {
-	return (&dao.User{ID: uid}).DelMfa(a.DB)
+func (a UserSrv) DelMfa(id uint) error {
+	return (&dao.User{ID: id}).DelMfa(a.DB)
 }
 
-func (a UserSrv) FirstPhoneByID(uid uint) (string, error) {
-	model := dao.User{ID: uid}
+func (a UserSrv) FirstPhoneByID(id uint) (string, error) {
+	model := dao.User{ID: id}
 	return model.Phone, model.FirstPhoneByID(a.DB)
+}
+
+func (a UserSrv) UpdateUserPreferU2F(id uint, prefer string) error {
+	return (&dao.User{ID: id, PreferU2F: prefer}).UpdateU2fPreferByID(a.DB)
 }
