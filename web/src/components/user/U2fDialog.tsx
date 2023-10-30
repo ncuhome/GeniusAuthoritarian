@@ -1,4 +1,4 @@
-import { FC, useEffect, useRef, useState } from "react";
+import { FC, useEffect, useState } from "react";
 import { useInterval } from "@hooks/useInterval";
 import toast from "react-hot-toast";
 
@@ -16,12 +16,20 @@ import {
   TextField,
 } from "@mui/material";
 import { LoadingButton } from "@mui/lab";
-import { ReportProblemOutlined } from "@mui/icons-material";
+import {
+  ReportProblemOutlined,
+  SensorOccupiedOutlined,
+} from "@mui/icons-material";
 
 import { apiV1User } from "@api/v1/user/base";
 
 import { shallow } from "zustand/shallow";
 import useU2fDialog from "@store/useU2fDialog";
+import {
+  coerceResponseToBase64Url,
+  coerceToArrayBuffer,
+  coerceToBase64Url,
+} from "@util/coerce";
 
 const U2fDialog: FC = () => {
   const open = useU2fDialog((state) => state.open);
@@ -55,10 +63,9 @@ const U2fDialog: FC = () => {
     if (states.reject) states.reject("user canceled");
   };
 
-  const onSubmit = async () => {
-    setIsLoading(true);
+  const onSubmit = async (method: string = tabValue) => {
     let data: any;
-    switch (tabValue) {
+    switch (method) {
       case "phone":
         if (smsCode === "") {
           toast.error("验证码不能为空");
@@ -82,14 +89,37 @@ const U2fDialog: FC = () => {
         data = { code: mfaCode };
         break;
       case "passkey":
-        //todo
+        const {
+          data: { data: options },
+        } = await apiV1User.get("passkey/options");
+        options.publicKey.challenge = coerceToArrayBuffer(
+          options.publicKey.challenge
+        );
+        options.publicKey.allowCredentials =
+          options.publicKey.allowCredentials.map((cred: any) => {
+            cred.id = coerceToArrayBuffer(cred.id);
+            return cred;
+          });
+        const credential = await navigator.credentials.get(options);
+        if (!(credential instanceof PublicKeyCredential)) {
+          toast.error(`获取凭据失败，凭据类型不正确`);
+          return;
+        }
+        const pubKeyCred = credential as any;
+        data = {
+          id: pubKeyCred.id,
+          rawId: coerceToBase64Url(pubKeyCred.rawId),
+          response: coerceResponseToBase64Url(pubKeyCred.response),
+          type: pubKeyCred.type,
+        };
         break;
     }
+    setIsLoading(true);
     try {
       const {
         data: { data: result },
       } = await apiV1User.post<{ data: User.U2F.Result }>(
-        `u2f/${tabValue}`,
+        `u2f/${method}`,
         data
       );
       const states = useU2fDialog.getState();
@@ -117,6 +147,7 @@ const U2fDialog: FC = () => {
     if (open) {
       setMfaCode("");
       setSmsCode("");
+      if (tabValue === "passkey") onSubmit();
     }
   }, [open]);
   useEffect(() => {
@@ -164,15 +195,30 @@ const U2fDialog: FC = () => {
         );
       case "mfa":
         return (
+          <Stack alignItems={"center"}>
+            <TextField
+              variant={"outlined"}
+              label={"校验码"}
+              value={mfaCode}
+              onChange={(e) => {
+                if (!isNaN(Number(e.target.value))) setMfaCode(e.target.value);
+              }}
+            />
+          </Stack>
+        );
+      case "passkey":
+        return (
             <Stack alignItems={"center"}>
-              <TextField
-                  variant={"outlined"}
-                  label={"校验码"}
-                  value={mfaCode}
-                  onChange={(e) => {
-                    if (!isNaN(Number(e.target.value))) setMfaCode(e.target.value);
+              <SensorOccupiedOutlined
+                  sx={{
+                    fontSize: "6rem",
+                    mt: 2,
+                    mb: 4,
                   }}
               />
+              <Button variant={"outlined"} onClick={() => onSubmit()}>
+                重试
+              </Button>
             </Stack>
         );
       default:
@@ -195,9 +241,10 @@ const U2fDialog: FC = () => {
 
         <Tabs
           value={tabValue}
-          onChange={(e, value: string) =>
-            setTabValue(value as User.U2F.Methods)
-          }
+          onChange={(e, value: string) => {
+            setTabValue(value as User.U2F.Methods);
+            if (value === "passkey") return onSubmit("passkey");
+          }}
           variant="fullWidth"
           sx={{
             mt: 2,
@@ -219,7 +266,7 @@ const U2fDialog: FC = () => {
         <LoadingButton
           disabled={tabValue === ""}
           loading={isLoading}
-          onClick={onSubmit}
+          onClick={() => onSubmit()}
         >
           确定
         </LoadingButton>

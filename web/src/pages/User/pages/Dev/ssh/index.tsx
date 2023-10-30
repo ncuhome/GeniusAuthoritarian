@@ -27,10 +27,10 @@ import TipIconButton from "@components/TipIconButton";
 import { useUserApiV1 } from "@api/v1/user/hook";
 import { apiV1User } from "@api/v1/user/base";
 
-import useMfaCode from "@hooks/useMfaCode";
+import useU2F from "@hooks/useU2F";
 
 const Ssh: FC = () => {
-  const onMfaCode = useMfaCode();
+  const { isLoading: u2fLoading, refreshToken } = useU2F();
 
   const [sshKey, setSshKey] = useState<User.SSH.Keys | null>(null);
   const [keyMode, setKeyMode] = useState<"pem" | "ssh">("ssh");
@@ -47,13 +47,13 @@ const Ssh: FC = () => {
   async function onShowSshKeys() {
     setIsUnlockLoading(true);
     try {
-      const code = await onMfaCode();
+      const token = await refreshToken();
       try {
         const {
           data: { data },
         } = await apiV1User.get("dev/ssh/", {
           params: {
-            code,
+            token,
           },
         });
         setSshKey(data);
@@ -65,12 +65,12 @@ const Ssh: FC = () => {
   }
 
   async function onResetSshKey() {
-    const code = await onMfaCode("重置密钥不会断开已连接终端");
+    const token = await refreshToken("重置密钥不会断开已连接终端");
     try {
       const {
         data: { data },
       } = await apiV1User.put("dev/ssh/", {
-        code,
+        token,
       });
       setSshKey(data);
       toast.success("SSH 密钥已重新生成");
@@ -80,10 +80,10 @@ const Ssh: FC = () => {
   }
 
   async function onKillAllProcess() {
-    const code = await onMfaCode();
+    const token = await refreshToken();
     try {
       await apiV1User.post("dev/ssh/killall", {
-        code,
+        token,
       });
       toast.success("已发送 KILLALL 指令");
     } catch ({ msg }) {
