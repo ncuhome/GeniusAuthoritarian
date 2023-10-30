@@ -1,4 +1,4 @@
-import { useCallback, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import toast from "react-hot-toast";
 
 import { useUserApiV1 } from "@api/v1/user/hook";
@@ -19,21 +19,27 @@ export const useU2F = (): U2F => {
   const dataResolver = useRef<() => void>(() => {});
   const dataLoaded = useRef(false);
 
-  const { isLoading } = useUserApiV1<User.U2F.Status>(
+  const onDataLoaded = useCallback((data: User.U2F.Status) => {
+    useU2fDialog.getState().setStatus(data);
+    dataLoaded.current = true;
+    dataResolver.current();
+  }, []);
+
+  const { data, isLoading } = useUserApiV1<User.U2F.Status>(
     loadData ? "u2f/" : null,
     {
       revalidateIfStale: false,
       revalidateOnFocus: false,
-      onSuccess: (data) => {
-        useU2fDialog.getState().setStatus(data);
-        dataLoaded.current = true;
-        dataResolver.current();
-      },
+      onSuccess: onDataLoaded,
       onError: (err) => {
         toast.error(`载入 U2F 状态失败: ${err}`);
       },
     }
   );
+
+  useEffect(() => {
+    if (data) onDataLoaded(data);
+  }, [data]);
 
   const setPrefer = async (method: User.U2F.Methods) => {
     await apiV1User.put("u2f/prefer", {
@@ -50,6 +56,7 @@ export const useU2F = (): U2F => {
       });
       setLoadData(true);
       await dataPromise.current;
+      dataPromise.current = null;
     }
 
     const result = await useU2fDialog.getState().openDialog(tip);
