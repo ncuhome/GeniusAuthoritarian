@@ -136,7 +136,7 @@ func BeginU2F(c *gin.Context) {
 
 func UpdateU2fPrefer(c *gin.Context) {
 	var f struct {
-		Prefer string `json:"prefer" form:"prefer" binding:"required,eq=phone|eq=mfa|eq=passkey|eq="`
+		Prefer string `json:"prefer" form:"prefer" binding:"eq=phone|eq=mfa|eq=passkey|eq="`
 	}
 	if err := c.ShouldBind(&f); err != nil {
 		callback.Error(c, callback.ErrForm, err)
