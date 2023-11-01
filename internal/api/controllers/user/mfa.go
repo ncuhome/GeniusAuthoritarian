@@ -14,24 +14,7 @@ import (
 )
 
 func MfaAdd(c *gin.Context) {
-	var f struct {
-		Code string `json:"code" form:"code" binding:"required"` // 身份校验码（短信）
-	}
-	if err := c.ShouldBind(&f); err != nil {
-		callback.Error(c, callback.ErrForm, err)
-		return
-	}
-
 	uid := tools.GetUserInfo(c).ID
-
-	ok, err := redis.NewUserIdentityCode(uid).VerifyAndDestroy(f.Code)
-	if err != nil {
-		callback.Error(c, callback.ErrUnexpected, err)
-		return
-	} else if !ok {
-		callback.Error(c, callback.ErrIdentityCodeNotCorrect)
-		return
-	}
 
 	userSrv, err := service.User.Begin()
 	if err != nil {

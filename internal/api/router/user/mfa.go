@@ -7,7 +7,7 @@ import (
 )
 
 func routerMfa(G *gin.RouterGroup) {
-	G.GET("/", controllers.MfaAdd)
+	G.GET("/", middlewares.RequireU2F, controllers.MfaAdd)
 	G.POST("/", controllers.MfaAddCheck)
 	G.DELETE("/", middlewares.RequireU2F, controllers.MfaDel)
 }
