@@ -1,5 +1,5 @@
 import { FC, useState } from "react";
-import { useInterval } from "@hooks/useInterval";
+import useInterval from "@hooks/useInterval";
 import toast from "react-hot-toast";
 
 import {

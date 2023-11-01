@@ -1,5 +1,6 @@
 import { FC, useCallback, useEffect, useState } from "react";
-import { useInterval } from "@hooks/useInterval";
+import useInterval from "@hooks/useInterval";
+import useTimeout from "@hooks/useTimeout";
 import toast from "react-hot-toast";
 
 import {
@@ -17,6 +18,8 @@ import {
   Alert,
   AlertTitle,
   IconButton,
+  CircularProgress,
+  Box,
 } from "@mui/material";
 import { LoadingButton } from "@mui/lab";
 import {
@@ -53,6 +56,18 @@ const U2fDialog: FC = () => {
   const [tokenAvailable, setTokenAvailable] = useState(false);
 
   const [isLoading, setIsLoading] = useState(false);
+  const [autoConfirm, setAutoConfirm] = useState(3);
+  useTimeout(() => setAutoConfirm(3), autoConfirm != 3 && !open ? 100 : null);
+  useInterval(
+    () => {
+      setAutoConfirm((num) => {
+        const next = num - 0.1;
+        if (next <= 0) onSubmit();
+        return next;
+      });
+    },
+    autoConfirm > 0 && tokenAvailable && open ? 100 : null
+  );
 
   const [smsCode, setSmsCode] = useState("");
   const [isSendingSms, setIsSendingSms] = useState(false);
@@ -171,7 +186,10 @@ const U2fDialog: FC = () => {
     if (open) {
       setMfaCode("");
       setSmsCode("");
-      if (isTokenAvailable()) setTokenAvailable(true);
+      if (isTokenAvailable()) {
+        setAutoConfirm(3);
+        setTokenAvailable(true);
+      }
     }
   }, [open]);
   useEffect(() => {
@@ -280,7 +298,40 @@ const U2fDialog: FC = () => {
         ) : undefined}
 
         {tokenAvailable ? (
-          <Alert severity="success">
+          <Alert
+            severity="success"
+            icon={
+              <Box>
+                <Stack position={"relative"}>
+                  <CircularProgress
+                    thickness={4}
+                    size={23.5}
+                    color="success"
+                    variant="determinate"
+                    value={(autoConfirm * 100) / 3}
+                  />
+                  <Box
+                    sx={{
+                      top: 0,
+                      left: 0,
+                      bottom: 0,
+                      right: 0,
+                      position: "absolute",
+                      display: "flex",
+                      alignItems: "center",
+                      justifyContent: "center",
+                    }}
+                  >
+                    <Typography
+                      variant="caption"
+                      component="div"
+                      color="success"
+                    >{`${Math.round(autoConfirm)}`}</Typography>
+                  </Box>
+                </Stack>
+              </Box>
+            }
+          >
             <AlertTitle>已认证</AlertTitle>
             最近 5 分钟已通过验证，无需再次校验。你可以通过刷新提前移除校验状态
           </Alert>
