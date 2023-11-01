@@ -96,7 +96,7 @@ func BeginU2F(c *gin.Context) {
 		}
 		credential, err := webAuthn.Client.FinishLogin(user, sessionData, c.Request)
 		if err != nil {
-			callback.Error(c, callback.ErrUnauthorized, err)
+			callback.Error(c, callback.ErrPasskeyVerifyFailed, err)
 			return
 		}
 
