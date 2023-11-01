@@ -1,4 +1,4 @@
-import { FC, useEffect, useState } from "react";
+import { FC, useCallback, useEffect, useState } from "react";
 import { useInterval } from "@hooks/useInterval";
 import toast from "react-hot-toast";
 
@@ -46,10 +46,11 @@ const U2fDialog: FC = () => {
     shallow
   );
   const u2fToken = useU2fDialog((state) => state.u2f);
+  const tabValue = useU2fDialog((state) => state.tabValue);
+  const setTabValue = useU2fDialog((state) => state.setTabValue);
 
   const [tokenAvailable, setTokenAvailable] = useState(false);
 
-  const [tabValue, setTabValue] = useState<User.U2F.Methods>("");
   const [isLoading, setIsLoading] = useState(false);
 
   const [smsCode, setSmsCode] = useState("");
@@ -62,9 +63,10 @@ const U2fDialog: FC = () => {
 
   const [mfaCode, setMfaCode] = useState("");
 
-  const isTokenAvailable = () => {
-    return !!u2fToken && u2fToken.valid_before > Date.now() / 1000;
-  };
+  const isTokenAvailable = useCallback(() => {
+    const u2fTokenRef = useU2fDialog.getState().u2f;
+    return !!u2fTokenRef && u2fTokenRef.valid_before > Date.now() / 1000;
+  }, []);
   useInterval(
     () => {
       if (!isTokenAvailable()) setTokenAvailable(false);
@@ -169,16 +171,12 @@ const U2fDialog: FC = () => {
       setMfaCode("");
       setSmsCode("");
       if (isTokenAvailable()) setTokenAvailable(true);
-      else if (tabValue === "passkey") onSubmit();
     }
   }, [open]);
   useEffect(() => {
-    if (u2fStatus.prefer != "" && u2fStatus[u2fStatus.prefer])
-      setTabValue(u2fStatus.prefer);
-    else if (u2fStatus.passkey) setTabValue("passkey");
-    else if (u2fStatus.mfa) setTabValue("mfa");
-    else if (u2fStatus.phone) setTabValue("phone");
-  }, [u2fStatus]);
+    if (open && !isTokenAvailable() && tabValue === "passkey")
+      onSubmit("passkey");
+  }, [open, tabValue]);
 
   const renderTabPanel = () => {
     switch (tabValue) {
@@ -276,10 +274,9 @@ const U2fDialog: FC = () => {
           <>
             <Tabs
               value={tabValue}
-              onChange={(e, value: string) => {
-                setTabValue(value as User.U2F.Methods);
-                if (value === "passkey") return onSubmit("passkey");
-              }}
+              onChange={(e, value: string) =>
+                setTabValue(value as User.U2F.Methods)
+              }
               variant="fullWidth"
               sx={{
                 mt: 2,
