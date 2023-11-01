@@ -35,7 +35,7 @@ const u2fMethods: {
   label: string;
   value: User.U2F.Methods;
 }[] = [
-  { label: "电话", value: "phone" },
+  { label: "短信", value: "phone" },
   { label: "双因素认证", value: "mfa" },
   { label: "通行密钥", value: "passkey" },
 ];
