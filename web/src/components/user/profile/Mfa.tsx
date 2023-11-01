@@ -16,6 +16,7 @@ import {
   Box,
   TextField,
   Typography,
+  CircularProgress,
 } from "@mui/material";
 import { LoadingButton } from "@mui/lab";
 import { Done, Remove } from "@mui/icons-material";
@@ -23,7 +24,6 @@ import { Done, Remove } from "@mui/icons-material";
 import { apiV1User } from "@api/v1/user/base";
 
 import useU2F from "@hooks/useU2F";
-import { shallow } from "zustand/shallow";
 import useNewMfaForm from "@store/useNewMfa";
 
 interface Props extends StackProps {
@@ -34,12 +34,9 @@ interface Props extends StackProps {
 export const Mfa: FC<Props> = ({ enabled, setEnabled, ...props }) => {
   const { isLoading: isU2fLoading, refreshToken } = useU2F();
 
-  const [newMfaStep, newMfaSmsCode, newMfaCode] = useNewMfaForm(
-    (state) => [state.step, state.smsCode, state.mfaCode],
-    shallow
-  );
+  const newMfaStep = useNewMfaForm((state) => state.step);
+  const newMfaCode = useNewMfaForm((state) => state.mfaCode);
   const setNewMfaStep = useNewMfaForm((state) => state.setState("step"));
-  const setNewMfaSmsCode = useNewMfaForm((state) => state.setState("smsCode"));
   const setNewMfaCode = useNewMfaForm((state) => state.setState("mfaCode"));
   const resetNewMfaForm = useNewMfaForm((state) => state.reset);
 
@@ -58,35 +55,23 @@ export const Mfa: FC<Props> = ({ enabled, setEnabled, ...props }) => {
   async function onEnableMfa() {
     resetNewMfaForm();
     setShowNewMfa(true);
-  }
-
-  async function onApplyNewMfa(smsCode: string, nextStep: number) {
     setNewMfaNextStepLoading(true);
     try {
+      const token = await refreshToken();
       const {
         data: { data },
       } = await apiV1User.get("mfa/", {
         params: {
-          code: smsCode,
+          token,
         },
       });
       setMfaNew(data);
-      setNewMfaStep(nextStep);
+      setNewMfaStep(1);
     } catch ({ msg }) {
       if (msg) toast.error(msg as string);
+      setShowNewMfa(false);
     }
     setNewMfaNextStepLoading(false);
-  }
-
-  async function onSendSmsCode() {
-    setIsSendingSms(true);
-    try {
-      await apiV1User.post("identity/sms");
-      setSmsCoolDown(60);
-    } catch ({ msg }) {
-      if (msg) toast.error(msg as string);
-    }
-    setIsSendingSms(false);
   }
 
   async function onCheckMfaEnable(code: string) {
@@ -123,49 +108,17 @@ export const Mfa: FC<Props> = ({ enabled, setEnabled, ...props }) => {
     switch (step) {
       case 0:
         return (
-          <>
-            <Typography variant={"h6"} marginBottom={"1rem"}>
-              短信身份校验
-            </Typography>
-            <Stack flexDirection={"row"}>
-              <TextField
-                variant={"outlined"}
-                sx={{ width: "60%" }}
-                inputProps={{
-                  style: {
-                    height: "1rem",
-                  },
-                }}
-                value={newMfaSmsCode}
-                onChange={(e) => setNewMfaSmsCode(e.target.value)}
-              />
-              <Stack
-                flexDirection={"row"}
-                flexGrow={1}
-                paddingX={"1.3rem"}
-                boxSizing={"border-box"}
-              >
-                <LoadingButton
-                  variant={"contained"}
-                  fullWidth
-                  disabled={!!smsCoolDown}
-                  loading={isSendingSms}
-                  onClick={onSendSmsCode}
-                >
-                  {smsCoolDown ? smsCoolDown + "s" : "发送"}
-                </LoadingButton>
-              </Stack>
-            </Stack>
-          </>
+          <Stack alignItems={"center"} mt={2.5}>
+            <CircularProgress />
+          </Stack>
         );
       case 1:
         return (
           <Stack
             alignItems={"center"}
-            mb={2.5}
             sx={{
-              width: "21rem",
-              maxWidth: "100%",
+              mt: 3,
+              width: "100%",
             }}
           >
             <img
@@ -195,16 +148,19 @@ export const Mfa: FC<Props> = ({ enabled, setEnabled, ...props }) => {
         );
       case 2:
         return (
-          <>
-            <Typography variant={"h6"} marginBottom={"1rem"}>
-              双因素校验码
-            </Typography>
-            <TextField
-              variant={"outlined"}
-              value={newMfaCode}
-              onChange={(e) => setNewMfaCode(e.target.value)}
-            />
-          </>
+          <Stack alignItems={"center"} mt={1}>
+            <Box>
+              <Typography variant={"h6"} marginBottom={"1rem"}>
+                双因素校验码
+              </Typography>
+              <TextField
+                variant={"outlined"}
+                name={"twofactor_token"}
+                value={newMfaCode}
+                onChange={(e) => setNewMfaCode(e.target.value)}
+              />
+            </Box>
+          </Stack>
         );
     }
   }
@@ -212,20 +168,15 @@ export const Mfa: FC<Props> = ({ enabled, setEnabled, ...props }) => {
   async function onNextNewMfaStep(step: number) {
     switch (step) {
       case 0:
-        if (newMfaSmsCode == "") {
-          toast.error("请输入短信校验码");
-          return;
-        }
-        await onApplyNewMfa(newMfaSmsCode, step + 1);
-        break;
+        return;
       case 1:
         setNewMfaStep(step + 1);
         break;
       case 2:
-        if (newMfaSmsCode == "") {
+        if (newMfaCode == "") {
           toast.error("请输入双因素校验码");
           return;
-        } else if (newMfaCode.length != 6 && !isNaN(Number(newMfaSmsCode))) {
+        } else if (newMfaCode.length != 6 && !isNaN(Number(newMfaCode))) {
           toast.error("双因素校验码错误");
           return;
         }
@@ -271,7 +222,7 @@ export const Mfa: FC<Props> = ({ enabled, setEnabled, ...props }) => {
         </Box>
       </Stack>
 
-      <Dialog open={showNewMfa} onClose={() => setShowNewMfa(false)}>
+      <Dialog open={showNewMfa} fullWidth onClose={() => setShowNewMfa(false)}>
         <DialogContent>
           <Stack>
             <Stepper activeStep={newMfaStep}>

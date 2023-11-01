@@ -2,7 +2,6 @@ import {create, StoreApi, UseBoundStore} from "zustand";
 
 interface NewMfaForm {
     step: number
-    smsCode: string
     mfaCode: string
 }
 
@@ -15,7 +14,6 @@ interface NewMfaAction {
 
 const initialMfaForm: NewMfaForm = {
   step: 0,
-  smsCode: "",
   mfaCode: "",
 };
 
