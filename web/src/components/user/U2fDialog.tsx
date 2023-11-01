@@ -16,6 +16,7 @@ import {
   TextField,
   Alert,
   AlertTitle,
+  IconButton,
 } from "@mui/material";
 import { LoadingButton } from "@mui/lab";
 import {
@@ -183,42 +184,53 @@ const U2fDialog: FC = () => {
       case "phone":
         return (
           <Stack alignItems={"center"}>
-            <Typography mb={2.5}>
-              每天上限五条，出现异常情况请过会儿再试
-            </Typography>
-            <Stack flexDirection={"row"} width={"100%"} maxWidth={"21rem"}>
-              <TextField
+            <Stack
+              sx={{
+                width: "100%",
+                maxWidth: "21rem",
+              }}
+            >
+              <Alert
                 variant={"outlined"}
-                label={"验证码"}
-                sx={{ width: "60%" }}
-                value={smsCode}
-                onChange={(e) => {
-                  if (!isNaN(Number(e.target.value)))
-                    setSmsCode(e.target.value);
-                }}
-              />
-              <Stack
-                flexDirection={"row"}
-                flexGrow={1}
-                paddingLeft={"5%"}
-                boxSizing={"border-box"}
+                severity={"info"}
+                sx={{ mb: 2.5, width: "100%", boxSizing: "border-box" }}
               >
-                <LoadingButton
-                  variant={"contained"}
-                  fullWidth
-                  disabled={!!smsCoolDown}
-                  loading={isSendingSms}
-                  onClick={onSendSmsCode}
+                每天上限五条，请避免频繁重试
+              </Alert>
+              <Stack flexDirection={"row"} width={"100%"}>
+                <TextField
+                  variant={"outlined"}
+                  label={"验证码"}
+                  sx={{ width: "60%" }}
+                  value={smsCode}
+                  onChange={(e) => {
+                    if (!isNaN(Number(e.target.value)))
+                      setSmsCode(e.target.value);
+                  }}
+                />
+                <Stack
+                  flexDirection={"row"}
+                  flexGrow={1}
+                  paddingLeft={"5%"}
+                  boxSizing={"border-box"}
                 >
-                  {smsCoolDown ? smsCoolDown + "s" : "发送"}
-                </LoadingButton>
+                  <LoadingButton
+                    variant={"outlined"}
+                    fullWidth
+                    disabled={!!smsCoolDown}
+                    loading={isSendingSms}
+                    onClick={onSendSmsCode}
+                  >
+                    {smsCoolDown ? smsCoolDown + "s" : "发送"}
+                  </LoadingButton>
+                </Stack>
               </Stack>
             </Stack>
           </Stack>
         );
       case "mfa":
         return (
-          <Stack alignItems={"center"}>
+          <Stack alignItems={"center"} pt={1.5}>
             <TextField
               variant={"outlined"}
               label={"校验码"}
@@ -233,16 +245,13 @@ const U2fDialog: FC = () => {
       case "passkey":
         return (
           <Stack alignItems={"center"}>
-            <SensorOccupiedOutlined
-              sx={{
-                fontSize: "6rem",
-                mt: 2,
-                mb: 4,
-              }}
-            />
-            <Button variant={"outlined"} onClick={() => onSubmit()}>
-              重试
-            </Button>
+            <IconButton onClick={() => onSubmit()} sx={{ padding: "1.5rem" }}>
+              <SensorOccupiedOutlined
+                sx={{
+                  fontSize: "6rem",
+                }}
+              />
+            </IconButton>
           </Stack>
         );
       default:
@@ -259,11 +268,16 @@ const U2fDialog: FC = () => {
     <Dialog fullWidth open={open} onClose={onCancel}>
       <DialogTitle>U2F 身份校验</DialogTitle>
       <DialogContent>
-        {!tip && tokenAvailable ? undefined : (
+        {tokenAvailable ? undefined : (
           <DialogContentText>
-            {tip ? tip : "你正在进行敏感操作，需要额外的身份校验"}
+            你正在进行敏感操作，需要额外的身份校验
           </DialogContentText>
         )}
+        {tip ? (
+          <Alert severity={"info"} sx={{ mt: 2 }}>
+            {tip}
+          </Alert>
+        ) : undefined}
 
         {tokenAvailable ? (
           <Alert severity="success">
