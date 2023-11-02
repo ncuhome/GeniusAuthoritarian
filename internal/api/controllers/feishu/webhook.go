@@ -23,7 +23,7 @@ func Webhook(c *gin.Context) {
 			callback.Error(c, callback.ErrUnauthorized, err)
 			return
 		}
-		callback.Success(c, gin.H{
+		c.JSON(200, gin.H{
 			"challenge": event.Challenge,
 		})
 		return
@@ -71,5 +71,5 @@ func Webhook(c *gin.Context) {
 		logger.Warnf("未知的事件类型")
 	}
 
-	callback.Default(c)
+	c.JSON(200, gin.H{})
 }
