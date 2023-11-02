@@ -18,8 +18,9 @@ type Config struct {
 }
 
 type Feishu struct {
-	ClientID string `yaml:"clientID"`
-	Secret   string `yaml:"secret"`
+	ClientID                 string `yaml:"clientID"`
+	Secret                   string `yaml:"secret"`
+	WebhookVerificationToken string `json:"webhook_verification_token"`
 }
 
 type DingTalk struct {
