@@ -1,10 +1,12 @@
 package controllers
 
 import (
+	"encoding/json"
 	"github.com/gin-gonic/gin"
 	"github.com/ncuhome/GeniusAuthoritarian/internal/api/callback"
 	"github.com/ncuhome/GeniusAuthoritarian/internal/global"
 	"github.com/ncuhome/GeniusAuthoritarian/internal/pkg/feishu"
+	"github.com/ncuhome/GeniusAuthoritarian/internal/service"
 	log "github.com/sirupsen/logrus"
 )
 
@@ -21,6 +23,42 @@ func Webhook(c *gin.Context) {
 		return
 	}
 
-	log.Infof("[飞书事件] %s:%s", event.Header.EventType, event.Header.EventID)
+	logger := log.WithFields(log.Fields{
+		"n":    "飞书事件",
+		"type": event.Header.EventType,
+		"id":   event.Header.EventID,
+	})
+	logger.Infoln("Received")
 
+	switch event.Header.EventType {
+	case "contact.user.deleted_v3":
+		var info feishu.UserDeletedEvent
+		err := json.Unmarshal(event.Event, &info)
+		if err != nil {
+			callback.Error(c, callback.ErrForm, err)
+			return
+		}
+		if info.Object.Mobile == "" {
+			logger.Errorln("电话号码为空")
+		} else {
+			userSrv, err := service.User.Begin()
+			if err != nil {
+				callback.Error(c, callback.ErrDBOperation, err)
+				return
+			}
+			defer userSrv.Rollback()
+			result := userSrv.FrozeByPhone(info.Object.Mobile)
+			if result.Error != nil || userSrv.Commit() != nil {
+				callback.Error(c, callback.ErrDBOperation, result.Error)
+				return
+			}
+			if result.RowsAffected != 0 {
+				logger.Infof("%s:%s 离职已写入", info.Object.Name, info.Object.Mobile)
+			}
+		}
+	default:
+		logger.Warnf("未知的事件类型")
+	}
+
+	callback.Default(c)
 }

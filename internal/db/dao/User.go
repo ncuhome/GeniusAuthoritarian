@@ -38,7 +38,6 @@ func (a *User) FirstByID(tx *gorm.DB) error {
 func (a *User) FirstByPhone(tx *gorm.DB) error {
 	return tx.First(a, "phone=?", a.Phone).Error
 }
-
 func (a *User) FirstProfileByID(tx *gorm.DB) (*dto.UserProfile, error) {
 	var t dto.UserProfile
 	return &t, tx.Model(a).First(&t, "id=?", a.ID).Error
@@ -87,6 +86,10 @@ func (a *User) U2fStatus(tx *gorm.DB) (*dto.UserU2fStatus, error) {
 
 func (a *User) FrozeByIDSlice(tx *gorm.DB, ids []uint) error {
 	return tx.Delete(a, "id IN ?", ids).Error
+}
+
+func (a *User) FrozeByPhone(tx *gorm.DB) *gorm.DB {
+	return tx.Delete(a, "phone=?", a.Phone)
 }
 
 func (a *User) UpdateMfa(tx *gorm.DB) error {

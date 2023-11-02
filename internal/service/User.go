@@ -34,6 +34,12 @@ func (a UserSrv) FrozeByIDSlice(id []uint) error {
 	return (&dao.User{}).FrozeByIDSlice(a.DB, id)
 }
 
+func (a UserSrv) FrozeByPhone(phone string) *gorm.DB {
+	return (&dao.User{
+		Phone: phone,
+	}).FrozeByPhone(a.DB)
+}
+
 func (a UserSrv) UnFrozeByIDSlice(id []uint) error {
 	return (&dao.User{}).UnfrozeByIDSlice(a.DB, id)
 }
@@ -82,17 +88,17 @@ func (a UserSrv) FirstMfa(id uint, opts ...daoUtil.ServiceOpt) (string, error) {
 	return t.MFA, t.FirstMfa(daoUtil.TxOpts(a.DB, opts...))
 }
 
+func (a UserSrv) FirstPhoneByID(id uint) (string, error) {
+	model := dao.User{ID: id}
+	return model.Phone, model.FirstPhoneByID(a.DB)
+}
+
 func (a UserSrv) SetMfaSecret(id uint, secret string) error {
 	return (&dao.User{ID: id, MFA: secret}).UpdateMfa(a.DB)
 }
 
 func (a UserSrv) DelMfa(id uint) error {
 	return (&dao.User{ID: id}).DelMfa(a.DB)
-}
-
-func (a UserSrv) FirstPhoneByID(id uint) (string, error) {
-	model := dao.User{ID: id}
-	return model.Phone, model.FirstPhoneByID(a.DB)
 }
 
 func (a UserSrv) UpdateUserPreferU2F(id uint, prefer string) error {
