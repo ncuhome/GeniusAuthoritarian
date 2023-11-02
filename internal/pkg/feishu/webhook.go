@@ -15,6 +15,12 @@ type Event struct {
 	Schema string          `json:"schema"`
 	Header EventHeader     `json:"header"`
 	Event  json.RawMessage `json:"event"`
+
+	// 以下配置订阅时使用
+
+	Type      string `json:"type"`
+	Token     string `json:"token"`
+	Challenge string `json:"challenge"`
 }
 
 type UserDeletedEvent struct {

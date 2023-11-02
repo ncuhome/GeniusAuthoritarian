@@ -18,9 +18,19 @@ func Webhook(c *gin.Context) {
 		return
 	}
 
-	if event.Header.Token != global.Config.Feishu.WebhookVerificationToken {
-		callback.Error(c, callback.ErrUnauthorized, err)
-		return
+	if event.Type == "url_verification" {
+		if event.Token != global.Config.Feishu.WebhookVerificationToken {
+			callback.Error(c, callback.ErrUnauthorized, err)
+			return
+		}
+		callback.Success(c, gin.H{
+			"challenge": event.Challenge,
+		})
+	} else {
+		if event.Header.Token != global.Config.Feishu.WebhookVerificationToken {
+			callback.Error(c, callback.ErrUnauthorized, err)
+			return
+		}
 	}
 
 	logger := log.WithFields(log.Fields{
