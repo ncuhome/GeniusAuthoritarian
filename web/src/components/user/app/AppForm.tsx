@@ -1,4 +1,4 @@
-import { FC, useEffect, useRef, useState } from "react";
+import { FC, useEffect, useMemo, useRef, useState } from "react";
 import useTimeout from "@hooks/useTimeout";
 import toast from "react-hot-toast";
 
@@ -13,6 +13,8 @@ import {
   Skeleton,
   Stack,
   TextField,
+  Alert,
+  Fade,
 } from "@mui/material";
 
 import { useUserApiV1 } from "@api/v1/user/hook";
@@ -35,8 +37,11 @@ interface Props {
 
 const hasValidScheme = (input: string) => {
   const isLocalhost = input.includes("://localhost");
-  return input.indexOf("https://") === 0 || (isLocalhost && input.indexOf("http://") === 0);
-}
+  return (
+    input.indexOf("https://") === 0 ||
+    (isLocalhost && input.indexOf("http://") === 0)
+  );
+};
 
 export const AppForm: FC<Props> = ({
   useForm,
@@ -85,6 +90,15 @@ export const AppForm: FC<Props> = ({
 
   const groups = useGroup((state) => state.groups);
   const setGroups = useGroup((state) => state.setState("groups"));
+
+  const notOnlyCenterSelected = useMemo(
+    () =>
+      !permitAll &&
+      permitGroups &&
+      permitGroups.length !== 1 &&
+      permitGroups.findIndex((group) => group.name === "中心") !== -1,
+    [permitAll, permitGroups]
+  );
 
   useUserApiV1<User.Group[]>(!permitAll ? "group/list" : null, {
     immutable: true,
@@ -160,23 +174,35 @@ export const AppForm: FC<Props> = ({
           />
         </Grid>
         <Grid item xs={12}>
-          <FormControlLabel
-            control={
-              <Checkbox
-                checked={permitAll}
-                onChange={(e) => setPermitAll(e.target.checked)}
-              />
-            }
-            label="允许所有成员使用"
-          />
+          <Stack
+            flexDirection={"row"}
+            alignItems={"center"}
+            justifyContent={"space-between"}
+          >
+            <FormControlLabel
+              control={
+                <Checkbox
+                  checked={permitAll}
+                  onChange={(e) => setPermitAll(e.target.checked)}
+                />
+              }
+              label="允许所有成员使用"
+            />
+            <Fade in={notOnlyCenterSelected}>
+              <Alert severity={"info"} sx={{ flexGrow: 1 }}>
+                仅供中心组使用才需要选择中心组
+              </Alert>
+            </Fade>
+          </Stack>
         </Grid>
         <Grid
           item
           xs={12}
-          sm={6}
+          mb={2}
           sx={{
-            transition: `padding .3s ease-out${permitAll ? " .3s" : ""
-              }, opacity 0.3s ease-out${permitAll ? "" : " .3s"}`,
+            transition: `padding .3s ease-out${
+              permitAll ? " .3s" : ""
+            }, opacity 0.3s ease-out${permitAll ? "" : " .3s"}`,
             py: permitAll ? "0!important" : undefined,
             opacity: permitAll ? "0" : undefined,
           }}
@@ -188,6 +214,7 @@ export const AppForm: FC<Props> = ({
                 permitGroups={permitGroups}
                 setPermitGroups={setPermitGroups}
                 fullWidth
+                sx={{ pb: "1rem" }}
               />
             ) : (
               <Skeleton variant={"rounded"} width={"100%"} height={56} />
@@ -201,7 +228,6 @@ export const AppForm: FC<Props> = ({
         justifyContent={"flex-end"}
         flexWrap={"wrap"}
         sx={{
-          marginTop: "1rem",
           "&>button": {
             marginLeft: "0.8rem",
           },
