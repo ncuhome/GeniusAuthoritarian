@@ -26,6 +26,7 @@ func Webhook(c *gin.Context) {
 		callback.Success(c, gin.H{
 			"challenge": event.Challenge,
 		})
+		return
 	} else {
 		if event.Header.Token != global.Config.Feishu.WebhookVerificationToken {
 			callback.Error(c, callback.ErrUnauthorized, err)
