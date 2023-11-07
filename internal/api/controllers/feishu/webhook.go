@@ -59,7 +59,7 @@ func Webhook(c *gin.Context) {
 			}
 			defer userSrv.Rollback()
 			result := userSrv.FrozeByPhone(info.Object.Mobile)
-			if result.Error != nil || userSrv.Commit() != nil {
+			if result.Error != nil || userSrv.Commit().Error != nil {
 				callback.Error(c, callback.ErrDBOperation, result.Error)
 				return
 			}
