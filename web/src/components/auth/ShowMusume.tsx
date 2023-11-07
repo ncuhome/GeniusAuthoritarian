@@ -1,10 +1,20 @@
-import { FC } from "react";
+import { FC, useMemo } from "react";
 import logo from "@/assets/img/logo-white.png";
 import bkg from "@/assets/img/bkg.png";
+import bgk_2910230214 from "@/assets/img/bkg_2910230214.png";
+import bgk_627660024 from "@/assets/img/bgk_627660024.png";
+import bgk_627660022 from "@/assets/img/bgk_627660022.png";
 
 import { Stack, Box, Paper } from "@mui/material";
 
+const images = [bkg, bgk_2910230214, bgk_627660024, bgk_627660022];
+
 export const ShowMusume: FC = () => {
+  const img = useMemo(
+    () => images[Math.floor(Math.random() * images.length)],
+    []
+  );
+
   return (
     <Stack
       sx={{
@@ -41,9 +51,9 @@ export const ShowMusume: FC = () => {
       >
         <img
           style={{
-            maxWidth: "85%",
+            width: "100%",
           }}
-          src={bkg}
+          src={img}
           alt={"看板 MuSiMie"}
           title={"“走，上工！”"}
         />
