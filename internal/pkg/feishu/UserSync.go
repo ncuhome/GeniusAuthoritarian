@@ -91,12 +91,12 @@ func (a *UserSyncProcessor) PrintSyncResult() {
 		a.createdUser, a.frozenUser, a.unFrozenUser, a.createdUserGroup, a.deletedUserGroup)
 }
 
-func (a *UserSyncProcessor) downloadUserList() (map[string][]feishuApi.ListUserContent, error) {
+func (a *UserSyncProcessor) downloadUserList() (map[string][]feishuApi.User, error) {
 	return Api.LoadUserList()
 }
 
 // 过滤无效组，并返回有效组映射 飞书 OpenID ==> dao.BaseGroup.ID
-func (a *UserSyncProcessor) filterInvalidGroups(feishuUserList map[string][]feishuApi.ListUserContent) (map[string]uint, error) {
+func (a *UserSyncProcessor) filterInvalidGroups(feishuUserList map[string][]feishuApi.User) (map[string]uint, error) {
 	var openID = make([]string, len(feishuUserList))
 	i := 0
 	for k := range feishuUserList {
@@ -128,7 +128,7 @@ func (a *UserSyncProcessor) filterInvalidGroups(feishuUserList map[string][]feis
 }
 
 // 过滤无效用户
-func (a *UserSyncProcessor) filterInvalidUsers(feishuUserList map[string][]feishuApi.ListUserContent) {
+func (a *UserSyncProcessor) filterInvalidUsers(feishuUserList map[string][]feishuApi.User) {
 	for k, users := range feishuUserList {
 		var lens int
 		for i, user := range users {
@@ -139,7 +139,7 @@ func (a *UserSyncProcessor) filterInvalidUsers(feishuUserList map[string][]feish
 				lens++
 			}
 		}
-		var filteredList = make([]feishuApi.ListUserContent, lens)
+		var filteredList = make([]feishuApi.User, lens)
 		lens = 0
 		for _, user := range users {
 			if user.Status.IsActivated {
@@ -152,7 +152,7 @@ func (a *UserSyncProcessor) filterInvalidUsers(feishuUserList map[string][]feish
 }
 
 // 转换数据为 dao.BaseGroup.ID ==> []dao.User
-func (a *UserSyncProcessor) convertApiDataToGroupIdKeyMap(feishuUserList map[string][]feishuApi.ListUserContent, validGroupsMap map[string]uint) map[uint][]dao.User {
+func (a *UserSyncProcessor) convertApiDataToGroupIdKeyMap(feishuUserList map[string][]feishuApi.User, validGroupsMap map[string]uint) map[uint][]dao.User {
 	var filteredData = make(map[uint][]dao.User, len(feishuUserList))
 	for openID, users := range feishuUserList {
 		dbUserList := make([]dao.User, len(users))

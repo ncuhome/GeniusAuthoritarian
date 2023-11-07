@@ -144,9 +144,9 @@ func (f Fs) doLoadUserListRequest(departmentID, pageToken string, pageSize uint)
 		Query: query,
 	})
 }
-func (f Fs) doLoadAllUserListRequest(departmentID string) ([]ListUserContent, error) {
+func (f Fs) doLoadAllUserListRequest(departmentID string) ([]User, error) {
 	const pageSize = 99
-	var r []ListUserContent
+	var r []User
 	res, err := f.doLoadUserListRequest(departmentID, "", pageSize)
 	if err != nil {
 		return nil, err
@@ -163,15 +163,15 @@ func (f Fs) doLoadAllUserListRequest(departmentID string) ([]ListUserContent, er
 }
 
 // LoadUserList map key 为飞书部门 OpenID
-func (f Fs) LoadUserList() (map[string][]ListUserContent, error) {
+func (f Fs) LoadUserList() (map[string][]User, error) {
 	departments, err := f.LoadDepartmentList()
 	if err != nil {
 		return nil, err
 	}
 
-	result := make(map[string][]ListUserContent, len(departments.Items))
+	result := make(map[string][]User, len(departments.Items))
 	for _, department := range departments.Items {
-		var list []ListUserContent
+		var list []User
 		list, err = f.doLoadAllUserListRequest(department.OpenDepartmentId)
 		if err != nil {
 			return nil, err
