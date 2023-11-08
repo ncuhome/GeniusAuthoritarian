@@ -34,6 +34,7 @@ type UserDeletedEvent struct {
 }
 
 type UserUpdatedEvent struct {
-	Object    User `json:"object"`
+	Object User `json:"object"`
+	// 只有变更字段有值
 	OldObject User `json:"old_object"`
 }

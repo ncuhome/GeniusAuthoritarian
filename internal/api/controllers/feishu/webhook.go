@@ -87,6 +87,8 @@ func Webhook(c *gin.Context) {
 			return
 		}
 		user := feishu.NewUser(&info.Object)
+		oldUser := feishu.NewUser(&info.OldObject)
+		oldUserModel := oldUser.Model()
 		userSrv, err := service.User.Begin()
 		if err != nil {
 			callback.Error(c, callback.ErrDBOperation, err)
@@ -107,13 +109,31 @@ func Webhook(c *gin.Context) {
 				logger.Infoln("已冻结")
 			}
 		} else {
-			userModel, err := userSrv.FirstByPhone(info.OldObject.Mobile, daoUtil.UnScoped, daoUtil.LockForUpdate)
+			var phone string
+			if oldUserModel.Phone != "" {
+				phone = oldUserModel.Phone
+			} else {
+				phone = user.Data.Mobile
+			}
+			userModel, err := userSrv.FirstByPhone(phone, daoUtil.UnScoped, daoUtil.LockForUpdate)
 			if errors.Is(err, gorm.ErrRecordNotFound) {
-				err = userSrv.CreateAll([]dao.User{user.Model()})
+				models := []dao.User{user.Model()}
+				err = userSrv.CreateAll(models)
 				if err != nil {
 					callback.Error(c, callback.ErrDBOperation, err)
 					return
 				}
+				groupMap, err := (&service.FeishuGroupsSrv{DB: userSrv.DB}).GetGroupMap(daoUtil.LockForShare)
+				if err != nil {
+					callback.Error(c, callback.ErrDBOperation, err)
+					return
+				}
+				err = service.UserGroupsSrv{DB: userSrv.DB}.CreateAll(user.DepartmentModels(models[0].ID, groupMap))
+				if err != nil {
+					callback.Error(c, callback.ErrDBOperation, err)
+					return
+				}
+				logger.Infoln("用户已追加创建")
 			} else if err != nil {
 				callback.Error(c, callback.ErrDBOperation, err)
 				return
@@ -123,28 +143,34 @@ func Webhook(c *gin.Context) {
 					callback.Error(c, callback.ErrDBOperation, err)
 					return
 				}
+				logger.Infoln("用户已解冻")
 			} else {
-				userModelNew := user.Model()
-				userModelNew.ID = userModel.ID
-				if err = userModelNew.UpdateAllInfoByID(userSrv.DB).Error; err != nil {
-					callback.Error(c, callback.ErrDBOperation, err)
-					return
-				}
-				logger.Infoln("信息已更新")
+				if oldUserModel.Phone != "" ||
+					oldUserModel.Name != "" ||
+					oldUserModel.AvatarUrl != "" {
 
-				groupMap, err := (&service.FeishuGroupsSrv{DB: userSrv.DB}).GetGroupMap(daoUtil.LockForShare)
-				if err != nil {
-					callback.Error(c, callback.ErrDBOperation, err)
-					return
+					userModelNew := user.Model()
+					userModelNew.ID = userModel.ID
+					if err = userModelNew.UpdateAllInfoByID(userSrv.DB).Error; err != nil {
+						callback.Error(c, callback.ErrDBOperation, err)
+						return
+					}
+					logger.Infoln("用户信息已更新")
 				}
 
-				changed, err := user.SyncDepartments(userSrv.DB, userModel.ID, groupMap)
-				if err != nil {
-					callback.Error(c, callback.ErrDBOperation, err)
-					return
-				}
-				if changed {
-					logger.Infoln("部门已同步")
+				if len(oldUser.Data.DepartmentIds) != 0 {
+					groupMap, err := (&service.FeishuGroupsSrv{DB: userSrv.DB}).GetGroupMap(daoUtil.LockForShare)
+					if err != nil {
+						callback.Error(c, callback.ErrDBOperation, err)
+						return
+					}
+
+					err = user.SyncDepartments(userSrv.DB, userModel.ID, groupMap)
+					if err != nil {
+						callback.Error(c, callback.ErrDBOperation, err)
+						return
+					}
+					logger.Infoln("用户部门已同步")
 				}
 			}
 		}

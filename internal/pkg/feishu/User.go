@@ -58,32 +58,27 @@ func (u User) DepartmentModels(uid uint, groupMap map[string]uint) []dao.UserGro
 	return u.genDepartmentModels(uid, u.Departments(groupMap))
 }
 
-func (u User) SyncDepartments(tx *gorm.DB, uid uint, groupMap map[string]uint) (changed bool, err error) {
+func (u User) SyncDepartments(tx *gorm.DB, uid uint, groupMap map[string]uint) error {
 	departments := u.Departments(groupMap)
 
 	userGroupSrv := service.UserGroupsSrv{DB: tx}
-	result := userGroupSrv.DeleteNotInGidSliceByUID(uid, departments)
-	err = result.Error
+	err := userGroupSrv.DeleteNotInGidSliceByUID(uid, departments).Error
 	if err != nil {
-		return
-	}
-	if result.RowsAffected != 0 {
-		changed = true
+		return err
 	}
 
 	existDepartments, err := userGroupSrv.GetForUser(uid)
 	if err != nil {
-		return
+		return err
 	}
 
 	gidToAddLength := len(departments) - len(existDepartments)
 	if gidToAddLength > 0 {
-		changed = true
 		var gidToAdd = make([]uint, gidToAddLength)
 		err = userGroupSrv.CreateAll(u.genDepartmentModels(uid, gidToAdd))
 		if err != nil {
-			return
+			return err
 		}
 	}
-	return
+	return nil
 }
