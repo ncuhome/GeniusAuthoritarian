@@ -76,3 +76,7 @@ func (a *UserGroups) GetAllNotFrozen(tx *gorm.DB) ([]UserGroups, error) {
 func (a *UserGroups) DeleteByIDSlice(tx *gorm.DB, ids []uint) error {
 	return tx.Model(a).Delete(a, "id IN ?", ids).Error
 }
+
+func (a *UserGroups) DeleteNotInGidSliceByUID(tx *gorm.DB, ids []uint) *gorm.DB {
+	return tx.Model(a).Where("uid=? AND gid NOT IN ?", a.UID, ids).Delete(nil)
+}

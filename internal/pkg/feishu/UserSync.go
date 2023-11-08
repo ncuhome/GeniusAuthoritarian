@@ -86,14 +86,7 @@ func (a *UserSyncProcessor) Run() error {
 	defer a.tx.Rollback()
 
 	// 获取飞书部门 OpenID 与基础组的映射关系
-	feishuGroups, err := (service.FeishuGroupsSrv{DB: a.tx}).GetAll(daoUtil.LockForShare)
-	if err != nil {
-		return err
-	}
-	groupMap := make(map[string]uint, len(feishuGroups))
-	for _, fsGroup := range feishuGroups {
-		groupMap[fsGroup.OpenDepartmentId] = fsGroup.GID
-	}
+	groupMap, err := (service.FeishuGroupsSrv{DB: a.tx}).GetGroupMap(daoUtil.LockForShare)
 
 	// 同步用户列表
 	if err = a.doSyncUsers(userList); err != nil {

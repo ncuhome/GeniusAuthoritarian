@@ -44,13 +44,6 @@ func (a UserSrv) UnFrozeByIDSlice(id []uint) error {
 	return (&dao.User{}).UnfrozeByIDSlice(a.DB, id)
 }
 
-func (a UserSrv) UserInfo(phone string) (*dao.User, error) {
-	var user = dao.User{
-		Phone: phone,
-	}
-	return &user, user.FirstByPhone(a.DB)
-}
-
 func (a UserSrv) U2fStatus(id uint) (*dto.UserU2fStatus, error) {
 	return (&dao.User{ID: id}).U2fStatus(a.DB)
 }
@@ -91,6 +84,13 @@ func (a UserSrv) FirstMfa(id uint, opts ...daoUtil.ServiceOpt) (string, error) {
 func (a UserSrv) FirstPhoneByID(id uint) (string, error) {
 	model := dao.User{ID: id}
 	return model.Phone, model.FirstPhoneByID(a.DB)
+}
+
+func (a UserSrv) FirstByPhone(phone string, opts ...daoUtil.ServiceOpt) (*dao.User, error) {
+	var user = dao.User{
+		Phone: phone,
+	}
+	return &user, user.FirstByPhone(daoUtil.TxOpts(a.DB, opts...))
 }
 
 func (a UserSrv) SetMfaSecret(id uint, secret string) error {

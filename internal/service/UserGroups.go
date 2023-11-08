@@ -46,3 +46,7 @@ func (a UserGroupsSrv) CreateAll(data []dao.UserGroups) error {
 func (a UserGroupsSrv) DeleteByIDSlice(id []uint) error {
 	return (&dao.UserGroups{}).DeleteByIDSlice(a.DB, id)
 }
+
+func (a UserGroupsSrv) DeleteNotInGidSliceByUID(uid uint, id []uint) *gorm.DB {
+	return (&dao.UserGroups{UID: uid}).DeleteNotInGidSliceByUID(a.DB, id)
+}

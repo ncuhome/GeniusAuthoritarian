@@ -2,14 +2,10 @@ package feishu
 
 import (
 	"github.com/ncuhome/GeniusAuthoritarian/internal/db/dao"
+	"github.com/ncuhome/GeniusAuthoritarian/internal/service"
 	"github.com/ncuhome/GeniusAuthoritarian/pkg/feishuApi"
+	"gorm.io/gorm"
 )
-
-type UserSync interface {
-	IsInvalid() bool
-	Departments(groupMap map[string]uint) []uint
-	Model() *dao.User
-}
 
 func NewUser(data *feishuApi.User) *User {
 	return &User{
@@ -49,12 +45,45 @@ func (u User) Departments(groupMap map[string]uint) []uint {
 	return departments[:validLength]
 }
 
-func (u User) DepartmentModels(uid uint, groupMap map[string]uint) []dao.UserGroups {
-	departments := u.Departments(groupMap)
+func (u User) genDepartmentModels(uid uint, departments []uint) []dao.UserGroups {
 	models := make([]dao.UserGroups, len(departments))
 	for i, gid := range departments {
 		models[i].UID = uid
 		models[i].GID = gid
 	}
 	return models
+}
+
+func (u User) DepartmentModels(uid uint, groupMap map[string]uint) []dao.UserGroups {
+	return u.genDepartmentModels(uid, u.Departments(groupMap))
+}
+
+func (u User) SyncDepartments(tx *gorm.DB, uid uint, groupMap map[string]uint) (changed bool, err error) {
+	departments := u.Departments(groupMap)
+
+	userGroupSrv := service.UserGroupsSrv{DB: tx}
+	result := userGroupSrv.DeleteNotInGidSliceByUID(uid, departments)
+	err = result.Error
+	if err != nil {
+		return
+	}
+	if result.RowsAffected != 0 {
+		changed = true
+	}
+
+	existDepartments, err := userGroupSrv.GetForUser(uid)
+	if err != nil {
+		return
+	}
+
+	gidToAddLength := len(departments) - len(existDepartments)
+	if gidToAddLength > 0 {
+		changed = true
+		var gidToAdd = make([]uint, gidToAddLength)
+		err = userGroupSrv.CreateAll(u.genDepartmentModels(uid, gidToAdd))
+		if err != nil {
+			return
+		}
+	}
+	return
 }

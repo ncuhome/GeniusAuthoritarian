@@ -179,7 +179,7 @@ func ThirdPartySelfLogin(c *gin.Context) {
 
 	appInfo := service.App.This(c.Request.Host)
 
-	user, err := service.User.UserInfo(userIdentity.Phone)
+	user, err := service.User.FirstByPhone(userIdentity.Phone)
 	if err != nil {
 		callback.Error(c, callback.ErrDBOperation, err)
 		return
@@ -228,7 +228,7 @@ func ThirdPartyLogin(c *gin.Context) {
 		return
 	}
 
-	user, err := service.User.UserInfo(userIdentity.Phone)
+	user, err := service.User.FirstByPhone(userIdentity.Phone)
 	if err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
 			callback.Error(c, callback.ErrUserIdentity)

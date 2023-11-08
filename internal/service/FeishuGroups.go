@@ -21,6 +21,19 @@ func (a FeishuGroupsSrv) GetAll(opts ...daoUtil.ServiceOpt) ([]dao.FeishuGroups,
 	return (&dao.FeishuGroups{}).GetAll(daoUtil.TxOpts(a.DB, opts...))
 }
 
+func (a FeishuGroupsSrv) GetGroupMap(opts ...daoUtil.ServiceOpt) (map[string]uint, error) {
+	feishuGroups, err := a.GetAll(opts...)
+	if err != nil {
+		return nil, err
+	}
+
+	groupMap := make(map[string]uint, len(feishuGroups))
+	for _, fsGroup := range feishuGroups {
+		groupMap[fsGroup.OpenDepartmentId] = fsGroup.GID
+	}
+	return groupMap, nil
+}
+
 func (a FeishuGroupsSrv) GetByOpenID(openID []string, opts ...daoUtil.ServiceOpt) ([]dao.FeishuGroups, error) {
 	return (&dao.FeishuGroups{}).GetByOpenIDSlice(daoUtil.TxOpts(a.DB, opts...), openID)
 }
