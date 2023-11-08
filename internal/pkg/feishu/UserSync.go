@@ -70,7 +70,7 @@ func (a *UserSyncProcessor) Run() error {
 				userMap[userData.UserId] = struct{}{}
 				userData := userData
 				newUser := NewUser(&userData)
-				if newUser.IsInvalid() {
+				if !newUser.IsInvalid() {
 					userDataList.PushBack(newUser)
 				}
 			}
@@ -201,6 +201,7 @@ func (a *UserSyncProcessor) doSyncUsers(userList []*User) error {
 		}
 	}
 	if userToUnFroze.Len() > 0 {
+		a.unFrozenUser = userToUnFroze.Len()
 		var idSlice = make([]uint, userToUnFroze.Len())
 		for i, el := 0, userToUnFroze.Front(); el != nil; i, el = i+1, el.Next() {
 			idSlice[i] = el.Value.(uint)
@@ -232,6 +233,7 @@ func (a *UserSyncProcessor) doSyncUserGroups(userList []*User, groupMap map[stri
 			length += len(userDepartmentModels)
 			modelSlice[i] = userDepartmentModels
 		}
+		a.createdUserGroup = length
 		models := make([]dao.UserGroups, length)
 		length = 0
 		for _, modelSliceEl := range modelSlice {
@@ -261,11 +263,11 @@ func (a *UserSyncProcessor) doSyncUserGroups(userList []*User, groupMap map[stri
 	var userGroupsToAdd = list.New()    // dao.UserGroups
 	var userGroupsToDelete = list.New() // uint
 	for _, user := range userList {
-		exUserGroups := exUserGroupMap[user.ID]
+		thisUserExistGroups := exUserGroupMap[user.ID]
 		currentUserGroups := user.Departments(groupMap)
 		var userGroupChanged bool
 		for _, gid := range currentUserGroups {
-			for _, exUserGroup := range exUserGroups {
+			for _, exUserGroup := range thisUserExistGroups {
 				if gid == exUserGroup.GID {
 					goto nextUserGroup
 				}
@@ -277,13 +279,13 @@ func (a *UserSyncProcessor) doSyncUserGroups(userList []*User, groupMap map[stri
 			userGroupChanged = true
 		nextUserGroup:
 		}
-		for _, exUserGroup := range existUserGroups {
+		for _, exUserGroup := range thisUserExistGroups {
 			for _, gid := range currentUserGroups {
 				if exUserGroup.GID == gid {
 					goto nextExUserGroup
 				}
 			}
-			userGroupsToDelete.PushBack(exUserGroup)
+			userGroupsToDelete.PushBack(exUserGroup.ID)
 			userGroupChanged = true
 		nextExUserGroup:
 		}
