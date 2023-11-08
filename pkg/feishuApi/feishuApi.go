@@ -129,8 +129,10 @@ func (f Fs) doLoadUserListRequest(departmentID, pageToken string, pageSize uint)
 	}
 	var data ListUserResp
 	query := map[string]interface{}{
-		"department_id": departmentID,
-		"page_size":     pageSize,
+		"page_size": pageSize,
+	}
+	if departmentID != "" {
+		query["department_id"] = departmentID
 	}
 	if pageToken != "" {
 		query["page_token"] = pageToken
@@ -144,6 +146,7 @@ func (f Fs) doLoadUserListRequest(departmentID, pageToken string, pageSize uint)
 		Query: query,
 	})
 }
+
 func (f Fs) doLoadAllUserListRequest(departmentID string) ([]User, error) {
 	const pageSize = 99
 	var r []User
@@ -162,21 +165,6 @@ func (f Fs) doLoadAllUserListRequest(departmentID string) ([]User, error) {
 	return r, nil
 }
 
-// LoadUserList map key 为飞书部门 OpenID
-func (f Fs) LoadUserList() (map[string][]User, error) {
-	departments, err := f.LoadDepartmentList()
-	if err != nil {
-		return nil, err
-	}
-
-	result := make(map[string][]User, len(departments.Items))
-	for _, department := range departments.Items {
-		var list []User
-		list, err = f.doLoadAllUserListRequest(department.OpenDepartmentId)
-		if err != nil {
-			return nil, err
-		}
-		result[department.OpenDepartmentId] = list
-	}
-	return result, nil
+func (f Fs) LoadUserList() ([]User, error) {
+	return f.doLoadAllUserListRequest("")
 }
