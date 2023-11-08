@@ -136,7 +136,7 @@ func (f Fs) doLoadUserListRequest(departmentID, pageToken string, pageSize uint)
 		query["page_token"] = pageToken
 	}
 	return &data, f.doRequest("GET", &data, &tool.DoHttpReq{
-		Url: "https://open.feishu.cn/open-apis/contact/v3/find_by_department",
+		Url: "https://open.feishu.cn/open-apis/contact/v3/users/find_by_department",
 		Header: map[string]interface{}{
 			"Authorization": "Bearer " + tenantToken,
 			"Content-Type":  "application/json",
@@ -146,7 +146,7 @@ func (f Fs) doLoadUserListRequest(departmentID, pageToken string, pageSize uint)
 }
 
 func (f Fs) doLoadAllUserListRequest(departmentID string) ([]User, error) {
-	const pageSize = 99
+	const pageSize = 50
 	var r []User
 	res, err := f.doLoadUserListRequest(departmentID, "", pageSize)
 	if err != nil {
