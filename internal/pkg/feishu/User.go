@@ -24,8 +24,9 @@ type User struct {
 
 func (u User) Model() dao.User {
 	return dao.User{
-		Name:  u.Data.Name,
-		Phone: u.Data.Mobile,
+		Name:      u.Data.Name,
+		Phone:     u.Data.Mobile,
+		AvatarUrl: u.Data.Avatar.AvatarOrigin,
 	}
 }
 

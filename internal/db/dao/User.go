@@ -10,8 +10,11 @@ import (
 type User struct {
 	ID        uint           `gorm:"primarykey"`
 	DeletedAt gorm.DeletedAt `gorm:"index"`
-	Name      string         `gorm:"not null"`
-	Phone     string         `gorm:"not null;uniqueIndex;type:varchar(15)"`
+
+	Name      string `gorm:"not null"`
+	Phone     string `gorm:"not null;uniqueIndex;type:varchar(15)"`
+	AvatarUrl string
+
 	MFA       string
 	PreferU2F string `gorm:"column:prefer_u2f"`
 }
