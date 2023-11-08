@@ -2,12 +2,12 @@ package feishu
 
 import (
 	"container/list"
+	"errors"
 	"github.com/Mmx233/daoUtil"
 	"github.com/ncuhome/GeniusAuthoritarian/internal/db/dao"
 	"github.com/ncuhome/GeniusAuthoritarian/internal/db/redis"
 	"github.com/ncuhome/GeniusAuthoritarian/internal/service"
 	"github.com/ncuhome/GeniusAuthoritarian/pkg/backoff"
-	"github.com/ncuhome/GeniusAuthoritarian/pkg/feishuApi"
 	"github.com/robfig/cron/v3"
 	log "github.com/sirupsen/logrus"
 	"gorm.io/gorm"
@@ -51,37 +51,59 @@ type RelatedUserInfo struct {
 }
 
 func (a *UserSyncProcessor) Run() error {
-	GroupOpenIdToFeishuUserSliceMap, err := a.downloadUserList()
+	userDataList, err := Api.LoadUserList()
 	if err != nil {
 		return err
 	}
 
 	var startAt = time.Now()
+
+	// 转换数据为操作结构体并去除无效用户
+	userList := make([]*User, len(userDataList))
+	var userListLength int
+	for _, userData := range userDataList {
+		userData := userData
+		newUser := NewUser(&userData)
+		if newUser.IsInvalid() {
+			userList[userListLength] = newUser
+			userListLength++
+		}
+	}
+	if userListLength == 0 {
+		return errors.New("no valid user found")
+	}
+	userList = userList[:userListLength]
+
+	// 开启事务，开始数据库操作
 	a.tx = dao.DB.Begin()
 	defer a.tx.Rollback()
 
-	// 过滤无效数据
-	validFeishuGroupIdMap, err := a.filterInvalidGroups(GroupOpenIdToFeishuUserSliceMap)
+	// 获取飞书部门 OpenID 与基础组的映射关系
+	feishuGroups, err := (service.FeishuGroupsSrv{DB: a.tx}).GetAll(daoUtil.LockForShare)
 	if err != nil {
 		return err
 	}
-	a.filterInvalidUsers(GroupOpenIdToFeishuUserSliceMap)
+	groupMap := make(map[string]uint, len(feishuGroups))
+	for _, fsGroup := range feishuGroups {
+		groupMap[fsGroup.OpenDepartmentId] = fsGroup.GID
+	}
 
-	// 转换数据
-	GroupDaoIdToFeishuUserSliceMap := a.convertApiDataToGroupIdKeyMap(GroupOpenIdToFeishuUserSliceMap, validFeishuGroupIdMap)
-	UserPhoneToRelatedUserInfoMap := a.convertReverseMap(GroupDaoIdToFeishuUserSliceMap)
-
-	// 将数据同步入数据库
-	if err = a.doSyncUsers(UserPhoneToRelatedUserInfoMap); err != nil {
+	// 同步用户列表
+	if err = a.doSyncUsers(userList); err != nil {
 		return err
 	}
-	if err = a.doSyncUserGroups(UserPhoneToRelatedUserInfoMap); err != nil {
+
+	// 同步用户组
+	if err = a.doSyncUserGroups(userList, groupMap); err != nil {
 		return err
 	}
+
+	// 提交事务
 	if err = a.tx.Commit().Error; err != nil {
 		return err
 	}
 
+	// 计算同步耗时
 	a.Cost = time.Now().Sub(startAt)
 	return nil
 }
@@ -91,158 +113,21 @@ func (a *UserSyncProcessor) PrintSyncResult() {
 		a.createdUser, a.frozenUser, a.unFrozenUser, a.createdUserGroup, a.deletedUserGroup)
 }
 
-func (a *UserSyncProcessor) downloadUserList() (map[string][]feishuApi.User, error) {
-	return Api.LoadUserList()
-}
-
-// 过滤无效组，并返回有效组映射 飞书 OpenID ==> dao.BaseGroup.ID
-func (a *UserSyncProcessor) filterInvalidGroups(feishuUserList map[string][]feishuApi.User) (map[string]uint, error) {
-	var openID = make([]string, len(feishuUserList))
-	i := 0
-	for k := range feishuUserList {
-		openID[i] = k
-		i++
-	}
-	validGroups, err := service.FeishuGroupsSrv{DB: a.tx}.GetByOpenID(openID, daoUtil.LockForShare)
-	if err != nil {
-		return nil, err
-	}
-	var validGroupsMap = make(map[string]uint, len(validGroups))
-	for _, group := range validGroups {
-		validGroupsMap[group.OpenDepartmentId] = group.GID
-	}
-	var invalidOpenID = list.New() // string
-	for k := range feishuUserList {
-		if _, ok := validGroupsMap[k]; ok {
-			goto nextGroup
-		}
-		invalidOpenID.PushBack(k)
-	nextGroup:
-	}
-	el := invalidOpenID.Front()
-	for el != nil {
-		delete(feishuUserList, el.Value.(string))
-		el = el.Next()
-	}
-	return validGroupsMap, nil
-}
-
-// 过滤无效用户
-func (a *UserSyncProcessor) filterInvalidUsers(feishuUserList map[string][]feishuApi.User) {
-	for k, users := range feishuUserList {
-		var lens int
-		for i, user := range users {
-			if !user.Status.IsActivated || user.Status.IsFrozen || user.Status.IsResigned || user.Mobile == "" || // 账号未异常
-				user.EmployeeType != 1 { // 仅允许正式员工状态账号
-				users[i].Status.IsActivated = false
-			} else {
-				lens++
-			}
-		}
-		var filteredList = make([]feishuApi.User, lens)
-		lens = 0
-		for _, user := range users {
-			if user.Status.IsActivated {
-				filteredList[lens] = user
-				lens++
-			}
-		}
-		feishuUserList[k] = filteredList
-	}
-}
-
-// 转换数据为 dao.BaseGroup.ID ==> []dao.User
-func (a *UserSyncProcessor) convertApiDataToGroupIdKeyMap(feishuUserList map[string][]feishuApi.User, validGroupsMap map[string]uint) map[uint][]dao.User {
-	var filteredData = make(map[uint][]dao.User, len(feishuUserList))
-	for openID, users := range feishuUserList {
-		dbUserList := make([]dao.User, len(users))
-		for i, user := range users {
-			dbUserList[i] = dao.User{
-				Name:  user.Name,
-				Phone: user.Mobile,
-			}
-		}
-		filteredData[validGroupsMap[openID]] = dbUserList
-	}
-	return filteredData
-}
-
-// 反转映射关系，以 dao.User.Phone 为 key
-func (a *UserSyncProcessor) convertReverseMap(filteredData map[uint][]dao.User) map[string]*RelatedUserInfo {
-	var lens int
-	for _, users := range filteredData {
-		lens += len(users)
-	}
-	var reserveData = make(map[string]*RelatedUserInfo, lens)
-	for gid, users := range filteredData {
-		for _, user := range users {
-			if _, ok := reserveData[user.Phone]; ok {
-				reserveData[user.Phone].Departments = append(reserveData[user.Phone].Departments, gid)
-			} else {
-				reserveData[user.Phone] = &RelatedUserInfo{
-					Data:        user,
-					Departments: []uint{gid},
-				}
-			}
-		}
-	}
-	return reserveData
-}
-
 // 数据库操作：创建不存在的用户，解冻已冻结用户，冻结不在列表中的用户
-func (a *UserSyncProcessor) doSyncUsers(reserveData map[string]*RelatedUserInfo) error {
-	var allPhone = make([]string, len(reserveData))
-	i := 0
-	for phone := range reserveData {
-		allPhone[i] = phone
-		i++
+func (a *UserSyncProcessor) doSyncUsers(userList []*User) error {
+	// 读取已存在用户
+	var allPhone = make([]string, len(userList))
+	for i, user := range userList {
+		allPhone[i] = user.Data.Mobile
 	}
 	userSrv := service.UserSrv{DB: a.tx}
+	// 此处 sql 指定了返回数据顺序与输入号码数组顺序一致，见 dao 函数
 	existUsers, err := userSrv.GetUnscopedUserByPhoneSlice(allPhone)
 	if err != nil {
 		return err
 	}
-	a.createdUser = len(allPhone) - len(existUsers)
-	for _, exUser := range existUsers {
-		if exUser.DeletedAt.Valid {
-			a.unFrozenUser++
-		}
-		reserveData[exUser.Phone].Data.ID = exUser.ID
-	}
-	if a.createdUser > 0 {
-		var userToCreate = make([]dao.User, a.createdUser)
-		i = 0
-		for _, phone := range allPhone {
-			for _, exUser := range existUsers {
-				if phone == exUser.Phone {
-					goto nextUser
-				}
-			}
-			userToCreate[i] = reserveData[phone].Data
-			i++
-		nextUser:
-		}
-		if err = userSrv.CreateAll(userToCreate); err != nil {
-			return err
-		}
-		for _, user := range userToCreate { // 回填 Uid
-			reserveData[user.Phone].Data.ID = user.ID
-		}
-	}
-	if a.unFrozenUser > 0 {
-		var userToUnfroze = make([]uint, a.unFrozenUser)
-		i = 0
-		for _, exUser := range existUsers {
-			if exUser.DeletedAt.Valid {
-				userToUnfroze[i] = exUser.ID
-				i++
-			}
-		}
-		if err = userSrv.UnFrozeByIDSlice(userToUnfroze); err != nil {
-			return err
-		}
-	}
 
+	// 冻结不在列表但在数据库中未冻结的用户
 	invalidUsers, err := userSrv.GetUserNotInPhoneSlice(allPhone)
 	if err != nil {
 		return err
@@ -250,7 +135,6 @@ func (a *UserSyncProcessor) doSyncUsers(reserveData map[string]*RelatedUserInfo)
 	if len(invalidUsers) > 0 {
 		var invalidUID = make([]uint, len(invalidUsers))
 		for i, user := range invalidUsers {
-			delete(reserveData, user.Phone)
 			invalidUID[i] = user.ID
 		}
 		if err = userSrv.FrozeByIDSlice(invalidUID); err != nil {
@@ -259,62 +143,160 @@ func (a *UserSyncProcessor) doSyncUsers(reserveData map[string]*RelatedUserInfo)
 		a.frozenUser = len(invalidUID)
 	}
 
+	// 对比数据。此处不考虑手机号重复的情况，届时将 panic
+	// 此处依赖 []*User 中的元素为指针
+	a.createdUser = len(allPhone) - len(existUsers)
+	var userToCreate []*User
+	var userToUnFroze list.List // uint
+	if a.createdUser > 0 {
+		userToCreate = make([]*User, a.createdUser)
+	}
+	if len(existUsers) == 0 {
+		for i, user := range userList {
+			userToCreate[i] = user
+		}
+	} else {
+		var exUserIndex int
+		var userToCreateIndex int
+		userModel := &existUsers[0]
+		for _, user := range userList {
+			if userModel != nil && user.Data.Mobile == userModel.Phone {
+				user.ID = userModel.ID
+				if userModel.DeletedAt.Valid {
+					userToUnFroze.PushBack(userModel.ID)
+				}
+
+				exUserIndex++
+				if exUserIndex >= len(existUsers) {
+					userModel = nil
+				} else {
+					userModel = &existUsers[exUserIndex]
+				}
+			} else {
+				userToCreate[userToCreateIndex] = user
+				userToCreateIndex++
+			}
+		}
+	}
+
+	// 将对比结果写入数据库
+	if len(userToCreate) > 0 {
+		userModelToCreate := make([]dao.User, len(userToCreate))
+		for i, user := range userToCreate {
+			userModelToCreate[i] = user.Model()
+		}
+		if err = userSrv.CreateAll(userModelToCreate); err != nil {
+			return err
+		}
+		// 回填新用户 uid
+		for i, userModel := range userModelToCreate {
+			userToCreate[i].ID = userModel.ID
+		}
+	}
+	if userToUnFroze.Len() > 0 {
+		var idSlice = make([]uint, userToUnFroze.Len())
+		el := userToUnFroze.Front()
+		for i := 0; el != nil; i++ {
+			idSlice[i] = el.Value.(uint)
+			el = el.Next()
+		}
+		if err = userSrv.UnFrozeByIDSlice(idSlice); err != nil {
+			return err
+		}
+	}
+
 	return nil
 }
 
 // 数据库操作：同步用户部门关系
-func (a *UserSyncProcessor) doSyncUserGroups(reserveData map[string]*RelatedUserInfo) error {
+func (a *UserSyncProcessor) doSyncUserGroups(userList []*User, groupMap map[string]uint) error {
 	userGroupSrv := service.UserGroupsSrv{DB: a.tx}
+	// 此处数据已按照 uid,gid 排序
 	existUserGroups, err := userGroupSrv.GetAll()
 	if err != nil {
 		return err
 	}
-	var userGroupsToAdd = list.New()
-	var userGroupsToDelete = list.New() // uint
-	var exUserGroupMap = make(map[uint][]dao.UserGroups, len(reserveData))
-	for _, exUserGroup := range existUserGroups {
-		exUserGroupMap[exUserGroup.UID] = append(exUserGroupMap[exUserGroup.UID], exUserGroup)
+	var exUserGroupMap map[uint][]dao.UserGroups
+
+	// 处理特殊情况
+	if len(existUserGroups) == 0 {
+		var length int
+		var modelSlice = make([][]dao.UserGroups, len(userList))
+		for i, user := range userList {
+			userDepartmentModels := user.DepartmentModels(user.ID, groupMap)
+			length += len(userDepartmentModels)
+			modelSlice[i] = userDepartmentModels
+		}
+		models := make([]dao.UserGroups, length)
+		length = 0
+		for _, modelSliceEl := range modelSlice {
+			for _, userGroup := range modelSliceEl {
+				models[length] = userGroup
+				length++
+			}
+		}
+		return userGroupSrv.CreateAll(models)
 	}
-	for _, user := range reserveData {
-		userJwtRedis := redis.NewUserJwt(user.Data.ID)
-		for _, userDepartment := range user.Departments {
-			exGroups, ok := exUserGroupMap[user.Data.ID]
-			if ok {
-				for _, exGroup := range exGroups {
-					if userDepartment == exGroup.GID {
-						goto nextUserDepartment
-					}
+
+	// 转换数据库数据为 uid 映射
+	exUserGroupMap = make(map[uint][]dao.UserGroups, len(userList)-a.createdUser-a.frozenUser)
+	var beginIndex int
+	var lastUID uint
+	lastUID = existUserGroups[0].UID
+	for i, userGroup := range existUserGroups {
+		if userGroup.UID != lastUID {
+			exUserGroupMap[lastUID] = existUserGroups[beginIndex:i]
+			beginIndex = i
+			lastUID = userGroup.UID
+		}
+	}
+	exUserGroupMap[lastUID] = existUserGroups[beginIndex:]
+
+	// 计算差异
+	var userGroupsToAdd = list.New()    // dao.UserGroups
+	var userGroupsToDelete = list.New() // uint
+	for _, user := range userList {
+		exUserGroups := exUserGroupMap[user.ID]
+		currentUserGroups := user.Departments(groupMap)
+		var userGroupChanged bool
+		for _, gid := range currentUserGroups {
+			for _, exUserGroup := range exUserGroups {
+				if gid == exUserGroup.GID {
+					goto nextUserGroup
 				}
 			}
 			userGroupsToAdd.PushBack(dao.UserGroups{
-				UID: user.Data.ID,
-				GID: userDepartment,
+				UID: user.ID,
+				GID: gid,
 			})
-			_ = userJwtRedis.Clear()
-		nextUserDepartment:
+			userGroupChanged = true
+		nextUserGroup:
 		}
-		for _, exUserDepartment := range exUserGroupMap[user.Data.ID] {
-			for _, userDepartment := range user.Departments {
-				if userDepartment == exUserDepartment.GID {
-					goto nextExUserDepartment
+		for _, exUserGroup := range existUserGroups {
+			for _, gid := range currentUserGroups {
+				if exUserGroup.GID == gid {
+					goto nextExUserGroup
 				}
 			}
-			userGroupsToDelete.PushBack(exUserDepartment.ID)
-			err = userJwtRedis.Clear()
-			if err != nil && err != redis.Nil {
-				return err
+			userGroupsToDelete.PushBack(exUserGroup)
+			userGroupChanged = true
+		nextExUserGroup:
+		}
+		if userGroupChanged {
+			err := redis.NewUserJwt(user.ID).Clear()
+			if err != nil {
+				log.Errorf("移除用户 %d 登录状态失败: %v", user.ID, err)
 			}
-		nextExUserDepartment:
 		}
 	}
+
+	// 存储计算结果
 	if userGroupsToAdd.Len() != 0 {
 		a.createdUserGroup = userGroupsToAdd.Len()
 		userGroupsToAddModels := make([]dao.UserGroups, userGroupsToAdd.Len())
 		el := userGroupsToAdd.Front()
-		i := 0
-		for el != nil {
+		for i := 0; el != nil; i++ {
 			userGroupsToAddModels[i] = el.Value.(dao.UserGroups)
-			i++
 			el = el.Next()
 		}
 		if err = userGroupSrv.CreateAll(userGroupsToAddModels); err != nil {

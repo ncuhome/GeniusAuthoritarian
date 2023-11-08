@@ -4,6 +4,7 @@ import (
 	"github.com/ncuhome/GeniusAuthoritarian/internal/db/dto"
 	"github.com/ncuhome/GeniusAuthoritarian/pkg/departments"
 	"gorm.io/gorm"
+	"gorm.io/gorm/clause"
 )
 
 type User struct {
@@ -57,7 +58,9 @@ func (a *User) FirstPhoneByID(tx *gorm.DB) error {
 
 func (a *User) GetUnscopedByPhoneSlice(tx *gorm.DB, phone []string) ([]User, error) {
 	var t []User
-	return t, tx.Model(a).Unscoped().Where("phone IN ?", phone).Find(&t).Error
+	return t, tx.Model(a).Unscoped().Where("phone IN ?", phone).
+		Clauses(clause.OrderBy{Expression: clause.Expr{SQL: "FIELD(phone,?)", Vars: []interface{}{phone}, WithoutParentheses: true}}).
+		Find(&t).Error
 }
 
 func (a *User) GetNotInPhoneSlice(tx *gorm.DB, phone []string) ([]User, error) {

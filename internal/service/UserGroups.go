@@ -36,7 +36,7 @@ func (a UserGroupsSrv) GetForAppCode(uid uint, appCode string) ([]string, error)
 }
 
 func (a UserGroupsSrv) GetAll() ([]dao.UserGroups, error) {
-	return (&dao.UserGroups{}).GetAllUnfrozen(a.DB)
+	return (&dao.UserGroups{}).GetAllNotFrozen(a.DB)
 }
 
 func (a UserGroupsSrv) CreateAll(data []dao.UserGroups) error {

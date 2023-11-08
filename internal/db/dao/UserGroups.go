@@ -66,11 +66,11 @@ func (a *UserGroups) GetUserGroupsLimited(tx *gorm.DB, groups []string) ([]BaseG
 		Find(&t).Error
 }
 
-func (a *UserGroups) GetAllUnfrozen(tx *gorm.DB) ([]UserGroups, error) {
+func (a *UserGroups) GetAllNotFrozen(tx *gorm.DB) ([]UserGroups, error) {
 	var t []UserGroups
 	tx = tx.Model(a)
 	tx = a.sqlJoinUsers(tx)
-	return t, tx.Find(&t).Error
+	return t, tx.Order("uid,gid").Find(&t).Error
 }
 
 func (a *UserGroups) DeleteByIDSlice(tx *gorm.DB, ids []uint) error {
