@@ -56,12 +56,8 @@ func CheckBaseGroups() error {
 
 	if notExistGroups.Len() != 0 {
 		var newGroups = make([]dao.BaseGroup, notExistGroups.Len())
-		el := notExistGroups.Front()
-		i := 0
-		for el != nil {
+		for i, el := 0, notExistGroups.Front(); el != nil; i, el = i+1, el.Next() {
 			newGroups[i].Name = el.Value.(string)
-			el = el.Next()
-			i++
 		}
 
 		err = service.BaseGroups.CreateGroups(newGroups)

@@ -129,16 +129,14 @@ func (f Fs) doLoadUserListRequest(departmentID, pageToken string, pageSize uint)
 	}
 	var data ListUserResp
 	query := map[string]interface{}{
-		"page_size": pageSize,
-	}
-	if departmentID != "" {
-		query["department_id"] = departmentID
+		"department_id": departmentID,
+		"page_size":     pageSize,
 	}
 	if pageToken != "" {
 		query["page_token"] = pageToken
 	}
 	return &data, f.doRequest("GET", &data, &tool.DoHttpReq{
-		Url: "https://open.feishu.cn/open-apis/contact/v3/users",
+		Url: "https://open.feishu.cn/open-apis/contact/v3/find_by_department",
 		Header: map[string]interface{}{
 			"Authorization": "Bearer " + tenantToken,
 			"Content-Type":  "application/json",
@@ -165,6 +163,21 @@ func (f Fs) doLoadAllUserListRequest(departmentID string) ([]User, error) {
 	return r, nil
 }
 
-func (f Fs) LoadUserList() ([]User, error) {
-	return f.doLoadAllUserListRequest("")
+// LoadUserList 键名为部门 OpenID，只能挨个部门获取用户列表
+func (f Fs) LoadUserList() (map[string][]User, error) {
+	departments, err := f.LoadDepartmentList()
+	if err != nil {
+		return nil, err
+	}
+
+	result := make(map[string][]User, len(departments.Items))
+	for _, department := range departments.Items {
+		var list []User
+		list, err = f.doLoadAllUserListRequest(department.OpenDepartmentId)
+		if err != nil {
+			return nil, err
+		}
+		result[department.OpenDepartmentId] = list
+	}
+	return result, nil
 }

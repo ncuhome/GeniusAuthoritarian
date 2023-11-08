@@ -2,7 +2,6 @@ package feishu
 
 import (
 	"container/list"
-	"errors"
 	"github.com/Mmx233/daoUtil"
 	"github.com/ncuhome/GeniusAuthoritarian/internal/db/dao"
 	"github.com/ncuhome/GeniusAuthoritarian/internal/db/redis"
@@ -51,28 +50,36 @@ type RelatedUserInfo struct {
 }
 
 func (a *UserSyncProcessor) Run() error {
-	userDataList, err := Api.LoadUserList()
+	userDataRaw, err := Api.LoadUserList()
 	if err != nil {
 		return err
 	}
 
 	var startAt = time.Now()
 
-	// 转换数据为操作结构体并去除无效用户
-	userList := make([]*User, len(userDataList))
-	var userListLength int
-	for _, userData := range userDataList {
-		userData := userData
-		newUser := NewUser(&userData)
-		if newUser.IsInvalid() {
-			userList[userListLength] = newUser
-			userListLength++
+	// 去除重复用户与无效用户，转换数据为操作结构体
+	var userMapLength int
+	for _, userSlice := range userDataRaw {
+		userMapLength += len(userSlice)
+	}
+	var userMap = make(map[string]struct{}, userMapLength)
+	var userDataList list.List
+	for _, userSlice := range userDataRaw {
+		for _, userData := range userSlice {
+			if _, ok := userMap[userData.UserId]; !ok {
+				userMap[userData.UserId] = struct{}{}
+				userData := userData
+				newUser := NewUser(&userData)
+				if newUser.IsInvalid() {
+					userDataList.PushBack(newUser)
+				}
+			}
 		}
 	}
-	if userListLength == 0 {
-		return errors.New("no valid user found")
+	userList := make([]*User, userDataList.Len())
+	for i, el := 0, userDataList.Front(); el != nil; i, el = i+1, el.Next() {
+		userList[i] = el.Value.(*User)
 	}
-	userList = userList[:userListLength]
 
 	// 开启事务，开始数据库操作
 	a.tx = dao.DB.Begin()
@@ -195,10 +202,8 @@ func (a *UserSyncProcessor) doSyncUsers(userList []*User) error {
 	}
 	if userToUnFroze.Len() > 0 {
 		var idSlice = make([]uint, userToUnFroze.Len())
-		el := userToUnFroze.Front()
-		for i := 0; el != nil; i++ {
+		for i, el := 0, userToUnFroze.Front(); el != nil; i, el = i+1, el.Next() {
 			idSlice[i] = el.Value.(uint)
-			el = el.Next()
 		}
 		if err = userSrv.UnFrozeByIDSlice(idSlice); err != nil {
 			return err
@@ -294,10 +299,8 @@ func (a *UserSyncProcessor) doSyncUserGroups(userList []*User, groupMap map[stri
 	if userGroupsToAdd.Len() != 0 {
 		a.createdUserGroup = userGroupsToAdd.Len()
 		userGroupsToAddModels := make([]dao.UserGroups, userGroupsToAdd.Len())
-		el := userGroupsToAdd.Front()
-		for i := 0; el != nil; i++ {
+		for i, el := 0, userGroupsToAdd.Front(); el != nil; i, el = i+1, el.Next() {
 			userGroupsToAddModels[i] = el.Value.(dao.UserGroups)
-			el = el.Next()
 		}
 		if err = userGroupSrv.CreateAll(userGroupsToAddModels); err != nil {
 			return err
@@ -306,12 +309,8 @@ func (a *UserSyncProcessor) doSyncUserGroups(userList []*User, groupMap map[stri
 	if userGroupsToDelete.Len() != 0 {
 		a.deletedUserGroup = userGroupsToDelete.Len()
 		userGroupsToDeleteSlice := make([]uint, userGroupsToDelete.Len())
-		el := userGroupsToDelete.Front()
-		i := 0
-		for el != nil {
+		for i, el := 0, userGroupsToDelete.Front(); el != nil; i, el = i+1, el.Next() {
 			userGroupsToDeleteSlice[i] = el.Value.(uint)
-			i++
-			el = el.Next()
 		}
 		if err = userGroupSrv.DeleteByIDSlice(userGroupsToDeleteSlice); err != nil {
 			return err

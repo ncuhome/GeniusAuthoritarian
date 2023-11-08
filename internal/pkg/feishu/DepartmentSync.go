@@ -100,12 +100,8 @@ func doDepartmentSync() error {
 
 	if toDelete.Len() != 0 {
 		var toDeleteSlice = make([]uint, toDelete.Len())
-		el := toDelete.Front()
-		i = 0
-		for el != nil {
+		for i, el := 0, toDelete.Front(); el != nil; i, el = i+1, el.Next() {
 			toDeleteSlice[i] = el.Value.(uint)
-			i++
-			el = el.Next()
 		}
 		if err = srv.DeleteSelected(toDeleteSlice); err != nil {
 			return err

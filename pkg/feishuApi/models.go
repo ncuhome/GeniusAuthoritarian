@@ -74,34 +74,36 @@ type UserInfoResp struct {
 	User User `json:"user"`
 }
 
+type Department struct {
+	Name     string `json:"name"`
+	I18NName struct {
+		ZhCn string `json:"zh_cn"`
+		JaJp string `json:"ja_jp"`
+		EnUs string `json:"en_us"`
+	} `json:"i18n_name"`
+	ParentDepartmentId string   `json:"parent_department_id"`
+	DepartmentId       string   `json:"department_id"`
+	OpenDepartmentId   string   `json:"open_department_id"`
+	LeaderUserId       string   `json:"leader_user_id"`
+	ChatId             string   `json:"chat_id"`
+	Order              string   `json:"order"`
+	UnitIds            []string `json:"unit_ids"`
+	MemberCount        int      `json:"member_count"`
+	Status             struct {
+		IsDeleted bool `json:"is_deleted"`
+	} `json:"status"`
+	CreateGroupChat bool `json:"create_group_chat"`
+	Leaders         []struct {
+		LeaderType int    `json:"leaderType"`
+		LeaderID   string `json:"leaderID"`
+	} `json:"leaders"`
+	DepartmentHrbps []string `json:"department_hrbps"`
+}
+
 type ListDepartmentResp struct {
-	HasMore   bool   `json:"has_more"`
-	PageToken string `json:"page_token"`
-	Items     []struct {
-		Name     string `json:"name"`
-		I18NName struct {
-			ZhCn string `json:"zh_cn"`
-			JaJp string `json:"ja_jp"`
-			EnUs string `json:"en_us"`
-		} `json:"i18n_name"`
-		ParentDepartmentId string   `json:"parent_department_id"`
-		DepartmentId       string   `json:"department_id"`
-		OpenDepartmentId   string   `json:"open_department_id"`
-		LeaderUserId       string   `json:"leader_user_id"`
-		ChatId             string   `json:"chat_id"`
-		Order              string   `json:"order"`
-		UnitIds            []string `json:"unit_ids"`
-		MemberCount        int      `json:"member_count"`
-		Status             struct {
-			IsDeleted bool `json:"is_deleted"`
-		} `json:"status"`
-		CreateGroupChat bool `json:"create_group_chat"`
-		Leaders         []struct {
-			LeaderType int    `json:"leaderType"`
-			LeaderID   string `json:"leaderID"`
-		} `json:"leaders"`
-		DepartmentHrbps []string `json:"department_hrbps"`
-	} `json:"items"`
+	HasMore   bool         `json:"has_more"`
+	PageToken string       `json:"page_token"`
+	Items     []Department `json:"items"`
 }
 
 type ListUserResp struct {
