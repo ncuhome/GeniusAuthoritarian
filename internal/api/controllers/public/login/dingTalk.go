@@ -30,13 +30,7 @@ func loginDingTalk(c *gin.Context, code string) *dto.UserThirdPartyIdentity {
 		phone = "+86" + phone
 	}
 
-	var avatarUrl string
-	if userInfo.Body.AvatarUrl != nil {
-		avatarUrl = *userInfo.Body.AvatarUrl
-	}
-
 	return &dto.UserThirdPartyIdentity{
-		Phone:     phone,
-		AvatarUrl: avatarUrl,
+		Phone: phone,
 	}
 }

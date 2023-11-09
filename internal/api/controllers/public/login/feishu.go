@@ -14,7 +14,6 @@ func loginFeishu(c *gin.Context, code string) *dto.UserThirdPartyIdentity {
 		return nil
 	}
 	return &dto.UserThirdPartyIdentity{
-		Phone:     user.Mobile,
-		AvatarUrl: user.AvatarUrl,
+		Phone: user.Mobile,
 	}
 }

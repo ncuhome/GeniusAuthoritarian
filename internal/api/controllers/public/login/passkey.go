@@ -109,7 +109,7 @@ func FinishPasskeyLogin(c *gin.Context) {
 		IP:        c.ClientIP(),
 		Groups:    groups,
 		AppID:     appInfo.ID,
-		AvatarUrl: "",
+		AvatarUrl: user.AvatarUrl,
 	}
 
 	token, err := jwt.GenerateLoginToken(claims)

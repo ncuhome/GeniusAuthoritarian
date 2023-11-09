@@ -109,11 +109,10 @@ func checkUserPermission(c *gin.Context, user *dao.User, appCode string, permitA
 }
 
 type ThirdPartyLoginContext struct {
-	User      *dao.User
-	AppInfo   *dao.App
-	Groups    []string
-	Ip        string
-	AvatarUrl string
+	User    *dao.User
+	AppInfo *dao.App
+	Groups  []string
+	Ip      string
 }
 
 // 根据数据完成请求响应
@@ -124,7 +123,7 @@ func callThirdPartyLoginResult(c *gin.Context, info ThirdPartyLoginContext) {
 		IP:        info.Ip,
 		Groups:    info.Groups,
 		AppID:     info.AppInfo.ID,
-		AvatarUrl: info.AvatarUrl,
+		AvatarUrl: info.User.AvatarUrl,
 	}
 
 	if info.User.MFA == "" {
@@ -186,11 +185,10 @@ func ThirdPartySelfLogin(c *gin.Context) {
 	}
 
 	callThirdPartyLoginResult(c, ThirdPartyLoginContext{
-		User:      user,
-		AppInfo:   appInfo,
-		Groups:    nil,
-		Ip:        c.ClientIP(),
-		AvatarUrl: userIdentity.AvatarUrl,
+		User:    user,
+		AppInfo: appInfo,
+		Groups:  nil,
+		Ip:      c.ClientIP(),
 	})
 }
 
@@ -244,10 +242,9 @@ func ThirdPartyLogin(c *gin.Context) {
 	}
 
 	callThirdPartyLoginResult(c, ThirdPartyLoginContext{
-		User:      user,
-		AppInfo:   appInfo,
-		Groups:    groups,
-		Ip:        c.ClientIP(),
-		AvatarUrl: userIdentity.AvatarUrl,
+		User:    user,
+		AppInfo: appInfo,
+		Groups:  groups,
+		Ip:      c.ClientIP(),
 	})
 }

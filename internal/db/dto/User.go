@@ -1,8 +1,7 @@
 package dto
 
 type UserThirdPartyIdentity struct {
-	Phone     string
-	AvatarUrl string
+	Phone string
 }
 
 type UserProfile struct {
