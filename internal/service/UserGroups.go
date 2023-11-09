@@ -24,7 +24,11 @@ func (a UserGroupsSrv) IsCenterMember(uid uint) (bool, error) {
 	}).ExistByName(a.DB, departments.UCe)
 }
 
-func (a UserGroupsSrv) GetForUser(uid uint) ([]string, error) {
+func (a UserGroupsSrv) GetIdsForUser(uid uint) ([]uint, error) {
+	return (&dao.UserGroups{UID: uid}).GetGetUserGroupIdsByUID(a.DB)
+}
+
+func (a UserGroupsSrv) GetNamesForUser(uid uint) ([]string, error) {
 	return (&dao.UserGroups{UID: uid}).GetUserGroupNamesByUID(a.DB)
 }
 

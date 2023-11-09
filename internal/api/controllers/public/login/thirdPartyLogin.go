@@ -82,7 +82,7 @@ func checkUserPermission(c *gin.Context, user *dao.User, appCode string, permitA
 		callback.Error(c, callback.ErrDBOperation, err)
 		return
 	} else if isCenterMember {
-		groups, err = service.UserGroups.GetForUser(user.ID)
+		groups, err = service.UserGroups.GetNamesForUser(user.ID)
 		if err != nil {
 			callback.Error(c, callback.ErrDBOperation, err)
 			return

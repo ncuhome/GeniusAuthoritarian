@@ -46,6 +46,11 @@ func (a *UserGroups) GetUserGroupNamesByUID(tx *gorm.DB) ([]string, error) {
 	return t, a.sqlGetUserGroupsByUID(tx).Select("base_groups.name").Find(&t).Error
 }
 
+func (a *UserGroups) GetGetUserGroupIdsByUID(tx *gorm.DB) ([]uint, error) {
+	var t []uint
+	return t, a.sqlGetUserGroupsByUID(tx).Select("base_groups.id").Find(&t).Error
+}
+
 func (a *UserGroups) GetUserGroupsForShowByUID(tx *gorm.DB) ([]dto.Group, error) {
 	var t = make([]dto.Group, 0)
 	return t, a.sqlGetUserGroupsByUID(tx).Find(&t).Error

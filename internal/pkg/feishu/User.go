@@ -67,7 +67,7 @@ func (u User) SyncDepartments(tx *gorm.DB, uid uint, groupMap map[string]uint) e
 		return err
 	}
 
-	existDepartments, err := userGroupSrv.GetForUser(uid)
+	existDepartments, err := userGroupSrv.GetIdsForUser(uid)
 	if err != nil {
 		return err
 	}
@@ -75,6 +75,20 @@ func (u User) SyncDepartments(tx *gorm.DB, uid uint, groupMap map[string]uint) e
 	gidToAddLength := len(departments) - len(existDepartments)
 	if gidToAddLength > 0 {
 		var gidToAdd = make([]uint, gidToAddLength)
+		var gidToAddIndex int
+		for _, gid := range departments {
+			for _, existGid := range existDepartments {
+				if existGid == gid {
+					goto next
+				}
+			}
+			gidToAdd[gidToAddIndex] = gid
+			gidToAddIndex++
+			if gidToAddIndex == gidToAddLength {
+				break
+			}
+		next:
+		}
 		err = userGroupSrv.CreateAll(u.genDepartmentModels(uid, gidToAdd))
 		if err != nil {
 			return err

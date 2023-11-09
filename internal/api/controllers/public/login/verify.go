@@ -128,7 +128,7 @@ func Login(c *gin.Context) {
 	}
 
 	userGroupSrv := service.UserGroupsSrv{DB: tx}
-	groups, err := userGroupSrv.GetForUser(claims.UID)
+	groups, err := userGroupSrv.GetNamesForUser(claims.UID)
 	if err != nil {
 		callback.Error(c, callback.ErrDBOperation, err)
 		return
