@@ -27,7 +27,9 @@ func (u User) Model() dao.User {
 	}
 }
 func (u User) IsModelEmpty() bool {
-	return u.Data.Name == "" || u.Data.Mobile == "" || u.Data.Avatar.AvatarOrigin == ""
+	return u.Data.Name == "" &&
+		u.Data.Mobile == "" &&
+		u.Data.Avatar.AvatarOrigin == ""
 }
 
 func (u User) IsInvalid() bool {
