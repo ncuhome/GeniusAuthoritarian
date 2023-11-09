@@ -152,23 +152,23 @@ func userUpdated(c *gin.Context, logger *log.Entry, event json.RawMessage) {
 		} else if err != nil {
 			callback.Error(c, callback.ErrDBOperation, err)
 			return
-		} else if userModel.DeletedAt.Valid {
-			err = userSrv.UnFrozeByIDSlice([]uint{userModel.ID})
-			if err != nil {
-				callback.Error(c, callback.ErrDBOperation, err)
-				return
-			}
-			logger.Infoln("用户已解冻")
 		} else {
-			if !oldUser.IsModelEmpty() {
-				userModelNew := user.Model()
-				userModelNew.ID = userModel.ID
-				if err = userModelNew.UpdateAllInfoByID(userSrv.DB).Error; err != nil {
+			if userModel.DeletedAt.Valid {
+				err = userSrv.UnFrozeByIDSlice([]uint{userModel.ID})
+				if err != nil {
 					callback.Error(c, callback.ErrDBOperation, err)
 					return
 				}
-				logger.Infoln("用户信息已更新")
+				logger.Infoln("用户已解冻")
 			}
+
+			userModelNew := user.Model()
+			userModelNew.ID = userModel.ID
+			if err = userModelNew.UpdateAllInfoByID(userSrv.DB).Error; err != nil {
+				callback.Error(c, callback.ErrDBOperation, err)
+				return
+			}
+			logger.Infoln("用户信息已更新")
 
 			if len(oldUser.Data.DepartmentIds) != 0 {
 				groupMap, err := (&service.FeishuGroupsSrv{DB: userSrv.DB}).GetGroupMap(daoUtil.LockForShare)

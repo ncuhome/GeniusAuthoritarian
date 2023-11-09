@@ -18,16 +18,12 @@ type User struct {
 	Data *feishuApi.User
 }
 
-// Model 注意需要同时修改下方的 IsModelEmpty
 func (u User) Model() dao.User {
 	return dao.User{
 		Name:      u.Data.Name,
 		Phone:     u.Data.Mobile,
 		AvatarUrl: u.Data.Avatar.AvatarOrigin,
 	}
-}
-func (u User) IsModelEmpty() bool {
-	return u.Data.Name == "" || u.Data.Mobile == "" || u.Data.Avatar.AvatarOrigin == ""
 }
 
 func (u User) IsInvalid() bool {
