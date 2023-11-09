@@ -24,7 +24,11 @@ import {
   FormControlLabel,
   Stack,
   Tooltip,
+  Avatar,
+  Typography,
+  Paper,
 } from "@mui/material";
+import { PermIdentity } from "@mui/icons-material";
 
 import { useUserApiV1 } from "@api/v1/user/hook";
 
@@ -113,22 +117,36 @@ export const Profile: FC = () => {
 
   return (
     <Container>
-      <Stack flexDirection={"row"} mt={"2rem"} mb={"1.2rem"}>
+      <Stack flexDirection={"row"} mt={"3rem"} mb={"2.3rem"}>
         <Avatar
+          component={Paper}
+          elevation={6}
           src={profile?.user.avatar_url}
           sx={{
-            height: 100,
-            width: 100,
+            height: 90,
+            width: 90,
           }}
         />
+        <Stack ml={3} width={"100%"} justifyContent={"space-between"}>
+          <Typography
+            variant={"h5"}
+            sx={{
+              fontWeight: 600,
+            }}
+          >
+            {profile?.user.name}
+          </Typography>
+          <Stack>
+            <Typography variant={"body2"} color={"text.secondary"}>
+              当前身份状态
+            </Typography>
+            <Stack flexDirection={"row"} mt={0.5}>
+              <PermIdentity />
+              <Typography ml={1}>{`${userGroups}组成员`}</Typography>
+            </Stack>
+          </Stack>
+        </Stack>
       </Stack>
-      {/*<Block title={"Profile"}>
-        <Grid container spacing={2} marginTop={0} marginBottom={3}>
-          <GridTextField label={"姓名"} value={profile?.user.name} />
-          <GridTextField label={"电话"} value={profile?.user.phone} />
-          <GridTextField label={"身份组"} value={userGroups} />
-        </Grid>
-      </Block>*/}
 
       <Block title={"Security"}>
         <ChildBlock

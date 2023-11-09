@@ -8,7 +8,7 @@ declare namespace User {
     user: {
       id: number;
       name: string;
-      phone: string;
+      avatar_url: string;
       mfa: boolean;
       groups: Group[];
     };
