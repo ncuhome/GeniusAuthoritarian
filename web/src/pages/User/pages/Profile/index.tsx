@@ -113,13 +113,22 @@ export const Profile: FC = () => {
 
   return (
     <Container>
-      <Block title={"Profile"}>
+      <Stack flexDirection={"row"} mt={"2rem"} mb={"1.2rem"}>
+        <Avatar
+          src={profile?.user.avatar_url}
+          sx={{
+            height: 100,
+            width: 100,
+          }}
+        />
+      </Stack>
+      {/*<Block title={"Profile"}>
         <Grid container spacing={2} marginTop={0} marginBottom={3}>
           <GridTextField label={"姓名"} value={profile?.user.name} />
           <GridTextField label={"电话"} value={profile?.user.phone} />
           <GridTextField label={"身份组"} value={userGroups} />
         </Grid>
-      </Block>
+      </Block>*/}
 
       <Block title={"Security"}>
         <ChildBlock
@@ -130,12 +139,12 @@ export const Profile: FC = () => {
             <Stack flexDirection={"row"}>
               {u2fMethods.map((m) => (
                 <Tooltip
+                  key={m.value}
                   title={!(u2fStatus as any)[m.value] ? "未启用" : undefined}
                   placement={"top"}
                   arrow
                 >
                   <FormControlLabel
-                    key={m.value}
                     label={m.label}
                     control={
                       <Checkbox
