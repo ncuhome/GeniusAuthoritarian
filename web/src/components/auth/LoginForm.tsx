@@ -3,15 +3,18 @@ import { createUseQuery } from "@hooks/useQuery";
 import useMount from "@hooks/useMount";
 import { useNavigate } from "react-router-dom";
 import toast from "react-hot-toast";
-import feishuLogo from "@/assets/img/login/feishu.png";
-import dingLogo from "@/assets/img/login/ding.png";
-import passkeyLogo from "@/assets/img/login/passkeys.svg";
 import { ThrowError } from "@util/nav";
 import {
   coerceResponseToBase64Url,
   coerceToArrayBuffer,
   coerceToBase64Url,
 } from "@util/coerce";
+
+import feishuLogo from "@/assets/img/login/feishu.png";
+import webpFeishuLogo from "@/assets/img/login/feishu.webp";
+import dingLogo from "@/assets/img/login/ding.png";
+import webpDingLogo from "@/assets/img/login/ding.webp";
+import passkeyLogo from "@/assets/img/login/passkeys.svg";
 
 import LoginItem from "@components/auth/LoginItem";
 import { Stack, Box, Typography, List, Paper, Skeleton } from "@mui/material";
@@ -185,11 +188,13 @@ export const LoginForm: FC = () => {
         <List>
           <LoginItem
             logo={feishuLogo}
+            webpLogo={webpFeishuLogo}
             text={"飞书"}
             onClick={onGoFeishuLogin}
           />
           <LoginItem
             logo={dingLogo}
+            webpLogo={webpDingLogo}
             text={"钉钉"}
             onClick={onGoDingTalkLogin}
           />

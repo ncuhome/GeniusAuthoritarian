@@ -1,8 +1,11 @@
 import { FC } from "react";
 import { useNavigate } from "react-router-dom";
-import logo_white from "@/assets/img/logo-white.png";
-import logo_dark from "@/assets/img/logo-dark.png";
 import "./NavHeader.css";
+
+import logo_white from "@/assets/img/logo-white.png";
+import logo_white_webp from "@/assets/img/logo-white.webp";
+import logo_dark from "@/assets/img/logo-dark.png";
+import logo_dark_webp from "@/assets/img/logo-dark.webp";
 
 import {
   Box,
@@ -59,12 +62,21 @@ export const NavHeader: FC<Props> = ({
           display: { xs: "none", sm: "flex" },
           alignItems: "center",
           marginRight: "1rem",
-          "&>img": {
+          "&>picture": {
             height: "60%",
+            "&>img": {
+              height: "100%",
+            },
           },
         }}
       >
-        <img src={darkTheme ? logo_white : logo_dark} alt={"NCUHOME"} />
+        <picture>
+          <source
+            type="image/webp"
+            srcSet={darkTheme ? logo_white_webp : logo_dark_webp}
+          />
+          <img src={darkTheme ? logo_white : logo_dark} alt={"NCUHOME"} />
+        </picture>
       </Box>
 
       <Stack

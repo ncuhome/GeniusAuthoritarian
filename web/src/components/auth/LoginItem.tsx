@@ -1,4 +1,4 @@
-import { FC } from "react";
+import { FC, ReactNode } from "react";
 
 import {
   ListItem,
@@ -10,24 +10,42 @@ import {
 
 interface Props {
   logo: string;
+  webpLogo?: string;
   text: string;
   disableDivider?: boolean;
   onClick: () => void;
   sx?: SxProps;
 }
 
-export const LoginItem: FC<Props> = ({ logo, text, disableDivider, onClick, sx }) => {
+export const LoginItem: FC<Props> = ({
+  logo,
+  webpLogo,
+  text,
+  disableDivider,
+  onClick,
+  sx,
+}) => {
   return (
     <ListItem disablePadding divider={!disableDivider} sx={sx}>
       <ListItemButton onClick={onClick}>
         <ListItemIcon>
-          <img
+          <picture
             style={{
-              width: "1.8rem",
+              display: "inline-flex",
+              alignItems: "center",
             }}
-            src={logo}
-            alt={text}
-          />
+          >
+            {webpLogo ? (
+              <source type="image/webp" srcSet={webpLogo} />
+            ) : undefined}
+            <img
+              style={{
+                width: "1.8rem",
+              }}
+              src={logo}
+              alt={text}
+            />
+          </picture>
         </ListItemIcon>
         <ListItemText primary={text} />
       </ListItemButton>
