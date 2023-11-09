@@ -48,139 +48,146 @@ func Webhook(c *gin.Context) {
 
 	switch event.Header.EventType {
 	case "contact.user.deleted_v3":
-		var info feishuApi.UserDeletedEvent
-		err := json.Unmarshal(event.Event, &info)
-		if err != nil {
-			callback.Error(c, callback.ErrForm, err)
-			return
-		}
-		if info.Object.Mobile == "" {
-			logger.Errorln("电话号码为空")
-		} else {
-			logger = logger.WithFields(log.Fields{
-				"name":  info.Object.Name,
-				"phone": info.Object.Mobile,
-			})
-			userSrv, err := service.User.Begin()
-			if err != nil {
-				callback.Error(c, callback.ErrDBOperation, err)
-				return
-			}
-			defer userSrv.Rollback()
-			result := userSrv.FrozeByPhone(info.Object.Mobile)
-			if result.Error != nil || userSrv.Commit().Error != nil {
-				callback.Error(c, callback.ErrDBOperation, result.Error)
-				return
-			}
-			if result.RowsAffected != 0 {
-				logger.Infoln("离职已写入")
-			}
-		}
+		userDeleted(c, logger, event.Event)
 	case "contact.user.updated_v3":
-		var info feishuApi.UserUpdatedEvent
-		err := json.Unmarshal(event.Event, &info)
-		if err != nil {
-			callback.Error(c, callback.ErrForm, err)
-			return
-		}
-		if info.Object.Mobile == "" {
-			return
-		}
-		user := feishu.NewUser(&info.Object)
-		oldUser := feishu.NewUser(&info.OldObject)
-		oldUserModel := oldUser.Model()
+		userUpdated(c, logger, event.Event)
+	default:
+		logger.Warnf("未知的事件类型")
+	}
+	if c.IsAborted() {
+		return
+	}
+
+	c.JSON(200, gin.H{})
+}
+
+func userDeleted(c *gin.Context, logger *log.Entry, event json.RawMessage) {
+	var info feishuApi.UserDeletedEvent
+	err := json.Unmarshal(event, &info)
+	if err != nil {
+		callback.Error(c, callback.ErrForm, err)
+		return
+	}
+	if info.Object.Mobile == "" {
+		logger.Errorln("电话号码为空")
+	} else {
+		logger = logger.WithFields(log.Fields{
+			"name":  info.Object.Name,
+			"phone": info.Object.Mobile,
+		})
 		userSrv, err := service.User.Begin()
 		if err != nil {
 			callback.Error(c, callback.ErrDBOperation, err)
 			return
 		}
 		defer userSrv.Rollback()
-		logger = logger.WithFields(log.Fields{
-			"name":  user.Data.Name,
-			"phone": user.Data.Mobile,
-		})
-		if user.IsInvalid() {
-			result := userSrv.FrozeByPhone(user.Data.Mobile)
-			if result.Error != nil {
-				callback.Error(c, callback.ErrDBOperation, result.Error)
+		result := userSrv.FrozeByPhone(info.Object.Mobile)
+		if result.Error != nil || userSrv.Commit().Error != nil {
+			callback.Error(c, callback.ErrDBOperation, result.Error)
+			return
+		}
+		if result.RowsAffected != 0 {
+			logger.Infoln("离职已写入")
+		}
+	}
+}
+
+func userUpdated(c *gin.Context, logger *log.Entry, event json.RawMessage) {
+	var info feishuApi.UserUpdatedEvent
+	err := json.Unmarshal(event, &info)
+	if err != nil {
+		callback.Error(c, callback.ErrForm, err)
+		return
+	}
+	if info.Object.Mobile == "" {
+		return
+	}
+	user := feishu.NewUser(&info.Object)
+	oldUser := feishu.NewUser(&info.OldObject)
+	userSrv, err := service.User.Begin()
+	if err != nil {
+		callback.Error(c, callback.ErrDBOperation, err)
+		return
+	}
+	defer userSrv.Rollback()
+	logger = logger.WithFields(log.Fields{
+		"name":  user.Data.Name,
+		"phone": user.Data.Mobile,
+	})
+	if user.IsInvalid() {
+		result := userSrv.FrozeByPhone(user.Data.Mobile)
+		if result.Error != nil {
+			callback.Error(c, callback.ErrDBOperation, result.Error)
+			return
+		}
+		if result.RowsAffected != 0 {
+			logger.Infoln("用户已冻结")
+		}
+	} else {
+		var phone string
+		if oldUser.Data.Mobile != "" {
+			phone = oldUser.Data.Mobile
+		} else {
+			phone = user.Data.Mobile
+		}
+		userModel, err := userSrv.FirstByPhone(phone, daoUtil.UnScoped, daoUtil.LockForUpdate)
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			models := []dao.User{user.Model()}
+			err = userSrv.CreateAll(models)
+			if err != nil {
+				callback.Error(c, callback.ErrDBOperation, err)
 				return
 			}
-			if result.RowsAffected != 0 {
-				logger.Infoln("已冻结")
+			groupMap, err := (&service.FeishuGroupsSrv{DB: userSrv.DB}).GetGroupMap(daoUtil.LockForShare)
+			if err != nil {
+				callback.Error(c, callback.ErrDBOperation, err)
+				return
 			}
+			err = service.UserGroupsSrv{DB: userSrv.DB}.CreateAll(user.DepartmentModels(models[0].ID, groupMap))
+			if err != nil {
+				callback.Error(c, callback.ErrDBOperation, err)
+				return
+			}
+			logger.Infoln("用户已追加创建")
+		} else if err != nil {
+			callback.Error(c, callback.ErrDBOperation, err)
+			return
+		} else if userModel.DeletedAt.Valid {
+			err = userSrv.UnFrozeByIDSlice([]uint{userModel.ID})
+			if err != nil {
+				callback.Error(c, callback.ErrDBOperation, err)
+				return
+			}
+			logger.Infoln("用户已解冻")
 		} else {
-			var phone string
-			if oldUserModel.Phone != "" {
-				phone = oldUserModel.Phone
-			} else {
-				phone = user.Data.Mobile
-			}
-			userModel, err := userSrv.FirstByPhone(phone, daoUtil.UnScoped, daoUtil.LockForUpdate)
-			if errors.Is(err, gorm.ErrRecordNotFound) {
-				models := []dao.User{user.Model()}
-				err = userSrv.CreateAll(models)
-				if err != nil {
+			if !oldUser.IsModelEmpty() {
+				userModelNew := user.Model()
+				userModelNew.ID = userModel.ID
+				if err = userModelNew.UpdateAllInfoByID(userSrv.DB).Error; err != nil {
 					callback.Error(c, callback.ErrDBOperation, err)
 					return
 				}
+				logger.Infoln("用户信息已更新")
+			}
+
+			if len(oldUser.Data.DepartmentIds) != 0 {
 				groupMap, err := (&service.FeishuGroupsSrv{DB: userSrv.DB}).GetGroupMap(daoUtil.LockForShare)
 				if err != nil {
 					callback.Error(c, callback.ErrDBOperation, err)
 					return
 				}
-				err = service.UserGroupsSrv{DB: userSrv.DB}.CreateAll(user.DepartmentModels(models[0].ID, groupMap))
+
+				err = user.SyncDepartments(userSrv.DB, userModel.ID, groupMap)
 				if err != nil {
 					callback.Error(c, callback.ErrDBOperation, err)
 					return
 				}
-				logger.Infoln("用户已追加创建")
-			} else if err != nil {
-				callback.Error(c, callback.ErrDBOperation, err)
-				return
-			} else if userModel.DeletedAt.Valid {
-				err = userSrv.UnFrozeByIDSlice([]uint{userModel.ID})
-				if err != nil {
-					callback.Error(c, callback.ErrDBOperation, err)
-					return
-				}
-				logger.Infoln("用户已解冻")
-			} else {
-				if oldUserModel.Phone != "" ||
-					oldUserModel.Name != "" ||
-					oldUserModel.AvatarUrl != "" {
-
-					userModelNew := user.Model()
-					userModelNew.ID = userModel.ID
-					if err = userModelNew.UpdateAllInfoByID(userSrv.DB).Error; err != nil {
-						callback.Error(c, callback.ErrDBOperation, err)
-						return
-					}
-					logger.Infoln("用户信息已更新")
-				}
-
-				if len(oldUser.Data.DepartmentIds) != 0 {
-					groupMap, err := (&service.FeishuGroupsSrv{DB: userSrv.DB}).GetGroupMap(daoUtil.LockForShare)
-					if err != nil {
-						callback.Error(c, callback.ErrDBOperation, err)
-						return
-					}
-
-					err = user.SyncDepartments(userSrv.DB, userModel.ID, groupMap)
-					if err != nil {
-						callback.Error(c, callback.ErrDBOperation, err)
-						return
-					}
-					logger.Infoln("用户部门已同步")
-				}
+				logger.Infoln("用户部门已同步")
 			}
 		}
-		if err = userSrv.Commit().Error; err != nil {
-			callback.Error(c, callback.ErrDBOperation, err)
-			return
-		}
-	default:
-		logger.Warnf("未知的事件类型")
 	}
-
-	c.JSON(200, gin.H{})
+	if err = userSrv.Commit().Error; err != nil {
+		callback.Error(c, callback.ErrDBOperation, err)
+		return
+	}
 }
