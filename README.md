@@ -95,7 +95,7 @@ Form:
   "data": {
     "id": 8,
     "name": "孙翔宇",
-    "avatarUrl": "https://aaa.bbb.com/ccc.png", // 可能为空字符串，头像地址随登录方式改变而改变来源
+    "avatarUrl": "https://aaa.bbb.com/ccc.png", // 固定为飞书头像
     "groups": [
       "研发",
       "中心"
