@@ -78,44 +78,46 @@ export const Profile: FC = () => {
 
   return (
     <Container>
-      <Stack flexDirection={"row"} mt={"3rem"} mb={"2.3rem"}>
+      <Stack
+        flexDirection={"row"}
+        mt={"3rem"}
+        mb={"2.3rem"}
+        sx={{
+          "& .MuiAvatar-root": {
+            height: 90,
+            width: 90,
+          },
+        }}
+      >
         {profile ? (
           <Avatar
             component={Paper}
             elevation={6}
             src={profile.user.avatar_url}
-            sx={{
-              height: 90,
-              width: 90,
-            }}
           />
         ) : (
-          <Skeleton variant={"circular"} height={90} width={103} />
+          <Skeleton variant={"circular"}>
+            <Avatar />
+          </Skeleton>
         )}
         <Stack ml={3} width={"100%"} justifyContent={"space-between"}>
-          {profile ? (
-            <Typography
-              variant={"h5"}
-              sx={{
-                fontWeight: 600,
-              }}
-            >
-              {profile.user.name}
-            </Typography>
-          ) : (
-            <Skeleton width={75} />
-          )}
+          <Typography
+            variant={"h5"}
+            sx={{
+              fontWeight: 600,
+            }}
+          >
+            {profile ? profile.user.name : <Skeleton width={75} />}
+          </Typography>
           <Stack>
             <Typography variant={"body2"} color={"text.secondary"}>
               当前身份状态
             </Typography>
             <Stack flexDirection={"row"} mt={0.5}>
               <PermIdentity sx={{ marginRight: 1 }} />
-              {profile ? (
-                <Typography>{`${userGroups}组成员`}</Typography>
-              ) : (
-                <Skeleton width={120} />
-              )}
+              <Typography>
+                {profile ? `${userGroups}组成员` : <Skeleton width={120} />}
+              </Typography>
             </Stack>
           </Stack>
         </Stack>
