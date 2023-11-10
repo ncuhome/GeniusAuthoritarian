@@ -10,10 +10,6 @@ import Passkey from "@components/user/profile/Passkey";
 import {
   Container,
   Box,
-  Grid,
-  GridProps,
-  TextField,
-  TextFieldProps,
   Table,
   TableBody,
   TableCell,
@@ -43,41 +39,6 @@ const u2fMethods: {
   { label: "双因素认证", value: "mfa" },
   { label: "通行密钥", value: "passkey" },
 ];
-
-const GridItem: FC<GridProps> = ({ children, ...props }) => (
-  <Grid item xs={12} sm={6} {...props}>
-    {children ? children : <Skeleton variant={"rounded"} height={56} />}
-  </Grid>
-);
-
-const GridTextField: FC<TextFieldProps> = ({ ...props }) => {
-  return (
-    <GridItem>
-      {props.value ? (
-        <TextField
-          variant={"outlined"}
-          inputProps={{
-            readOnly: true,
-            style: {
-              cursor: "default",
-            },
-          }}
-          fullWidth
-          onClick={async () => {
-            try {
-              await navigator.clipboard.writeText(props.value as string);
-              toast.success("已复制");
-            } catch (e) {
-              console.log(e);
-              toast.error(`复制失败: ${e}`);
-            }
-          }}
-          {...props}
-        />
-      ) : undefined}
-    </GridItem>
-  );
-};
 
 export const Profile: FC = () => {
   const profile = useUser((state) => state.profile);
