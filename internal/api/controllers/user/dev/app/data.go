@@ -5,6 +5,7 @@ import (
 	"github.com/ncuhome/GeniusAuthoritarian/internal/api/callback"
 	"github.com/ncuhome/GeniusAuthoritarian/internal/service"
 	"github.com/ncuhome/GeniusAuthoritarian/internal/tools"
+	"github.com/ncuhome/GeniusAuthoritarian/pkg/departments"
 )
 
 func ListOwnedApp(c *gin.Context) {
@@ -28,7 +29,7 @@ func ListAccessibleApp(c *gin.Context) {
 		return
 	}
 
-	isCenterMember, err := service.UserGroups.IsCenterMember(uid)
+	isCenterMember, err := service.UserGroups.IsUnitMember(uid, departments.UCe)
 	if err != nil {
 		callback.Error(c, callback.ErrDBOperation, err)
 		return

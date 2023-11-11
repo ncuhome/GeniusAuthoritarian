@@ -12,6 +12,7 @@ import (
 	"github.com/ncuhome/GeniusAuthoritarian/internal/pkg/jwt"
 	"github.com/ncuhome/GeniusAuthoritarian/internal/service"
 	"github.com/ncuhome/GeniusAuthoritarian/internal/tools"
+	"github.com/ncuhome/GeniusAuthoritarian/pkg/departments"
 	"gorm.io/gorm"
 )
 
@@ -77,7 +78,7 @@ func loadUserIdentity(c *gin.Context, code string) *dto.UserThirdPartyIdentity {
 }
 
 func checkUserPermission(c *gin.Context, user *dao.User, appCode string, permitAllGroup bool) (groups []string, ok bool) {
-	isCenterMember, err := service.UserGroups.IsCenterMember(user.ID)
+	isCenterMember, err := service.UserGroups.IsUnitMember(user.ID, departments.UCe)
 	if err != nil {
 		callback.Error(c, callback.ErrDBOperation, err)
 		return
