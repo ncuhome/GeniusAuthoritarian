@@ -213,43 +213,38 @@ func userUpdated(c *gin.Context, logger *log.Entry, event json.RawMessage) {
 				}
 
 				// 处理研发身份变更,同步 SSH 权限
-				if prevIsDeveloper && !nowIsDeveloper {
-					err = redis.PublishSshDev([]rpcModel.SshAccountMsg{
-						{
+				if (prevIsDeveloper || nowIsDeveloper) && prevIsDeveloper != nowIsDeveloper {
+					var msg rpcModel.SshAccountMsg
+					userName := sshTool.LinuxAccountName(userModel.ID)
+					if prevIsDeveloper { // 以前是现在不是
+						msg = rpcModel.SshAccountMsg{
 							IsDel:    true,
-							Username: sshTool.LinuxAccountName(userModel.ID),
-						},
-					})
-					if err != nil {
-						callback.Error(c, callback.ErrDBOperation, err)
-						return
-					}
-					logger.Infoln("已发送移除 SSH 账号请求")
-				}
-				if nowIsDeveloper && !prevIsDeveloper {
-					model, err := sshTool.NewSshDevModel(rand.New(rand.NewSource(time.Now().UnixNano())), userModel.ID)
-					if err != nil {
-						callback.Error(c, callback.ErrUnexpected, err)
-						return
-					}
+							Username: userName,
+						}
+					} else { // 以前不是现在是
+						model, err := sshTool.NewSshDevModel(rand.New(rand.NewSource(time.Now().UnixNano())), userModel.ID)
+						if err != nil {
+							callback.Error(c, callback.ErrUnexpected, err)
+							return
+						}
 
-					err = service.UserSshSrv{DB: userSrv.DB}.CreateAll([]dao.UserSsh{model})
-					if err != nil {
-						callback.Error(c, callback.ErrDBOperation, err)
-						return
-					}
+						err = service.UserSshSrv{DB: userSrv.DB}.CreateAll([]dao.UserSsh{model})
+						if err != nil {
+							callback.Error(c, callback.ErrDBOperation, err)
+							return
+						}
 
-					err = redis.PublishSshDev([]rpcModel.SshAccountMsg{
-						{
-							Username:  sshTool.LinuxAccountName(userModel.ID),
+						msg = rpcModel.SshAccountMsg{
+							Username:  userName,
 							PublicKey: model.PublicSsh,
-						},
-					})
+						}
+					}
+					err = redis.PublishSshDev([]rpcModel.SshAccountMsg{msg})
 					if err != nil {
 						callback.Error(c, callback.ErrDBOperation, err)
 						return
 					}
-					logger.Infoln("SSH 账号已创建")
+					logger.Infoln("研发 SSH 已同步")
 				}
 			}
 		}
