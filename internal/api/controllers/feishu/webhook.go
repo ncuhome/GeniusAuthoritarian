@@ -7,12 +7,18 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/ncuhome/GeniusAuthoritarian/internal/api/callback"
 	"github.com/ncuhome/GeniusAuthoritarian/internal/db/dao"
+	"github.com/ncuhome/GeniusAuthoritarian/internal/db/redis"
 	"github.com/ncuhome/GeniusAuthoritarian/internal/global"
 	"github.com/ncuhome/GeniusAuthoritarian/internal/pkg/feishu"
+	"github.com/ncuhome/GeniusAuthoritarian/internal/pkg/sshDev/server/rpc"
+	"github.com/ncuhome/GeniusAuthoritarian/internal/pkg/sshDev/sshTool"
 	"github.com/ncuhome/GeniusAuthoritarian/internal/service"
+	"github.com/ncuhome/GeniusAuthoritarian/pkg/departments"
 	"github.com/ncuhome/GeniusAuthoritarian/pkg/feishuApi"
 	log "github.com/sirupsen/logrus"
 	"gorm.io/gorm"
+	"math/rand"
+	"time"
 )
 
 func Webhook(c *gin.Context) {
@@ -179,12 +185,65 @@ func userUpdated(c *gin.Context, logger *log.Entry, event json.RawMessage) {
 					return
 				}
 
+				userGroupSrv := service.UserGroupsSrv{DB: userSrv.DB}
+
+				prevIsDeveloper, err := userGroupSrv.IsUnitMember(userModel.ID, departments.UDev)
+				if err != nil {
+					callback.Error(c, callback.ErrDBOperation, err)
+					return
+				}
+
 				err = user.Departments(groupMap).Sync(userSrv.DB, userModel.ID)
 				if err != nil {
 					callback.Error(c, callback.ErrDBOperation, err)
 					return
 				}
 				logger.Infoln("用户部门已同步")
+
+				nowIsDeveloper, err := userGroupSrv.IsUnitMember(userModel.ID, departments.UDev)
+				if err != nil {
+					callback.Error(c, callback.ErrDBOperation, err)
+					return
+				}
+
+				if prevIsDeveloper && !nowIsDeveloper {
+					err = redis.PublishSshDev([]rpc.SshAccountMsg{
+						{
+							IsDel:    true,
+							Username: sshTool.LinuxAccountName(userModel.ID),
+						},
+					})
+					if err != nil {
+						callback.Error(c, callback.ErrDBOperation, err)
+						return
+					}
+					logger.Infoln("已发送移除 SSH 账号请求")
+				}
+				if nowIsDeveloper && !prevIsDeveloper {
+					model, err := sshTool.NewSshDevModel(rand.New(rand.NewSource(time.Now().UnixNano())), userModel.ID)
+					if err != nil {
+						callback.Error(c, callback.ErrUnexpected, err)
+						return
+					}
+
+					err = service.UserSshSrv{DB: userSrv.DB}.CreateAll([]dao.UserSsh{model})
+					if err != nil {
+						callback.Error(c, callback.ErrDBOperation, err)
+						return
+					}
+
+					err = redis.PublishSshDev([]rpc.SshAccountMsg{
+						{
+							Username:  sshTool.LinuxAccountName(userModel.ID),
+							PublicKey: model.PublicSsh,
+						},
+					})
+					if err != nil {
+						callback.Error(c, callback.ErrDBOperation, err)
+						return
+					}
+					logger.Infoln("SSH 账号已创建")
+				}
 			}
 		}
 	}

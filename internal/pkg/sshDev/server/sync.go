@@ -90,9 +90,8 @@ func DoSync() error {
 		}
 		for _, userSsh := range userToDelete {
 			sshRpcMessages[i] = rpc.SshAccountMsg{
-				IsDel:     true,
-				Username:  sshTool.LinuxAccountName(userSsh.UID),
-				PublicKey: userSsh.PublicSsh,
+				IsDel:    true,
+				Username: sshTool.LinuxAccountName(userSsh.UID),
 			}
 			i++
 		}
