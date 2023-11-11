@@ -6,6 +6,7 @@ import (
 	"errors"
 	redisPkg "github.com/ncuhome/GeniusAuthoritarian/internal/db/redis"
 	"github.com/ncuhome/GeniusAuthoritarian/internal/pkg/sshDev/proto"
+	"github.com/ncuhome/GeniusAuthoritarian/internal/pkg/sshDev/server/rpcModel"
 	"github.com/ncuhome/GeniusAuthoritarian/internal/service"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/codes"
@@ -60,7 +61,7 @@ func (a *SshAccounts) Watch(_ *emptypb.Empty, server proto.SshAccounts_WatchServ
 		return err
 	}
 
-	msgChannel := make(chan []SshAccountMsg)
+	msgChannel := make(chan []rpcModel.SshAccountMsg)
 	go func() {
 		for {
 			msg, err := sub.ReceiveMessage(context.Background())
@@ -76,7 +77,7 @@ func (a *SshAccounts) Watch(_ *emptypb.Empty, server proto.SshAccounts_WatchServ
 			}
 
 			for _, payload := range msg.PayloadSlice {
-				var msgDecoded []SshAccountMsg
+				var msgDecoded []rpcModel.SshAccountMsg
 				msgBytes := unsafe.Slice(unsafe.StringData(payload), len(payload))
 				err = json.Unmarshal(msgBytes, &msgDecoded)
 				msgChannel <- msgDecoded

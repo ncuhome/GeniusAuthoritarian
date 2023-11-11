@@ -1,4 +1,4 @@
-package rpc
+package rpcModel
 
 import (
 	"github.com/ncuhome/GeniusAuthoritarian/internal/pkg/sshDev/proto"
