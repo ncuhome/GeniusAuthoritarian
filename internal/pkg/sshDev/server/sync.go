@@ -9,7 +9,6 @@ import (
 	"github.com/ncuhome/GeniusAuthoritarian/internal/pkg/sshDev/sshTool"
 	"github.com/ncuhome/GeniusAuthoritarian/internal/service"
 	"github.com/ncuhome/GeniusAuthoritarian/pkg/backoff"
-	"github.com/ncuhome/GeniusAuthoritarian/pkg/ed25519"
 	"github.com/robfig/cron/v3"
 	log "github.com/sirupsen/logrus"
 	"math/rand"
@@ -54,26 +53,9 @@ func DoSync() error {
 	// 生成密钥对
 	userSshToCreate := make([]dao.UserSsh, len(users))
 	for i, uid := range users {
-		sshKey, err := ed25519.Generate(randRand)
+		userSshToCreate[i], err = sshTool.NewSshDevModel(randRand, uid)
 		if err != nil {
 			return err
-		}
-
-		publicPem, privatePem, err := sshKey.MarshalPem()
-		if err != nil {
-			return err
-		}
-		publicSsh, privateSsh, err := sshKey.MarshalSSH()
-		if err != nil {
-			return err
-		}
-
-		userSshToCreate[i] = dao.UserSsh{
-			UID:        uid,
-			PublicPem:  string(publicPem),
-			PrivatePem: string(privatePem),
-			PublicSsh:  string(publicSsh),
-			PrivateSsh: string(privateSsh),
 		}
 	}
 

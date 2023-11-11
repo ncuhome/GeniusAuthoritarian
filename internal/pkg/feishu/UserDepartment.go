@@ -15,15 +15,6 @@ func (d UserDepartment) Ids() []uint {
 	return d.GidList
 }
 
-func (d UserDepartment) ContainGid(id uint) bool {
-	for _, v := range d.GidList {
-		if id == v {
-			return true
-		}
-	}
-	return false
-}
-
 func (d UserDepartment) Models(uid uint) []dao.UserGroups {
 	models := make([]dao.UserGroups, len(d.GidList))
 	for i, gid := range d.GidList {
