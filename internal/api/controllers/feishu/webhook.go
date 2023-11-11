@@ -143,7 +143,7 @@ func userUpdated(c *gin.Context, logger *log.Entry, event json.RawMessage) {
 				callback.Error(c, callback.ErrDBOperation, err)
 				return
 			}
-			err = service.UserGroupsSrv{DB: userSrv.DB}.CreateAll(user.DepartmentModels(models[0].ID, groupMap))
+			err = service.UserGroupsSrv{DB: userSrv.DB}.CreateAll(user.Departments(groupMap).Models(models[0].ID))
 			if err != nil {
 				callback.Error(c, callback.ErrDBOperation, err)
 				return
@@ -179,7 +179,7 @@ func userUpdated(c *gin.Context, logger *log.Entry, event json.RawMessage) {
 					return
 				}
 
-				err = user.SyncDepartments(userSrv.DB, userModel.ID, groupMap)
+				err = user.Departments(groupMap).Sync(userSrv.DB, userModel.ID)
 				if err != nil {
 					callback.Error(c, callback.ErrDBOperation, err)
 					return

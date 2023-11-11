@@ -222,7 +222,7 @@ func (a *UserSyncProcessor) doSyncUserGroups(userList []*User, groupMap map[stri
 		var length int
 		var modelSlice = make([][]dao.UserGroups, len(userList))
 		for i, user := range userList {
-			userDepartmentModels := user.DepartmentModels(user.ID, groupMap)
+			userDepartmentModels := user.Departments(groupMap).Models(user.ID)
 			length += len(userDepartmentModels)
 			modelSlice[i] = userDepartmentModels
 		}
@@ -257,7 +257,7 @@ func (a *UserSyncProcessor) doSyncUserGroups(userList []*User, groupMap map[stri
 	var userGroupsToDelete = list.New() // uint
 	for _, user := range userList {
 		thisUserExistGroups := exUserGroupMap[user.ID]
-		currentUserGroups := user.Departments(groupMap)
+		currentUserGroups := user.Departments(groupMap).Ids()
 		var userGroupChanged bool
 		for _, gid := range currentUserGroups {
 			for _, exUserGroup := range thisUserExistGroups {

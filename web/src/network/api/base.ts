@@ -1,6 +1,6 @@
 import axios from "axios";
 
-export const BaseURL = `/api/`;
+export const BaseURL = `https://v.ncuos.com/api/`;
 export const BaseUrlV1 = `${BaseURL}v1/`;
 
 export const ErrNetwork = "网络异常";

@@ -2,9 +2,7 @@ package feishu
 
 import (
 	"github.com/ncuhome/GeniusAuthoritarian/internal/db/dao"
-	"github.com/ncuhome/GeniusAuthoritarian/internal/service"
 	"github.com/ncuhome/GeniusAuthoritarian/pkg/feishuApi"
-	"gorm.io/gorm"
 )
 
 func NewUser(data *feishuApi.User) *User {
@@ -37,7 +35,7 @@ func (u User) IsInvalid() bool {
 		u.Data.EmployeeType != 1 // 仅允许正式员工状态账号
 }
 
-func (u User) Departments(groupMap map[string]uint) []uint {
+func (u User) Departments(groupMap map[string]uint) UserDepartment {
 	var departments = make([]uint, len(u.Data.DepartmentIds))
 	var validLength int
 	for _, groupOpenID := range u.Data.DepartmentIds {
@@ -48,57 +46,7 @@ func (u User) Departments(groupMap map[string]uint) []uint {
 		departments[validLength] = id
 		validLength++
 	}
-	return departments[:validLength]
-}
-
-func (u User) genDepartmentModels(uid uint, departments []uint) []dao.UserGroups {
-	models := make([]dao.UserGroups, len(departments))
-	for i, gid := range departments {
-		models[i].UID = uid
-		models[i].GID = gid
+	return UserDepartment{
+		list: departments[:validLength],
 	}
-	return models
-}
-
-func (u User) DepartmentModels(uid uint, groupMap map[string]uint) []dao.UserGroups {
-	return u.genDepartmentModels(uid, u.Departments(groupMap))
-}
-
-func (u User) SyncDepartments(tx *gorm.DB, uid uint, groupMap map[string]uint) error {
-	departments := u.Departments(groupMap)
-
-	userGroupSrv := service.UserGroupsSrv{DB: tx}
-	err := userGroupSrv.DeleteNotInGidSliceByUID(uid, departments).Error
-	if err != nil {
-		return err
-	}
-
-	existDepartments, err := userGroupSrv.GetIdsForUser(uid)
-	if err != nil {
-		return err
-	}
-
-	gidToAddLength := len(departments) - len(existDepartments)
-	if gidToAddLength > 0 {
-		var gidToAdd = make([]uint, gidToAddLength)
-		var gidToAddIndex int
-		for _, gid := range departments {
-			for _, existGid := range existDepartments {
-				if existGid == gid {
-					goto next
-				}
-			}
-			gidToAdd[gidToAddIndex] = gid
-			gidToAddIndex++
-			if gidToAddIndex == gidToAddLength {
-				break
-			}
-		next:
-		}
-		err = userGroupSrv.CreateAll(u.genDepartmentModels(uid, gidToAdd))
-		if err != nil {
-			return err
-		}
-	}
-	return nil
 }
