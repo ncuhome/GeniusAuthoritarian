@@ -43,7 +43,8 @@ type SshAccounts struct {
 
 func (a *SshAccounts) Watch(_ *emptypb.Empty, server proto.SshAccounts_WatchServer) error {
 	// 注册监听
-	sub := redisPkg.Client.Subscribe(context.Background(), redisPkg.KeySubscribeSshDev())
+
+	sub := redisPkg.SubScribeSshDev()
 	defer sub.Close()
 
 	// 发送现有账号

@@ -47,6 +47,7 @@ func (u User) Departments(groupMap map[string]uint) UserDepartment {
 		validLength++
 	}
 	return UserDepartment{
-		list: departments[:validLength],
+		GidList:    departments[:validLength],
+		OpenIdList: u.Data.DepartmentIds,
 	}
 }

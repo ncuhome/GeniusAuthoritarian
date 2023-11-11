@@ -1,8 +1,6 @@
 package controllers
 
 import (
-	"context"
-	"encoding/json"
 	"github.com/Mmx233/daoUtil"
 	"github.com/gin-gonic/gin"
 	"github.com/ncuhome/GeniusAuthoritarian/internal/api/callback"
@@ -63,19 +61,12 @@ func ResetSshKeyPair(c *gin.Context) {
 		return
 	}
 
-	rpcMsg := []rpc.SshAccountMsg{
+	if err = redis.PublishSshDev([]rpc.SshAccountMsg{
 		{
 			Username:  sshTool.LinuxAccountName(uid),
 			PublicKey: publicSshStr,
 		},
-	}
-	rpcMsgBytes, err := json.Marshal(&rpcMsg)
-	if err != nil {
-		callback.Error(c, callback.ErrUnexpected, err)
-		return
-	}
-	err = redis.Client.Publish(context.Background(), redis.KeySubscribeSshDev(), rpcMsgBytes).Err()
-	if err != nil {
+	}); err != nil {
 		callback.Error(c, callback.ErrDBOperation, err)
 		return
 	}
@@ -101,18 +92,12 @@ func ResetSshKeyPair(c *gin.Context) {
 func KillAllProcess(c *gin.Context) {
 	uid := tools.GetUserInfo(c).ID
 
-	rpcMsg := []rpc.SshAccountMsg{
+	err := redis.PublishSshDev([]rpc.SshAccountMsg{
 		{
 			IsKill:   true,
 			Username: sshTool.LinuxAccountName(uid),
 		},
-	}
-	rpcMsgBytes, err := json.Marshal(&rpcMsg)
-	if err != nil {
-		callback.Error(c, callback.ErrUnexpected, err)
-		return
-	}
-	err = redis.Client.Publish(context.Background(), redis.KeySubscribeSshDev(), rpcMsgBytes).Err()
+	})
 	if err != nil {
 		callback.Error(c, callback.ErrDBOperation, err)
 		return

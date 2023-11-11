@@ -1,8 +1,6 @@
 package server
 
 import (
-	"context"
-	"encoding/json"
 	"github.com/Mmx233/tool"
 	"github.com/ncuhome/GeniusAuthoritarian/internal/db/dao"
 	"github.com/ncuhome/GeniusAuthoritarian/internal/db/redis"
@@ -117,12 +115,7 @@ func DoSync() error {
 			i++
 		}
 
-		rpcMsgBytes, err := json.Marshal(&sshRpcMessages)
-		if err != nil {
-			return err
-		}
-		err = redis.Client.Publish(context.Background(), redis.KeySubscribeSshDev(), rpcMsgBytes).Err()
-		if err != nil {
+		if err = redis.PublishSshDev(sshRpcMessages); err != nil {
 			return err
 		}
 	}
