@@ -10,7 +10,7 @@ import (
 	"github.com/ncuhome/GeniusAuthoritarian/internal/db/redis"
 	"github.com/ncuhome/GeniusAuthoritarian/internal/global"
 	"github.com/ncuhome/GeniusAuthoritarian/internal/pkg/feishu"
-	"github.com/ncuhome/GeniusAuthoritarian/internal/pkg/sshDev/server/rpc"
+	"github.com/ncuhome/GeniusAuthoritarian/internal/pkg/sshDev/server/rpcModel"
 	"github.com/ncuhome/GeniusAuthoritarian/internal/pkg/sshDev/sshTool"
 	"github.com/ncuhome/GeniusAuthoritarian/internal/service"
 	"github.com/ncuhome/GeniusAuthoritarian/pkg/departments"
@@ -98,6 +98,7 @@ func userDeleted(c *gin.Context, logger *log.Entry, event json.RawMessage) {
 	}
 }
 
+// 逻辑太长了，抽象不了，受不了
 func userUpdated(c *gin.Context, logger *log.Entry, event json.RawMessage) {
 	var info feishuApi.UserUpdatedEvent
 	err := json.Unmarshal(event, &info)
@@ -120,7 +121,7 @@ func userUpdated(c *gin.Context, logger *log.Entry, event json.RawMessage) {
 		"name":  user.Data.Name,
 		"phone": user.Data.Mobile,
 	})
-	if user.IsInvalid() {
+	if user.IsInvalid() { // 用户无效，不管以前的状态，直接执行冻结
 		result := userSrv.FrozeByPhone(user.Data.Mobile)
 		if result.Error != nil {
 			callback.Error(c, callback.ErrDBOperation, result.Error)
@@ -129,15 +130,17 @@ func userUpdated(c *gin.Context, logger *log.Entry, event json.RawMessage) {
 		if result.RowsAffected != 0 {
 			logger.Infoln("用户已冻结")
 		}
-	} else {
+	} else { // 用户有效
 		var phone string
+		// 处理电话号码更换的情况
 		if oldUser.Data.Mobile != "" {
 			phone = oldUser.Data.Mobile
 		} else {
 			phone = user.Data.Mobile
 		}
+		// 获取数据库中的目标用户
 		userModel, err := userSrv.FirstByPhone(phone, daoUtil.UnScoped, daoUtil.LockForUpdate)
-		if errors.Is(err, gorm.ErrRecordNotFound) {
+		if errors.Is(err, gorm.ErrRecordNotFound) { // 用户不存在，追加创建该用户
 			models := []dao.User{user.Model()}
 			err = userSrv.CreateAll(models)
 			if err != nil {
@@ -155,11 +158,11 @@ func userUpdated(c *gin.Context, logger *log.Entry, event json.RawMessage) {
 				return
 			}
 			logger.Infoln("用户已追加创建")
-		} else if err != nil {
+		} else if err != nil { // 获取数据库中的用户出错
 			callback.Error(c, callback.ErrDBOperation, err)
 			return
-		} else {
-			if userModel.DeletedAt.Valid {
+		} else { // 用户已存在数据库中
+			if userModel.DeletedAt.Valid { // 用户有效但被冻结，执行解冻
 				err = userSrv.UnFrozeByIDSlice([]uint{userModel.ID})
 				if err != nil {
 					callback.Error(c, callback.ErrDBOperation, err)
@@ -168,7 +171,7 @@ func userUpdated(c *gin.Context, logger *log.Entry, event json.RawMessage) {
 				logger.Infoln("用户已解冻")
 			}
 
-			if userModel.DeletedAt.Valid || !oldUser.IsModelEmpty() {
+			if userModel.DeletedAt.Valid || !oldUser.IsModelEmpty() { // 用户冻结或有效字段变更时更新数据库用户信息字段
 				userModelNew := user.Model()
 				userModelNew.ID = userModel.ID
 				if err = userModelNew.UpdateAllInfoByID(userSrv.DB).Error; err != nil {
@@ -178,7 +181,7 @@ func userUpdated(c *gin.Context, logger *log.Entry, event json.RawMessage) {
 				logger.Infoln("用户信息已更新")
 			}
 
-			if userModel.DeletedAt.Valid || len(oldUser.Data.DepartmentIds) != 0 {
+			if userModel.DeletedAt.Valid || len(oldUser.Data.DepartmentIds) != 0 { //用户解冻或部门变动时同步用户部门
 				groupMap, err := (&service.FeishuGroupsSrv{DB: userSrv.DB}).GetGroupMap(daoUtil.LockForShare)
 				if err != nil {
 					callback.Error(c, callback.ErrDBOperation, err)
@@ -187,12 +190,14 @@ func userUpdated(c *gin.Context, logger *log.Entry, event json.RawMessage) {
 
 				userGroupSrv := service.UserGroupsSrv{DB: userSrv.DB}
 
+				// 同步前是否是研发组成员
 				prevIsDeveloper, err := userGroupSrv.IsUnitMember(userModel.ID, departments.UDev)
 				if err != nil {
 					callback.Error(c, callback.ErrDBOperation, err)
 					return
 				}
 
+				// 执行部门同步,写入数据库
 				err = user.Departments(groupMap).Sync(userSrv.DB, userModel.ID)
 				if err != nil {
 					callback.Error(c, callback.ErrDBOperation, err)
@@ -200,14 +205,16 @@ func userUpdated(c *gin.Context, logger *log.Entry, event json.RawMessage) {
 				}
 				logger.Infoln("用户部门已同步")
 
+				// 同步后是否是研发组成员
 				nowIsDeveloper, err := userGroupSrv.IsUnitMember(userModel.ID, departments.UDev)
 				if err != nil {
 					callback.Error(c, callback.ErrDBOperation, err)
 					return
 				}
 
+				// 处理研发身份变更,同步 SSH 权限
 				if prevIsDeveloper && !nowIsDeveloper {
-					err = redis.PublishSshDev([]rpc.SshAccountMsg{
+					err = redis.PublishSshDev([]rpcModel.SshAccountMsg{
 						{
 							IsDel:    true,
 							Username: sshTool.LinuxAccountName(userModel.ID),
@@ -232,7 +239,7 @@ func userUpdated(c *gin.Context, logger *log.Entry, event json.RawMessage) {
 						return
 					}
 
-					err = redis.PublishSshDev([]rpc.SshAccountMsg{
+					err = redis.PublishSshDev([]rpcModel.SshAccountMsg{
 						{
 							Username:  sshTool.LinuxAccountName(userModel.ID),
 							PublicKey: model.PublicSsh,
