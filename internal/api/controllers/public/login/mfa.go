@@ -4,6 +4,7 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/ncuhome/GeniusAuthoritarian/internal/api/callback"
 	"github.com/ncuhome/GeniusAuthoritarian/internal/pkg/jwt"
+	"github.com/ncuhome/GeniusAuthoritarian/internal/service"
 	"github.com/ncuhome/GeniusAuthoritarian/internal/tools"
 )
 
@@ -43,6 +44,24 @@ func VerifyMfa(c *gin.Context) {
 		return
 	}
 
+	app, err := service.App.FirstAppByID(claims.AppID)
+	if err != nil {
+		callback.Error(c, callback.ErrDBOperation, err)
+		return
+	}
+
+	accessToken, err := jwt.GenerateAccessToken(claims.UID, claims.Name, app.AppCode, claims.Groups)
+	if err != nil {
+		callback.Error(c, callback.ErrUnexpected, err)
+		return
+	}
+
+	refreshToken, err := jwt.GenerateRefreshToken(claims.UID, claims.Name, app.AppCode, claims.Groups)
+	if err != nil {
+		callback.Error(c, callback.ErrUnexpected, err)
+		return
+	}
+
 	callbackUrl, err := tools.GenCallback(claims.AppCallback, token)
 	if err != nil {
 		callback.Error(c, callback.ErrUnexpected, err)
@@ -50,7 +69,9 @@ func VerifyMfa(c *gin.Context) {
 	}
 
 	callback.Success(c, gin.H{
-		"token":    token,
-		"callback": callbackUrl,
+		"token":        token,
+		"callback":     callbackUrl,
+		"accessToken":  accessToken,
+		"refreshToken": refreshToken,
 	})
 }

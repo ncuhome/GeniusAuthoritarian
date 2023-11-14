@@ -166,23 +166,9 @@ func callThirdPartyLoginResult(c *gin.Context, info ThirdPartyLoginContext) {
 			return
 		}
 
-		accessToken, err := jwt.GenerateAccessToken(info.User.ID, info.User.Name, info.AppInfo.AppCode, info.Groups)
-		if err != nil {
-			callback.Error(c, callback.ErrUnexpected, err)
-			return
-		}
-
-		refreshToken, err := jwt.GenerateRefreshToken(info.User.ID, info.User.Name, info.AppInfo.AppCode, info.Groups)
-		if err != nil {
-			callback.Error(c, callback.ErrUnexpected, err)
-			return
-		}
-
 		callback.Success(c, response.ThirdPartyLogin{
-			Token:        token,
-			Mfa:          true,
-			AccessToken:  accessToken,
-			RefreshToken: refreshToken,
+			Token: token,
+			Mfa:   true,
 		})
 	}
 }
