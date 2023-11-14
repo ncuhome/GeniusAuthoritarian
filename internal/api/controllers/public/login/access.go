@@ -3,6 +3,7 @@ package controllers
 import (
 	"github.com/gin-gonic/gin"
 	"github.com/ncuhome/GeniusAuthoritarian/internal/api/callback"
+	"github.com/ncuhome/GeniusAuthoritarian/internal/db/redis"
 	"github.com/ncuhome/GeniusAuthoritarian/internal/pkg/jwt"
 	"strings"
 )
@@ -38,6 +39,14 @@ func VerifyAccessToken(c *gin.Context) {
 		callback.Error(c, callback.ErrUnauthorized)
 		return
 	} else if claims.AppCode != appCode {
+		callback.Error(c, callback.ErrUnauthorized)
+		return
+	}
+
+	valid, err = redis.NewAccessJwt(claims.ID).Pair(claims.IssuedAt.Time)
+	if err != nil {
+		callback.Error(c, callback.ErrUnexpected, err)
+	} else if !valid {
 		callback.Error(c, callback.ErrUnauthorized)
 		return
 	}

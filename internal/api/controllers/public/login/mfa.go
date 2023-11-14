@@ -3,6 +3,7 @@ package controllers
 import (
 	"github.com/gin-gonic/gin"
 	"github.com/ncuhome/GeniusAuthoritarian/internal/api/callback"
+	"github.com/ncuhome/GeniusAuthoritarian/internal/db/redis"
 	"github.com/ncuhome/GeniusAuthoritarian/internal/pkg/jwt"
 	"github.com/ncuhome/GeniusAuthoritarian/internal/service"
 	"github.com/ncuhome/GeniusAuthoritarian/internal/tools"
@@ -50,13 +51,25 @@ func VerifyMfa(c *gin.Context) {
 		return
 	}
 
-	accessToken, err := jwt.GenerateAccessToken(claims.UID, claims.Name, app.AppCode, claims.Groups)
+	accessToken, accessClaims, err := jwt.GenerateAccessToken(claims.UID, claims.Name, app.AppCode, claims.Groups)
 	if err != nil {
 		callback.Error(c, callback.ErrUnexpected, err)
 		return
 	}
 
-	refreshToken, err := jwt.GenerateRefreshToken(claims.UID, claims.Name, app.AppCode, claims.Groups)
+	refreshToken, refreshClaims, err := jwt.GenerateRefreshToken(claims.UID, claims.Name, app.AppCode, claims.Groups)
+	if err != nil {
+		callback.Error(c, callback.ErrUnexpected, err)
+		return
+	}
+
+	err = redis.NewAccessJwt(claims.UID).Set(accessClaims.IssuedAt.Time, accessClaims.ExpiresAt.Time.Sub(accessClaims.IssuedAt.Time))
+	if err != nil {
+		callback.Error(c, callback.ErrUnexpected, err)
+		return
+	}
+
+	err = redis.NewRefreshJwt(claims.UID).Set(refreshClaims.IssuedAt.Time, refreshClaims.ExpiresAt.Time.Sub(refreshClaims.IssuedAt.Time))
 	if err != nil {
 		callback.Error(c, callback.ErrUnexpected, err)
 		return

@@ -161,7 +161,7 @@ func ParseU2fToken(token, ip string) (bool, error) {
 	return true, nil
 }
 
-func GenerateAccessToken(uid uint, name, appCode string, groups []string) (string, error) {
+func GenerateAccessToken(uid uint, name, appCode string, groups []string) (string, *AccessToken, error) {
 	claims := &AccessToken{
 		UserToken: UserToken{
 			TypedClaims: NewTypedClaims("Access", time.Minute*5),
@@ -172,14 +172,15 @@ func GenerateAccessToken(uid uint, name, appCode string, groups []string) (strin
 		AppCode: appCode,
 	}
 
-	return GenerateToken(claims)
+	token, err := GenerateToken(claims)
+	return token, claims, err
 }
 
 func ParseAccessToken(token string) (*AccessToken, bool, error) {
 	return ParseToken("Access", token, &AccessToken{})
 }
 
-func GenerateRefreshToken(uid uint, name, appCode string, groups []string) (string, error) {
+func GenerateRefreshToken(uid uint, name, appCode string, groups []string) (string, *RefreshToken, error) {
 	claims := &RefreshToken{
 		UserToken: UserToken{
 			TypedClaims: NewTypedClaims("Refresh", time.Hour*24*15),
@@ -190,7 +191,8 @@ func GenerateRefreshToken(uid uint, name, appCode string, groups []string) (stri
 		AppCode: appCode,
 	}
 
-	return GenerateToken(claims)
+	token, err := GenerateToken(claims)
+	return token, claims, err
 }
 
 func ParseRefreshToken(token string) (*RefreshToken, bool, error) {

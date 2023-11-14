@@ -118,13 +118,25 @@ func FinishPasskeyLogin(c *gin.Context) {
 		return
 	}
 
-	accessToken, err := jwt.GenerateAccessToken(user.ID, user.Name, appInfo.AppCode, groups)
+	accessToken, accessClaims, err := jwt.GenerateAccessToken(user.ID, user.Name, appInfo.AppCode, groups)
 	if err != nil {
 		callback.Error(c, callback.ErrUnexpected, err)
 		return
 	}
 
-	refreshToken, err := jwt.GenerateRefreshToken(user.ID, user.Name, appInfo.AppCode, groups)
+	refreshToken, refreshClaims, err := jwt.GenerateRefreshToken(user.ID, user.Name, appInfo.AppCode, groups)
+	if err != nil {
+		callback.Error(c, callback.ErrUnexpected, err)
+		return
+	}
+
+	err = redis.NewAccessJwt(user.ID).Set(accessClaims.IssuedAt.Time, accessClaims.ExpiresAt.Time.Sub(accessClaims.IssuedAt.Time))
+	if err != nil {
+		callback.Error(c, callback.ErrUnexpected, err)
+		return
+	}
+
+	err = redis.NewRefreshJwt(user.ID).Set(refreshClaims.IssuedAt.Time, refreshClaims.ExpiresAt.Time.Sub(refreshClaims.IssuedAt.Time))
 	if err != nil {
 		callback.Error(c, callback.ErrUnexpected, err)
 		return
