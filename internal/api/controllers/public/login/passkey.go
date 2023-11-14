@@ -118,6 +118,18 @@ func FinishPasskeyLogin(c *gin.Context) {
 		return
 	}
 
+	accessToken, err := jwt.GenerateAccessToken(user.ID, user.Name, appInfo.AppCode, groups)
+	if err != nil {
+		callback.Error(c, callback.ErrUnexpected, err)
+		return
+	}
+
+	refreshToken, err := jwt.GenerateRefreshToken(user.ID, user.Name, appInfo.AppCode, groups)
+	if err != nil {
+		callback.Error(c, callback.ErrUnexpected, err)
+		return
+	}
+
 	callbackUrl, err := tools.GenCallback(appInfo.Callback, token)
 	if err != nil {
 		callback.Error(c, callback.ErrUnexpected, err)
@@ -143,7 +155,9 @@ func FinishPasskeyLogin(c *gin.Context) {
 	}
 
 	callback.Success(c, gin.H{
-		"token":    token,
-		"callback": callbackUrl,
+		"token":         token,
+		"callback":      callbackUrl,
+		"access_token":  accessToken,
+		"refresh_token": refreshToken,
 	})
 }
