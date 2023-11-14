@@ -63,3 +63,13 @@ type U2fToken struct {
 	UID uint   `json:"uid"`
 	IP  string `json:"ip"`
 }
+
+type AccessToken struct {
+	UserToken
+	AppCode string `json:"appCode"`
+}
+
+type RefreshToken struct {
+	UserToken
+	AppCode string `json:"appCode"`
+}

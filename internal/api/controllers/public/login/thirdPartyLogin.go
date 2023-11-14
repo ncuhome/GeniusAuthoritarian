@@ -134,6 +134,18 @@ func callThirdPartyLoginResult(c *gin.Context, info ThirdPartyLoginContext) {
 			return
 		}
 
+		accessToken, err := jwt.GenerateAccessToken(info.User.ID, info.User.Name, info.AppInfo.AppCode, info.Groups)
+		if err != nil {
+			callback.Error(c, callback.ErrUnexpected, err)
+			return
+		}
+
+		refreshToken, err := jwt.GenerateRefreshToken(info.User.ID, info.User.Name, info.AppInfo.AppCode, info.Groups)
+		if err != nil {
+			callback.Error(c, callback.ErrUnexpected, err)
+			return
+		}
+
 		callbackUrl, err := tools.GenCallback(info.AppInfo.Callback, token)
 		if err != nil {
 			callback.Error(c, callback.ErrUnexpected, err)
@@ -141,9 +153,11 @@ func callThirdPartyLoginResult(c *gin.Context, info ThirdPartyLoginContext) {
 		}
 
 		callback.Success(c, response.ThirdPartyLogin{
-			Token:    token,
-			Mfa:      false,
-			Callback: callbackUrl,
+			Token:        token,
+			Mfa:          false,
+			Callback:     callbackUrl,
+			AccessToken:  accessToken,
+			RefreshToken: refreshToken,
 		})
 	} else {
 		token, err := jwt.GenerateMfaToken(claims, info.User.MFA, info.AppInfo.Callback)
@@ -152,9 +166,23 @@ func callThirdPartyLoginResult(c *gin.Context, info ThirdPartyLoginContext) {
 			return
 		}
 
+		accessToken, err := jwt.GenerateAccessToken(info.User.ID, info.User.Name, info.AppInfo.AppCode, info.Groups)
+		if err != nil {
+			callback.Error(c, callback.ErrUnexpected, err)
+			return
+		}
+
+		refreshToken, err := jwt.GenerateRefreshToken(info.User.ID, info.User.Name, info.AppInfo.AppCode, info.Groups)
+		if err != nil {
+			callback.Error(c, callback.ErrUnexpected, err)
+			return
+		}
+
 		callback.Success(c, response.ThirdPartyLogin{
-			Token: token,
-			Mfa:   true,
+			Token:        token,
+			Mfa:          true,
+			AccessToken:  accessToken,
+			RefreshToken: refreshToken,
 		})
 	}
 }
