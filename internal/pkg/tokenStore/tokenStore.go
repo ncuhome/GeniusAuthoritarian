@@ -5,22 +5,21 @@ import (
 	"encoding/json"
 	"fmt"
 	"github.com/go-redis/redis/v8"
-	"sync/atomic"
 	"time"
 )
 
-func NewTokenStore(Client *redis.Client, idAtom *atomic.Uint64, keyPrefix string) TokenStore {
+func NewTokenStore(Client *redis.Client, keyPrefix string) TokenStore {
 	return TokenStore{
 		client:    Client,
 		keyPrefix: keyPrefix,
-		idAtom:    idAtom,
+		keyID:     keyPrefix + "id",
 	}
 }
 
 type TokenStore struct {
 	client    *redis.Client
 	keyPrefix string
-	idAtom    *atomic.Uint64
+	keyID     string
 }
 
 func (a TokenStore) genKey(id uint64) string {
@@ -38,7 +37,11 @@ func (a TokenStore) CreateStorePoint(ctx context.Context, iat time.Time, valid t
 		return 0, err
 	}
 
-	id := a.idAtom.Add(1)
+	id, err := a.client.Incr(ctx, a.keyID).Uint64()
+	if err != nil {
+		return 0, err
+	}
+
 	return id, a.client.Set(ctx, a.genKey(id), value, valid).Err()
 }
 

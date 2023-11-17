@@ -6,5 +6,5 @@ import (
 )
 
 func NewMfaLogin(uid uint) tokenStore.TokenStore {
-	return tokenStore.NewTokenStore(Client, &idMfaLogin, keyUserMfaLogin.String()+fmt.Sprint(uid)+"-")
+	return tokenStore.NewTokenStore(Client, keyUserMfaLogin.String()+fmt.Sprint(uid)+"-")
 }

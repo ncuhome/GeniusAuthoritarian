@@ -5,5 +5,5 @@ import (
 )
 
 func NewThirdPartyLogin() tokenStore.TokenStore {
-	return tokenStore.NewTokenStore(Client, &idThirdPartyLogin, keyThirdPartyLogin.String())
+	return tokenStore.NewTokenStore(Client, keyThirdPartyLogin.String())
 }
