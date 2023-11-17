@@ -26,7 +26,7 @@ jobs:
       - name: Build Site
         run: |
           cd web
-          pnpm install --frozen-lockfile --prod
+          pnpm install --frozen-lockfile
           pnpm run build
 
       - name: Build Core Binary
