@@ -25,7 +25,10 @@ jobs:
           echo SSH_DEV_VERSION=${SSH_DEV}:${GITHUB_REF/refs\/tags\//} >> $GITHUB_OUTPUT
 
       - name: Build Site
-        run: cd web && pnpm i && pnpm run build
+        run: |
+          cd web
+          pnpm install --frozen-lockfile --prod
+          pnpm run build
 
       - name: Build Core Binary
         env:

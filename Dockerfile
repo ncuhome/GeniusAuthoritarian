@@ -7,10 +7,10 @@ RUN apk update && \
     echo 'Asia/Shanghai' >/etc/timezone && \
     rm -rf /var/cache/apk/*
 
+WORKDIR /data
+
 COPY ./runner /usr/bin/runner
 
 RUN chmod +x /usr/bin/runner
-
-WORKDIR /data
 
 ENTRYPOINT [ "/usr/bin/runner" ]
