@@ -23,7 +23,7 @@ import {
 import { useUserApiV1 } from "@api/v1/user/hook";
 import { apiV1User } from "@api/v1/user/base";
 
-import { shallow } from "zustand/shallow";
+import { useShallow } from "zustand/react/shallow";
 import { useAppModifyForm } from "@store/useAppForm";
 import useUser from "@store/useUser";
 
@@ -39,23 +39,21 @@ export const AppControlBlock: FC = () => {
   });
 
   const [name, callback, permitAll, permitGroups] = useAppModifyForm(
-    (state) => [
+    useShallow((state) => [
       state.name,
       state.callback,
       state.permitAll,
       state.permitGroups,
-    ],
-    shallow
+    ]),
   );
   const [setName, setCallback, setPermitAll, setPermitGroups] =
     useAppModifyForm(
-      (state) => [
+      useShallow((state) => [
         state.setState("name"),
         state.setState("callback"),
         state.setState("permitAll"),
         state.setState("permitGroups"),
-      ],
-      shallow
+      ]),
     );
   const [onModifyApp, setOnModifyApp] = useState<App.Detailed | null>(null);
   const [modifyingApp, setModifyingApp] = useState(false);
@@ -89,13 +87,13 @@ export const AppControlBlock: FC = () => {
       });
       if (!ok) return;
       await apiV1User.put("dev/app/linkOff", {
-          id: app.id,
-          linkOff: !app.linkOff,
+        id: app.id,
+        linkOff: !app.linkOff,
       });
       setApps(
         (apps || []).map((a) =>
-          a.id === app.id ? ({ ...a, linkOff: !a.linkOff } as App.Detailed) : a
-        )
+          a.id === app.id ? ({ ...a, linkOff: !a.linkOff } as App.Detailed) : a,
+        ),
       );
       toast.success("修改成功");
     } catch ({ msg }) {
@@ -126,8 +124,8 @@ export const AppControlBlock: FC = () => {
                 permitAllGroup: permitAll,
                 groups: permitGroups || [],
               } as App.Detailed)
-            : app
-        )
+            : app,
+        ),
       );
       setOnModifyApp(null);
     } catch ({ msg }) {

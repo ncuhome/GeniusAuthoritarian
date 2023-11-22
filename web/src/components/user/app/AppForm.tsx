@@ -19,7 +19,7 @@ import {
 
 import { useUserApiV1 } from "@api/v1/user/hook";
 
-import { shallow } from "zustand/shallow";
+import { useShallow } from "zustand/react/shallow";
 import useGroup from "@store/useGroup";
 import useUser from "@store/useUser";
 import { UseAppForm } from "@store/useAppForm";
@@ -58,15 +58,14 @@ export const AppForm: FC<Props> = ({
 
   const [name, callback, permitAll, permitGroups, nameError, callbackError] =
     useForm(
-      (state) => [
+      useShallow((state) => [
         state.name,
         state.callback,
         state.permitAll,
         state.permitGroups,
         state.nameError,
         state.callbackError,
-      ],
-      shallow
+      ]),
     );
   const [
     setName,
@@ -76,15 +75,14 @@ export const AppForm: FC<Props> = ({
     setNameError,
     setCallbackError,
   ] = useForm(
-    (state) => [
+    useShallow((state) => [
       state.setState("name"),
       state.setState("callback"),
       state.setState("permitAll"),
       state.setState("permitGroups"),
       state.setState("nameError"),
       state.setState("callbackError"),
-    ],
-    shallow
+    ]),
   );
   const [showSelectGroups, setShowSelectGroups] = useState(!permitAll);
 
@@ -97,7 +95,7 @@ export const AppForm: FC<Props> = ({
       permitGroups &&
       permitGroups.length !== 1 &&
       permitGroups.findIndex((group) => group.name === "中心") !== -1,
-    [permitAll, permitGroups]
+    [permitAll, permitGroups],
   );
 
   useUserApiV1<User.Group[]>(!permitAll ? "group/list" : null, {

@@ -21,7 +21,7 @@ import {
   Button,
 } from "@mui/material";
 
-import { shallow } from "zustand/shallow";
+import { useShallow } from "zustand/react/shallow";
 import useUser from "@store/useUser";
 import useTheme from "@store/useTheme";
 
@@ -54,8 +54,11 @@ const UserRoutersExtra: {
 
 export const User: FC = () => {
   const [dialog, openDialog, dialogResolver] = useUser(
-    (state) => [state.dialog, state.openDialog, state.dialogResolver],
-    shallow
+    useShallow((state) => [
+      state.dialog,
+      state.openDialog,
+      state.dialogResolver,
+    ]),
   );
   const groups = useUser((state) => state.groups);
 

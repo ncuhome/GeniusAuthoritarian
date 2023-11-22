@@ -7,7 +7,7 @@ import { Box, Stack, Typography } from "@mui/material";
 
 import { apiV1User } from "@api/v1/user/base";
 
-import { shallow } from "zustand/shallow";
+import { useShallow } from "zustand/react/shallow";
 import { useAppForm } from "@store/useAppForm";
 import useUser from "@store/useUser";
 
@@ -17,13 +17,12 @@ export const NewAppBlock: FC = () => {
   const setDialog = useUser((state) => state.setDialog);
 
   const [name, callback, permitAll, permitGroups] = useAppForm(
-    (state) => [
+    useShallow((state) => [
       state.name,
       state.callback,
       state.permitAll,
       state.permitGroups,
-    ],
-    shallow
+    ]),
   );
   const resetForm = useAppForm((state) => state.reset);
 

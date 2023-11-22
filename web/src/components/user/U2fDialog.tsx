@@ -29,7 +29,7 @@ import {
 
 import { apiV1User } from "@api/v1/user/base";
 
-import { shallow } from "zustand/shallow";
+import { useShallow } from "zustand/react/shallow";
 import useU2fDialog from "@store/useU2fDialog";
 import {
   coerceResponseToBase64Url,
@@ -41,13 +41,12 @@ const U2fDialog: FC = () => {
   const open = useU2fDialog((state) => state.open);
   const tip = useU2fDialog((state) => state.tip);
   const u2fStatus = useU2fDialog(
-    (state) => ({
+    useShallow((state) => ({
       prefer: state.prefer,
       mfa: state.mfa,
       phone: state.phone,
       passkey: state.passkey,
-    }),
-    shallow,
+    })),
   );
   const u2fToken = useU2fDialog((state) => state.u2f);
   const tabValue = useU2fDialog((state) => state.tabValue);
