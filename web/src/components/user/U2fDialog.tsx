@@ -47,7 +47,7 @@ const U2fDialog: FC = () => {
       phone: state.phone,
       passkey: state.passkey,
     }),
-    shallow
+    shallow,
   );
   const u2fToken = useU2fDialog((state) => state.u2f);
   const tabValue = useU2fDialog((state) => state.tabValue);
@@ -66,7 +66,7 @@ const U2fDialog: FC = () => {
         return next;
       });
     },
-    autoConfirm > 0 && tokenAvailable && open ? 100 : null
+    autoConfirm > 0 && tokenAvailable && open ? 100 : null,
   );
 
   const [smsCode, setSmsCode] = useState("");
@@ -74,7 +74,7 @@ const U2fDialog: FC = () => {
   const [smsCoolDown, setSmsCoolDown] = useState(0);
   useInterval(
     () => setSmsCoolDown((num) => num - 1),
-    smsCoolDown > 0 ? 1000 : null
+    smsCoolDown > 0 ? 1000 : null,
   );
 
   const [mfaCode, setMfaCode] = useState("");
@@ -87,7 +87,7 @@ const U2fDialog: FC = () => {
     () => {
       if (!isTokenAvailable()) setTokenAvailable(false);
     },
-    tokenAvailable ? 1000 : null
+    tokenAvailable ? 1000 : null,
   );
 
   const onCancel = () => {
@@ -132,7 +132,7 @@ const U2fDialog: FC = () => {
           data: { data: options },
         } = await apiV1User.get("passkey/options");
         options.publicKey.challenge = coerceToArrayBuffer(
-          options.publicKey.challenge
+          options.publicKey.challenge,
         );
         options.publicKey.allowCredentials =
           options.publicKey.allowCredentials.map((cred: any) => {
@@ -159,7 +159,7 @@ const U2fDialog: FC = () => {
         data: { data: result },
       } = await apiV1User.post<{ data: User.U2F.Result }>(
         `u2f/${method}`,
-        data
+        data,
       );
       const states = useU2fDialog.getState();
       states.setToken(result);
@@ -292,7 +292,15 @@ const U2fDialog: FC = () => {
           </DialogContentText>
         )}
         {tip ? (
-          <Alert severity={"info"} sx={{ mt: 2 }}>
+          <Alert
+            severity={"info"}
+            sx={{
+              mt: 2,
+              "& + .MuiAlert-root": {
+                mt: 2,
+              },
+            }}
+          >
             {tip}
           </Alert>
         ) : undefined}
