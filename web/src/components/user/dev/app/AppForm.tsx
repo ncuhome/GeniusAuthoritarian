@@ -2,7 +2,7 @@ import { FC, useEffect, useMemo, useRef, useState } from "react";
 import useTimeout from "@hooks/useTimeout";
 import toast from "react-hot-toast";
 
-import SelectPermitGroup from "@components/user/app/SelectPermitGroup";
+import SelectPermitGroup from "@components/user/dev/app/SelectPermitGroup";
 import { LoadingButton } from "@mui/lab";
 import {
   Button,

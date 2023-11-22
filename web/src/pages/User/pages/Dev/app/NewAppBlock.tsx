@@ -2,7 +2,7 @@ import { FC, useState } from "react";
 import toast from "react-hot-toast";
 
 import Block from "@components/user/Block";
-import AppForm from "@components/user/app/AppForm";
+import AppForm from "@components/user/dev/app/AppForm";
 import { Box, Stack, Typography } from "@mui/material";
 
 import { apiV1User } from "@api/v1/user/base";

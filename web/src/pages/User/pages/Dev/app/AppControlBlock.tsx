@@ -2,8 +2,8 @@ import { FC, useState } from "react";
 import toast from "react-hot-toast";
 
 import Block from "@components/user/Block";
-import AppForm from "@components/user/app/AppForm";
-import AppTableRow from "@components/user/app/AppTableRow";
+import AppForm from "@components/user/dev/app/AppForm";
+import AppTableRow from "@components/user/dev/app/AppTableRow";
 import {
   Paper,
   TableContainer,
