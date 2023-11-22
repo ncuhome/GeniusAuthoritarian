@@ -50,6 +50,8 @@ declare namespace User {
   }
 
   namespace SSH {
+    type KeyMode = "pem" | "ssh";
+
     type Keys = {
       username: string;
       pem: {

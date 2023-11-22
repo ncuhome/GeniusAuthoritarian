@@ -23,6 +23,7 @@ import {
 import Block from "@components/user/Block";
 import TipButton from "@components/TipButton";
 import TipIconButton from "@components/TipIconButton";
+import KeyPair from "@components/user/dev/ssh/KeyPair";
 
 import { apiV1User } from "@api/v1/user/base";
 
@@ -32,7 +33,7 @@ const Ssh: FC = () => {
   const { isLoading: u2fLoading, refreshToken } = useU2F();
 
   const [sshKey, setSshKey] = useState<User.SSH.Keys | null>(null);
-  const [keyMode, setKeyMode] = useState<"pem" | "ssh">("ssh");
+  const [keyMode, setKeyMode] = useState<User.SSH.KeyMode>("ssh");
 
   const [isUnlockLoading, setIsUnlockLoading] = useState(false);
 
@@ -114,57 +115,13 @@ const Ssh: FC = () => {
         </Stack>
 
         {sshKey ? (
-          <Stack spacing={3} py={2}>
-            <FormControl variant={"outlined"} fullWidth>
-              <InputLabel id={"key-mode-select"}>格式</InputLabel>
-              <Select
-                labelId={"key-mode-select"}
-                label={"格式"}
-                value={keyMode}
-                defaultValue={"ssh"}
-                onChange={(e) => setKeyMode(e.target.value as "pem" | "ssh")}
-              >
-                <MenuItem value={"ssh"}>SSH</MenuItem>
-                <MenuItem value={"pem"}>PEM</MenuItem>
-              </Select>
-            </FormControl>
-
-            <TextField
-              label={"用户名"}
-              fullWidth
-              value={sshKey.username}
-              InputProps={{
-                readOnly: true,
-              }}
-              onClick={(e: any) => {
-                e.target.select();
-              }}
-            />
-            <TextField
-              label={"公钥"}
-              fullWidth
-              multiline
-              value={sshKey[keyMode].public.trimEnd()}
-              InputProps={{
-                readOnly: true,
-              }}
-              onClick={(e: any) => {
-                e.target.select();
-              }}
-            />
-            <TextField
-              label={"密钥"}
-              fullWidth
-              multiline
-              value={sshKey[keyMode].private.trimEnd()}
-              InputProps={{
-                readOnly: true,
-              }}
-              onClick={(e: any) => {
-                e.target.select();
-              }}
-            />
-          </Stack>
+          <KeyPair
+            spacing={3}
+            py={2}
+            keyMode={keyMode}
+            keys={sshKey}
+            onSetKeyMode={setKeyMode}
+          />
         ) : (
           <Stack
             alignItems={"center"}
