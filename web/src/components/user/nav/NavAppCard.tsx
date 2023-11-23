@@ -10,7 +10,7 @@ import {
   Chip,
   CardActions,
 } from "@mui/material";
-import { DataSaverOff, LinkOff } from "@mui/icons-material";
+import { DataSaverOff, ExtensionOff } from "@mui/icons-material";
 
 import { apiV1User } from "@api/v1/user/base";
 
@@ -65,13 +65,6 @@ export const NavAppCard: FC<Props> = ({ app }) => {
           }}
         >
           {app.name}
-          {app.linkOff ? (
-            <LinkOff
-              fontSize={"small"}
-              color={"warning"}
-              style={{ display: "inline", marginLeft: "0.5rem", opacity: 0.5 }}
-            />
-          ) : undefined}
         </Typography>
 
         <Stack
@@ -88,18 +81,28 @@ export const NavAppCard: FC<Props> = ({ app }) => {
           pt: 0,
           pb: 1.5,
           px: 1.5,
+          "&>.MuiChip-root": {
+            paddingLeft: "3.5px",
+          },
         }}
       >
-        <Chip
-          variant="outlined"
-          size="small"
-          color={"primary"}
-          icon={<DataSaverOff color={"info"} />}
-          label={numeral(app.views)}
-          sx={{
-            opacity: app.linkOff ? 0 : 1,
-          }}
-        />
+        {app.linkOff ? (
+          <Chip
+            variant="outlined"
+            size="small"
+            color={"warning"}
+            icon={<ExtensionOff />}
+            label={"未接入"}
+          />
+        ) : (
+          <Chip
+            variant="outlined"
+            size="small"
+            color={"primary"}
+            icon={<DataSaverOff color={"info"} />}
+            label={numeral(app.views)}
+          />
+        )}
       </CardActions>
     </Card>
   );

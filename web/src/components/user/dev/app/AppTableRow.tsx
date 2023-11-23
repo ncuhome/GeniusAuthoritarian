@@ -5,8 +5,8 @@ import { Divider, Stack, TableCell, TableRow } from "@mui/material";
 import {
   DeleteForeverOutlined,
   DriveFileRenameOutlineOutlined,
-    Link,
-  LinkOff,
+  Extension,
+  ExtensionOff,
 } from "@mui/icons-material";
 
 interface Props {
@@ -16,7 +16,12 @@ interface Props {
   onDelete: (app: App.Detailed) => Promise<void>;
 }
 
-export const AppTableRow: FC<Props> = ({ app, onDelete, onModify, onModifyLinkOff }) => {
+export const AppTableRow: FC<Props> = ({
+  app,
+  onDelete,
+  onModify,
+  onModifyLinkOff,
+}) => {
   const [deletingApp, setDeletingApp] = useState(false);
 
   async function handleDeleteApp(app: App.Detailed) {
@@ -25,21 +30,23 @@ export const AppTableRow: FC<Props> = ({ app, onDelete, onModify, onModifyLinkOf
     setDeletingApp(false);
   }
 
-  async function handleSetLinkState(linkOff:boolean) {
-
-  }
-
   return (
     <TableRow hover role="checkbox" tabIndex={-1}>
       <TableCell>{app.name}</TableCell>
-      <TableCell>{app.linkOff?<LinkOff/>:<Link/>}</TableCell>
+      <TableCell>
+        {app.linkOff ? (
+          <ExtensionOff fontSize={"small"} />
+        ) : (
+          <Extension fontSize={"small"} />
+        )}
+      </TableCell>
       <TableCell>{app.appCode}</TableCell>
       <TableCell>
         {app.permitAllGroup
           ? "ALL"
           : app.groups.length > 0
-          ? app.groups.map((group) => group.name).join("，")
-          : "NONE"}
+            ? app.groups.map((group) => group.name).join("，")
+            : "NONE"}
       </TableCell>
       <TableCell>{app.callback}</TableCell>
       <TableCell>
@@ -59,9 +66,12 @@ export const AppTableRow: FC<Props> = ({ app, onDelete, onModify, onModifyLinkOf
           <TipIconButton title={"编辑"} onClick={() => onModify(app)}>
             <DriveFileRenameOutlineOutlined />
           </TipIconButton>
-            <TipIconButton title={"更新接入状态"} onClick={() => onModifyLinkOff(app)}>
-                {app.linkOff?<Link/>:<LinkOff/>}
-            </TipIconButton>
+          <TipIconButton
+            title={"更新接入状态"}
+            onClick={() => onModifyLinkOff(app)}
+          >
+            {app.linkOff ? <Extension /> : <ExtensionOff />}
+          </TipIconButton>
           <TipIconButton
             title={"删除"}
             onClick={() => handleDeleteApp(app)}
