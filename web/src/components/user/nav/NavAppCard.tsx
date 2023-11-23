@@ -77,7 +77,7 @@ export const NavAppCard: FC<Props> = ({ app }) => {
                 mr: 0.7,
               }}
             />
-            <span>{app.linkOff ? "--" : numeral(app.views, 0)}</span>
+            <span>{app.linkOff ? "--" : numeral(app.views)}</span>
           </Stack>
         </Stack>
       </CardContent>
