@@ -2,7 +2,14 @@ import { FC, useState } from "react";
 import toast from "react-hot-toast";
 import { numeral } from "@util/num";
 
-import { Card, CardContent, Stack, Typography } from "@mui/material";
+import {
+  Card,
+  CardContent,
+  Stack,
+  Typography,
+  Chip,
+  CardActions,
+} from "@mui/material";
 import { DataSaverOff, LinkOff } from "@mui/icons-material";
 
 import { apiV1User } from "@api/v1/user/base";
@@ -27,7 +34,7 @@ export const NavAppCard: FC<Props> = ({ app }) => {
         },
       });
       window.open(url, "_blank");
-    } catch ({msg}) {
+    } catch ({ msg }) {
       if (msg) toast.error(msg as string);
     }
   }
@@ -43,7 +50,11 @@ export const NavAppCard: FC<Props> = ({ app }) => {
         transition: "box-shadow .3s ease-in-out",
       }}
     >
-      <CardContent>
+      <CardContent
+        sx={{
+          pb: 1,
+        }}
+      >
         <Typography
           gutterBottom
           variant="subtitle1"
@@ -64,23 +75,32 @@ export const NavAppCard: FC<Props> = ({ app }) => {
         </Typography>
 
         <Stack
-          flexDirection={"row-reverse"}
+          direction="row"
+          justifyContent={"flex-end"}
           sx={{
             mt: 1,
-            opacity: 0.8,
           }}
-        >
-          <Stack flexDirection={"row"} alignItems={"center"} width={"3.5rem"}>
-            <DataSaverOff
-              fontSize={"small"}
-              sx={{
-                mr: 0.7,
-              }}
-            />
-            <span>{app.linkOff ? "--" : numeral(app.views)}</span>
-          </Stack>
-        </Stack>
+        ></Stack>
       </CardContent>
+      <CardActions
+        sx={{
+          justifyContent: "flex-end",
+          pt: 0,
+          pb: 1.5,
+          px: 1.5,
+        }}
+      >
+        <Chip
+          variant="outlined"
+          size="small"
+          color={"primary"}
+          icon={<DataSaverOff color={"info"} />}
+          label={numeral(app.views)}
+          sx={{
+            opacity: app.linkOff ? 0 : 1,
+          }}
+        />
+      </CardActions>
     </Card>
   );
 };
