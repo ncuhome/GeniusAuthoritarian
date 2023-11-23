@@ -14,31 +14,13 @@ interface Props {
 export const NavAppCard: FC<Props> = ({ app }) => {
   const [elevation, setElevation] = useState(5);
 
-  async function onLandingApp(id: number, code?: string) {
-    try {
-      const {
-        data: {
-          data: { url },
-        },
-      } = await apiV1User.get("app/landing", {
-        params: {
-          id,
-          code,
-        },
-      });
-      window.open(url, "_blank");
-    } catch ({ msg }) {
-      if (msg) toast.error(msg as string);
-    }
-  }
-
   return (
     <Card
       variant={"elevation"}
       elevation={elevation}
       onMouseEnter={() => setElevation(7)}
       onMouseLeave={() => setElevation(5)}
-      onClick={() => onLandingApp(app.id)}
+      onClick={() => window.open(app.callback, "_blank")}
       sx={{
         transition: "box-shadow .3s ease-in-out",
       }}
