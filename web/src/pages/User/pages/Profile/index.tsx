@@ -200,7 +200,7 @@ export const Profile: FC = () => {
       </Block>
 
       {profile && profile.loginRecord.length ? (
-        <Block title={"Record"} subtitle={"最近十次登录记录"}>
+        <Block title={"Record"} subtitle={"最近十次登录"}>
           <Box
             sx={{
               marginTop: "0.5rem",

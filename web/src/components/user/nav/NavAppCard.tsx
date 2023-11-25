@@ -38,7 +38,7 @@ export const NavAppCard: FC<Props> = ({ app }) => {
           {app.name}
         </Typography>
         <Typography variant={"subtitle2"} color={"text.secondary"}>
-          {new URL(app.callback).hostname}
+          {new URL(app.callback).host}
         </Typography>
       </CardContent>
 
