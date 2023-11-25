@@ -42,10 +42,10 @@ func ParseToken[C Claims](Type, token string, target C) (claims C, valid bool, e
 	return
 }
 
-// GenerateUserToken 生成有效期 15 天的后台 Token
-func GenerateUserToken(uid uint, name string, groups []string) (string, *UserToken, error) {
+// GenerateUserToken 生成后台 Token
+func GenerateUserToken(uid uint, name string, groups []string, valid time.Duration) (string, *UserToken, error) {
 	claims := &UserToken{
-		TypedClaims: NewTypedClaims("User", time.Hour*24*15),
+		TypedClaims: NewTypedClaims("User", valid),
 		ID:          uid,
 		Name:        name,
 		Groups:      groups,

@@ -139,13 +139,15 @@ func Login(c *gin.Context) {
 		return
 	}
 
-	token, userTokenClaims, err := jwt.GenerateUserToken(claims.UID, claims.Name, groups)
+	var tokenValid = time.Hour * 24 * 3
+
+	token, userTokenClaims, err := jwt.GenerateUserToken(claims.UID, claims.Name, groups, tokenValid)
 	if err != nil {
 		callback.Error(c, callback.ErrUnexpected, err)
 		return
 	}
 
-	if err = redis.NewUserJwt(claims.UID).Set(userTokenClaims.IssuedAt.Time, time.Hour*24*15); err != nil {
+	if err = redis.NewUserJwt(claims.UID).Set(userTokenClaims.IssuedAt.Time, tokenValid); err != nil {
 		callback.Error(c, callback.ErrUnexpected, err)
 		return
 	}
