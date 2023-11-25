@@ -91,7 +91,7 @@ var (
 	}
 	ErrAppNameExist = &Msg{
 		Code:       cErrAppNameExist,
-		Msg:        "名称已被占用",
+		Msg:        "应用名称已被占用",
 		HttpStatus: 409,
 	}
 	ErrGroupNotFound = &Msg{

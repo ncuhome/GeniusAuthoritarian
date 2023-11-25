@@ -73,6 +73,15 @@ func ApplyApp(c *gin.Context) {
 	}
 	defer appSrv.Rollback()
 
+	exist, err := appSrv.NameExist(f.Name, daoUtil.LockForUpdate)
+	if err != nil {
+		callback.Error(c, callback.ErrDBOperation, err)
+		return
+	} else if exist {
+		callback.Error(c, callback.ErrAppNameExist)
+		return
+	}
+
 	uid := tools.GetUserInfo(c).ID
 	newApp, err := appSrv.New(uid, f.Name, f.Callback, f.PermitAll)
 	if err != nil {
