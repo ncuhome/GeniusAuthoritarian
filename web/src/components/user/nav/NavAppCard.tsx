@@ -1,12 +1,8 @@
 import { FC, useState } from "react";
-import toast from "react-hot-toast";
 import { numeral } from "@util/num";
 
 import { Card, CardContent, Stack, Typography, Chip } from "@mui/material";
 import { DataSaverOff, ExtensionOff } from "@mui/icons-material";
-
-import { apiV1User } from "@api/v1/user/base";
-
 interface Props {
   app: App.Info;
 }
@@ -32,7 +28,7 @@ export const NavAppCard: FC<Props> = ({ app }) => {
       >
         <Typography
           gutterBottom
-          variant="subtitle1"
+          variant="h6"
           sx={{
             display: "flex",
             alignItems: "center",
@@ -41,15 +37,11 @@ export const NavAppCard: FC<Props> = ({ app }) => {
         >
           {app.name}
         </Typography>
-
-        <Stack
-          direction="row"
-          justifyContent={"flex-end"}
-          sx={{
-            mt: 1,
-          }}
-        ></Stack>
+        <Typography variant={"subtitle2"} color={"text.secondary"}>
+          {new URL(app.callback).hostname}
+        </Typography>
       </CardContent>
+
       <Stack
         direction="row"
         sx={{
