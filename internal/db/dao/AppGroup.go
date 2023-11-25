@@ -13,7 +13,7 @@ type AppGroup struct {
 }
 
 func (a *AppGroup) sqlJoinApps(tx *gorm.DB) *gorm.DB {
-	return tx.Joins("INNER JOIN apps ON apps.id=app_groups.aid AND apps.deleted_at IS NULL")
+	return tx.Joins("INNER JOIN apps ON apps.id=app_groups.aid")
 }
 
 func (a *AppGroup) sqlGetGroupsJoined(tx *gorm.DB) *gorm.DB {
