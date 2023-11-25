@@ -12,14 +12,14 @@ type App struct {
 	// User.ID 拥有者
 	UID            uint   `gorm:"column:uid;index"`
 	User           *User  `gorm:"foreignKey:UID;constraint:OnDelete:SET NULL"`
-	Name           string `gorm:"not null"`
+	Name           string `gorm:"not null;uniqueIndex;type:varchar(20)"`
 	AppCode        string `gorm:"not null;uniqueIndex;type:varchar(36)"`
 	AppSecret      string `gorm:"not null"`
 	Callback       string `gorm:"not null"`
 	PermitAllGroup bool
 	// 以下仅用于导航标识
-	LinkOff bool `gorm:"index"`
-	Views   uint64
+	LinkOff bool   `gorm:"index"`
+	Views   uint64 `gorm:"index"`
 	// LoginRecord.ID 统计用，无需约束
 	ViewsID uint
 }
@@ -51,6 +51,10 @@ func (a *App) sqlGetForWithGroup(tx *gorm.DB) *gorm.DB {
 	tx = a.sqlJoinAppGroups(tx)
 	tx = a.sqlJoinGroups(tx)
 	return tx.Order("base_groups.id,apps.id")
+}
+
+func (a *App) sqlOderForNav(tx *gorm.DB) *gorm.DB {
+	return tx.Order("views DESC,name,id DESC")
 }
 
 func (a *App) Insert(tx *gorm.DB) error {
