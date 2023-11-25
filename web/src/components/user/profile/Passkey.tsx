@@ -77,13 +77,16 @@ export const Passkey: FC = () => {
         },
       });
       options.publicKey.challenge = coerceToArrayBuffer(
-        options.publicKey.challenge
+        options.publicKey.challenge,
       );
       options.publicKey.user.id = coerceToArrayBuffer(
-        options.publicKey.user.id
+        options.publicKey.user.id,
       );
       const credential = await navigator.credentials.create(options);
-      if (!(credential instanceof PublicKeyCredential)) {
+      if (
+        Object.prototype.toString.call(credential) !==
+        "[object PublicKeyCredential]"
+      ) {
         toast.error(`创建凭据失败，凭据类型不正确`);
         return;
       }

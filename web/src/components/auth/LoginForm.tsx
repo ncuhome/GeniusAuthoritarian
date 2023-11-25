@@ -43,7 +43,7 @@ export const LoginForm: FC = () => {
           ThrowError(nav, "登录对象异常", err.msg, appCode);
         }
       },
-    }
+    },
   );
 
   async function onGoLogin(thirdParty: string) {
@@ -67,10 +67,13 @@ export const LoginForm: FC = () => {
         data: { data: options },
       } = await apiV1.get("public/login/passkey/");
       options.publicKey.challenge = coerceToArrayBuffer(
-        options.publicKey.challenge
+        options.publicKey.challenge,
       );
       const credential = await navigator.credentials.get(options);
-      if (!(credential instanceof PublicKeyCredential)) {
+      if (
+        Object.prototype.toString.call(credential) !==
+        "[object PublicKeyCredential]"
+      ) {
         toast.error(`获取凭据失败，凭据类型不正确`);
         return;
       }
@@ -87,7 +90,7 @@ export const LoginForm: FC = () => {
             response: coerceResponseToBase64Url(pubKeyCred.response),
             type: pubKeyCred.type,
           },
-        }
+        },
       );
       window.open(data.callback, "_self");
     } catch (err: any) {
