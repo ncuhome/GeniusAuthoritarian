@@ -8,7 +8,6 @@ import (
 type App struct {
 	ID        uint `gorm:"primarykey"`
 	CreatedAt int64
-	DeletedAt gorm.DeletedAt `gorm:"index"`
 	// User.ID 拥有者
 	UID            uint   `gorm:"column:uid;index"`
 	User           *User  `gorm:"foreignKey:UID;constraint:OnDelete:SET NULL"`
