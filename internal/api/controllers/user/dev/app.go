@@ -14,6 +14,18 @@ import (
 	"sort"
 )
 
+func ListOwnedApp(c *gin.Context) {
+	uid := tools.GetUserInfo(c).ID
+
+	apps, err := service.App.GetUserOwnedApp(uid)
+	if err != nil {
+		callback.Error(c, callback.ErrDBOperation, err)
+		return
+	}
+
+	callback.Success(c, apps)
+}
+
 func checkCallback(c *gin.Context, callbackStr string) {
 	callbackUrl, err := url.Parse(callbackStr)
 	if err != nil {

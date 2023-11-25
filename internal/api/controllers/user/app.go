@@ -8,18 +8,6 @@ import (
 	"github.com/ncuhome/GeniusAuthoritarian/pkg/departments"
 )
 
-func ListOwnedApp(c *gin.Context) {
-	uid := tools.GetUserInfo(c).ID
-
-	apps, err := service.App.GetUserOwnedApp(uid)
-	if err != nil {
-		callback.Error(c, callback.ErrDBOperation, err)
-		return
-	}
-
-	callback.Success(c, apps)
-}
-
 func ListAccessibleApp(c *gin.Context) {
 	uid := tools.GetUserInfo(c).ID
 
