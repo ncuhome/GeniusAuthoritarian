@@ -66,15 +66,15 @@ func ApplyApp(c *gin.Context) {
 		return
 	}
 
-	appSrc, err := service.App.Begin()
+	appSrv, err := service.App.Begin()
 	if err != nil {
 		callback.Error(c, callback.ErrForm, err)
 		return
 	}
-	defer appSrc.Rollback()
+	defer appSrv.Rollback()
 
 	uid := tools.GetUserInfo(c).ID
-	newApp, err := appSrc.New(uid, f.Name, f.Callback, f.PermitAll)
+	newApp, err := appSrv.New(uid, f.Name, f.Callback, f.PermitAll)
 	if err != nil {
 		callback.Error(c, callback.ErrDBOperation, err)
 		return
@@ -82,7 +82,7 @@ func ApplyApp(c *gin.Context) {
 
 	var groups = make([]dto.Group, 0)
 	if !f.PermitAll && len(f.PermitGroups) != 0 {
-		appGroupSrv := service.AppGroupSrv{DB: appSrc.DB}
+		appGroupSrv := service.AppGroupSrv{DB: appSrv.DB}
 
 		if groups, err = appGroupSrv.BindForApp(newApp.ID, f.PermitGroups); err != nil {
 			if errors.Is(err, gorm.ErrRecordNotFound) {
@@ -94,7 +94,7 @@ func ApplyApp(c *gin.Context) {
 		}
 	}
 
-	if err = redis.AppCode.Add(newApp.AppCode); err != nil || appSrc.Commit().Error != nil {
+	if err = redis.AppCode.Add(newApp.AppCode); err != nil || appSrv.Commit().Error != nil {
 		callback.Error(c, callback.ErrUnexpected, err)
 		return
 	}
@@ -204,6 +204,14 @@ func ModifyApp(c *gin.Context) {
 	appInfoChanged := false
 
 	if f.Name != app.Name {
+		if exist, err := appSrv.NameExist(f.Name); err != nil {
+			callback.Error(c, callback.ErrDBOperation, err)
+			return
+		} else if exist {
+			callback.Error(c, callback.ErrAppNameExist)
+			return
+		}
+
 		appInfoChanged = true
 	}
 

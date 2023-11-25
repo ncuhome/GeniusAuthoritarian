@@ -92,7 +92,7 @@ var (
 	ErrAppNameExist = &Msg{
 		Code:       cErrAppNameExist,
 		Msg:        "名称已被占用",
-		HttpStatus: 400,
+		HttpStatus: 409,
 	}
 	ErrGroupNotFound = &Msg{
 		Code:       cErrGroupNotFound,
@@ -112,7 +112,7 @@ var (
 	ErrMfaAlreadyExist = &Msg{
 		Code:       cErrMfaAlreadyExist,
 		Msg:        "双因素校验已开启",
-		HttpStatus: 400,
+		HttpStatus: 409,
 	}
 	ErrMfaAddExpired = &Msg{
 		Code:       cErrMfaAddExpired,

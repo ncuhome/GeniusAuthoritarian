@@ -33,6 +33,12 @@ func (a AppSrv) This(host string) *dao.App {
 	}
 }
 
+func (a AppSrv) NameExist(name string, opts ...daoUtil.ServiceOpt) (bool, error) {
+	return (&dao.App{
+		Name: name,
+	}).Exist(daoUtil.TxOpts(a.DB, opts...))
+}
+
 func (a AppSrv) New(uid uint, name, callback string, permitAll bool) (*dao.App, error) {
 	randSrc := rand.NewSource(time.Now().UnixNano())
 	var t = dao.App{
