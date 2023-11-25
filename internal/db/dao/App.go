@@ -53,8 +53,8 @@ func (a *App) sqlGetForWithGroup(tx *gorm.DB) *gorm.DB {
 	return tx.Order("base_groups.id,apps.id")
 }
 
-func (a *App) sqlOderForNav(tx *gorm.DB) *gorm.DB {
-	return tx.Order("views DESC,name,id DESC")
+func (a *App) sqlOrderForNav(tx *gorm.DB) *gorm.DB {
+	return tx.Order("apps.link_off,apps.views DESC,apps.name")
 }
 
 func (a *App) Exist(tx *gorm.DB) (bool, error) {
@@ -122,7 +122,9 @@ func (a *App) GetByUIDForShowDetailed(tx *gorm.DB) ([]dto.AppShowDetail, error) 
 
 func (a *App) GetPermitAll(tx *gorm.DB) ([]dto.AppShow, error) {
 	var t = make([]dto.AppShow, 0)
-	return t, tx.Model(a).Where("permit_all_group=?", true).Find(&t).Error
+	tx = tx.Model(a).Where("permit_all_group=?", true)
+	tx = a.sqlOrderForNav(tx)
+	return t, tx.Find(&t).Error
 }
 
 func (a *App) GetAccessible(tx *gorm.DB) ([]dto.AppShowWithGroup, error) {
@@ -130,6 +132,7 @@ func (a *App) GetAccessible(tx *gorm.DB) ([]dto.AppShowWithGroup, error) {
 	var t []dto.AppShowWithGroup
 	tx = a.sqlGetForWithGroup(tx)
 	tx = a.sqlJoinUserGroups(tx)
+	tx = a.sqlOrderForNav(tx)
 	return t, tx.Where("user_groups.uid=?", a.UID).Find(&t).Error
 }
 
