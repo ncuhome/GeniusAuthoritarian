@@ -155,7 +155,7 @@ func DashboardLogin(c *gin.Context) {
 	}
 
 	callback.Success(c, gin.H{
-		"token":  token,
+		"token":  jwt.TokenWithType(jwt.User, token),
 		"groups": groups,
 	})
 }

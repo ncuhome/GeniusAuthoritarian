@@ -8,9 +8,9 @@ import (
 )
 
 func UserAuth(c *gin.Context) {
-	token := c.GetHeader("Authorization")
-	if token == "" {
-		callback.Error(c, callback.ErrUnauthorized)
+	token, err := jwt.HeaderToken(c, jwt.User)
+	if err != nil {
+		callback.Error(c, callback.ErrUnauthorized, err)
 		return
 	}
 

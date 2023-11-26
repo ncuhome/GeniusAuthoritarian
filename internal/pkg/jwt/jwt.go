@@ -10,6 +10,15 @@ import (
 
 var key = []byte(global.Config.Jwt.SignKey)
 
+const (
+	User    = "User"
+	Login   = "Login"
+	Mfa     = "Mfa"
+	U2F     = "U2F"
+	Refresh = "Refresh"
+	Access  = "Access"
+)
+
 func NewTypedClaims(Type string, valid time.Duration) TypedClaims {
 	now := time.Now()
 	return TypedClaims{
@@ -45,7 +54,7 @@ func ParseToken[C Claims](Type, token string, target C) (claims C, valid bool, e
 // GenerateUserToken 生成后台 Token
 func GenerateUserToken(uid uint, name string, groups []string, valid time.Duration) (string, *UserToken, error) {
 	claims := &UserToken{
-		TypedClaims: NewTypedClaims("User", valid),
+		TypedClaims: NewTypedClaims(User, valid),
 		ID:          uid,
 		Name:        name,
 		Groups:      groups,
@@ -55,7 +64,7 @@ func GenerateUserToken(uid uint, name string, groups []string, valid time.Durati
 }
 
 func ParseUserToken(token string) (*UserToken, bool, error) {
-	return ParseToken("User", token, &UserToken{})
+	return ParseToken(User, token, &UserToken{})
 }
 
 // GenerateLoginToken 生成有效期 5 分钟的登录校验 Token
@@ -63,7 +72,7 @@ func GenerateLoginToken(claims LoginRedisClaims) (string, error) {
 	valid := time.Minute * 5
 
 	tokenClaims := &LoginToken{
-		TypedClaims: NewTypedClaims("Login", valid),
+		TypedClaims: NewTypedClaims(Login, valid),
 	}
 	var err error
 	tokenClaims.ID, err = redis.NewThirdPartyLogin().CreateStorePoint(context.Background(), tokenClaims.IssuedAt.Time, valid, claims)
@@ -76,7 +85,7 @@ func GenerateLoginToken(claims LoginRedisClaims) (string, error) {
 
 // ParseLoginToken 解析后自动销毁
 func ParseLoginToken(token string) (*LoginRedisClaims, bool, error) {
-	claims, valid, err := ParseToken("Login", token, &LoginToken{})
+	claims, valid, err := ParseToken(Login, token, &LoginToken{})
 	if err != nil || !valid {
 		return nil, false, err
 	}
@@ -97,7 +106,7 @@ func GenerateMfaToken(claims LoginRedisClaims, mfaSecret, appCallback string) (s
 	valid := time.Minute * 5
 
 	mfaTokenClaims := &MfaToken{
-		TypedClaims: NewTypedClaims("Mfa", valid),
+		TypedClaims: NewTypedClaims(Mfa, valid),
 		UID:         claims.UID,
 	}
 	var err error
@@ -114,7 +123,7 @@ func GenerateMfaToken(claims LoginRedisClaims, mfaSecret, appCallback string) (s
 
 // ParseMfaToken 不会销毁，允许多次验证尝试
 func ParseMfaToken(token string) (*MfaRedisClaims, error) {
-	claims, valid, err := ParseToken("Mfa", token, &MfaToken{})
+	claims, valid, err := ParseToken(Mfa, token, &MfaToken{})
 	if err != nil || !valid {
 		return nil, err
 	}
@@ -128,7 +137,7 @@ func GenerateU2fToken(uid uint, ip string) (string, *U2fToken, error) {
 	valid := time.Minute * 5
 
 	tokenClaims := &U2fToken{
-		TypedClaims: NewTypedClaims("U2F", valid),
+		TypedClaims: NewTypedClaims(U2F, valid),
 		UID:         uid,
 		IP:          ip,
 	}
@@ -142,7 +151,7 @@ func GenerateU2fToken(uid uint, ip string) (string, *U2fToken, error) {
 }
 
 func ParseU2fToken(token, ip string) (bool, error) {
-	claims, valid, err := ParseToken("U2F", token, &U2fToken{})
+	claims, valid, err := ParseToken(U2F, token, &U2fToken{})
 	if err != nil || !valid || claims.IP != ip {
 		return false, err
 	}
@@ -159,7 +168,7 @@ func ParseU2fToken(token, ip string) (bool, error) {
 
 func GenerateRefreshToken(uid uint, appCode, payload string, valid time.Duration) (string, error) {
 	return GenerateToken(&RefreshToken{
-		TypedClaims: NewTypedClaims("Refresh", valid),
+		TypedClaims: NewTypedClaims(Refresh, valid),
 		UID:         uid,
 		AppCode:     appCode,
 		Payload:     payload,
@@ -167,13 +176,13 @@ func GenerateRefreshToken(uid uint, appCode, payload string, valid time.Duration
 }
 
 func ParseRefreshToken(token string) (*RefreshToken, bool, error) {
-	return ParseToken("Refresh", token, &RefreshToken{})
+	return ParseToken(Refresh, token, &RefreshToken{})
 }
 
 func GenerateAccessToken(uid uint, appCode, payload string) (string, error) {
 	return GenerateToken(&AccessToken{
 		RefreshToken{
-			TypedClaims: NewTypedClaims("Access", time.Minute*5),
+			TypedClaims: NewTypedClaims(Access, time.Minute*5),
 			UID:         uid,
 			AppCode:     appCode,
 			Payload:     payload,
@@ -182,5 +191,5 @@ func GenerateAccessToken(uid uint, appCode, payload string) (string, error) {
 }
 
 func ParseAccessToken(token string) (*AccessToken, bool, error) {
-	return ParseToken("Access", token, &AccessToken{})
+	return ParseToken(Access, token, &AccessToken{})
 }
