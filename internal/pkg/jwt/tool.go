@@ -7,8 +7,8 @@ import (
 )
 
 func HeaderToken(c *gin.Context, Type string) (string, error) {
-	tokens := c.Request.Header.Values("Authorization")
-	for _, token := range tokens {
+	tokenStr := c.GetHeader("Authorization")
+	for _, token := range strings.Split(tokenStr, ", ") {
 		if strings.HasPrefix(token, Type) {
 			s := strings.Split(token, " ")
 			if len(s) != 2 {
