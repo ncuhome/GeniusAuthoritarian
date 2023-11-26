@@ -1,5 +1,5 @@
 import { useEffect } from "react";
-import { useLoadingToast } from "@hooks/useLoadingToast";
+import useLoadingToast from "@hooks/useLoadingToast";
 import useSWR, { SWRConfiguration } from "swr";
 import { AxiosInstance } from "axios";
 

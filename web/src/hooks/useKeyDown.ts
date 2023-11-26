@@ -5,3 +5,4 @@ export const useKeyDown = (key: string | null, callback: () => void) => {
     e.key === key ? callback() : null
   );
 };
+export default useKeyDown;

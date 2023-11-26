@@ -31,3 +31,5 @@ export function useLoadingToast() {
 
   return [showToast, closeToast];
 }
+
+export default useLoadingToast;

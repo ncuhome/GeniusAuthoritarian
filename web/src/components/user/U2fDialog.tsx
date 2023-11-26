@@ -1,6 +1,7 @@
 import { FC, useCallback, useEffect, useState } from "react";
 import useInterval from "@hooks/useInterval";
 import useTimeout from "@hooks/useTimeout";
+import useKeyDown from "@hooks/useKeyDown";
 import toast from "react-hot-toast";
 
 import {
@@ -169,6 +170,7 @@ const U2fDialog: FC = () => {
     }
     setIsLoading(false);
   };
+  useKeyDown("Enter", onSubmit);
 
   async function onSendSmsCode() {
     setIsSendingSms(true);
