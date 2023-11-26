@@ -10,7 +10,6 @@ import (
 )
 
 var key = []byte(global.Config.Jwt.SignKey)
-var refreshKey = []byte(global.Config.Jwt.RefreshKey)
 
 func NewTypedClaims(Type string, valid time.Duration) TypedClaims {
 	now := time.Now()
@@ -31,9 +30,6 @@ func ParseToken[C Claims](Type, token string, target C) (claims C, valid bool, e
 	var t *jwt.Token
 	t, err = jwt.ParseWithClaims(
 		token, target, func(t *jwt.Token) (interface{}, error) {
-			if Type == "Refresh" {
-				return refreshKey, nil
-			}
 			return key, nil
 		},
 		jwt.WithLeeway(time.Second*3),
