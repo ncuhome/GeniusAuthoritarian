@@ -67,7 +67,7 @@ func VerifyToken(c *gin.Context) {
 		return
 	}
 
-	appCode, appSecret, err := appSrv.FirstAppKeyPair(claims.AppID)
+	appCode, appSecret, err := appSrv.FirstAppKeyPairByID(claims.AppID)
 	if err != nil {
 		callback.Error(c, callback.ErrDBOperation, err)
 		return

@@ -99,6 +99,11 @@ func (a *App) FirstAppKeyPairByID(tx *gorm.DB) error {
 	return tx.Model(a).Select("app_code", "app_secret").First(a, a.ID).Error
 }
 
+func (a *App) FirstAppKeyPairByAppCode(tx *gorm.DB) error {
+	return tx.Model(a).Select("app_code", "app_secret").
+		First(a, "app_code=?", a.AppCode).Error
+}
+
 func (a *App) GetAppCode(tx *gorm.DB) ([]string, error) {
 	var t []string
 	return t, tx.Model(a).Select("app_code").Find(&t).Error

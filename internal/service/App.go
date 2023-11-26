@@ -132,11 +132,18 @@ func (a AppSrv) FirstAppDetailedByIDForUser(id, uid uint, opts ...daoUtil.Servic
 	return appDetailed, nil
 }
 
-func (a AppSrv) FirstAppKeyPair(id uint) (string, string, error) {
+func (a AppSrv) FirstAppKeyPairByID(id uint) (string, string, error) {
 	var t = dao.App{
 		ID: id,
 	}
 	return t.AppCode, t.AppSecret, t.FirstAppKeyPairByID(a.DB)
+}
+
+func (a AppSrv) FirstAppKeyPairByAppCode(appCode string) (string, string, error) {
+	var t = dao.App{
+		AppCode: appCode,
+	}
+	return t.AppCode, t.AppSecret, t.FirstAppKeyPairByAppCode(a.DB)
 }
 
 func (a AppSrv) GetUserOwnedApp(uid uint) ([]dto.AppShowDetail, error) {
