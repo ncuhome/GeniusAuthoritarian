@@ -70,11 +70,11 @@ func CompleteLogin(c *gin.Context) {
 
 	if f.GrantType == "refresh_token" {
 		var form2 struct {
-			Payload json.RawMessage `json:"payload,omitempty"`
+			Payload json.RawMessage `json:"payload,omitempty" form:"-"`
 			// refreshToken 有效期，秒，最长 30 天，最短不在此处处理
-			Valid int64 `json:"valid" binding:"min=0,max=2592000"`
+			Valid int64 `json:"valid" form:"valid" binding:"min=0,max=2592000"`
 		}
-		if err = c.ShouldBindJSON(&form2); err != nil {
+		if err = c.ShouldBind(&form2); err != nil {
 			callback.Error(c, callback.ErrForm, err)
 			return
 		}
