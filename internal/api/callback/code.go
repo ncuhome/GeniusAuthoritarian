@@ -31,6 +31,7 @@ const (
 	cErrPasskeyNotExist
 	cErrU2fTokenExpired
 	cErrPasskeyVerifyFailed
+	cErrTokenInvalid
 )
 
 var (
@@ -182,6 +183,11 @@ var (
 	ErrPasskeyVerifyFailed = &Msg{
 		Code:       cErrPasskeyVerifyFailed,
 		Msg:        "通行密钥校验失败，请重试",
+		HttpStatus: 403,
+	}
+	ErrTokenInvalid = &Msg{
+		Code:       cErrTokenInvalid,
+		Msg:        "身份令牌无效或已过期",
 		HttpStatus: 403,
 	}
 )

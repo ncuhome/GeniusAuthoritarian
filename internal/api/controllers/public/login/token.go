@@ -5,6 +5,7 @@ import (
 	"github.com/ncuhome/GeniusAuthoritarian/internal/api/callback"
 	"github.com/ncuhome/GeniusAuthoritarian/internal/db/redis"
 	"github.com/ncuhome/GeniusAuthoritarian/internal/pkg/jwt"
+	"github.com/ncuhome/GeniusAuthoritarian/internal/tools"
 	"strings"
 )
 
@@ -19,29 +20,14 @@ func RefreshToken(c *gin.Context) {
 
 	claims, valid, err := jwt.ParseRefreshToken(f.Token)
 	if err != nil {
-		callback.Error(c, callback.ErrUnauthorized, err)
+		callback.Error(c, callback.ErrTokenInvalid, err)
 		return
 	} else if !valid {
-		callback.Error(c, callback.ErrUnauthorized)
+		callback.Error(c, callback.ErrTokenInvalid)
 		return
 	}
 
-	valid, err = redis.NewRefreshJwt(claims.ID).Pair(claims.IssuedAt.Time)
-	if err != nil {
-		callback.Error(c, callback.ErrUnexpected, err)
-		return
-	} else if !valid {
-		callback.Error(c, callback.ErrUnauthorized)
-		return
-	}
-
-	accessToken, accessClaims, err := jwt.GenerateAccessToken(claims.ID, claims.Name, claims.AppCode, claims.Groups)
-	if err != nil {
-		callback.Error(c, callback.ErrUnexpected, err)
-		return
-	}
-
-	err = redis.NewAccessJwt(claims.ID).Set(accessClaims.IssuedAt.Time, accessClaims.ExpiresAt.Sub(accessClaims.IssuedAt.Time))
+	accessToken, err := jwt.GenerateAccessToken(claims.UID, tools.GetAppCode(c), claims.Payload)
 	if err != nil {
 		callback.Error(c, callback.ErrUnexpected, err)
 		return
@@ -49,6 +35,7 @@ func RefreshToken(c *gin.Context) {
 
 	callback.Success(c, gin.H{
 		"access_token": accessToken,
+		"payload":      claims.Payload,
 	})
 }
 
