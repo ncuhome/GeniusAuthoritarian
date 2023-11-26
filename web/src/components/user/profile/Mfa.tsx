@@ -42,11 +42,10 @@ export const Mfa: FC<Props> = ({ enabled, setEnabled, ...props }) => {
 
   const [newMfaNextStepLoading, setNewMfaNextStepLoading] = useState(false);
 
-  const [isSendingSms, setIsSendingSms] = useState(false);
   const [smsCoolDown, setSmsCoolDown] = useState(0);
   useInterval(
     () => setSmsCoolDown((num) => num - 1),
-    smsCoolDown > 0 ? 1000 : null
+    smsCoolDown > 0 ? 1000 : null,
   );
 
   const [showNewMfa, setShowNewMfa] = useState(false);
