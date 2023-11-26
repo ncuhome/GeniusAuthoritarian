@@ -1,6 +1,7 @@
 package controllers
 
 import (
+	"encoding/json"
 	"github.com/gin-gonic/gin"
 	"github.com/ncuhome/GeniusAuthoritarian/internal/api/callback"
 	"github.com/ncuhome/GeniusAuthoritarian/internal/api/models/response"
@@ -8,6 +9,7 @@ import (
 	"github.com/ncuhome/GeniusAuthoritarian/internal/db/redis"
 	"github.com/ncuhome/GeniusAuthoritarian/internal/pkg/jwt"
 	"github.com/ncuhome/GeniusAuthoritarian/internal/service"
+	"github.com/ncuhome/GeniusAuthoritarian/internal/tools"
 	"gorm.io/gorm"
 	"time"
 )
@@ -29,11 +31,13 @@ func doVerifyToken(c *gin.Context, tx *gorm.DB, token string) *jwt.LoginRedisCla
 	return claims
 }
 
-// VerifyToken 第三方应用后端调用校验认证权威性
-func VerifyToken(c *gin.Context) {
+// CompleteLogin 第三方应用后端调用校验认证权威性
+func CompleteLogin(c *gin.Context) {
 	var f struct {
-		Token    string `json:"token" form:"token" binding:"required"`
-		ClientIp string `json:"clientIp" form:"clientIp"`
+		Token    string `json:"token" binding:"required"`
+		ClientIp string `json:"clientIp"`
+
+		GrantType string `json:"grantType" binding:"eq=|eq=refresh_token|eq=once"`
 	}
 	if err := c.ShouldBind(&f); err != nil {
 		callback.Error(c, callback.ErrForm, err)
@@ -57,21 +61,56 @@ func VerifyToken(c *gin.Context) {
 		return
 	}
 
+	res := &response.VerifyTokenSuccess{
+		UserID:    claims.UID,
+		Name:      claims.Name,
+		Groups:    claims.Groups,
+		AvatarUrl: claims.AvatarUrl,
+	}
+
+	if f.GrantType == "refresh_token" {
+		var form2 struct {
+			Payload json.RawMessage `json:"payload,omitempty"`
+			// refreshToken 有效期，秒，最长 30 天，最短不在此处处理
+			Valid int64 `json:"valid" binding:"min=0,max=2592000"`
+		}
+		if err = c.ShouldBindJSON(&form2); err != nil {
+			callback.Error(c, callback.ErrForm, err)
+			return
+		}
+
+		if len(form2.Payload) > 60 {
+			callback.ErrorWithTip(c, callback.ErrForm, "payload too long, max 60 bytes")
+			return
+		}
+
+		if form2.Valid == 0 {
+			form2.Valid = 604800
+		} else if form2.Valid < 604800 {
+			callback.ErrorWithTip(c, callback.ErrForm, "valid too short, min 604800 seconds (7 days)")
+			return
+		}
+
+		appCode := tools.GetAppCode(c)
+		res.RefreshToken, err = jwt.GenerateRefreshToken(claims.UID, appCode, form2.Payload, time.Duration(form2.Valid)*time.Second)
+		if err != nil {
+			callback.Error(c, callback.ErrUnexpected, err)
+			return
+		}
+
+		res.AccessToken, err = jwt.GenerateAccessToken(claims.UID, appCode, form2.Payload)
+	}
+
 	if err = appSrv.Commit().Error; err != nil {
 		callback.Error(c, callback.ErrDBOperation, err)
 		return
 	}
 
-	callback.Success(c, response.VerifyTokenSuccess{
-		UserID:    claims.UID,
-		Name:      claims.Name,
-		Groups:    claims.Groups,
-		AvatarUrl: claims.AvatarUrl,
-	})
+	callback.Success(c, res)
 }
 
-// Login 用户后台登录
-func Login(c *gin.Context) {
+// DashboardLogin 用户后台登录
+func DashboardLogin(c *gin.Context) {
 	var f struct {
 		Token string `json:"token" form:"token" binding:"required"`
 	}

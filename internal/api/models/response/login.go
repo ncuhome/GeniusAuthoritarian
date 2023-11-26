@@ -5,6 +5,9 @@ type VerifyTokenSuccess struct {
 	Name      string   `json:"name"`
 	Groups    []string `json:"groups"`
 	AvatarUrl string   `json:"avatarUrl"`
+
+	RefreshToken string `json:"refreshToken"`
+	AccessToken  string `json:"accessToken"`
 }
 
 type ThirdPartyLogin struct {

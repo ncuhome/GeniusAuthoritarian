@@ -7,10 +7,10 @@ import (
 )
 
 func Router(G *gin.RouterGroup) {
-	G.POST("/", controllers.Login) // 个人页面登录
+	G.POST("/", controllers.DashboardLogin) // 个人页面登录
 	G.POST("/mfa", controllers.VerifyMfa)
 
-	G.POST("/verify", middlewares.RequireAppSignature, controllers.VerifyToken)
+	G.POST("/verify", middlewares.RequireAppSignature, controllers.CompleteLogin)
 	routerToken(G.Group("token"))
 
 	routerLoginPasskey(G.Group("passkey"))

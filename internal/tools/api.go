@@ -21,3 +21,8 @@ func GenCallback(callback, token string) (string, error) {
 	callbackUrl.RawQuery = callbackQuery.Encode()
 	return callbackUrl.String(), nil
 }
+
+func GetAppCode(c *gin.Context) string {
+	v, _ := c.Get("appCode")
+	return v.(string)
+}

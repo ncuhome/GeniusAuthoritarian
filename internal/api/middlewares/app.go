@@ -74,4 +74,6 @@ func RequireAppSignature(c *gin.Context) {
 		callback.Error(c, callback.ErrUnauthorized)
 		return
 	}
+
+	c.Set("appCode", header.AppCode)
 }
