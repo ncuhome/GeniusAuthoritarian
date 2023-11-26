@@ -9,14 +9,14 @@ import (
 
 func RefreshToken(c *gin.Context) {
 	var f struct {
-		RefreshToken string `json:"refresh_token" binding:"required"`
+		Token string `json:"token" form:"token" binding:"required"`
 	}
 	if err := c.ShouldBind(&f); err != nil {
 		callback.Error(c, callback.ErrForm, err)
 		return
 	}
 
-	claims, valid, err := jwt.ParseRefreshToken(f.RefreshToken)
+	claims, valid, err := jwt.ParseRefreshToken(f.Token)
 	if err != nil {
 		callback.Error(c, callback.ErrUnauthorized, err)
 		return

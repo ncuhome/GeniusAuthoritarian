@@ -9,6 +9,6 @@ import (
 func routerToken(G *gin.RouterGroup) {
 	G.Use(middlewares.RequireAppSignature)
 
-	G.POST("/refresh", controllers.RefreshToken)
-	G.POST("/access", controllers.VerifyAccessToken)
+	G.POST("refresh", controllers.RefreshToken)
+	G.POST("access", controllers.VerifyAccessToken)
 }

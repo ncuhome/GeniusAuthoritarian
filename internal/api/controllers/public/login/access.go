@@ -10,14 +10,14 @@ import (
 
 func VerifyAccessToken(c *gin.Context) {
 	var f struct {
-		AccessToken string `json:"access_token" binding:"required"`
+		Token string `json:"token" form:"token" binding:"required"`
 	}
 	if err := c.ShouldBind(&f); err != nil {
 		callback.Error(c, callback.ErrForm, err)
 		return
 	}
 
-	parts := strings.Split(f.AccessToken, " ")
+	parts := strings.Split(f.Token, " ")
 	if len(parts) != 2 {
 		callback.Error(c, callback.ErrUnauthorized)
 		return
