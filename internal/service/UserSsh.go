@@ -4,7 +4,7 @@ import (
 	"github.com/Mmx233/daoUtil"
 	"github.com/ncuhome/GeniusAuthoritarian/internal/db/dao"
 	"github.com/ncuhome/GeniusAuthoritarian/internal/db/dto"
-	"github.com/ncuhome/GeniusAuthoritarian/internal/pkg/sshDev/sshTool"
+	"github.com/ncuhome/GeniusAuthoritarian/internal/rpc/sshDev/client/sshTool"
 	"gorm.io/gorm"
 )
 

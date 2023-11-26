@@ -4,7 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"github.com/go-redis/redis/v8"
-	"github.com/ncuhome/GeniusAuthoritarian/internal/pkg/sshDev/server/rpcModel"
+	"github.com/ncuhome/GeniusAuthoritarian/internal/rpc/sshDev/rpcModel"
 )
 
 func SubScribeSshDev() *redis.PubSub {

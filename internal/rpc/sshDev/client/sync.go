@@ -1,7 +1,7 @@
 package client
 
 import (
-	"github.com/ncuhome/GeniusAuthoritarian/internal/pkg/sshDev/proto"
+	"github.com/ncuhome/GeniusAuthoritarian/internal/rpc/sshDev/client/proto"
 	"github.com/ncuhome/GeniusAuthoritarian/pkg/linux"
 	log "github.com/sirupsen/logrus"
 )

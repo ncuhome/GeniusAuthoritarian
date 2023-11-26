@@ -2,9 +2,9 @@ package rpc
 
 import (
 	"github.com/ncuhome/GeniusAuthoritarian/internal/db/dto"
-	"github.com/ncuhome/GeniusAuthoritarian/internal/pkg/sshDev/proto"
-	"github.com/ncuhome/GeniusAuthoritarian/internal/pkg/sshDev/server/rpcModel"
-	"github.com/ncuhome/GeniusAuthoritarian/internal/pkg/sshDev/sshTool"
+	"github.com/ncuhome/GeniusAuthoritarian/internal/rpc/sshDev/client/proto"
+	"github.com/ncuhome/GeniusAuthoritarian/internal/rpc/sshDev/client/sshTool"
+	"github.com/ncuhome/GeniusAuthoritarian/internal/rpc/sshDev/rpcModel"
 )
 
 func TransformAccountArray(a []dto.SshDeploy) []*proto.SshAccount {

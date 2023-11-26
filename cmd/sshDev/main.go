@@ -2,8 +2,8 @@ package main
 
 import (
 	"context"
-	"github.com/ncuhome/GeniusAuthoritarian/internal/pkg/sshDev/client"
-	"github.com/ncuhome/GeniusAuthoritarian/internal/pkg/sshDev/proto"
+	sshDev "github.com/ncuhome/GeniusAuthoritarian/internal/rpc/sshDev/client"
+	"github.com/ncuhome/GeniusAuthoritarian/internal/rpc/sshDev/client/proto"
 	"github.com/ncuhome/GeniusAuthoritarian/pkg/linux"
 	log "github.com/sirupsen/logrus"
 	"google.golang.org/grpc"
@@ -20,14 +20,14 @@ func main() {
 	log.Infoln("Sys Boost")
 
 	// 读取配置
-	conf := client.ReadConfig()
+	conf := sshDev.ReadConfig()
 
 	// 连接 grpc
 	creds := credentials.NewClientTLSFromCert(nil, "")
 	conn, err := grpc.Dial(
 		conf.Addr,
 		grpc.WithTransportCredentials(creds),
-		grpc.WithPerRPCCredentials(&client.GrpcAuth{Token: conf.Token}),
+		grpc.WithPerRPCCredentials(&sshDev.GrpcAuth{Token: conf.Token}),
 	)
 	if err != nil {
 		log.Fatalln("连接 grpc 服务失败:", err)
@@ -58,7 +58,7 @@ beginSync:
 			continue
 		}
 
-		if err = client.SshAccountSync(msg); err != nil {
+		if err = sshDev.SshAccountSync(msg); err != nil {
 			break
 		}
 	}
