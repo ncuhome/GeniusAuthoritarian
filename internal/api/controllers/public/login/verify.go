@@ -1,8 +1,8 @@
 package controllers
 
 import (
+	"bytes"
 	"github.com/gin-gonic/gin"
-	"github.com/gin-gonic/gin/binding"
 	"github.com/ncuhome/GeniusAuthoritarian/internal/api/callback"
 	"github.com/ncuhome/GeniusAuthoritarian/internal/api/models/response"
 	"github.com/ncuhome/GeniusAuthoritarian/internal/db/dao"
@@ -11,6 +11,7 @@ import (
 	"github.com/ncuhome/GeniusAuthoritarian/internal/service"
 	"github.com/ncuhome/GeniusAuthoritarian/internal/tools"
 	"gorm.io/gorm"
+	"io"
 	"time"
 )
 
@@ -34,12 +35,18 @@ func doVerifyToken(c *gin.Context, tx *gorm.DB, token string) *jwt.LoginRedisCla
 // CompleteLogin 第三方应用后端调用校验认证权威性
 func CompleteLogin(c *gin.Context) {
 	var f struct {
-		Token    string `json:"token"  binding:"required"`
-		ClientIp string `json:"clientIp"`
+		Token    string `json:"token" form:"token"  binding:"required"`
+		ClientIp string `json:"clientIp" form:"token"`
 
-		GrantType string `json:"grantType" binding:"eq=|eq=refresh_token|eq=once"`
+		GrantType string `json:"grantType" form:"grantType" binding:"eq=|eq=refresh_token|eq=once"`
+
+		Payload string `json:"payload" form:"payload" binding:"max=32"`
+		// refreshToken 有效期，秒，最长 30 天，最短不在此处处理
+		Valid int64 `json:"valid" form:"valid" binding:"min=0,max=2592000"`
 	}
-	if err := c.ShouldBindBodyWith(&f, binding.JSON); err != nil {
+	cb, _ := c.Get(gin.BodyBytesKey)
+	c.Request.Body = io.NopCloser(bytes.NewBuffer(cb.([]byte)))
+	if err := c.ShouldBind(&f); err != nil {
 		callback.Error(c, callback.ErrForm, err)
 		return
 	}
@@ -69,36 +76,21 @@ func CompleteLogin(c *gin.Context) {
 	}
 
 	if f.GrantType == "refresh_token" {
-		var form2 struct {
-			Payload string `json:"payload" binding:"max=32"`
-			// refreshToken 有效期，秒，最长 30 天，最短不在此处处理
-			Valid int64 `json:"valid" binding:"min=0,max=2592000"`
-		}
-		if err = c.ShouldBindBodyWith(&form2, binding.JSON); err != nil {
-			callback.Error(c, callback.ErrForm, err)
-			return
-		}
-
-		if len(form2.Payload) > 60 {
-			callback.ErrorWithTip(c, callback.ErrForm, "payload too long, max 60 bytes")
-			return
-		}
-
-		if form2.Valid == 0 {
-			form2.Valid = 604800
-		} else if form2.Valid < 604800 {
+		if f.Valid == 0 {
+			f.Valid = 604800
+		} else if f.Valid < 604800 {
 			callback.ErrorWithTip(c, callback.ErrForm, "valid too short, min 604800 seconds (7 days)")
 			return
 		}
 
 		appCode := tools.GetAppCode(c)
-		res.RefreshToken, err = jwt.GenerateRefreshToken(claims.UID, appCode, form2.Payload, time.Duration(form2.Valid)*time.Second)
+		res.RefreshToken, err = jwt.GenerateRefreshToken(claims.UID, appCode, f.Payload, time.Duration(f.Valid)*time.Second)
 		if err != nil {
 			callback.Error(c, callback.ErrUnexpected, err)
 			return
 		}
 
-		res.AccessToken, err = jwt.GenerateAccessToken(claims.UID, appCode, form2.Payload)
+		res.AccessToken, err = jwt.GenerateAccessToken(claims.UID, appCode, f.Payload)
 	}
 
 	if err = appSrv.Commit().Error; err != nil {
