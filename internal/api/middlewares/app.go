@@ -1,27 +1,46 @@
 package middlewares
 
 import (
+	"bytes"
 	"crypto/sha256"
+	"encoding/json"
 	"errors"
 	"fmt"
 	"github.com/gin-gonic/gin"
+	"github.com/gin-gonic/gin/binding"
 	"github.com/ncuhome/GeniusAuthoritarian/internal/api/callback"
 	"github.com/ncuhome/GeniusAuthoritarian/internal/pkg/jwt"
 	"github.com/ncuhome/GeniusAuthoritarian/internal/service"
 	"github.com/ncuhome/GeniusAuthoritarian/internal/tools"
 	"gorm.io/gorm"
+	"io"
 	"sort"
 	"strings"
 	"time"
 )
 
 func RequireAppSignature(c *gin.Context) {
-	var header struct {
-		AppCode   string `json:"appCode" form:"appCode" binding:"required"`
-		TimeStamp int64  `json:"timeStamp" form:"timeStamp" binding:"required"`
-		Signature string `json:"signature" form:"signature" binding:"required"`
+	bodyBytes, err := io.ReadAll(c.Request.Body)
+	if err != nil {
+		callback.Error(c, callback.ErrForm, err)
+		return
 	}
-	if err := c.ShouldBind(&header); err != nil {
+	c.Set(gin.BodyBytesKey, bodyBytes)
+
+	var form map[string]interface{}
+	jsonDecoder := json.NewDecoder(bytes.NewReader(bodyBytes))
+	jsonDecoder.UseNumber()
+	if err = jsonDecoder.Decode(&form); err != nil {
+		callback.Error(c, callback.ErrForm, err)
+		return
+	}
+
+	var header struct {
+		AppCode   string `json:"appCode" binding:"required"`
+		TimeStamp int64  `json:"timeStamp" binding:"required"`
+		Signature string `json:"signature" binding:"required"`
+	}
+	if err := binding.JSON.BindBody(bodyBytes, &header); err != nil {
 		callback.Error(c, callback.ErrForm, err)
 		return
 	}
@@ -41,18 +60,17 @@ func RequireAppSignature(c *gin.Context) {
 		return
 	}
 
-	var payload map[string]string
-	if err = c.ShouldBindJSON(&payload); err != nil {
-		callback.Error(c, callback.ErrForm, err)
-		return
+	delete(form, "signature")
+	formStrMap := make(map[string]string, len(form)+1)
+	for key, value := range form {
+		formStrMap[key] = fmt.Sprint(value)
 	}
-	delete(payload, "signature")
-	payload["appSecret"] = appSecret
+	formStrMap["appSecret"] = appSecret
 
-	keys := make([]string, len(payload))
-	var signStrLen = len(payload)*2 - 1
+	keys := make([]string, len(formStrMap))
+	var signStrLen = len(formStrMap)*2 - 1
 	i := 0
-	for key, value := range payload {
+	for key, value := range formStrMap {
 		keys[i] = key
 		signStrLen += len(key) + len(value)
 		i++
@@ -65,13 +83,13 @@ func RequireAppSignature(c *gin.Context) {
 		if i != 0 {
 			signBuilder.Write([]byte("&"))
 		}
-		signBuilder.Write([]byte(key + "=" + payload[key]))
+		signBuilder.Write([]byte(key + "=" + formStrMap[key]))
 	}
 
 	h := sha256.New()
 	h.Write([]byte(signBuilder.String()))
 	if header.Signature != fmt.Sprintf("%x", h.Sum(nil)) {
-		callback.Error(c, callback.ErrUnauthorized)
+		callback.Error(c, callback.ErrUnauthorized, "signature invalid")
 		return
 	}
 
@@ -82,9 +100,9 @@ func RequireAppSignature(c *gin.Context) {
 // 需要在 RequireAppSignature 之后调用
 func RequireAccessToken(c *gin.Context) {
 	var f struct {
-		Token string `json:"token" form:"token" binding:"required"`
+		Token string `json:"token" binding:"required"`
 	}
-	if err := c.ShouldBind(&f); err != nil {
+	if err := c.ShouldBindBodyWith(&f, binding.JSON); err != nil {
 		callback.Error(c, callback.ErrForm, err)
 		return
 	}

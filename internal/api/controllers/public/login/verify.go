@@ -2,6 +2,7 @@ package controllers
 
 import (
 	"github.com/gin-gonic/gin"
+	"github.com/gin-gonic/gin/binding"
 	"github.com/ncuhome/GeniusAuthoritarian/internal/api/callback"
 	"github.com/ncuhome/GeniusAuthoritarian/internal/api/models/response"
 	"github.com/ncuhome/GeniusAuthoritarian/internal/db/dao"
@@ -33,12 +34,12 @@ func doVerifyToken(c *gin.Context, tx *gorm.DB, token string) *jwt.LoginRedisCla
 // CompleteLogin 第三方应用后端调用校验认证权威性
 func CompleteLogin(c *gin.Context) {
 	var f struct {
-		Token    string `json:"token" binding:"required"`
+		Token    string `json:"token"  binding:"required"`
 		ClientIp string `json:"clientIp"`
 
 		GrantType string `json:"grantType" binding:"eq=|eq=refresh_token|eq=once"`
 	}
-	if err := c.ShouldBind(&f); err != nil {
+	if err := c.ShouldBindBodyWith(&f, binding.JSON); err != nil {
 		callback.Error(c, callback.ErrForm, err)
 		return
 	}
@@ -69,11 +70,11 @@ func CompleteLogin(c *gin.Context) {
 
 	if f.GrantType == "refresh_token" {
 		var form2 struct {
-			Payload string `json:"payload" form:"payload" binding:"max=32"`
+			Payload string `json:"payload" binding:"max=32"`
 			// refreshToken 有效期，秒，最长 30 天，最短不在此处处理
-			Valid int64 `json:"valid" form:"valid" binding:"min=0,max=2592000"`
+			Valid int64 `json:"valid" binding:"min=0,max=2592000"`
 		}
-		if err = c.ShouldBind(&form2); err != nil {
+		if err = c.ShouldBindBodyWith(&form2, binding.JSON); err != nil {
 			callback.Error(c, callback.ErrForm, err)
 			return
 		}
