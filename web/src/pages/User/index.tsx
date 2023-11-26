@@ -1,5 +1,6 @@
 import { FC, ReactNode, useMemo, useState, lazy } from "react";
 import { Routes, Route } from "react-router-dom";
+import useKeyDown from "@hooks/useKeyDown";
 import "./style.css";
 
 const Dev = lazy(() => import("./pages/Dev"));
@@ -60,6 +61,12 @@ export const User: FC = () => {
       state.dialogResolver,
     ]),
   );
+    useKeyDown("Enter", () => {
+      if (openDialog) {
+        dialogResolver?.(true);
+      }
+    });
+
   const groups = useUser((state) => state.groups);
 
   const isDarkTheme = useTheme((state) => state.dark);
