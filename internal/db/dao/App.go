@@ -58,7 +58,7 @@ func (a *App) sqlOrderForNav(tx *gorm.DB) *gorm.DB {
 
 func (a *App) Exist(tx *gorm.DB) (bool, error) {
 	var t bool
-	return t, tx.Model(a).Select("1").Where(a).Limit(1).First(&t).Error
+	return t, tx.Model(a).Select("1").Where(a).Limit(1).Find(&t).Error
 }
 
 func (a *App) Insert(tx *gorm.DB) error {
