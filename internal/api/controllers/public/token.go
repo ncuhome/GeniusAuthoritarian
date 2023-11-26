@@ -3,10 +3,8 @@ package public
 import (
 	"github.com/gin-gonic/gin"
 	"github.com/ncuhome/GeniusAuthoritarian/internal/api/callback"
-	"github.com/ncuhome/GeniusAuthoritarian/internal/db/redis"
 	"github.com/ncuhome/GeniusAuthoritarian/internal/pkg/jwt"
 	"github.com/ncuhome/GeniusAuthoritarian/internal/tools"
-	"strings"
 )
 
 func RefreshToken(c *gin.Context) {
@@ -27,7 +25,13 @@ func RefreshToken(c *gin.Context) {
 		return
 	}
 
-	accessToken, err := jwt.GenerateAccessToken(claims.UID, tools.GetAppCode(c), claims.Payload)
+	appCode := tools.GetAppCode(c)
+	if appCode != claims.AppCode {
+		callback.Error(c, callback.ErrUnauthorized)
+		return
+	}
+
+	accessToken, err := jwt.GenerateAccessToken(claims.UID, appCode, claims.Payload)
 	if err != nil {
 		callback.Error(c, callback.ErrUnexpected, err)
 		return
@@ -48,43 +52,23 @@ func VerifyAccessToken(c *gin.Context) {
 		return
 	}
 
-	parts := strings.Split(f.Token, " ")
-	if len(parts) != 2 {
-		callback.Error(c, callback.ErrUnauthorized)
-		return
-	}
-
-	appCodeValue := strings.Split(parts[0], ":")
-	if len(appCodeValue) != 2 {
-		callback.Error(c, callback.ErrUnauthorized)
-		return
-	}
-	appCode := appCodeValue[1]
-	accessToken := parts[1]
-
-	claims, valid, err := jwt.ParseAccessToken(accessToken)
+	claims, valid, err := jwt.ParseAccessToken(f.Token)
 	if err != nil {
-		callback.Error(c, callback.ErrUnauthorized, err)
+		callback.Error(c, callback.ErrTokenInvalid, err)
 		return
 	} else if !valid {
-		callback.Error(c, callback.ErrUnauthorized)
-		return
-	} else if claims.AppCode != appCode {
-		callback.Error(c, callback.ErrUnauthorized)
+		callback.Error(c, callback.ErrTokenInvalid)
 		return
 	}
 
-	valid, err = redis.NewAccessJwt(claims.ID).Pair(claims.IssuedAt.Time)
-	if err != nil {
-		callback.Error(c, callback.ErrUnexpected, err)
-	} else if !valid {
+	appCode := tools.GetAppCode(c)
+	if appCode != claims.AppCode {
 		callback.Error(c, callback.ErrUnauthorized)
 		return
 	}
 
 	callback.Success(c, gin.H{
-		"uid":   claims.ID,
-		"name":  claims.Name,
-		"group": claims.Groups,
+		"uid":     claims.UID,
+		"payload": claims.Payload,
 	})
 }
