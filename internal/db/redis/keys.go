@@ -25,6 +25,4 @@ const (
 	keySshDevSub
 	keyPasskey
 	keyU2F
-	keyAccessJwt
-	keyRefreshJwt
 )
