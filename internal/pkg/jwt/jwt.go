@@ -2,6 +2,7 @@ package jwt
 
 import (
 	"context"
+	"encoding/json"
 	"github.com/golang-jwt/jwt/v5"
 	"github.com/ncuhome/GeniusAuthoritarian/internal/db/redis"
 	"github.com/ncuhome/GeniusAuthoritarian/internal/global"
@@ -161,15 +162,11 @@ func ParseU2fToken(token, ip string) (bool, error) {
 	return true, nil
 }
 
-func GenerateRefreshToken(uid uint, name, appCode string, groups []string, valid time.Duration) (string, *RefreshToken, error) {
+func GenerateRefreshToken(uid uint, appCode string, payload json.RawMessage, valid time.Duration) (string, *RefreshToken, error) {
 	claims := &RefreshToken{
-		UserToken: UserToken{
-			TypedClaims: NewTypedClaims("Refresh", valid),
-			ID:          uid,
-			Name:        name,
-			Groups:      groups,
-		},
-		AppCode: appCode,
+		TypedClaims: NewTypedClaims("Refresh", valid),
+		UID:         uid,
+		AppCode:     appCode,
 	}
 
 	token, err := GenerateToken(claims)
@@ -180,15 +177,13 @@ func ParseRefreshToken(token string) (*RefreshToken, bool, error) {
 	return ParseToken("Refresh", token, &RefreshToken{})
 }
 
-func GenerateAccessToken(uid uint, name, appCode string, groups []string) (string, *AccessToken, error) {
+func GenerateAccessToken(uid uint, appCode string, payload json.RawMessage) (string, *AccessToken, error) {
 	claims := &AccessToken{
-		UserToken: UserToken{
+		RefreshToken{
 			TypedClaims: NewTypedClaims("Access", time.Minute*5),
-			ID:          uid,
-			Name:        name,
-			Groups:      groups,
+			UID:         uid,
+			AppCode:     appCode,
 		},
-		AppCode: appCode,
 	}
 
 	token, err := GenerateToken(claims)

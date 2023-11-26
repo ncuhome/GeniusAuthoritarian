@@ -1,6 +1,7 @@
 package jwt
 
 import (
+	"encoding/json"
 	"github.com/golang-jwt/jwt/v5"
 )
 
@@ -64,12 +65,13 @@ type U2fToken struct {
 	IP  string `json:"ip"`
 }
 
-type AccessToken struct {
-	UserToken
-	AppCode string `json:"appCode"`
+type RefreshToken struct {
+	TypedClaims
+	UID     uint            `json:"uid"`
+	AppCode string          `json:"appCode"`
+	Payload json.RawMessage `json:"payload,omitempty"`
 }
 
-type RefreshToken struct {
-	UserToken
-	AppCode string `json:"appCode"`
+type AccessToken struct {
+	RefreshToken
 }
