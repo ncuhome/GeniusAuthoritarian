@@ -1,5 +1,4 @@
 import { useCallback, useEffect, useRef, useState } from "react";
-import toast from "react-hot-toast";
 
 import { useUserApiV1 } from "@api/v1/user/hook";
 
@@ -25,13 +24,11 @@ export const useU2F = (): U2F => {
   const { data, isLoading } = useUserApiV1<User.U2F.Status>(
     loadData ? "u2f/" : null,
     {
+      enableLoading: true,
       revalidateIfStale: false,
       revalidateOnFocus: false,
       onSuccess: onDataLoaded,
-      onError: (err) => {
-        toast.error(`载入 U2F 状态失败: ${err}`);
-      },
-    }
+    },
   );
 
   useEffect(() => {
