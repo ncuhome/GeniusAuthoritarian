@@ -60,8 +60,8 @@ export const Mfa: FC<Props> = ({ enabled, setEnabled, ...props }) => {
       const {
         data: { data },
       } = await apiV1User.get("mfa/", {
-        params: {
-          token,
+        headers: {
+          Authorization: token,
         },
       });
       setMfaNew(data);
@@ -91,8 +91,8 @@ export const Mfa: FC<Props> = ({ enabled, setEnabled, ...props }) => {
       const token = await refreshToken();
       try {
         await apiV1User.delete("mfa/", {
-          params: {
-            token,
+          headers: {
+            Authorization: token,
           },
         });
         setEnabled(false);

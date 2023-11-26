@@ -54,14 +54,16 @@ export const Passkey: FC = () => {
     const token = await refreshToken();
     try {
       await apiV1User.delete("passkey/", {
+        headers: {
+          Authorization: token,
+        },
         params: {
-          token,
           id: item.id,
         },
       });
       mutate((data) => [...data!.filter((el) => el.id !== item.id)]);
       toast.success("删除成功");
-    } catch ({msg}) {
+    } catch ({ msg }) {
       if (msg) toast.error(msg as string);
     }
   };
@@ -71,8 +73,8 @@ export const Passkey: FC = () => {
       const {
         data: { data: options },
       } = await apiV1User.get("passkey/register/", {
-        params: {
-          token,
+        headers: {
+          Authorization: token,
         },
       });
       options.publicKey.challenge = coerceToArrayBuffer(

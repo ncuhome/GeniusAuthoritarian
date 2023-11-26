@@ -56,8 +56,8 @@ const Ssh: FC = () => {
         const {
           data: { data },
         } = await apiV1User.get("dev/ssh/", {
-          params: {
-            token,
+          headers: {
+            Authorization: token,
           },
         });
         setSshKey(data);
@@ -73,8 +73,10 @@ const Ssh: FC = () => {
     try {
       const {
         data: { data },
-      } = await apiV1User.put("dev/ssh/", {
-        token,
+      } = await apiV1User.put("dev/ssh/", undefined, {
+        headers: {
+          Authorization: token,
+        },
       });
       setSshKey(data);
       toast.success("SSH 密钥已重新生成");
@@ -86,8 +88,10 @@ const Ssh: FC = () => {
   async function onKillAllProcess() {
     const token = await refreshToken();
     try {
-      await apiV1User.post("dev/ssh/killall", {
-        token,
+      await apiV1User.post("dev/ssh/killall", undefined, {
+        headers: {
+          Authorization: token,
+        },
       });
       toast.success("已发送 KILLALL 指令");
     } catch ({ msg }) {
