@@ -25,7 +25,6 @@ export const createFetchHook = (api: AxiosInstance) => {
       useEffect(() => {
         if (swr.error?.msg) showToast(swr.error.msg);
         else closeToast();
-        return closeToast;
       }, [swr.error]);
     }
     return swr;

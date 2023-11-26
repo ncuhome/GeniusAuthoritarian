@@ -14,6 +14,7 @@ export function useLoadingToast() {
 
   const showToast = (msg: string, options?: ToastOptions) => {
     if (!id.current) id.current = toast.loading(msg, options);
+    else toast.loading(msg, { id: id.current, ...options });
   };
 
   const closeToast = (msg?: string, success: boolean = true) => {
