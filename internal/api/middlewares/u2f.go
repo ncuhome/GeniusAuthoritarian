@@ -7,15 +7,13 @@ import (
 )
 
 func RequireU2F(c *gin.Context) {
-	var f struct {
-		Token string `json:"token" form:"token" binding:"required"`
-	}
-	if err := c.ShouldBind(&f); err != nil {
-		callback.Error(c, callback.ErrForm, err)
+	token, err := jwt.HeaderToken(c, jwt.U2F)
+	if err != nil {
+		callback.Error(c, callback.ErrUnauthorized, err)
 		return
 	}
 
-	ok, err := jwt.ParseU2fToken(f.Token, c.ClientIP())
+	ok, err := jwt.ParseU2fToken(token, c.ClientIP())
 	if err != nil {
 		callback.Error(c, callback.ErrUnexpected, err)
 		return

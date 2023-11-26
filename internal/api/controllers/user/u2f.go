@@ -129,7 +129,7 @@ func BeginU2F(c *gin.Context) {
 	}
 
 	callback.Success(c, gin.H{
-		"token":        token,
+		"token":        jwt.TokenWithType(jwt.U2F, token),
 		"valid_before": claims.ExpiresAt.Time.Unix(),
 	})
 }
