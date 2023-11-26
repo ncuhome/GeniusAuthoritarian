@@ -1,8 +1,8 @@
-package login
+package public
 
 import (
 	"github.com/gin-gonic/gin"
-	controllers "github.com/ncuhome/GeniusAuthoritarian/internal/api/controllers/public/login"
+	controllers "github.com/ncuhome/GeniusAuthoritarian/internal/api/controllers/public"
 	"github.com/ncuhome/GeniusAuthoritarian/internal/api/middlewares"
 )
 

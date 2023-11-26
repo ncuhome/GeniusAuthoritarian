@@ -7,5 +7,6 @@ import (
 
 func Router(G *gin.RouterGroup) {
 	routerApp(G.Group("app"))
+	routerToken(G.Group("token"))
 	login.Router(G.Group("login"))
 }

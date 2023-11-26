@@ -11,7 +11,6 @@ func Router(G *gin.RouterGroup) {
 	G.POST("/mfa", controllers.VerifyMfa)
 
 	G.POST("/verify", middlewares.RequireAppSignature, controllers.CompleteLogin)
-	routerToken(G.Group("token"))
 
 	routerLoginPasskey(G.Group("passkey"))
 
