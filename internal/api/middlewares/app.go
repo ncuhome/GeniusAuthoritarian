@@ -40,7 +40,7 @@ func RequireAppSignature(c *gin.Context) {
 	}
 
 	var payload map[string]interface{}
-	if err := c.ShouldBind(&payload); err != nil {
+	if err = c.ShouldBind(&payload); err != nil {
 		callback.Error(c, callback.ErrForm, err)
 		return
 	}

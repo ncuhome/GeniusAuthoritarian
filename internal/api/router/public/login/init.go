@@ -3,11 +3,12 @@ package login
 import (
 	"github.com/gin-gonic/gin"
 	controllers "github.com/ncuhome/GeniusAuthoritarian/internal/api/controllers/public/login"
+	"github.com/ncuhome/GeniusAuthoritarian/internal/api/middlewares"
 )
 
 func Router(G *gin.RouterGroup) {
 	G.POST("/", controllers.Login) // 个人页面登录
-	G.POST("/verify", controllers.VerifyToken)
+	G.POST("/verify", middlewares.RequireAppSignature, controllers.VerifyToken)
 	G.POST("/mfa", controllers.VerifyMfa)
 	G.POST("/refresh", controllers.RefreshToken)
 	G.POST("/access", controllers.VerifyAccessToken)

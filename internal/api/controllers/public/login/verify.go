@@ -8,7 +8,6 @@ import (
 	"github.com/ncuhome/GeniusAuthoritarian/internal/db/redis"
 	"github.com/ncuhome/GeniusAuthoritarian/internal/pkg/jwt"
 	"github.com/ncuhome/GeniusAuthoritarian/internal/service"
-	"github.com/ncuhome/GeniusAuthoritarianClient/pkg/signature"
 	"gorm.io/gorm"
 	"time"
 )
@@ -33,20 +32,11 @@ func doVerifyToken(c *gin.Context, tx *gorm.DB, token string) *jwt.LoginRedisCla
 // VerifyToken 第三方应用后端调用校验认证权威性
 func VerifyToken(c *gin.Context) {
 	var f struct {
-		Token     string `json:"token" form:"token" binding:"required"`
-		AppCode   string `json:"appCode" form:"appCode" binding:"required"`
-		TimeStamp int64  `json:"timeStamp" form:"timeStamp" binding:"required"`
-		Signature string `json:"signature" form:"signature" binding:"required"`
-
+		Token    string `json:"token" form:"token" binding:"required"`
 		ClientIp string `json:"clientIp" form:"clientIp"`
 	}
 	if err := c.ShouldBind(&f); err != nil {
 		callback.Error(c, callback.ErrForm, err)
-		return
-	}
-
-	if time.Now().Sub(time.Unix(f.TimeStamp, 0)) > time.Minute*5 {
-		callback.Error(c, callback.ErrSignatureExpired)
 		return
 	}
 
@@ -64,25 +54,6 @@ func VerifyToken(c *gin.Context) {
 
 	if f.ClientIp != "" && claims.IP != f.ClientIp {
 		callback.Error(c, callback.ErrNetContextChanged, "context="+claims.IP, "got="+f.ClientIp)
-		return
-	}
-
-	appCode, appSecret, err := appSrv.FirstAppKeyPairByID(claims.AppID)
-	if err != nil {
-		callback.Error(c, callback.ErrDBOperation, err)
-		return
-	} else if f.AppCode != appCode {
-		callback.Error(c, callback.ErrOperationIllegal)
-		return
-	}
-
-	if !signature.Check(f.Signature, &signature.VerifyClaims{
-		Token:     f.Token,
-		AppCode:   f.AppCode,
-		TimeStamp: f.TimeStamp,
-		AppSecret: appSecret,
-	}) {
-		callback.Error(c, callback.ErrUnauthorized)
 		return
 	}
 
