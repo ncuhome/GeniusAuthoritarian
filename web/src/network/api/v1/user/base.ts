@@ -1,4 +1,4 @@
-import axios, { AxiosError } from "axios";
+import axios from "axios";
 import { BaseUrlV1, apiV1ErrorHandler } from "@api/base";
 
 import useUser from "@store/useUser";
@@ -18,7 +18,13 @@ export const apiV1User = axios.create({
 apiV1User.interceptors.request.use((req) => {
   const token = useUser.getState().token;
   if (token) {
-    req.headers["Authorization"] = token;
+    if (Array.isArray(req.headers.Authorization)) {
+      req.headers.Authorization.push(token);
+    } else if (typeof req.headers.Authorization === "string") {
+      req.headers.Authorization += `, ${token}`;
+    } else {
+      req.headers.Authorization = token;
+    }
   } else {
     GoLogin();
     const controller = new AbortController();
