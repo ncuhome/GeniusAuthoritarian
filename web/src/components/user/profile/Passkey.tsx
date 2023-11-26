@@ -83,11 +83,8 @@ export const Passkey: FC = () => {
         options.publicKey.user.id,
       );
       const credential = await navigator.credentials.create(options);
-      if (
-        Object.prototype.toString.call(credential) !==
-        "[object PublicKeyCredential]"
-      ) {
-        toast.error(`创建凭据失败，凭据类型不正确`);
+      if (credential?.type !== "public-key") {
+        toast.error(`获取凭据失败，凭据类型不正确: ${credential?.type}`);
         return;
       }
       const pubKeyCred = credential as PublicKeyCredential;
