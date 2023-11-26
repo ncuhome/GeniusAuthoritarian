@@ -16,7 +16,6 @@ interface U2fDialog extends User.U2F.Status {
   closeDialog: () => void;
   setStatus: (status: User.U2F.Status) => void;
   setToken: (token: User.U2F.Result) => void;
-  setPrefer: (method: User.U2F.Methods) => Promise<void>;
   setTabValue: (value: User.U2F.Methods) => void;
   resetTabValue: () => void;
 }
@@ -43,14 +42,6 @@ export const useU2fDialog = create<U2fDialog>()((set, getState) => ({
     }
   },
   setToken: (u2f) => set({ u2f }),
-  setPrefer: async (method: User.U2F.Methods) => {
-    if (method === getState().prefer) return;
-    await apiV1User.put("u2f/prefer", {
-      prefer: method,
-    });
-    set({ prefer: method });
-    getState().resetTabValue();
-  },
   setTabValue: (tabValue) => set({ tabValue }),
   resetTabValue: () => {
     const states = getState();

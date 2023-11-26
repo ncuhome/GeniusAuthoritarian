@@ -29,7 +29,7 @@ import { PermIdentity } from "@mui/icons-material";
 import { useUserApiV1 } from "@api/v1/user/hook";
 
 import useUser from "@store/useUser";
-import useU2fDialog from "@store/useU2fDialog";
+import { apiV1User } from "@api/v1/user/base";
 
 const u2fMethods: {
   label: string;
@@ -60,13 +60,15 @@ export const Profile: FC = () => {
       onError: (err) => {
         toast.error(`载入 U2F 状态失败: ${err}`);
       },
-    }
+    },
   );
-  const setPrefer = useU2fDialog((state) => state.setPrefer);
 
   const onChangePrefer = async (target: User.U2F.Methods) => {
     try {
-      await setPrefer(target);
+      if (target === u2fStatus?.prefer) return;
+      await apiV1User.put("u2f/prefer", {
+        prefer: target,
+      });
       mutateU2f({
         ...u2fStatus!,
         prefer: target,
