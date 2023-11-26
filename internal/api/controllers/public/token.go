@@ -3,6 +3,7 @@ package public
 import (
 	"github.com/gin-gonic/gin"
 	"github.com/ncuhome/GeniusAuthoritarian/internal/api/callback"
+	"github.com/ncuhome/GeniusAuthoritarian/internal/api/models/response"
 	"github.com/ncuhome/GeniusAuthoritarian/internal/pkg/jwt"
 	"github.com/ncuhome/GeniusAuthoritarian/internal/tools"
 )
@@ -37,16 +38,16 @@ func RefreshToken(c *gin.Context) {
 		return
 	}
 
-	callback.Success(c, gin.H{
-		"access_token": accessToken,
-		"payload":      claims.Payload,
+	callback.Success(c, &response.RefreshToken{
+		AccessToken: accessToken,
+		Payload:     claims.Payload,
 	})
 }
 
 func VerifyAccessToken(c *gin.Context) {
 	claims := tools.GetAccessClaims(c)
-	callback.Success(c, gin.H{
-		"uid":     claims.UID,
-		"payload": claims.Payload,
+	callback.Success(c, &response.VerifyAccessToken{
+		UID:     claims.UID,
+		Payload: claims.Payload,
 	})
 }
