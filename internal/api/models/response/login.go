@@ -8,9 +8,7 @@ type VerifyTokenSuccess struct {
 }
 
 type ThirdPartyLogin struct {
-	Token        string `json:"token"`
-	Mfa          bool   `json:"mfa"`
-	Callback     string `json:"callback,omitempty"`
-	AccessToken  string `json:"accessToken"`
-	RefreshToken string `json:"refreshToken"`
+	Token    string `json:"token"`
+	Mfa      bool   `json:"mfa"`
+	Callback string `json:"callback,omitempty"`
 }
