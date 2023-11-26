@@ -11,6 +11,6 @@ func routerToken(G *gin.RouterGroup) {
 
 	G.POST("refresh", controllers.RefreshToken)
 
-	access := G.Group("access")
+	access := G.Group("access", middlewares.RequireAccessToken)
 	access.POST("verify", controllers.VerifyAccessToken)
 }

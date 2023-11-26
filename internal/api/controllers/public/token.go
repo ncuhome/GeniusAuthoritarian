@@ -44,29 +44,7 @@ func RefreshToken(c *gin.Context) {
 }
 
 func VerifyAccessToken(c *gin.Context) {
-	var f struct {
-		Token string `json:"token" form:"token" binding:"required"`
-	}
-	if err := c.ShouldBind(&f); err != nil {
-		callback.Error(c, callback.ErrForm, err)
-		return
-	}
-
-	claims, valid, err := jwt.ParseAccessToken(f.Token)
-	if err != nil {
-		callback.Error(c, callback.ErrTokenInvalid, err)
-		return
-	} else if !valid {
-		callback.Error(c, callback.ErrTokenInvalid)
-		return
-	}
-
-	appCode := tools.GetAppCode(c)
-	if appCode != claims.AppCode {
-		callback.Error(c, callback.ErrUnauthorized)
-		return
-	}
-
+	claims := tools.GetAccessClaims(c)
 	callback.Success(c, gin.H{
 		"uid":     claims.UID,
 		"payload": claims.Payload,

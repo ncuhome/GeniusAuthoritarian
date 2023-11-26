@@ -26,3 +26,8 @@ func GetAppCode(c *gin.Context) string {
 	v, _ := c.Get("appCode")
 	return v.(string)
 }
+
+func GetAccessClaims(c *gin.Context) *jwt.AccessToken {
+	v, _ := c.Get("access")
+	return v.(*jwt.AccessToken)
+}

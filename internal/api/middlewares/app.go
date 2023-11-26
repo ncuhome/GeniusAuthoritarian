@@ -6,7 +6,9 @@ import (
 	"fmt"
 	"github.com/gin-gonic/gin"
 	"github.com/ncuhome/GeniusAuthoritarian/internal/api/callback"
+	"github.com/ncuhome/GeniusAuthoritarian/internal/pkg/jwt"
 	"github.com/ncuhome/GeniusAuthoritarian/internal/service"
+	"github.com/ncuhome/GeniusAuthoritarian/internal/tools"
 	"gorm.io/gorm"
 	"sort"
 	"strings"
@@ -76,4 +78,33 @@ func RequireAppSignature(c *gin.Context) {
 	}
 
 	c.Set("appCode", header.AppCode)
+}
+
+// RequireAccessToken 解析并将 access claims 写入上下文
+// 需要在 RequireAppSignature 之后调用
+func RequireAccessToken(c *gin.Context) {
+	var f struct {
+		Token string `json:"token" form:"token" binding:"required"`
+	}
+	if err := c.ShouldBind(&f); err != nil {
+		callback.Error(c, callback.ErrForm, err)
+		return
+	}
+
+	claims, valid, err := jwt.ParseAccessToken(f.Token)
+	if err != nil {
+		callback.Error(c, callback.ErrTokenInvalid, err)
+		return
+	} else if !valid {
+		callback.Error(c, callback.ErrTokenInvalid)
+		return
+	}
+
+	appCode := tools.GetAppCode(c)
+	if appCode != claims.AppCode {
+		callback.Error(c, callback.ErrUnauthorized)
+		return
+	}
+
+	c.Set("access", claims)
 }
