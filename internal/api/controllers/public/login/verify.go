@@ -1,7 +1,6 @@
 package controllers
 
 import (
-	"encoding/json"
 	"github.com/gin-gonic/gin"
 	"github.com/ncuhome/GeniusAuthoritarian/internal/api/callback"
 	"github.com/ncuhome/GeniusAuthoritarian/internal/api/models/response"
@@ -70,7 +69,7 @@ func CompleteLogin(c *gin.Context) {
 
 	if f.GrantType == "refresh_token" {
 		var form2 struct {
-			Payload json.RawMessage `json:"payload,omitempty" form:"-"`
+			Payload string `json:"payload" form:"payload" binding:"max=32"`
 			// refreshToken 有效期，秒，最长 30 天，最短不在此处处理
 			Valid int64 `json:"valid" form:"valid" binding:"min=0,max=2592000"`
 		}

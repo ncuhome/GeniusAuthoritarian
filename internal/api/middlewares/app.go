@@ -41,8 +41,8 @@ func RequireAppSignature(c *gin.Context) {
 		return
 	}
 
-	var payload map[string]interface{}
-	if err = c.ShouldBind(&payload); err != nil {
+	var payload map[string]string
+	if err = c.ShouldBindJSON(&payload); err != nil {
 		callback.Error(c, callback.ErrForm, err)
 		return
 	}
@@ -54,9 +54,7 @@ func RequireAppSignature(c *gin.Context) {
 	i := 0
 	for key, value := range payload {
 		keys[i] = key
-		valueStr := fmt.Sprint(value)
-		payload[key] = valueStr
-		signStrLen += len(key) + len(valueStr)
+		signStrLen += len(key) + len(value)
 		i++
 	}
 	sort.Strings(keys)
@@ -67,7 +65,7 @@ func RequireAppSignature(c *gin.Context) {
 		if i != 0 {
 			signBuilder.Write([]byte("&"))
 		}
-		signBuilder.Write([]byte(key + "=" + payload[key].(string)))
+		signBuilder.Write([]byte(key + "=" + payload[key]))
 	}
 
 	h := sha256.New()
