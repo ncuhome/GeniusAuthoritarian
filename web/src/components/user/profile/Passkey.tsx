@@ -61,9 +61,8 @@ export const Passkey: FC = () => {
       });
       mutate((data) => [...data!.filter((el) => el.id !== item.id)]);
       toast.success("删除成功");
-    } catch (err) {
-      console.log(err instanceof AxiosError);
-      // if (msg) toast.error(msg as any);
+    } catch ({msg}) {
+      if (msg) toast.error(msg as string);
     }
   };
   const onRegister = async () => {
