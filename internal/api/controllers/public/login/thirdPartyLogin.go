@@ -7,6 +7,7 @@ import (
 	"github.com/ncuhome/GeniusAuthoritarian/internal/api/models/response"
 	"github.com/ncuhome/GeniusAuthoritarian/internal/db/dao"
 	"github.com/ncuhome/GeniusAuthoritarian/internal/db/dto"
+	"github.com/ncuhome/GeniusAuthoritarian/internal/db/redis"
 	"github.com/ncuhome/GeniusAuthoritarian/internal/pkg/dingTalk"
 	"github.com/ncuhome/GeniusAuthoritarian/internal/pkg/feishu"
 	"github.com/ncuhome/GeniusAuthoritarian/internal/pkg/jwt"
@@ -134,6 +135,30 @@ func callThirdPartyLoginResult(c *gin.Context, info ThirdPartyLoginContext) {
 			return
 		}
 
+		accessToken, accessClaims, err := jwt.GenerateAccessToken(info.User.ID, info.User.Name, info.AppInfo.AppCode, info.Groups)
+		if err != nil {
+			callback.Error(c, callback.ErrUnexpected, err)
+			return
+		}
+
+		refreshToken, refreshClaims, err := jwt.GenerateRefreshToken(info.User.ID, info.User.Name, info.AppInfo.AppCode, info.Groups)
+		if err != nil {
+			callback.Error(c, callback.ErrUnexpected, err)
+			return
+		}
+
+		err = redis.NewAccessJwt(info.User.ID).Set(accessClaims.IssuedAt.Time, accessClaims.ExpiresAt.Time.Sub(accessClaims.IssuedAt.Time))
+		if err != nil {
+			callback.Error(c, callback.ErrUnexpected, err)
+			return
+		}
+
+		err = redis.NewRefreshJwt(info.User.ID).Set(refreshClaims.IssuedAt.Time, refreshClaims.ExpiresAt.Time.Sub(refreshClaims.IssuedAt.Time))
+		if err != nil {
+			callback.Error(c, callback.ErrUnexpected, err)
+			return
+		}
+
 		callbackUrl, err := tools.GenCallback(info.AppInfo.Callback, token)
 		if err != nil {
 			callback.Error(c, callback.ErrUnexpected, err)
@@ -141,9 +166,11 @@ func callThirdPartyLoginResult(c *gin.Context, info ThirdPartyLoginContext) {
 		}
 
 		callback.Success(c, response.ThirdPartyLogin{
-			Token:    token,
-			Mfa:      false,
-			Callback: callbackUrl,
+			Token:        token,
+			Mfa:          false,
+			Callback:     callbackUrl,
+			AccessToken:  accessToken,
+			RefreshToken: refreshToken,
 		})
 	} else {
 		token, err := jwt.GenerateMfaToken(claims, info.User.MFA, info.AppInfo.Callback)

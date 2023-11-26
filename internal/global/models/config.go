@@ -29,7 +29,8 @@ type DingTalk struct {
 }
 
 type Jwt struct {
-	SignKey string `yaml:"signKey"`
+	SignKey    string `yaml:"signKey"`
+	RefreshKey string `yaml:"refreshKey"`
 }
 
 type SshDev struct {
