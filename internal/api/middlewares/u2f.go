@@ -9,7 +9,7 @@ import (
 func RequireU2F(c *gin.Context) {
 	token, err := jwt.HeaderToken(c, jwt.U2F)
 	if err != nil {
-		callback.Error(c, callback.ErrUnauthorized, err)
+		callback.Error(c, callback.ErrU2fTokenExpired, err)
 		return
 	}
 
