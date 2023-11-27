@@ -2,6 +2,7 @@ package tools
 
 import (
 	"github.com/gin-gonic/gin"
+	"github.com/gin-gonic/gin/binding"
 	"github.com/ncuhome/GeniusAuthoritarian/internal/pkg/jwt"
 	"net/url"
 )
@@ -30,4 +31,15 @@ func GetAppCode(c *gin.Context) string {
 func GetAccessClaims(c *gin.Context) *jwt.AccessToken {
 	v, _ := c.Get("access")
 	return v.(*jwt.AccessToken)
+}
+
+func ShouldBindReused(c *gin.Context, obj any) error {
+	bodyData, ok := c.Get(gin.BodyBytesKey)
+	if ok {
+		bodyBytes, ok := bodyData.([]byte)
+		if ok {
+			return binding.JSON.BindBody(bodyBytes, obj)
+		}
+	}
+	return c.ShouldBindQuery(obj)
 }

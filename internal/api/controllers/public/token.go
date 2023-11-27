@@ -2,7 +2,6 @@ package public
 
 import (
 	"github.com/gin-gonic/gin"
-	"github.com/gin-gonic/gin/binding"
 	"github.com/ncuhome/GeniusAuthoritarian/internal/api/callback"
 	"github.com/ncuhome/GeniusAuthoritarian/internal/api/models/response"
 	"github.com/ncuhome/GeniusAuthoritarian/internal/pkg/jwt"
@@ -13,7 +12,7 @@ func RefreshToken(c *gin.Context) {
 	var f struct {
 		Token string `json:"token" binding:"required"`
 	}
-	if err := c.ShouldBindBodyWith(&f, binding.JSON); err != nil {
+	if err := tools.ShouldBindReused(c, &f); err != nil {
 		callback.Error(c, callback.ErrForm, err)
 		return
 	}
