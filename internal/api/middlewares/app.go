@@ -20,29 +20,50 @@ import (
 )
 
 func RequireAppSignature(c *gin.Context) {
-	bodyBytes, err := io.ReadAll(c.Request.Body)
-	if err != nil {
-		callback.Error(c, callback.ErrForm, err)
-		return
-	}
-	c.Set(gin.BodyBytesKey, bodyBytes)
-
-	var form map[string]interface{}
-	jsonDecoder := json.NewDecoder(bytes.NewReader(bodyBytes))
-	jsonDecoder.UseNumber()
-	if err = jsonDecoder.Decode(&form); err != nil {
-		callback.Error(c, callback.ErrForm, err)
-		return
-	}
-
 	var header struct {
 		AppCode   string `json:"appCode" binding:"required"`
 		TimeStamp int64  `json:"timeStamp" binding:"required"`
 		Signature string `json:"signature" binding:"required"`
 	}
-	if err := binding.JSON.BindBody(bodyBytes, &header); err != nil {
-		callback.Error(c, callback.ErrForm, err)
-		return
+	var form map[string]interface{}
+	var err error
+	if c.Request.Method != "GET" && c.Request.Method != "DELETE" {
+		if c.Request.Body != nil {
+			var bodyBytes []byte
+			bodyBytes, err = io.ReadAll(c.Request.Body)
+			if err != nil {
+				callback.Error(c, callback.ErrForm, err)
+				return
+			}
+
+			if err = binding.JSON.BindBody(bodyBytes, &header); err != nil {
+				callback.Error(c, callback.ErrForm, err)
+				return
+			}
+
+			jsonDecoder := json.NewDecoder(bytes.NewReader(bodyBytes))
+			jsonDecoder.UseNumber()
+			if err = jsonDecoder.Decode(&form); err != nil {
+				callback.Error(c, callback.ErrForm, err)
+				return
+			}
+
+			c.Set(gin.BodyBytesKey, bodyBytes)
+		} else {
+			callback.Error(c, callback.ErrForm, "signature required")
+			return
+		}
+	} else {
+		if err = c.ShouldBindQuery(&header); err != nil {
+			callback.Error(c, callback.ErrForm, err)
+			return
+		}
+
+		query := c.Request.URL.Query()
+		form = make(map[string]interface{}, len(query))
+		for k, v := range query {
+			form[k] = v[0]
+		}
 	}
 
 	if time.Now().Sub(time.Unix(header.TimeStamp, 0)) > time.Minute*5 {
