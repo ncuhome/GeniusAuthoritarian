@@ -35,14 +35,14 @@ func doVerifyToken(c *gin.Context, tx *gorm.DB, token string) *jwt.LoginRedisCla
 // CompleteLogin 第三方应用后端调用校验认证权威性
 func CompleteLogin(c *gin.Context) {
 	var f struct {
-		Token    string `json:"token" form:"token"  binding:"required"`
-		ClientIp string `json:"clientIp" form:"token"`
+		Token    string `json:"token"  binding:"required"`
+		ClientIp string `json:"clientIp"`
 
-		GrantType string `json:"grantType" form:"grantType" binding:"eq=|eq=refresh_token|eq=once"`
+		GrantType string `json:"grantType" binding:"eq=|eq=refresh_token|eq=once"`
 
-		Payload string `json:"payload" form:"payload" binding:"max=32"`
+		Payload string `json:"payload" binding:"max=32"`
 		// refreshToken 有效期，秒，最长 30 天，最短不在此处处理
-		Valid int64 `json:"valid" form:"valid" binding:"min=0,max=2592000"`
+		Valid int64 `json:"valid" binding:"min=0,max=2592000"`
 	}
 	cb, _ := c.Get(gin.BodyBytesKey)
 	c.Request.Body = io.NopCloser(bytes.NewBuffer(cb.([]byte)))
