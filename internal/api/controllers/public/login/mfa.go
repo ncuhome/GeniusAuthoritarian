@@ -17,9 +17,12 @@ func VerifyMfa(c *gin.Context) {
 		return
 	}
 
-	claims, err := jwt.ParseMfaToken(f.Token)
+	claims, valid, err := jwt.ParseMfaToken(f.Token)
 	if err != nil {
 		callback.Error(c, callback.ErrUnauthorized, err)
+		return
+	} else if !valid {
+		callback.Error(c, callback.ErrUnauthorized)
 		return
 	}
 
@@ -28,7 +31,7 @@ func VerifyMfa(c *gin.Context) {
 		return
 	}
 
-	valid, err := tools.VerifyMfa(f.Code, claims.Mfa)
+	valid, err = tools.VerifyMfa(f.Code, claims.Mfa)
 	if err != nil {
 		callback.Error(c, callback.ErrUnexpected, err)
 		return

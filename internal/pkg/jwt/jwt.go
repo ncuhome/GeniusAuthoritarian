@@ -180,14 +180,14 @@ func GenerateMfaToken(claims jwtClaims.LoginRedis, mfaSecret, appCallback string
 }
 
 // ParseMfaToken 不会销毁，允许多次验证尝试
-func ParseMfaToken(token string) (*jwtClaims.MfaRedis, error) {
+func ParseMfaToken(token string) (*jwtClaims.MfaRedis, bool, error) {
 	claims, valid, err := ParseTokenAndVerify(Mfa, token, &jwtClaims.MfaToken{})
 	if err != nil || !valid {
-		return nil, err
+		return nil, valid, err
 	}
 
 	var redisClaims jwtClaims.MfaRedis
-	return &redisClaims, redis.NewMfaLogin().NewStorePoint(claims.ID).Get(context.Background(), &redisClaims)
+	return &redisClaims, true, redis.NewMfaLogin().NewStorePoint(claims.ID).Get(context.Background(), &redisClaims)
 }
 
 // GenerateU2fToken 生成后台 U2F 身份令牌，五分钟有效
@@ -231,15 +231,24 @@ func GenerateRefreshToken(uid uint, appCode, payload string, valid time.Duration
 	if err != nil {
 		return "", err
 	}
-	return GenerateToken(&jwtClaims.RefreshToken{
+	claims := jwtClaims.RefreshToken{
 		UserClaims: userClaims,
 		AppCode:    appCode,
 		Payload:    payload,
-	})
+	}
+	claims.ID, err = redis.NewRefreshToken().CreateStorePoint(context.Background(), valid, nil)
+	if err != nil {
+		return "", err
+	}
+	return GenerateToken(&claims)
 }
 
 func ParseRefreshToken(token string) (*jwtClaims.RefreshToken, bool, error) {
-	return ParseTokenAndVerify(Refresh, token, &jwtClaims.RefreshToken{})
+	claims, valid, err := ParseTokenAndVerify(Refresh, token, &jwtClaims.RefreshToken{})
+	if err != nil || !valid {
+		return claims, valid, err
+	}
+	return claims, true, redis.NewRefreshToken().NewStorePoint(claims.ID).Get(context.Background(), nil)
 }
 
 func GenerateAccessToken(uid uint, appCode, payload string) (string, error) {
