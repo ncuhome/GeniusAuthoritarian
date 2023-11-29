@@ -2,6 +2,7 @@ package feishu
 
 import (
 	"container/list"
+	"context"
 	"github.com/Mmx233/daoUtil"
 	"github.com/ncuhome/GeniusAuthoritarian/internal/db/dao"
 	"github.com/ncuhome/GeniusAuthoritarian/internal/db/redis"
@@ -146,6 +147,13 @@ func (a *UserSyncProcessor) doSyncUsers(userList []*User) error {
 		if err = userSrv.FrozeByIDSlice(invalidUID); err != nil {
 			return err
 		}
+		redisJwt := redis.NewUserJwt()
+		for _, uid := range invalidUID {
+			err = redisJwt.NewOperator(uid).Del(context.Background())
+			if err != nil {
+				return err
+			}
+		}
 		a.frozenUser = len(invalidUID)
 	}
 
@@ -261,6 +269,7 @@ func (a *UserSyncProcessor) doSyncUserGroups(userList []*User, groupMap map[stri
 	// 计算差异
 	var userGroupsToAdd = list.New()    // dao.UserGroups
 	var userGroupsToDelete = list.New() // uint
+	redisJwt := redis.NewUserJwt()
 	for _, user := range userList {
 		thisUserExistGroups := exUserGroupMap[user.ID]
 		currentUserGroups := user.Departments(groupMap).Ids()
@@ -289,7 +298,16 @@ func (a *UserSyncProcessor) doSyncUserGroups(userList []*User, groupMap map[stri
 		nextExUserGroup:
 		}
 		if userGroupChanged {
-			// todo
+			redisUserOperator := redisJwt.NewOperator(user.ID)
+			exist, err := redisUserOperator.Exist(context.Background())
+			if err != nil {
+				return err
+			} else if exist {
+				_, err = redisUserOperator.ChangeOperateID(context.Background())
+				if err != nil {
+					return err
+				}
+			}
 		}
 	}
 
