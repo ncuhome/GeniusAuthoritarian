@@ -94,7 +94,7 @@ export const Profile: FC = () => {
         {profile ? (
           <Avatar
             component={Paper}
-            elevation={6}
+            elevation={3}
             src={profile.user.avatar_url}
           />
         ) : (
