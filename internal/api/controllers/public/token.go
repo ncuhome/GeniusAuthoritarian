@@ -1,9 +1,11 @@
 package public
 
 import (
+	"context"
 	"github.com/gin-gonic/gin"
 	"github.com/ncuhome/GeniusAuthoritarian/internal/api/callback"
 	"github.com/ncuhome/GeniusAuthoritarian/internal/api/models/response"
+	"github.com/ncuhome/GeniusAuthoritarian/internal/db/redis"
 	"github.com/ncuhome/GeniusAuthoritarian/internal/pkg/jwt"
 	"github.com/ncuhome/GeniusAuthoritarian/internal/tools"
 )
@@ -42,6 +44,33 @@ func RefreshToken(c *gin.Context) {
 		AccessToken: accessToken,
 		Payload:     claims.Payload,
 	})
+}
+
+func DestroyRefreshToken(c *gin.Context) {
+	var f struct {
+		Token string `json:"token" binding:"required"`
+	}
+	if err := tools.ShouldBindReused(c, &f); err != nil {
+		callback.Error(c, callback.ErrForm, err)
+		return
+	}
+
+	claims, valid, err := jwt.ParseRefreshToken(f.Token)
+	if err != nil {
+		callback.Error(c, callback.ErrTokenInvalid, err)
+		return
+	} else if !valid {
+		callback.Error(c, callback.ErrTokenInvalid)
+		return
+	}
+
+	err = redis.NewRefreshToken().NewStorePoint(claims.ID).Destroy(context.Background())
+	if err != nil {
+		callback.Error(c, callback.ErrUnexpected, err)
+		return
+	}
+
+	callback.Default(c)
 }
 
 func VerifyAccessToken(c *gin.Context) {
