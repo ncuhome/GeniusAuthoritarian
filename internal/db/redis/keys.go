@@ -17,7 +17,7 @@ const (
 	keyUserIdentityCode keys = iota
 	keyThirdPartyLogin
 	keyAppCode
-	keyUserJwt
+	keyUserToken
 	keyUserMfaLogin
 	keyMfaEnable
 	keySms
@@ -25,4 +25,5 @@ const (
 	keySshDevSub
 	keyPasskey
 	keyU2F
+	keyUserJwt
 )

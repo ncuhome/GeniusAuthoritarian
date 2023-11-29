@@ -283,7 +283,7 @@ func (a *UserSyncProcessor) doSyncUserGroups(userList []*User, groupMap map[stri
 		nextExUserGroup:
 		}
 		if userGroupChanged {
-			err := redis.NewUserJwt(user.ID).Clear()
+			err := redis.NewUserToken(user.ID).Clear()
 			if err != nil {
 				log.Errorf("移除用户 %d 登录状态失败: %v", user.ID, err)
 			}

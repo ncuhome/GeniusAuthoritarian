@@ -150,7 +150,7 @@ func DashboardLogin(c *gin.Context) {
 		return
 	}
 
-	if err = redis.NewUserJwt(claims.UID).Set(userTokenClaims.IssuedAt.Time, tokenValid); err != nil {
+	if err = redis.NewUserToken(claims.UID).Set(userTokenClaims.IssuedAt.Time, tokenValid); err != nil {
 		callback.Error(c, callback.ErrUnexpected, err)
 		return
 	}
