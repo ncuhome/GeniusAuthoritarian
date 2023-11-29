@@ -17,9 +17,11 @@ func NewTokenStore(Client *redis.Client, keyPrefix string) TokenStore {
 }
 
 type TokenStore struct {
-	client    *redis.Client
+	client *redis.Client
+	// token 有效校验的 key 前缀
 	keyPrefix string
-	keyID     string
+	// redis ID 字段 key，用于给 token 分配不一样的 ID
+	keyID string
 }
 
 func (a TokenStore) genKey(id uint64) string {

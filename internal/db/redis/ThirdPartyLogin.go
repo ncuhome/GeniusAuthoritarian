@@ -1,7 +1,7 @@
 package redis
 
 import (
-	"github.com/ncuhome/GeniusAuthoritarian/internal/pkg/tokenStore"
+	"github.com/ncuhome/GeniusAuthoritarian/pkg/tokenStore"
 )
 
 func NewThirdPartyLogin() tokenStore.TokenStore {

@@ -2,7 +2,7 @@ package redis
 
 import (
 	"fmt"
-	"github.com/ncuhome/GeniusAuthoritarian/internal/pkg/tokenStore"
+	"github.com/ncuhome/GeniusAuthoritarian/pkg/tokenStore"
 )
 
 func NewU2F(uid uint) tokenStore.TokenStore {
