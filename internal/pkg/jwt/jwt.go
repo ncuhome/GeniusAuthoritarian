@@ -31,6 +31,13 @@ func NewTypedClaims(Type string, valid time.Duration) jwtClaims.TypedClaims {
 	}
 }
 
+func NewUserClaims(uid uint, Type string, valid time.Duration) jwtClaims.UserClaims {
+	return jwtClaims.UserClaims{
+		TypedClaims: NewTypedClaims(Type, valid),
+		UID:         uid,
+	}
+}
+
 func GenerateToken(claims jwtClaims.Claims) (string, error) {
 	return jwt.NewWithClaims(jwt.SigningMethodHS256, claims).SignedString(key)
 }

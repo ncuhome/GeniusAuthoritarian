@@ -13,6 +13,15 @@ type TypedClaims struct {
 	Type string `json:"type"`
 }
 
-func (a *TypedClaims) GetType() string {
-	return a.Type
+func (c TypedClaims) GetType() string {
+	return c.Type
+}
+
+type UserClaims struct {
+	TypedClaims
+	UID uint `json:"uid"`
+}
+
+func (u UserClaims) GetUID() uint {
+	return u.UID
 }
