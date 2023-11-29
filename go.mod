@@ -18,7 +18,7 @@ require (
 	github.com/go-redis/redis/v8 v8.11.5
 	github.com/go-webauthn/webauthn v0.9.2
 	github.com/golang-jwt/jwt/v5 v5.1.0
-	github.com/ncuhome/GeniusAuthoritarianProtos v0.0.2
+	github.com/ncuhome/GeniusAuthoritarianProtos v0.0.3
 	github.com/pquerna/otp v1.4.0
 	github.com/robfig/cron/v3 v3.0.1
 	github.com/sirupsen/logrus v1.9.3

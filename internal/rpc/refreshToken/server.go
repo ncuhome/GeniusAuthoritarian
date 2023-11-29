@@ -13,6 +13,7 @@ import (
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
+	"google.golang.org/protobuf/types/known/emptypb"
 	"gorm.io/gorm"
 	"net"
 	"unsafe"
@@ -81,28 +82,23 @@ func (s *Server) RefreshToken(_ context.Context, req *refreshTokenProto.TokenReq
 	}, nil
 }
 
-func (s *Server) DestroyRefreshToken(stream refreshTokenProto.RefreshToken_DestroyRefreshTokenServer) error {
-	for {
-		req, err := stream.Recv()
-		if err != nil {
-			return status.Error(codes.Internal, "receive request failed")
-		}
-
-		err = s.CheckSignature(req)
-		if err != nil {
-			return err
-		}
-
-		claims, valid, err := jwt.ParseRefreshToken(req.Token)
-		if err != nil || !valid {
-			return status.Error(codes.Unauthenticated, "token invalid")
-		}
-
-		err = redis.NewRefreshToken().NewStorePoint(claims.ID).Destroy(context.Background())
-		if err != nil {
-			return status.Error(codes.Internal, "destroy token failed")
-		}
+func (s *Server) DestroyRefreshToken(_ context.Context, req *refreshTokenProto.TokenRequest) (*emptypb.Empty, error) {
+	err := s.CheckSignature(req)
+	if err != nil {
+		return nil, err
 	}
+
+	claims, valid, err := jwt.ParseRefreshToken(req.Token)
+	if err != nil || !valid {
+		return nil, status.Error(codes.Unauthenticated, "token invalid")
+	}
+
+	err = redis.NewRefreshToken().NewStorePoint(claims.ID).Destroy(context.Background())
+	if err != nil {
+		return nil, status.Error(codes.Internal, "destroy token failed")
+	}
+
+	return &emptypb.Empty{}, nil
 }
 
 func (s *Server) VerifyAccessToken(_ context.Context, req *refreshTokenProto.TokenRequest) (*refreshTokenProto.AccessTokenInfo, error) {
