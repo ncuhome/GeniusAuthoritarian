@@ -5,6 +5,7 @@ import (
 	"github.com/golang-jwt/jwt/v5"
 	"github.com/ncuhome/GeniusAuthoritarian/internal/db/redis"
 	"github.com/ncuhome/GeniusAuthoritarian/internal/global"
+	"github.com/ncuhome/GeniusAuthoritarian/internal/pkg/jwt/jwtClaims"
 	"time"
 )
 
@@ -19,9 +20,9 @@ const (
 	Access  = "Access"
 )
 
-func NewTypedClaims(Type string, valid time.Duration) TypedClaims {
+func NewTypedClaims(Type string, valid time.Duration) jwtClaims.TypedClaims {
 	now := time.Now()
-	return TypedClaims{
+	return jwtClaims.TypedClaims{
 		RegisteredClaims: jwt.RegisteredClaims{
 			ExpiresAt: jwt.NewNumericDate(now.Add(valid)),
 			IssuedAt:  jwt.NewNumericDate(now),
@@ -30,11 +31,11 @@ func NewTypedClaims(Type string, valid time.Duration) TypedClaims {
 	}
 }
 
-func GenerateToken(claims Claims) (string, error) {
+func GenerateToken(claims jwtClaims.Claims) (string, error) {
 	return jwt.NewWithClaims(jwt.SigningMethodHS256, claims).SignedString(key)
 }
 
-func ParseToken[C Claims](Type, token string, target C) (claims C, valid bool, err error) {
+func ParseToken[C jwtClaims.Claims](Type, token string, target C) (claims C, valid bool, err error) {
 	var t *jwt.Token
 	t, err = jwt.ParseWithClaims(
 		token, target, func(t *jwt.Token) (interface{}, error) {
@@ -52,8 +53,8 @@ func ParseToken[C Claims](Type, token string, target C) (claims C, valid bool, e
 }
 
 // GenerateUserToken 生成后台 Token
-func GenerateUserToken(uid uint, name string, groups []string, valid time.Duration) (string, *UserToken, error) {
-	claims := &UserToken{
+func GenerateUserToken(uid uint, name string, groups []string, valid time.Duration) (string, *jwtClaims.UserToken, error) {
+	claims := &jwtClaims.UserToken{
 		TypedClaims: NewTypedClaims(User, valid),
 		ID:          uid,
 		Name:        name,
@@ -63,15 +64,15 @@ func GenerateUserToken(uid uint, name string, groups []string, valid time.Durati
 	return token, claims, err
 }
 
-func ParseUserToken(token string) (*UserToken, bool, error) {
-	return ParseToken(User, token, &UserToken{})
+func ParseUserToken(token string) (*jwtClaims.UserToken, bool, error) {
+	return ParseToken(User, token, &jwtClaims.UserToken{})
 }
 
 // GenerateLoginToken 生成有效期 5 分钟的登录校验 Token
-func GenerateLoginToken(claims LoginRedisClaims) (string, error) {
+func GenerateLoginToken(claims jwtClaims.LoginRedis) (string, error) {
 	valid := time.Minute * 5
 
-	tokenClaims := &LoginToken{
+	tokenClaims := &jwtClaims.LoginToken{
 		TypedClaims: NewTypedClaims(Login, valid),
 	}
 	var err error
@@ -84,13 +85,13 @@ func GenerateLoginToken(claims LoginRedisClaims) (string, error) {
 }
 
 // ParseLoginToken 解析后自动销毁
-func ParseLoginToken(token string) (*LoginRedisClaims, bool, error) {
-	claims, valid, err := ParseToken(Login, token, &LoginToken{})
+func ParseLoginToken(token string) (*jwtClaims.LoginRedis, bool, error) {
+	claims, valid, err := ParseToken(Login, token, &jwtClaims.LoginToken{})
 	if err != nil || !valid {
 		return nil, false, err
 	}
 
-	var redisClaims LoginRedisClaims
+	var redisClaims jwtClaims.LoginRedis
 	err = redis.NewThirdPartyLogin().NewStorePoint(claims.ID).GetAndDestroy(context.Background(), &redisClaims)
 	if err != nil {
 		if err == redis.Nil {
@@ -102,10 +103,10 @@ func ParseLoginToken(token string) (*LoginRedisClaims, bool, error) {
 }
 
 // GenerateMfaToken 生成绑定 TOTP MFA 中间身份令牌，五分钟有效
-func GenerateMfaToken(claims LoginRedisClaims, mfaSecret, appCallback string) (string, error) {
+func GenerateMfaToken(claims jwtClaims.LoginRedis, mfaSecret, appCallback string) (string, error) {
 	valid := time.Minute * 5
 
-	mfaTokenClaims := &MfaToken{
+	mfaTokenClaims := &jwtClaims.MfaToken{
 		TypedClaims: NewTypedClaims(Mfa, valid),
 		UID:         claims.UID,
 	}
@@ -122,21 +123,21 @@ func GenerateMfaToken(claims LoginRedisClaims, mfaSecret, appCallback string) (s
 }
 
 // ParseMfaToken 不会销毁，允许多次验证尝试
-func ParseMfaToken(token string) (*MfaRedisClaims, error) {
-	claims, valid, err := ParseToken(Mfa, token, &MfaToken{})
+func ParseMfaToken(token string) (*jwtClaims.MfaRedis, error) {
+	claims, valid, err := ParseToken(Mfa, token, &jwtClaims.MfaToken{})
 	if err != nil || !valid {
 		return nil, err
 	}
 
-	var redisClaims MfaRedisClaims
+	var redisClaims jwtClaims.MfaRedis
 	return &redisClaims, redis.NewMfaLogin(claims.UID).NewStorePoint(claims.ID).Get(context.Background(), &redisClaims)
 }
 
 // GenerateU2fToken 生成后台 U2F 身份令牌，五分钟有效
-func GenerateU2fToken(uid uint, ip string) (string, *U2fToken, error) {
+func GenerateU2fToken(uid uint, ip string) (string, *jwtClaims.U2fToken, error) {
 	valid := time.Minute * 5
 
-	tokenClaims := &U2fToken{
+	tokenClaims := &jwtClaims.U2fToken{
 		TypedClaims: NewTypedClaims(U2F, valid),
 		UID:         uid,
 		IP:          ip,
@@ -151,7 +152,7 @@ func GenerateU2fToken(uid uint, ip string) (string, *U2fToken, error) {
 }
 
 func ParseU2fToken(token, ip string) (bool, error) {
-	claims, valid, err := ParseToken(U2F, token, &U2fToken{})
+	claims, valid, err := ParseToken(U2F, token, &jwtClaims.U2fToken{})
 	if err != nil || !valid || claims.IP != ip {
 		return false, err
 	}
@@ -167,7 +168,7 @@ func ParseU2fToken(token, ip string) (bool, error) {
 }
 
 func GenerateRefreshToken(uid uint, appCode, payload string, valid time.Duration) (string, error) {
-	return GenerateToken(&RefreshToken{
+	return GenerateToken(&jwtClaims.RefreshToken{
 		TypedClaims: NewTypedClaims(Refresh, valid),
 		UID:         uid,
 		AppCode:     appCode,
@@ -175,13 +176,13 @@ func GenerateRefreshToken(uid uint, appCode, payload string, valid time.Duration
 	})
 }
 
-func ParseRefreshToken(token string) (*RefreshToken, bool, error) {
-	return ParseToken(Refresh, token, &RefreshToken{})
+func ParseRefreshToken(token string) (*jwtClaims.RefreshToken, bool, error) {
+	return ParseToken(Refresh, token, &jwtClaims.RefreshToken{})
 }
 
 func GenerateAccessToken(uid uint, appCode, payload string) (string, error) {
-	return GenerateToken(&AccessToken{
-		RefreshToken{
+	return GenerateToken(&jwtClaims.AccessToken{
+		jwtClaims.RefreshToken{
 			TypedClaims: NewTypedClaims(Access, time.Minute*5),
 			UID:         uid,
 			AppCode:     appCode,
@@ -190,6 +191,6 @@ func GenerateAccessToken(uid uint, appCode, payload string) (string, error) {
 	})
 }
 
-func ParseAccessToken(token string) (*AccessToken, bool, error) {
-	return ParseToken(Access, token, &AccessToken{})
+func ParseAccessToken(token string) (*jwtClaims.AccessToken, bool, error) {
+	return ParseToken(Access, token, &jwtClaims.AccessToken{})
 }
