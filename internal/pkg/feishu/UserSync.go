@@ -83,16 +83,19 @@ func (a *UserSyncProcessor) Run() error {
 	}
 
 	// 开启事务，开始数据库操作
-	a.tx = dao.DB.Begin()
+	a.tx = dao.DB.Begin().Session(&gorm.Session{})
 	defer a.tx.Rollback()
 
 	// 获取飞书部门 OpenID 与基础组的映射关系
 	groupMap, err := (service.FeishuGroupsSrv{DB: a.tx}).GetGroupMap(daoUtil.LockForShare)
 
+	stmtManger, ok := a.tx.ConnPool.(*gorm.PreparedStmtDB)
+	if ok {
+		stmtManger.Close()
+	}
+
 	// 锁定 User UserGroup 表
-	err = a.tx.Session(&gorm.Session{
-		PrepareStmt: false,
-	}).Exec("LOCK TABLES `users` WRITE, `user_groups` WRITE").Error
+	err = a.tx.Exec("LOCK TABLES `users` WRITE, `user_groups` WRITE").Error
 	if err != nil {
 		return err
 	}
