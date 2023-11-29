@@ -153,7 +153,6 @@ func userUpdated(c *gin.Context, logger *log.Entry, event json.RawMessage) {
 				return
 			} else {
 				// 数据库中不存在且用户无效
-				callback.Default(c)
 				return
 			}
 		} else {
@@ -278,6 +277,4 @@ func userUpdated(c *gin.Context, logger *log.Entry, event json.RawMessage) {
 		callback.Error(c, callback.ErrDBOperation, err)
 		return
 	}
-
-	callback.Default(c)
 }
