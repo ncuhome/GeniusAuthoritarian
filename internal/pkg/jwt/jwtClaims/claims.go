@@ -24,6 +24,7 @@ type U2fToken struct {
 
 type RefreshToken struct {
 	UserClaims
+	ID      uint64 `json:"id"`
 	AppCode string `json:"appCode"`
 	Payload string `json:"payload,omitempty"`
 }

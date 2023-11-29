@@ -26,4 +26,5 @@ const (
 	keyPasskey
 	keyU2F
 	keyUserJwt
+	keyRefreshToken
 )

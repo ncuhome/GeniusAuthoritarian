@@ -168,7 +168,7 @@ func GenerateMfaToken(claims jwtClaims.LoginRedis, mfaSecret, appCallback string
 	mfaTokenClaims := &jwtClaims.MfaToken{
 		UserClaims: userClaims,
 	}
-	if mfaTokenClaims.ID, err = redis.NewMfaLogin(claims.UID).CreateStorePoint(context.Background(), valid, &jwtClaims.MfaRedis{
+	if mfaTokenClaims.ID, err = redis.NewMfaLogin().CreateStorePoint(context.Background(), valid, &jwtClaims.MfaRedis{
 		LoginRedis:  claims,
 		Mfa:         mfaSecret,
 		AppCallback: appCallback,
@@ -187,7 +187,7 @@ func ParseMfaToken(token string) (*jwtClaims.MfaRedis, error) {
 	}
 
 	var redisClaims jwtClaims.MfaRedis
-	return &redisClaims, redis.NewMfaLogin(claims.UID).NewStorePoint(claims.ID).Get(context.Background(), &redisClaims)
+	return &redisClaims, redis.NewMfaLogin().NewStorePoint(claims.ID).Get(context.Background(), &redisClaims)
 }
 
 // GenerateU2fToken 生成后台 U2F 身份令牌，五分钟有效
@@ -202,7 +202,7 @@ func GenerateU2fToken(uid uint, ip string) (string, *jwtClaims.U2fToken, error) 
 		UserClaims: userClaims,
 		IP:         ip,
 	}
-	if tokenClaims.ID, err = redis.NewU2F(uid).CreateStorePoint(context.Background(), valid, nil); err != nil {
+	if tokenClaims.ID, err = redis.NewU2F().CreateStorePoint(context.Background(), valid, nil); err != nil {
 		return "", nil, err
 	}
 
@@ -216,7 +216,7 @@ func ParseU2fToken(token, ip string) (bool, error) {
 		return false, err
 	}
 
-	err = redis.NewU2F(claims.UID).NewStorePoint(claims.ID).Get(context.Background(), nil)
+	err = redis.NewU2F().NewStorePoint(claims.ID).Get(context.Background(), nil)
 	if err != nil {
 		if err == redis.Nil {
 			err = nil
