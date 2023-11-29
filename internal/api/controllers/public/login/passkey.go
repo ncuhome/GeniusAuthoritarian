@@ -10,6 +10,7 @@ import (
 	"github.com/ncuhome/GeniusAuthoritarian/internal/db/dao"
 	"github.com/ncuhome/GeniusAuthoritarian/internal/db/redis"
 	"github.com/ncuhome/GeniusAuthoritarian/internal/pkg/jwt"
+	"github.com/ncuhome/GeniusAuthoritarian/internal/pkg/jwt/jwtClaims"
 	"github.com/ncuhome/GeniusAuthoritarian/internal/pkg/webAuthn"
 	"github.com/ncuhome/GeniusAuthoritarian/internal/service"
 	"github.com/ncuhome/GeniusAuthoritarian/internal/tools"
@@ -103,7 +104,7 @@ func FinishPasskeyLogin(c *gin.Context) {
 		return
 	}
 
-	claims := jwt.LoginRedisClaims{
+	claims := jwtClaims.LoginRedis{
 		UID:       user.ID,
 		Name:      user.Name,
 		IP:        c.ClientIP(),

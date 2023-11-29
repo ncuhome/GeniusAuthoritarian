@@ -8,19 +8,19 @@ import (
 	"time"
 )
 
-func NewTokenStore(Client *redis.Client, keyPrefix string) TokenStore {
-	return TokenStore{
+func NewTokenStore[C any](Client *redis.Client, keyPrefix string) TokenStore[C] {
+	return TokenStore[C]{
 		client:    Client,
 		keyPrefix: keyPrefix,
 		keyID:     keyPrefix + "id",
 
-		CheckClaims: func(_ interface{}) error {
+		CheckClaims: func(_ C) error {
 			return nil
 		},
 	}
 }
 
-type TokenStore struct {
+type TokenStore[C any] struct {
 	client *redis.Client
 	// token 有效校验的 key 前缀
 	keyPrefix string
@@ -28,14 +28,14 @@ type TokenStore struct {
 	keyID string
 
 	// 解析完成后，如果有 claims，检查 claims 是否有效
-	CheckClaims func(claims interface{}) error
+	CheckClaims func(claims C) error
 }
 
-func (a TokenStore) genKey(id uint64) string {
+func (a TokenStore[C]) genKey(id uint64) string {
 	return a.keyPrefix + fmt.Sprint(id)
 }
 
-func (a TokenStore) CreateStorePoint(ctx context.Context, valid time.Duration, claims interface{}) (uint64, error) {
+func (a TokenStore[C]) CreateStorePoint(ctx context.Context, valid time.Duration, claims C) (uint64, error) {
 	var value []byte
 	var err error
 	if claims != nil {
@@ -55,19 +55,19 @@ func (a TokenStore) CreateStorePoint(ctx context.Context, valid time.Duration, c
 	return id, a.client.Set(ctx, a.genKey(id), value, valid).Err()
 }
 
-func (a TokenStore) NewStorePoint(id uint64) Point {
-	return Point{
+func (a TokenStore[C]) NewStorePoint(id uint64) Point[C] {
+	return Point[C]{
 		s:   a,
 		key: a.genKey(id),
 	}
 }
 
-type Point struct {
-	s   TokenStore
+type Point[C any] struct {
+	s   TokenStore[C]
 	key string
 }
 
-func (a Point) parsePoint(data []byte, claims interface{}) error {
+func (a Point[C]) parsePoint(data []byte, claims interface{}) error {
 	if claims != nil {
 		err := json.Unmarshal(data, claims)
 		if err != nil {
@@ -78,7 +78,7 @@ func (a Point) parsePoint(data []byte, claims interface{}) error {
 	return nil
 }
 
-func (a Point) GetAndDestroy(ctx context.Context, claims interface{}) error {
+func (a Point[C]) GetAndDestroy(ctx context.Context, claims C) error {
 	value, err := a.s.client.GetDel(ctx, a.key).Bytes()
 	if err != nil {
 		return err
@@ -87,7 +87,7 @@ func (a Point) GetAndDestroy(ctx context.Context, claims interface{}) error {
 	return a.parsePoint(value, claims)
 }
 
-func (a Point) Get(ctx context.Context, claims interface{}) error {
+func (a Point[C]) Get(ctx context.Context, claims C) error {
 	value, err := a.s.client.Get(ctx, a.key).Bytes()
 	if err != nil {
 		return err
@@ -96,6 +96,6 @@ func (a Point) Get(ctx context.Context, claims interface{}) error {
 	return a.parsePoint(value, claims)
 }
 
-func (a Point) Destroy(ctx context.Context) error {
+func (a Point[C]) Destroy(ctx context.Context) error {
 	return a.s.client.Del(ctx, a.key).Err()
 }

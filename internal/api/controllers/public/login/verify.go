@@ -8,6 +8,7 @@ import (
 	"github.com/ncuhome/GeniusAuthoritarian/internal/db/dao"
 	"github.com/ncuhome/GeniusAuthoritarian/internal/db/redis"
 	"github.com/ncuhome/GeniusAuthoritarian/internal/pkg/jwt"
+	"github.com/ncuhome/GeniusAuthoritarian/internal/pkg/jwt/jwtClaims"
 	"github.com/ncuhome/GeniusAuthoritarian/internal/service"
 	"github.com/ncuhome/GeniusAuthoritarian/internal/tools"
 	"gorm.io/gorm"
@@ -16,7 +17,7 @@ import (
 )
 
 // 验证 token 并添加登录记录
-func doVerifyToken(c *gin.Context, tx *gorm.DB, token string) *jwt.LoginRedisClaims {
+func doVerifyToken(c *gin.Context, tx *gorm.DB, token string) *jwtClaims.LoginRedis {
 	claims, valid, err := jwt.ParseLoginToken(token)
 	if err != nil || !valid {
 		callback.Error(c, callback.ErrUnauthorized, err)

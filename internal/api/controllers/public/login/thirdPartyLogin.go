@@ -10,6 +10,7 @@ import (
 	"github.com/ncuhome/GeniusAuthoritarian/internal/pkg/dingTalk"
 	"github.com/ncuhome/GeniusAuthoritarian/internal/pkg/feishu"
 	"github.com/ncuhome/GeniusAuthoritarian/internal/pkg/jwt"
+	"github.com/ncuhome/GeniusAuthoritarian/internal/pkg/jwt/jwtClaims"
 	"github.com/ncuhome/GeniusAuthoritarian/internal/service"
 	"github.com/ncuhome/GeniusAuthoritarian/internal/tools"
 	"github.com/ncuhome/GeniusAuthoritarian/pkg/departments"
@@ -118,7 +119,7 @@ type ThirdPartyLoginContext struct {
 
 // 根据数据完成请求响应
 func callThirdPartyLoginResult(c *gin.Context, info ThirdPartyLoginContext) {
-	claims := jwt.LoginRedisClaims{
+	claims := jwtClaims.LoginRedis{
 		UID:       info.User.ID,
 		Name:      info.User.Name,
 		IP:        info.Ip,

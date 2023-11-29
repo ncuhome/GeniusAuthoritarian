@@ -76,7 +76,7 @@ func GenerateLoginToken(claims jwtClaims.LoginRedis) (string, error) {
 		TypedClaims: NewTypedClaims(Login, valid),
 	}
 	var err error
-	tokenClaims.ID, err = redis.NewThirdPartyLogin().CreateStorePoint(context.Background(), valid, claims)
+	tokenClaims.ID, err = redis.NewThirdPartyLogin().CreateStorePoint(context.Background(), valid, &claims)
 	if err != nil {
 		return "", err
 	}
@@ -111,10 +111,10 @@ func GenerateMfaToken(claims jwtClaims.LoginRedis, mfaSecret, appCallback string
 		UID:         claims.UID,
 	}
 	var err error
-	if mfaTokenClaims.ID, err = redis.NewMfaLogin(claims.UID).CreateStorePoint(context.Background(), valid, &MfaRedisClaims{
-		LoginRedisClaims: claims,
-		Mfa:              mfaSecret,
-		AppCallback:      appCallback,
+	if mfaTokenClaims.ID, err = redis.NewMfaLogin(claims.UID).CreateStorePoint(context.Background(), valid, &jwtClaims.MfaRedis{
+		LoginRedis:  claims,
+		Mfa:         mfaSecret,
+		AppCallback: appCallback,
 	}); err != nil {
 		return "", err
 	}
@@ -182,7 +182,7 @@ func ParseRefreshToken(token string) (*jwtClaims.RefreshToken, bool, error) {
 
 func GenerateAccessToken(uid uint, appCode, payload string) (string, error) {
 	return GenerateToken(&jwtClaims.AccessToken{
-		jwtClaims.RefreshToken{
+		RefreshToken: jwtClaims.RefreshToken{
 			TypedClaims: NewTypedClaims(Access, time.Minute*5),
 			UID:         uid,
 			AppCode:     appCode,
