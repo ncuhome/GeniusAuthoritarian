@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"errors"
 	redisPkg "github.com/ncuhome/GeniusAuthoritarian/internal/db/redis"
+	"github.com/ncuhome/GeniusAuthoritarian/internal/rpc/middlewares"
 	"github.com/ncuhome/GeniusAuthoritarian/internal/rpc/sshDev/client/proto"
 	"github.com/ncuhome/GeniusAuthoritarian/internal/rpc/sshDev/rpcModel"
 	"github.com/ncuhome/GeniusAuthoritarian/internal/service"
@@ -25,11 +26,11 @@ func Run(token, addr string) error {
 
 	grpcServer := grpc.NewServer(
 		grpc.ChainUnaryInterceptor(
-			UnaryLogger(),
+			middlewares.UnaryLogger(),
 			UnaryTokenAuth(token),
 		),
 		grpc.ChainStreamInterceptor(
-			StreamLogger(),
+			middlewares.StreamLogger(),
 			StreamTokenAuth(token),
 		),
 	)

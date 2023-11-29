@@ -7,13 +7,35 @@ import (
 	"fmt"
 	"github.com/ncuhome/GeniusAuthoritarian/internal/db/redis"
 	"github.com/ncuhome/GeniusAuthoritarian/internal/pkg/jwt"
+	"github.com/ncuhome/GeniusAuthoritarian/internal/rpc/middlewares"
 	"github.com/ncuhome/GeniusAuthoritarian/internal/service"
 	refreshTokenProto "github.com/ncuhome/GeniusAuthoritarianProtos/refreshToken"
+	"google.golang.org/grpc"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
 	"gorm.io/gorm"
+	"net"
 	"unsafe"
 )
+
+func Run(addr string) error {
+	tcpListen, err := net.Listen("tcp", addr)
+	if err != nil {
+		return err
+	}
+
+	grpcServer := grpc.NewServer(
+		grpc.ChainUnaryInterceptor(
+			middlewares.UnaryLogger(),
+		),
+		grpc.ChainStreamInterceptor(
+			middlewares.StreamLogger(),
+		),
+	)
+	refreshTokenProto.RegisterRefreshTokenServer(grpcServer, &Server{})
+
+	return grpcServer.Serve(tcpListen)
+}
 
 type Server struct {
 	refreshTokenProto.UnimplementedRefreshTokenServer

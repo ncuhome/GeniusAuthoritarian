@@ -8,6 +8,7 @@ import (
 	"github.com/ncuhome/GeniusAuthoritarian/internal/pkg/feishu"
 	"github.com/ncuhome/GeniusAuthoritarian/internal/pkg/views"
 	"github.com/ncuhome/GeniusAuthoritarian/internal/router"
+	"github.com/ncuhome/GeniusAuthoritarian/internal/rpc/refreshToken"
 	sshDevServer "github.com/ncuhome/GeniusAuthoritarian/internal/rpc/sshDev"
 	"github.com/ncuhome/GeniusAuthoritarian/internal/rpc/sshDev/rpc"
 	"github.com/ncuhome/GeniusAuthoritarian/internal/tools"
@@ -36,10 +37,17 @@ func sshDevRpc() {
 	}
 }
 
+func refreshTokenRpc() {
+	if err := refreshToken.Run(":82"); err != nil {
+		log.Fatalln("启动 refreshToken rpc 服务失败:", err)
+	}
+}
+
 func main() {
 	log.Infoln("Sys Boost")
 
 	go sshDevRpc()
+	go refreshTokenRpc()
 
 	// :80
 	if err := tools.SoftHttpSrv(router.Engine()); err != nil {
