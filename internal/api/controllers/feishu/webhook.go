@@ -1,6 +1,7 @@
 package controllers
 
 import (
+	"context"
 	"encoding/json"
 	"errors"
 	"github.com/Mmx233/daoUtil"
@@ -121,136 +122,162 @@ func userUpdated(c *gin.Context, logger *log.Entry, event json.RawMessage) {
 		"name":  user.Data.Name,
 		"phone": user.Data.Mobile,
 	})
-	if user.IsInvalid() { // 用户无效，不管以前的状态，直接执行冻结
-		result := userSrv.FrozeByPhone(user.Data.Mobile)
-		if result.Error != nil {
-			callback.Error(c, callback.ErrDBOperation, result.Error)
-			return
-		}
-		if result.RowsAffected != 0 {
-			logger.Infoln("用户已冻结")
-		}
-	} else { // 用户有效
-		var phone string
-		// 处理电话号码更换的情况
-		if oldUser.Data.Mobile != "" {
-			phone = oldUser.Data.Mobile
-		} else {
-			phone = user.Data.Mobile
-		}
-		// 获取数据库中的目标用户
-		userModel, err := userSrv.FirstByPhone(phone, daoUtil.UnScoped, daoUtil.LockForUpdate)
-		if errors.Is(err, gorm.ErrRecordNotFound) { // 用户不存在，追加创建该用户
-			models := []dao.User{user.Model()}
-			err = userSrv.CreateAll(models)
-			if err != nil {
-				callback.Error(c, callback.ErrDBOperation, err)
-				return
-			}
-			groupMap, err := (&service.FeishuGroupsSrv{DB: userSrv.DB}).GetGroupMap(daoUtil.LockForShare)
-			if err != nil {
-				callback.Error(c, callback.ErrDBOperation, err)
-				return
-			}
-			err = service.UserGroupsSrv{DB: userSrv.DB}.CreateAll(user.Departments(groupMap).Models(models[0].ID))
-			if err != nil {
-				callback.Error(c, callback.ErrDBOperation, err)
-				return
-			}
-			logger.Infoln("用户已追加创建")
-		} else if err != nil { // 获取数据库中的用户出错
-			callback.Error(c, callback.ErrDBOperation, err)
-			return
-		} else { // 用户已存在数据库中
-			if userModel.DeletedAt.Valid { // 用户有效但被冻结，执行解冻
-				err = userSrv.UnFrozeByIDSlice([]uint{userModel.ID})
+	var phone string
+	// 处理电话号码更换的情况
+	if oldUser.Data.Mobile != "" {
+		phone = oldUser.Data.Mobile
+	} else {
+		phone = user.Data.Mobile
+	}
+	userModel, err := userSrv.FirstByPhone(phone, daoUtil.UnScoped, daoUtil.LockForUpdate)
+	if err != nil {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			if !user.IsInvalid() {
+				models := []dao.User{user.Model()}
+				err = userSrv.CreateAll(models)
 				if err != nil {
 					callback.Error(c, callback.ErrDBOperation, err)
 					return
 				}
-				logger.Infoln("用户已解冻")
-			}
-
-			if userModel.DeletedAt.Valid || !oldUser.IsModelEmpty() { // 用户冻结或有效字段变更时更新数据库用户信息字段
-				userModelNew := user.Model()
-				userModelNew.ID = userModel.ID
-				if err = userModelNew.UpdateAllInfoByID(userSrv.DB).Error; err != nil {
-					callback.Error(c, callback.ErrDBOperation, err)
-					return
-				}
-				logger.Infoln("用户信息已更新")
-			}
-
-			if userModel.DeletedAt.Valid || len(oldUser.Data.DepartmentIds) != 0 { //用户解冻或部门变动时同步用户部门
 				groupMap, err := (&service.FeishuGroupsSrv{DB: userSrv.DB}).GetGroupMap(daoUtil.LockForShare)
 				if err != nil {
 					callback.Error(c, callback.ErrDBOperation, err)
 					return
 				}
-
-				userGroupSrv := service.UserGroupsSrv{DB: userSrv.DB}
-
-				// 同步前是否是研发组成员
-				prevIsDeveloper, err := userGroupSrv.IsUnitMember(userModel.ID, departments.UDev)
+				err = service.UserGroupsSrv{DB: userSrv.DB}.CreateAll(user.Departments(groupMap).Models(models[0].ID))
 				if err != nil {
 					callback.Error(c, callback.ErrDBOperation, err)
 					return
 				}
-
-				// 执行部门同步,写入数据库
-				err = user.Departments(groupMap).Sync(userSrv.DB, userModel.ID)
-				if err != nil {
-					callback.Error(c, callback.ErrDBOperation, err)
-					return
-				}
-				logger.Infoln("用户部门已同步")
-
-				// 同步后是否是研发组成员
-				nowIsDeveloper, err := userGroupSrv.IsUnitMember(userModel.ID, departments.UDev)
-				if err != nil {
-					callback.Error(c, callback.ErrDBOperation, err)
-					return
-				}
-
-				// 处理研发身份变更,同步 SSH 权限
-				if (prevIsDeveloper || nowIsDeveloper) && prevIsDeveloper != nowIsDeveloper {
-					var msg rpcModel.SshAccountMsg
-					userName := sshTool.LinuxAccountName(userModel.ID)
-					if prevIsDeveloper { // 以前是现在不是
-						msg = rpcModel.SshAccountMsg{
-							IsDel:    true,
-							Username: userName,
-						}
-					} else { // 以前不是现在是
-						model, err := sshTool.NewSshDevModel(rand.New(rand.NewSource(time.Now().UnixNano())), userModel.ID)
-						if err != nil {
-							callback.Error(c, callback.ErrUnexpected, err)
-							return
-						}
-
-						err = service.UserSshSrv{DB: userSrv.DB}.CreateAll([]dao.UserSsh{model})
-						if err != nil {
-							callback.Error(c, callback.ErrDBOperation, err)
-							return
-						}
-
-						msg = rpcModel.SshAccountMsg{
-							Username:  userName,
-							PublicKey: model.PublicSsh,
-						}
-					}
-					err = redis.PublishSshDev([]rpcModel.SshAccountMsg{msg})
-					if err != nil {
-						callback.Error(c, callback.ErrDBOperation, err)
-						return
-					}
-					logger.Infoln("研发 SSH 已同步")
-				}
+				logger.Infoln("用户已追加创建")
+				return
+			} else {
+				// 数据库中不存在且用户无效
+				callback.Default(c)
+				return
 			}
+		} else {
+			callback.Error(c, callback.ErrDBOperation, err)
+			return
 		}
 	}
+
+	redisUserOperator := redis.NewUserJwt().NewOperator(userModel.ID)
+
+	if user.IsInvalid() != userModel.DeletedAt.Valid {
+		if userModel.DeletedAt.Valid { // 用户有效但被冻结，执行解冻
+			err = userSrv.UnFrozeByIDSlice([]uint{userModel.ID})
+			if err != nil {
+				callback.Error(c, callback.ErrDBOperation, err)
+				return
+			}
+			logger.Infoln("用户已解冻")
+		} else { // 用户有效但未冻结，执行冻结
+			result := userSrv.FrozeByPhone(user.Data.Mobile)
+			if result.Error != nil {
+				callback.Error(c, callback.ErrDBOperation, result.Error)
+				return
+			}
+			err = redisUserOperator.Del(context.Background())
+			if err != nil {
+				callback.Error(c, callback.ErrUnexpected, err)
+				return
+			}
+			if result.RowsAffected != 0 {
+				logger.Infoln("用户已冻结")
+			}
+			return
+		}
+	}
+
+	if userModel.DeletedAt.Valid || !oldUser.IsModelEmpty() { // 刚刚执行了用户解冻或有效字段变更时，更新数据库用户信息字段
+		userModelNew := user.Model()
+		userModelNew.ID = userModel.ID
+		if err = userModelNew.UpdateAllInfoByID(userSrv.DB).Error; err != nil {
+			callback.Error(c, callback.ErrDBOperation, err)
+			return
+		}
+		logger.Infoln("用户信息已更新")
+	}
+
+	if userModel.DeletedAt.Valid || len(oldUser.Data.DepartmentIds) != 0 { // 刚刚执行了用户解冻或部门变动时同步用户部门
+		groupMap, err := (&service.FeishuGroupsSrv{DB: userSrv.DB}).GetGroupMap(daoUtil.LockForShare)
+		if err != nil {
+			callback.Error(c, callback.ErrDBOperation, err)
+			return
+		}
+
+		userGroupSrv := service.UserGroupsSrv{DB: userSrv.DB}
+
+		// 同步前是否是研发组成员
+		prevIsDeveloper, err := userGroupSrv.IsUnitMember(userModel.ID, departments.UDev)
+		if err != nil {
+			callback.Error(c, callback.ErrDBOperation, err)
+			return
+		}
+
+		// 执行部门同步,写入数据库
+		err = user.Departments(groupMap).Sync(userSrv.DB, userModel.ID)
+		if err != nil {
+			callback.Error(c, callback.ErrDBOperation, err)
+			return
+		}
+
+		_, err = redisUserOperator.ChangeOperateID(context.Background())
+		if err != nil {
+			callback.Error(c, callback.ErrUnexpected, err)
+			return
+		}
+
+		logger.Infoln("用户部门已同步")
+
+		// 同步后是否是研发组成员
+		nowIsDeveloper, err := userGroupSrv.IsUnitMember(userModel.ID, departments.UDev)
+		if err != nil {
+			callback.Error(c, callback.ErrDBOperation, err)
+			return
+		}
+
+		// 处理研发身份变更,同步 SSH 权限
+		if (prevIsDeveloper || nowIsDeveloper) && prevIsDeveloper != nowIsDeveloper {
+			var msg rpcModel.SshAccountMsg
+			userName := sshTool.LinuxAccountName(userModel.ID)
+			if prevIsDeveloper { // 以前是现在不是
+				msg = rpcModel.SshAccountMsg{
+					IsDel:    true,
+					Username: userName,
+				}
+			} else { // 以前不是现在是
+				model, err := sshTool.NewSshDevModel(rand.New(rand.NewSource(time.Now().UnixNano())), userModel.ID)
+				if err != nil {
+					callback.Error(c, callback.ErrUnexpected, err)
+					return
+				}
+
+				err = service.UserSshSrv{DB: userSrv.DB}.CreateAll([]dao.UserSsh{model})
+				if err != nil {
+					callback.Error(c, callback.ErrDBOperation, err)
+					return
+				}
+
+				msg = rpcModel.SshAccountMsg{
+					Username:  userName,
+					PublicKey: model.PublicSsh,
+				}
+			}
+			err = redis.PublishSshDev([]rpcModel.SshAccountMsg{msg})
+			if err != nil {
+				callback.Error(c, callback.ErrDBOperation, err)
+				return
+			}
+			logger.Infoln("研发 SSH 已同步")
+		}
+	}
+
 	if err = userSrv.Commit().Error; err != nil {
 		callback.Error(c, callback.ErrDBOperation, err)
 		return
 	}
+
+	callback.Default(c)
 }
