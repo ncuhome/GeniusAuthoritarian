@@ -90,7 +90,9 @@ func (a *UserSyncProcessor) Run() error {
 	groupMap, err := (service.FeishuGroupsSrv{DB: a.tx}).GetGroupMap(daoUtil.LockForShare)
 
 	// 锁定 User UserGroup 表
-	err = a.tx.Exec("LOCK TABLES `users` WRITE, `user_groups` WRITE").Error
+	err = a.tx.Session(&gorm.Session{
+		PrepareStmt: false,
+	}).Exec("LOCK TABLES `users` WRITE, `user_groups` WRITE").Error
 	if err != nil {
 		return err
 	}
