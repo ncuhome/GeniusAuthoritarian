@@ -9,7 +9,7 @@ import (
 )
 
 func ListAccessibleApp(c *gin.Context) {
-	uid := tools.GetUserInfo(c).ID
+	uid := tools.GetUserInfo(c).UID
 
 	permitAllApps, err := service.App.GetPermitAll()
 	if err != nil {

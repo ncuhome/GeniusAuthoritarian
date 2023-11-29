@@ -16,7 +16,7 @@ import (
 )
 
 func ResetSshKeyPair(c *gin.Context) {
-	uid := tools.GetUserInfo(c).ID
+	uid := tools.GetUserInfo(c).UID
 
 	userSshSrv, err := service.UserSsh.Begin()
 	if err != nil {
@@ -90,7 +90,7 @@ func ResetSshKeyPair(c *gin.Context) {
 }
 
 func KillAllProcess(c *gin.Context) {
-	uid := tools.GetUserInfo(c).ID
+	uid := tools.GetUserInfo(c).UID
 
 	err := redis.PublishSshDev([]rpcModel.SshAccountMsg{
 		{

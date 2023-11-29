@@ -14,7 +14,7 @@ import (
 )
 
 func MfaAdd(c *gin.Context) {
-	uid := tools.GetUserInfo(c).ID
+	uid := tools.GetUserInfo(c).UID
 
 	userSrv, err := service.User.Begin()
 	if err != nil {
@@ -72,7 +72,7 @@ func MfaAddCheck(c *gin.Context) {
 		return
 	}
 
-	uid := tools.GetUserInfo(c).ID
+	uid := tools.GetUserInfo(c).UID
 
 	mfaEnableRedis := redis.NewMfaEnable(uid)
 	mfaSecret, err := mfaEnableRedis.Get()
@@ -127,7 +127,7 @@ func MfaDel(c *gin.Context) {
 	}
 	defer userSrv.Rollback()
 
-	uid := tools.GetUserInfo(c).ID
+	uid := tools.GetUserInfo(c).UID
 
 	mfaSecret, err := userSrv.FirstMfa(uid, daoUtil.LockForUpdate)
 	if err != nil {

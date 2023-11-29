@@ -11,7 +11,7 @@ import (
 )
 
 func SendVerifySms(c *gin.Context) {
-	uid := tools.GetUserInfo(c).ID
+	uid := tools.GetUserInfo(c).UID
 	phone, err := service.User.FirstPhoneByID(uid)
 	if err != nil {
 		callback.Error(c, callback.ErrDBOperation, err)

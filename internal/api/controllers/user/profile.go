@@ -8,7 +8,7 @@ import (
 )
 
 func ProfileData(c *gin.Context) {
-	uid := tools.GetUserInfo(c).ID
+	uid := tools.GetUserInfo(c).UID
 	profile, err := service.User.UserProfile(uid)
 	if err != nil {
 		callback.Error(c, callback.ErrDBOperation, err)

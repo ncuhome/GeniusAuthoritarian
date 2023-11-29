@@ -26,7 +26,7 @@ func DeletePasskey(c *gin.Context) {
 	}
 	defer webAuthnSrv.Rollback()
 
-	err = webAuthnSrv.Delete(f.ID, tools.GetUserInfo(c).ID)
+	err = webAuthnSrv.Delete(f.ID, tools.GetUserInfo(c).UID)
 	if err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
 			callback.Error(c, callback.ErrPasskeyNotExist, err)
@@ -61,7 +61,7 @@ func RenamePasskey(c *gin.Context) {
 	}
 	defer webAuthnSrv.Rollback()
 
-	exist, err := webAuthnSrv.Exist(f.ID, tools.GetUserInfo(c).ID, daoUtil.LockForUpdate)
+	exist, err := webAuthnSrv.Exist(f.ID, tools.GetUserInfo(c).UID, daoUtil.LockForUpdate)
 	if err != nil {
 		callback.Error(c, callback.ErrDBOperation, err)
 		return

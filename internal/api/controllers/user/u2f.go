@@ -17,7 +17,7 @@ import (
 // U2F 是后台已登录用户身份二次校验的总方法
 
 func AvailableU2fMethod(c *gin.Context) {
-	data, err := service.User.U2fStatus(tools.GetUserInfo(c).ID)
+	data, err := service.User.U2fStatus(tools.GetUserInfo(c).UID)
 	if err != nil {
 		callback.Error(c, callback.ErrDBOperation, err)
 		return
@@ -29,7 +29,7 @@ func AvailableU2fMethod(c *gin.Context) {
 // BeginU2F 为用户分发 U2F 短效令牌，可以通过指定需要 U2F 的接口
 // 各校验方式的前置准备在其他对应路由组的接口中，本接口直接获取其结果
 func BeginU2F(c *gin.Context) {
-	uid := tools.GetUserInfo(c).ID
+	uid := tools.GetUserInfo(c).UID
 
 	method := c.Param("method")
 	switch method {
@@ -150,7 +150,7 @@ func UpdateU2fPrefer(c *gin.Context) {
 	}
 	defer userSrv.Rollback()
 
-	err = userSrv.UpdateUserPreferU2F(tools.GetUserInfo(c).ID, f.Prefer)
+	err = userSrv.UpdateUserPreferU2F(tools.GetUserInfo(c).UID, f.Prefer)
 	if err != nil {
 		callback.Error(c, callback.ErrDBOperation, err)
 		return

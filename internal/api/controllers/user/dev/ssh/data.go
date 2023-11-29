@@ -10,7 +10,7 @@ import (
 )
 
 func ShowSshKey(c *gin.Context) {
-	data, err := service.UserSsh.FirstSshSecretsForUserShow(tools.GetUserInfo(c).ID)
+	data, err := service.UserSsh.FirstSshSecretsForUserShow(tools.GetUserInfo(c).UID)
 	if err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
 			callback.Error(c, callback.ErrSshNotFound)

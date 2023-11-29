@@ -14,7 +14,7 @@ import (
 )
 
 func BeginPasskeyRegistration(c *gin.Context) {
-	uid := tools.GetUserInfo(c).ID
+	uid := tools.GetUserInfo(c).UID
 
 	user, err := webAuthn.NewUser(uid)
 	if err != nil {
@@ -48,7 +48,7 @@ func BeginPasskeyRegistration(c *gin.Context) {
 }
 
 func FinishPasskeyRegistration(c *gin.Context) {
-	uid := tools.GetUserInfo(c).ID
+	uid := tools.GetUserInfo(c).UID
 
 	var session webauthn.SessionData
 	err := redis.NewPasskey(c.ClientIP()).NewUser(uid).

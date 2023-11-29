@@ -15,7 +15,7 @@ import (
 )
 
 func ListOwnedApp(c *gin.Context) {
-	uid := tools.GetUserInfo(c).ID
+	uid := tools.GetUserInfo(c).UID
 
 	apps, err := service.App.GetUserOwnedApp(uid)
 	if err != nil {
@@ -82,7 +82,7 @@ func ApplyApp(c *gin.Context) {
 		return
 	}
 
-	uid := tools.GetUserInfo(c).ID
+	uid := tools.GetUserInfo(c).UID
 	newApp, err := appSrv.New(uid, f.Name, f.Callback, f.PermitAll)
 	if err != nil {
 		callback.Error(c, callback.ErrDBOperation, err)
@@ -135,7 +135,7 @@ func DeleteApp(c *gin.Context) {
 		return
 	}
 
-	uid := tools.GetUserInfo(c).ID
+	uid := tools.GetUserInfo(c).UID
 
 	appSrv, err := service.App.Begin()
 	if err != nil {
@@ -202,7 +202,7 @@ func ModifyApp(c *gin.Context) {
 	}
 	defer appSrv.Rollback()
 
-	uid := tools.GetUserInfo(c).ID
+	uid := tools.GetUserInfo(c).UID
 
 	app, err := appSrv.FirstAppDetailedByIDForUser(f.ID, uid, daoUtil.LockForUpdate)
 	if err != nil {
@@ -344,7 +344,7 @@ func UpdateLinkState(c *gin.Context) {
 	}
 	defer appSrv.Rollback()
 
-	uid := tools.GetUserInfo(c).ID
+	uid := tools.GetUserInfo(c).UID
 
 	if err = appSrv.UpdateLinkOff(uid, f.ID, f.LinkOff); err != nil {
 		callback.Error(c, callback.ErrDBOperation, err)

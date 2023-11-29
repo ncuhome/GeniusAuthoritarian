@@ -12,7 +12,7 @@ import (
 )
 
 func ListPasskey(c *gin.Context) {
-	list, err := service.WebAuthn.ListUserCredForShow(tools.GetUserInfo(c).ID)
+	list, err := service.WebAuthn.ListUserCredForShow(tools.GetUserInfo(c).UID)
 	if err != nil {
 		callback.Error(c, callback.ErrDBOperation, err)
 		return
@@ -22,7 +22,7 @@ func ListPasskey(c *gin.Context) {
 }
 
 func PasskeyOptions(c *gin.Context) {
-	user, err := webAuthn.NewUser(tools.GetUserInfo(c).ID)
+	user, err := webAuthn.NewUser(tools.GetUserInfo(c).UID)
 	if err != nil {
 		callback.Error(c, callback.ErrDBOperation, err)
 		return

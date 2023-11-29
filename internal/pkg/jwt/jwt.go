@@ -102,28 +102,35 @@ func ParseTokenAndVerify[C jwtClaims.ClaimsUser](Type, token string, target C) (
 
 // GenerateUserToken 生成后台 Token
 func GenerateUserToken(uid uint, name string, groups []string, valid time.Duration) (string, error) {
+	userClaims, err := NewUserClaims(uid, User, valid)
+	if err != nil {
+		return "", err
+	}
 	claims := &jwtClaims.UserToken{
-		TypedClaims: NewTypedClaims(User, valid),
-		ID:          uid,
-		Name:        name,
-		Groups:      groups,
+		UserClaims: userClaims,
+		Name:       name,
+		Groups:     groups,
 	}
 	token, err := GenerateToken(claims)
 	return token, err
 }
 
 func ParseUserToken(token string) (*jwtClaims.UserToken, bool, error) {
-	return ParseToken(User, token, &jwtClaims.UserToken{})
+	return ParseTokenAndVerify(User, token, &jwtClaims.UserToken{})
 }
 
 // GenerateLoginToken 生成有效期 5 分钟的登录校验 Token
 func GenerateLoginToken(claims jwtClaims.LoginRedis) (string, error) {
 	valid := time.Minute * 5
 
-	tokenClaims := &jwtClaims.LoginToken{
-		TypedClaims: NewTypedClaims(Login, valid),
+	userClaims, err := NewUserClaims(claims.UID, Login, valid)
+	if err != nil {
+		return "", err
 	}
-	var err error
+
+	tokenClaims := &jwtClaims.LoginToken{
+		UserClaims: userClaims,
+	}
 	tokenClaims.ID, err = redis.NewThirdPartyLogin().CreateStorePoint(context.Background(), valid, &claims)
 	if err != nil {
 		return "", err
@@ -134,7 +141,7 @@ func GenerateLoginToken(claims jwtClaims.LoginRedis) (string, error) {
 
 // ParseLoginToken 解析后自动销毁
 func ParseLoginToken(token string) (*jwtClaims.LoginRedis, bool, error) {
-	claims, valid, err := ParseToken(Login, token, &jwtClaims.LoginToken{})
+	claims, valid, err := ParseTokenAndVerify(Login, token, &jwtClaims.LoginToken{})
 	if err != nil || !valid {
 		return nil, false, err
 	}
@@ -154,11 +161,13 @@ func ParseLoginToken(token string) (*jwtClaims.LoginRedis, bool, error) {
 func GenerateMfaToken(claims jwtClaims.LoginRedis, mfaSecret, appCallback string) (string, error) {
 	valid := time.Minute * 5
 
-	mfaTokenClaims := &jwtClaims.MfaToken{
-		TypedClaims: NewTypedClaims(Mfa, valid),
-		UID:         claims.UID,
+	userClaims, err := NewUserClaims(claims.UID, Mfa, valid)
+	if err != nil {
+		return "", err
 	}
-	var err error
+	mfaTokenClaims := &jwtClaims.MfaToken{
+		UserClaims: userClaims,
+	}
 	if mfaTokenClaims.ID, err = redis.NewMfaLogin(claims.UID).CreateStorePoint(context.Background(), valid, &jwtClaims.MfaRedis{
 		LoginRedis:  claims,
 		Mfa:         mfaSecret,
@@ -172,7 +181,7 @@ func GenerateMfaToken(claims jwtClaims.LoginRedis, mfaSecret, appCallback string
 
 // ParseMfaToken 不会销毁，允许多次验证尝试
 func ParseMfaToken(token string) (*jwtClaims.MfaRedis, error) {
-	claims, valid, err := ParseToken(Mfa, token, &jwtClaims.MfaToken{})
+	claims, valid, err := ParseTokenAndVerify(Mfa, token, &jwtClaims.MfaToken{})
 	if err != nil || !valid {
 		return nil, err
 	}
@@ -185,12 +194,14 @@ func ParseMfaToken(token string) (*jwtClaims.MfaRedis, error) {
 func GenerateU2fToken(uid uint, ip string) (string, *jwtClaims.U2fToken, error) {
 	valid := time.Minute * 5
 
-	tokenClaims := &jwtClaims.U2fToken{
-		TypedClaims: NewTypedClaims(U2F, valid),
-		UID:         uid,
-		IP:          ip,
+	userClaims, err := NewUserClaims(uid, U2F, valid)
+	if err != nil {
+		return "", nil, err
 	}
-	var err error
+	tokenClaims := &jwtClaims.U2fToken{
+		UserClaims: userClaims,
+		IP:         ip,
+	}
 	if tokenClaims.ID, err = redis.NewU2F(uid).CreateStorePoint(context.Background(), valid, nil); err != nil {
 		return "", nil, err
 	}
@@ -200,7 +211,7 @@ func GenerateU2fToken(uid uint, ip string) (string, *jwtClaims.U2fToken, error) 
 }
 
 func ParseU2fToken(token, ip string) (bool, error) {
-	claims, valid, err := ParseToken(U2F, token, &jwtClaims.U2fToken{})
+	claims, valid, err := ParseTokenAndVerify(U2F, token, &jwtClaims.U2fToken{})
 	if err != nil || !valid || claims.IP != ip {
 		return false, err
 	}
@@ -216,29 +227,37 @@ func ParseU2fToken(token, ip string) (bool, error) {
 }
 
 func GenerateRefreshToken(uid uint, appCode, payload string, valid time.Duration) (string, error) {
+	userClaims, err := NewUserClaims(uid, Refresh, valid)
+	if err != nil {
+		return "", err
+	}
 	return GenerateToken(&jwtClaims.RefreshToken{
-		TypedClaims: NewTypedClaims(Refresh, valid),
-		UID:         uid,
-		AppCode:     appCode,
-		Payload:     payload,
+		UserClaims: userClaims,
+		AppCode:    appCode,
+		Payload:    payload,
 	})
 }
 
 func ParseRefreshToken(token string) (*jwtClaims.RefreshToken, bool, error) {
-	return ParseToken(Refresh, token, &jwtClaims.RefreshToken{})
+	return ParseTokenAndVerify(Refresh, token, &jwtClaims.RefreshToken{})
 }
 
 func GenerateAccessToken(uid uint, appCode, payload string) (string, error) {
+	valid := time.Minute * 5
+
+	userClaims, err := NewUserClaims(uid, Access, valid)
+	if err != nil {
+		return "", err
+	}
 	return GenerateToken(&jwtClaims.AccessToken{
 		RefreshToken: jwtClaims.RefreshToken{
-			TypedClaims: NewTypedClaims(Access, time.Minute*5),
-			UID:         uid,
-			AppCode:     appCode,
-			Payload:     payload,
+			UserClaims: userClaims,
+			AppCode:    appCode,
+			Payload:    payload,
 		},
 	})
 }
 
 func ParseAccessToken(token string) (*jwtClaims.AccessToken, bool, error) {
-	return ParseToken(Access, token, &jwtClaims.AccessToken{})
+	return ParseTokenAndVerify(Access, token, &jwtClaims.AccessToken{})
 }

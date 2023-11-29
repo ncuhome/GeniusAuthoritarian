@@ -1,37 +1,29 @@
 package jwtClaims
 
 type UserToken struct {
-	TypedClaims
-	// dao.User.ID
-	ID     uint     `json:"id"`
+	UserClaims
 	Name   string   `json:"name"`
 	Groups []string `json:"groups,omitempty"`
 }
 
 type LoginToken struct {
-	TypedClaims
-	// 无意义 ID
+	UserClaims
 	ID uint64 `json:"id"`
 }
 
 type MfaToken struct {
-	TypedClaims
-	// 无意义 ID
-	ID  uint64 `json:"id"`
-	UID uint   `json:"uid"`
+	UserClaims
+	ID uint64 `json:"id"`
 }
 
 type U2fToken struct {
-	TypedClaims
-	// 无意义 ID
-	ID  uint64 `json:"id"`
-	UID uint   `json:"uid"`
-	IP  string `json:"ip"`
+	UserClaims
+	ID uint64 `json:"id"`
+	IP string `json:"ip"`
 }
 
 type RefreshToken struct {
-	TypedClaims
-	UID     uint   `json:"uid"`
+	UserClaims
 	AppCode string `json:"appCode"`
 	Payload string `json:"payload,omitempty"`
 }
