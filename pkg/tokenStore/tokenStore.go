@@ -28,15 +28,16 @@ func (a TokenStore) genKey(id uint64) string {
 	return a.keyPrefix + fmt.Sprint(id)
 }
 
-func (a TokenStore) CreateStorePoint(ctx context.Context, iat time.Time, valid time.Duration, claims interface{}) (uint64, error) {
+func (a TokenStore) CreateStorePoint(ctx context.Context, valid time.Duration, claims interface{}) (uint64, error) {
 	var value []byte
 	var err error
-	value, err = json.Marshal(&StorePointData{
-		Iat:    iat.Unix(),
-		Claims: claims,
-	})
-	if err != nil {
-		return 0, err
+	if claims != nil {
+		value, err = json.Marshal(claims)
+		if err != nil {
+			return 0, err
+		}
+	} else {
+		value = []byte{'1'}
 	}
 
 	id, err := a.client.Incr(ctx, a.keyID).Uint64()
@@ -59,35 +60,29 @@ type Point struct {
 	key string
 }
 
-func (a Point) parsePoint(iat time.Time, data []byte, claims interface{}) error {
-	var parsedData StorePointData
-	parsedData.Claims = claims
-	err := json.Unmarshal(data, &parsedData)
-	if err != nil {
-		return err
-	}
-	if parsedData.Iat != iat.Unix() {
-		return redis.Nil
+func (a Point) parsePoint(data []byte, claims interface{}) error {
+	if claims != nil {
+		return json.Unmarshal(data, claims)
 	}
 	return nil
 }
 
-func (a Point) GetAndDestroy(ctx context.Context, iat time.Time, claims interface{}) error {
+func (a Point) GetAndDestroy(ctx context.Context, claims interface{}) error {
 	value, err := a.s.client.GetDel(ctx, a.key).Bytes()
 	if err != nil {
 		return err
 	}
 
-	return a.parsePoint(iat, value, claims)
+	return a.parsePoint(value, claims)
 }
 
-func (a Point) Get(ctx context.Context, iat time.Time, claims interface{}) error {
+func (a Point) Get(ctx context.Context, claims interface{}) error {
 	value, err := a.s.client.Get(ctx, a.key).Bytes()
 	if err != nil {
 		return err
 	}
 
-	return a.parsePoint(iat, value, claims)
+	return a.parsePoint(value, claims)
 }
 
 func (a Point) Destroy(ctx context.Context) error {

@@ -75,7 +75,7 @@ func GenerateLoginToken(claims LoginRedisClaims) (string, error) {
 		TypedClaims: NewTypedClaims(Login, valid),
 	}
 	var err error
-	tokenClaims.ID, err = redis.NewThirdPartyLogin().CreateStorePoint(context.Background(), tokenClaims.IssuedAt.Time, valid, claims)
+	tokenClaims.ID, err = redis.NewThirdPartyLogin().CreateStorePoint(context.Background(), valid, claims)
 	if err != nil {
 		return "", err
 	}
@@ -91,7 +91,7 @@ func ParseLoginToken(token string) (*LoginRedisClaims, bool, error) {
 	}
 
 	var redisClaims LoginRedisClaims
-	err = redis.NewThirdPartyLogin().NewStorePoint(claims.ID).GetAndDestroy(context.Background(), claims.IssuedAt.Time, &redisClaims)
+	err = redis.NewThirdPartyLogin().NewStorePoint(claims.ID).GetAndDestroy(context.Background(), &redisClaims)
 	if err != nil {
 		if err == redis.Nil {
 			err = nil
@@ -110,7 +110,7 @@ func GenerateMfaToken(claims LoginRedisClaims, mfaSecret, appCallback string) (s
 		UID:         claims.UID,
 	}
 	var err error
-	if mfaTokenClaims.ID, err = redis.NewMfaLogin(claims.UID).CreateStorePoint(context.Background(), mfaTokenClaims.IssuedAt.Time, valid, &MfaRedisClaims{
+	if mfaTokenClaims.ID, err = redis.NewMfaLogin(claims.UID).CreateStorePoint(context.Background(), valid, &MfaRedisClaims{
 		LoginRedisClaims: claims,
 		Mfa:              mfaSecret,
 		AppCallback:      appCallback,
@@ -129,7 +129,7 @@ func ParseMfaToken(token string) (*MfaRedisClaims, error) {
 	}
 
 	var redisClaims MfaRedisClaims
-	return &redisClaims, redis.NewMfaLogin(claims.UID).NewStorePoint(claims.ID).Get(context.Background(), claims.IssuedAt.Time, &redisClaims)
+	return &redisClaims, redis.NewMfaLogin(claims.UID).NewStorePoint(claims.ID).Get(context.Background(), &redisClaims)
 }
 
 // GenerateU2fToken 生成后台 U2F 身份令牌，五分钟有效
@@ -142,7 +142,7 @@ func GenerateU2fToken(uid uint, ip string) (string, *U2fToken, error) {
 		IP:          ip,
 	}
 	var err error
-	if tokenClaims.ID, err = redis.NewU2F(uid).CreateStorePoint(context.Background(), tokenClaims.IssuedAt.Time, valid, nil); err != nil {
+	if tokenClaims.ID, err = redis.NewU2F(uid).CreateStorePoint(context.Background(), valid, nil); err != nil {
 		return "", nil, err
 	}
 
@@ -156,7 +156,7 @@ func ParseU2fToken(token, ip string) (bool, error) {
 		return false, err
 	}
 
-	err = redis.NewU2F(claims.UID).NewStorePoint(claims.ID).Get(context.Background(), claims.IssuedAt.Time, nil)
+	err = redis.NewU2F(claims.UID).NewStorePoint(claims.ID).Get(context.Background(), nil)
 	if err != nil {
 		if err == redis.Nil {
 			err = nil
