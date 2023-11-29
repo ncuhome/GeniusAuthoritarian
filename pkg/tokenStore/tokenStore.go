@@ -28,7 +28,7 @@ func (a TokenStore[C]) genKey(id uint64) string {
 	return a.keyPrefix + fmt.Sprint(id)
 }
 
-func (a TokenStore[C]) CreateStorePoint(ctx context.Context, valid time.Duration, claims C) (uint64, error) {
+func (a TokenStore[C]) CreateStorePoint(ctx context.Context, valid time.Duration, claims *C) (uint64, error) {
 	var value []byte
 	var err error
 	if claims != nil {
@@ -60,14 +60,14 @@ type Point[C any] struct {
 	key string
 }
 
-func (a Point[C]) parsePoint(data []byte, claims interface{}) error {
+func (a Point[C]) parsePoint(data []byte, claims *C) error {
 	if claims != nil {
 		return json.Unmarshal(data, claims)
 	}
 	return nil
 }
 
-func (a Point[C]) GetAndDestroy(ctx context.Context, claims C) error {
+func (a Point[C]) GetAndDestroy(ctx context.Context, claims *C) error {
 	value, err := a.s.client.GetDel(ctx, a.key).Bytes()
 	if err != nil {
 		return err
@@ -76,7 +76,7 @@ func (a Point[C]) GetAndDestroy(ctx context.Context, claims C) error {
 	return a.parsePoint(value, claims)
 }
 
-func (a Point[C]) Get(ctx context.Context, claims C) error {
+func (a Point[C]) Get(ctx context.Context, claims *C) error {
 	value, err := a.s.client.Get(ctx, a.key).Bytes()
 	if err != nil {
 		return err

@@ -35,6 +35,11 @@ func (a *User) InsertAll(tx *gorm.DB, users []User) error {
 	return tx.Create(users).Error
 }
 
+func (a *User) Exist(tx *gorm.DB) (bool, error) {
+	var t bool
+	return t, tx.Model(a).Select("1").Where(a, "id").Limit(1).Find(&t).Error
+}
+
 func (a *User) FirstByID(tx *gorm.DB) error {
 	return tx.Where(a, "id").First(a).Error
 }

@@ -6,6 +6,6 @@ import (
 	"github.com/ncuhome/GeniusAuthoritarian/pkg/tokenStore"
 )
 
-func NewMfaLogin(uid uint) tokenStore.TokenStore[*jwtClaims.MfaRedis] {
-	return tokenStore.NewTokenStore[*jwtClaims.MfaRedis](Client, keyUserMfaLogin.String()+fmt.Sprint(uid)+"-")
+func NewMfaLogin(uid uint) tokenStore.TokenStore[jwtClaims.MfaRedis] {
+	return tokenStore.NewTokenStore[jwtClaims.MfaRedis](Client, keyUserMfaLogin.String()+fmt.Sprint(uid)+"-")
 }

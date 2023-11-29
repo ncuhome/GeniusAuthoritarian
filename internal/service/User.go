@@ -1,9 +1,12 @@
 package service
 
 import (
+	"context"
 	"github.com/Mmx233/daoUtil"
 	"github.com/ncuhome/GeniusAuthoritarian/internal/db/dao"
 	"github.com/ncuhome/GeniusAuthoritarian/internal/db/dto"
+	"github.com/ncuhome/GeniusAuthoritarian/internal/db/redis"
+	log "github.com/sirupsen/logrus"
 	"gorm.io/gorm"
 )
 
@@ -53,6 +56,28 @@ func (a UserSrv) UserInfoByID(id uint) (*dao.User, error) {
 		ID: id,
 	}
 	return &user, user.FirstByID(a.DB)
+}
+
+func (a UserSrv) UserIdExist(uid uint, opts ...daoUtil.ServiceOpt) (bool, error) {
+	cache := redis.NewUserJwt().NewOperator(uid)
+	exist, err0 := cache.Exist(context.Background())
+	if err0 == nil && exist {
+		return true, nil
+	}
+
+	exist, err := (&dao.User{ID: uid}).Exist(daoUtil.TxOpts(a.DB, opts...))
+	if err != nil {
+		return false, err
+	}
+
+	if exist && err0 == nil {
+		err0 = cache.Create(context.Background())
+		if err0 != nil {
+			log.Warnln("创建用户 redis operate hash 失败:", err)
+		}
+	}
+
+	return exist, nil
 }
 
 func (a UserSrv) UserProfile(id uint) (*dto.UserProfile, error) {
