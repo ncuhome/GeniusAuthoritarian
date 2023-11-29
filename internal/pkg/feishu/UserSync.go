@@ -88,6 +88,12 @@ func (a *UserSyncProcessor) Run() error {
 	// 获取飞书部门 OpenID 与基础组的映射关系
 	groupMap, err := (service.FeishuGroupsSrv{DB: a.tx}).GetGroupMap(daoUtil.LockForShare)
 
+	// 锁定 User UserGroup 表
+	err = a.tx.Exec("LOCK TABLES `users` WRITE, `user_groups` WRITE").Error
+	if err != nil {
+		return err
+	}
+
 	// 同步用户列表
 	if err = a.doSyncUsers(userList); err != nil {
 		return err
