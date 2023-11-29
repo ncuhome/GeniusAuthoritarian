@@ -13,6 +13,10 @@ func NewTokenStore(Client *redis.Client, keyPrefix string) TokenStore {
 		client:    Client,
 		keyPrefix: keyPrefix,
 		keyID:     keyPrefix + "id",
+
+		CheckClaims: func(_ interface{}) error {
+			return nil
+		},
 	}
 }
 
@@ -22,6 +26,9 @@ type TokenStore struct {
 	keyPrefix string
 	// redis ID 字段 key，用于给 token 分配不一样的 ID
 	keyID string
+
+	// 解析完成后，如果有 claims，检查 claims 是否有效
+	CheckClaims func(claims interface{}) error
 }
 
 func (a TokenStore) genKey(id uint64) string {
@@ -62,7 +69,11 @@ type Point struct {
 
 func (a Point) parsePoint(data []byte, claims interface{}) error {
 	if claims != nil {
-		return json.Unmarshal(data, claims)
+		err := json.Unmarshal(data, claims)
+		if err != nil {
+			return err
+		}
+		return a.s.CheckClaims(claims)
 	}
 	return nil
 }
