@@ -17,6 +17,7 @@ import (
 	"sort"
 	"strings"
 	"time"
+	"unsafe"
 )
 
 func RequireAppSignature(c *gin.Context) {
@@ -108,7 +109,8 @@ func RequireAppSignature(c *gin.Context) {
 	}
 
 	h := sha256.New()
-	h.Write([]byte(signBuilder.String()))
+	signStr := signBuilder.String()
+	h.Write(unsafe.Slice(unsafe.StringData(signStr), len(signStr)))
 	if header.Signature != fmt.Sprintf("%x", h.Sum(nil)) {
 		callback.Error(c, callback.ErrUnauthorized, "signature invalid")
 		return
