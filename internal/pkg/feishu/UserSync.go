@@ -11,6 +11,7 @@ import (
 	"github.com/robfig/cron/v3"
 	log "github.com/sirupsen/logrus"
 	"gorm.io/gorm"
+	"gorm.io/gorm/clause"
 	"time"
 )
 
@@ -83,19 +84,18 @@ func (a *UserSyncProcessor) Run() error {
 	}
 
 	// 开启事务，开始数据库操作
-	a.tx = dao.DB.Begin().Session(&gorm.Session{})
+	a.tx = dao.DB.Begin()
 	defer a.tx.Rollback()
 
 	// 获取飞书部门 OpenID 与基础组的映射关系
 	groupMap, err := (service.FeishuGroupsSrv{DB: a.tx}).GetGroupMap(daoUtil.LockForShare)
 
-	stmtManger, ok := a.tx.ConnPool.(*gorm.PreparedStmtDB)
-	if ok {
-		stmtManger.Close()
-	}
-
 	// 锁定 User UserGroup 表
-	err = a.tx.Exec("LOCK TABLES `users` WRITE, `user_groups` WRITE").Error
+	err = a.tx.Model(&dao.User{}).Unscoped().Clauses(clause.Locking{Strength: "UPDATE"}).Find(nil).Error
+	if err != nil {
+		return err
+	}
+	err = a.tx.Model(&dao.UserGroups{}).Clauses(clause.Locking{Strength: "UPDATE"}).Find(nil).Error
 	if err != nil {
 		return err
 	}
