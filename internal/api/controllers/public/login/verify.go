@@ -6,7 +6,6 @@ import (
 	"github.com/ncuhome/GeniusAuthoritarian/internal/api/callback"
 	"github.com/ncuhome/GeniusAuthoritarian/internal/api/models/response"
 	"github.com/ncuhome/GeniusAuthoritarian/internal/db/dao"
-	"github.com/ncuhome/GeniusAuthoritarian/internal/db/redis"
 	"github.com/ncuhome/GeniusAuthoritarian/internal/pkg/jwt"
 	"github.com/ncuhome/GeniusAuthoritarian/internal/pkg/jwt/jwtClaims"
 	"github.com/ncuhome/GeniusAuthoritarian/internal/service"
@@ -144,13 +143,8 @@ func DashboardLogin(c *gin.Context) {
 
 	var tokenValid = time.Hour * 24 * 3
 
-	token, userTokenClaims, err := jwt.GenerateUserToken(claims.UID, claims.Name, groups, tokenValid)
+	token, err := jwt.GenerateUserToken(claims.UID, claims.Name, groups, tokenValid)
 	if err != nil {
-		callback.Error(c, callback.ErrUnexpected, err)
-		return
-	}
-
-	if err = redis.NewUserToken(claims.UID).Set(userTokenClaims.IssuedAt.Time, tokenValid); err != nil {
 		callback.Error(c, callback.ErrUnexpected, err)
 		return
 	}

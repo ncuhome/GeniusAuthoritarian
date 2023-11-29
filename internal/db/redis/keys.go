@@ -17,7 +17,7 @@ const (
 	keyUserIdentityCode keys = iota
 	keyThirdPartyLogin
 	keyAppCode
-	keyUserToken
+	_keyUserToken
 	keyUserMfaLogin
 	keyMfaEnable
 	keySms

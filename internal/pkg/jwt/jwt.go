@@ -101,7 +101,7 @@ func ParseTokenAndVerify[C jwtClaims.ClaimsUser](Type, token string, target C) (
 }
 
 // GenerateUserToken 生成后台 Token
-func GenerateUserToken(uid uint, name string, groups []string, valid time.Duration) (string, *jwtClaims.UserToken, error) {
+func GenerateUserToken(uid uint, name string, groups []string, valid time.Duration) (string, error) {
 	claims := &jwtClaims.UserToken{
 		TypedClaims: NewTypedClaims(User, valid),
 		ID:          uid,
@@ -109,7 +109,7 @@ func GenerateUserToken(uid uint, name string, groups []string, valid time.Durati
 		Groups:      groups,
 	}
 	token, err := GenerateToken(claims)
-	return token, claims, err
+	return token, err
 }
 
 func ParseUserToken(token string) (*jwtClaims.UserToken, bool, error) {
