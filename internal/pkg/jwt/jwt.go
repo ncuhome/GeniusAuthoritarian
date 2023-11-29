@@ -2,10 +2,14 @@ package jwt
 
 import (
 	"context"
+	"fmt"
+	"github.com/Mmx233/daoUtil"
 	"github.com/golang-jwt/jwt/v5"
 	"github.com/ncuhome/GeniusAuthoritarian/internal/db/redis"
 	"github.com/ncuhome/GeniusAuthoritarian/internal/global"
 	"github.com/ncuhome/GeniusAuthoritarian/internal/pkg/jwt/jwtClaims"
+	"github.com/ncuhome/GeniusAuthoritarian/internal/pkg/jwt/jwtVerify"
+	"github.com/ncuhome/GeniusAuthoritarian/internal/service"
 	"time"
 )
 
@@ -31,11 +35,40 @@ func NewTypedClaims(Type string, valid time.Duration) jwtClaims.TypedClaims {
 	}
 }
 
-func NewUserClaims(uid uint, Type string, valid time.Duration) jwtClaims.UserClaims {
-	return jwtClaims.UserClaims{
-		TypedClaims: NewTypedClaims(Type, valid),
-		UID:         uid,
+func NewUserClaims(uid uint, Type string, valid time.Duration) (claims jwtClaims.UserClaims, err error) {
+	redisOperator := redis.NewUserJwt().NewOperator(uid)
+	oid, err := redisOperator.GetOperateID(context.Background())
+	if err == redis.Nil {
+		var userSrv service.UserSrv
+		userSrv, err = service.User.Begin()
+		if err != nil {
+			return
+		}
+		defer userSrv.Rollback()
+
+		// service 操作会写入 redis，不用再操作创建 hash 项
+		var exist bool
+		exist, err = userSrv.UserIdExist(uid, daoUtil.LockForShare)
+		if err != nil {
+			return
+		} else if !exist {
+			err = fmt.Errorf("user %d not exist", uid)
+			return
+		}
+
+		oid, err = redisOperator.GetOperateID(context.Background())
+		if err != nil {
+			return
+		}
+	} else if err != nil {
+		return
 	}
+
+	return jwtClaims.UserClaims{
+		TypedClaims:   NewTypedClaims(Type, valid),
+		UID:           uid,
+		UserOperateID: oid,
+	}, nil
 }
 
 func GenerateToken(claims jwtClaims.Claims) (string, error) {
@@ -56,6 +89,14 @@ func ParseToken[C jwtClaims.Claims](Type, token string, target C) (claims C, val
 
 	claims, _ = t.Claims.(C)
 	valid = t.Valid && claims.GetType() == Type
+	return
+}
+
+func ParseTokenAndVerify[C jwtClaims.ClaimsUser](Type, token string, target C) (claims C, valid bool, err error) {
+	claims, valid, err = ParseToken(Type, token, target)
+	if err == nil && valid {
+		valid, err = jwtVerify.CheckUserClaims(context.Background(), claims)
+	}
 	return
 }
 
