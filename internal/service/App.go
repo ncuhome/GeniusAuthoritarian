@@ -2,6 +2,7 @@ package service
 
 import (
 	"container/list"
+	"context"
 	"fmt"
 	"github.com/Mmx233/daoUtil"
 	"github.com/Mmx233/tool"
@@ -140,10 +141,24 @@ func (a AppSrv) FirstAppKeyPairByID(id uint) (string, string, error) {
 }
 
 func (a AppSrv) FirstAppKeyPairByAppCode(appCode string) (string, string, error) {
+	redisCache := redis.NewAppKeyPair(appCode)
+	appSecret, err0 := redisCache.Read(context.Background())
+	if err0 == nil {
+		return appCode, appSecret, nil
+	}
+
 	var t = dao.App{
 		AppCode: appCode,
 	}
-	return t.AppCode, t.AppSecret, t.FirstAppKeyPairByAppCode(a.DB)
+	err := t.FirstAppKeyPairByAppCode(a.DB)
+	if err != nil {
+		return "", "", err
+	}
+
+	if err0 == redis.Nil {
+		_ = redisCache.Cache(context.Background(), t.AppSecret)
+	}
+	return t.AppCode, t.AppSecret, nil
 }
 
 func (a AppSrv) GetUserOwnedApp(uid uint) ([]dto.AppShowDetail, error) {
