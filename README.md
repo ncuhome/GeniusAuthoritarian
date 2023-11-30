@@ -33,9 +33,9 @@
 
 ## :children_crossing: 项目子程序说明
 
-Core 程序为 standalone 程序，包含所有登录逻辑、接口和功能，支持多实例并行运行。编程时请注意对多实例并行进行兼容，善用 mysql 锁、redis 锁与 redis 订阅/发布
+Core 程序为 standalone 程序，包含所有登录逻辑、接口和功能，支持多实例并行运行。编程时请注意对多实例并行进行兼容，善用 mysql 锁、redis 锁与 redis 订阅/发布。api 为 80 端口，ssh rpc 为 81 端口，refreshToken 为 81 端口
 
-sshDev 为 ssh server（rpc client），通过 rpc 从 core 获取用户名与公钥以此建立 ssh 服务，可以部署在任意地方
+sshDev 为 ssh server（rpc client），通过 rpc 从 core 获取用户名与公钥以此建立 ssh 服务，可以部署在任意地方，ssh 端口为默认端口
 
 ## :gear: 使用
 
