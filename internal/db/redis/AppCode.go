@@ -17,10 +17,14 @@ func (a AppCodeHelper) IsEmpty() (bool, error) {
 	return num == 0, err
 }
 
+// Add
+// Deprecated: use service.App.AddAppCodeToRedis instead
 func (a AppCodeHelper) Add(data ...string) error {
 	return Client.SAdd(context.Background(), a.key, data).Err()
 }
 
+// Exist
+// Deprecated: use service.App.AppCodeExist instead
 func (a AppCodeHelper) Exist(data string) (bool, error) {
 	return Client.SIsMember(context.Background(), a.key, data).Result()
 }

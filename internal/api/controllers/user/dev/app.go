@@ -103,7 +103,7 @@ func ApplyApp(c *gin.Context) {
 		}
 	}
 
-	if err = redis.AppCode.Add(newApp.AppCode); err != nil || appSrv.Commit().Error != nil {
+	if err = appSrv.AddAppCodeToRedis(newApp.AppCode); err != nil || appSrv.Commit().Error != nil {
 		callback.Error(c, callback.ErrUnexpected, err)
 		return
 	}

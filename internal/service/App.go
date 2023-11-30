@@ -55,19 +55,33 @@ func (a AppSrv) New(uid uint, name, callback string, permitAll bool) (*dao.App, 
 	return &t, t.Insert(a.DB)
 }
 
-func (a AppSrv) AppCodeExist(appCode string) (bool, error) {
+func (a AppSrv) LoadAppCodeToRedis() error {
 	empty, err := redis.AppCode.IsEmpty()
 	if err != nil {
-		return false, err
+		return err
 	} else if empty {
 		appCodeList, err := (&dao.App{}).GetAppCode(a.DB)
 		if err != nil {
-			return false, err
+			return err
 		}
-		err = redis.AppCode.Add(appCodeList...)
-		if err != nil {
-			return false, err
-		}
+		return redis.AppCode.Add(appCodeList...)
+	}
+	return nil
+}
+
+func (a AppSrv) AddAppCodeToRedis(appCode ...string) error {
+	err := a.LoadAppCodeToRedis()
+	if err != nil {
+		return err
+	}
+
+	return redis.AppCode.Add(appCode...)
+}
+
+func (a AppSrv) AppCodeExist(appCode string) (bool, error) {
+	err := a.LoadAppCodeToRedis()
+	if err != nil {
+		return false, err
 	}
 
 	return redis.AppCode.Exist(appCode)
