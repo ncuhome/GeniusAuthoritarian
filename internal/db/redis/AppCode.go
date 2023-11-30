@@ -12,21 +12,13 @@ type AppCodeHelper struct {
 	key string
 }
 
-func (a AppCodeHelper) stringSliceToInterfaceSlice(src []string) []interface{} {
-	dist := make([]interface{}, len(src))
-	for i, s := range src {
-		dist[i] = s
-	}
-	return dist
-}
-
 func (a AppCodeHelper) IsEmpty() (bool, error) {
 	num, err := Client.SCard(context.Background(), a.key).Result()
 	return num == 0, err
 }
 
 func (a AppCodeHelper) Add(data ...string) error {
-	return Client.SAdd(context.Background(), a.key, a.stringSliceToInterfaceSlice(data)...).Err()
+	return Client.SAdd(context.Background(), a.key, data).Err()
 }
 
 func (a AppCodeHelper) Exist(data string) (bool, error) {
@@ -34,7 +26,7 @@ func (a AppCodeHelper) Exist(data string) (bool, error) {
 }
 
 func (a AppCodeHelper) Del(data ...string) error {
-	return Client.SRem(context.Background(), a.key, a.stringSliceToInterfaceSlice(data)...).Err()
+	return Client.SRem(context.Background(), a.key, data).Err()
 }
 
 func (a AppCodeHelper) Load() ([]string, error) {
