@@ -32,7 +32,7 @@ func UnaryLogger() grpc.UnaryServerInterceptor {
 		}
 
 		if err == nil {
-			log.Infof("RPC %s [%s] %s - success", info.FullMethod, remoteAddr, subTimeStr)
+			log.Debugf("RPC %s [%s] %s - success", info.FullMethod, remoteAddr, subTimeStr)
 		} else {
 			log.Warnf("RPC %s [%s] %s - with error: %s", info.FullMethod, remoteAddr, subTimeStr, err)
 		}
