@@ -1,33 +1,33 @@
 #user {
-    width: 100%;
-    height: 100%;
-    overflow-y: auto;
+  width: 100%;
+  height: 100%;
+  overflow-y: auto;
 }
 
 #user .MuiContainer-root {
-    width: 100%;
-    min-height: 100%;
-    display: flex;
-    flex-direction: column;
-    padding-bottom: 1rem;
+  width: 100%;
+  min-height: 100%;
+  display: flex;
+  flex-direction: column;
+  padding-bottom: 1rem;
 }
 
 #user .MuiContainer-root > .MuiBox-root {
-    width: 100%;
-    margin: 1rem 0;
-    box-sizing: border-box;
-    padding: 1rem;
+  width: 100%;
+  margin: 1rem 0;
+  box-sizing: border-box;
+  padding: 1rem;
 }
 
 #root #user .MuiContainer-root > .block-area {
-    margin-top: 0.8rem;
-    margin-bottom: 0;
+  margin-top: 0.8rem;
+  margin-bottom: 0;
 }
 
 #user .MuiContainer-root > .MuiBox-root:first-child {
-    margin-top: 2rem;
+  margin-top: 2rem;
 }
 
 #user .MuiContainer-root > .MuiBox-root:last-child {
-    margin-bottom: 2rem;
+  margin-bottom: 2rem;
 }

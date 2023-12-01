@@ -27,19 +27,19 @@ export default function App() {
           mode: isDarkTheme ? "dark" : undefined,
         },
       }),
-    [isDarkTheme]
+    [isDarkTheme],
   );
 
   useMount(() => {
     if (import.meta.env.MODE === "production") {
       console.log(
         atob(
-          "ICAgX19fX18gICAgICAgICAgICAgICAgICAKICAvICAgICBcICAgX19fX18gX19fICBfX18KIC8gIFwgLyAgXCAvICAgICBcXCAgXC8gIC8KLyAgICBZICAgIFwgIFkgWSAgXD4gICAgPCAKXF9fX198X18gIC9fX3xffCAgL19fL1xfIFwKICAgICAgICBcLyAgICAgIFwvICAgICAgXC8="
-        )
+          "ICAgX19fX18gICAgICAgICAgICAgICAgICAKICAvICAgICBcICAgX19fX18gX19fICBfX18KIC8gIFwgLyAgXCAvICAgICBcXCAgXC8gIC8KLyAgICBZICAgIFwgIFkgWSAgXD4gICAgPCAKXF9fX198X18gIC9fX3xffCAgL19fL1xfIFwKICAgICAgICBcLyAgICAgIFwvICAgICAgXC8=",
+        ),
       );
       console.log(
         "%c可恶，看板娘都要我自己画！！！",
-        "margin-top: 8px;font-size: 13.5px"
+        "margin-top: 8px;font-size: 13.5px",
       );
     }
   });

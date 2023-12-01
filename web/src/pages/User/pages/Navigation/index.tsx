@@ -10,7 +10,7 @@ import useUser from "@store/useUser";
 export const Navigation: FC = () => {
   const accessibleApps = useUser((state) => state.accessibleApps);
   const setAccessibleApps = useUser((state) =>
-    state.setState("accessibleApps")
+    state.setState("accessibleApps"),
   );
 
   useUserApiV1<App.Accessible>("app/accessible", {
@@ -31,7 +31,13 @@ export const Navigation: FC = () => {
               apps={item.app}
             />
           ))}
-          <AppListBlock title={"全站"} apps={accessibleApps.permitAll} />
+          <AppListBlock
+            title={"全站"}
+            apps={accessibleApps.permitAll}
+            sx={{
+              marginBottom: "1rem!important",
+            }}
+          />
         </>
       ) : null}
     </Container>
