@@ -34,7 +34,7 @@ func RefreshToken(c *gin.Context) {
 		return
 	}
 
-	accessToken, err := jwt.GenerateAccessToken(claims.UID, appCode, claims.Payload)
+	accessToken, err := jwt.GenerateAccessToken(claims.ID, claims.UID, appCode, claims.Payload)
 	if err != nil {
 		callback.Error(c, callback.ErrUnexpected, err)
 		return

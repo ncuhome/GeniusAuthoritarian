@@ -226,10 +226,10 @@ func ParseU2fToken(token, ip string) (bool, error) {
 	return true, nil
 }
 
-func GenerateRefreshToken(uid uint, appCode, payload string, valid time.Duration) (string, error) {
+func GenerateRefreshToken(uid uint, appCode, payload string, valid time.Duration) (string, *jwtClaims.RefreshToken, error) {
 	userClaims, err := NewUserClaims(uid, Refresh, valid)
 	if err != nil {
-		return "", err
+		return "", nil, err
 	}
 	claims := jwtClaims.RefreshToken{
 		UserClaims: userClaims,
@@ -238,9 +238,10 @@ func GenerateRefreshToken(uid uint, appCode, payload string, valid time.Duration
 	}
 	claims.ID, err = redis.NewRefreshToken().CreateStorePoint(context.Background(), valid, nil)
 	if err != nil {
-		return "", err
+		return "", nil, err
 	}
-	return GenerateToken(&claims)
+	token, err := GenerateToken(&claims)
+	return token, &claims, err
 }
 
 func ParseRefreshToken(token string) (*jwtClaims.RefreshToken, bool, error) {
@@ -251,7 +252,7 @@ func ParseRefreshToken(token string) (*jwtClaims.RefreshToken, bool, error) {
 	return claims, true, redis.NewRefreshToken().NewStorePoint(claims.ID).Get(context.Background(), nil)
 }
 
-func GenerateAccessToken(uid uint, appCode, payload string) (string, error) {
+func GenerateAccessToken(refreshID uint64, uid uint, appCode, payload string) (string, error) {
 	valid := time.Minute * 5
 
 	userClaims, err := NewUserClaims(uid, Access, valid)
@@ -260,6 +261,7 @@ func GenerateAccessToken(uid uint, appCode, payload string) (string, error) {
 	}
 	return GenerateToken(&jwtClaims.AccessToken{
 		RefreshToken: jwtClaims.RefreshToken{
+			ID:         refreshID,
 			UserClaims: userClaims,
 			AppCode:    appCode,
 			Payload:    payload,
@@ -268,5 +270,10 @@ func GenerateAccessToken(uid uint, appCode, payload string) (string, error) {
 }
 
 func ParseAccessToken(token string) (*jwtClaims.AccessToken, bool, error) {
-	return ParseTokenAndVerify(Access, token, &jwtClaims.AccessToken{})
+	claims, valid, err := ParseTokenAndVerify(Access, token, &jwtClaims.AccessToken{})
+	if err != nil || !valid {
+		return claims, valid, err
+	}
+	// 校验 RefreshToken 是否有效
+	return claims, true, redis.NewRefreshToken().NewStorePoint(claims.ID).Get(context.Background(), nil)
 }

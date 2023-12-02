@@ -84,13 +84,14 @@ func CompleteLogin(c *gin.Context) {
 		}
 
 		appCode := tools.GetAppCode(c)
-		res.RefreshToken, err = jwt.GenerateRefreshToken(claims.UID, appCode, f.Payload, time.Duration(f.Valid)*time.Second)
+		var refreshClaims *jwtClaims.RefreshToken
+		res.RefreshToken, refreshClaims, err = jwt.GenerateRefreshToken(claims.UID, appCode, f.Payload, time.Duration(f.Valid)*time.Second)
 		if err != nil {
 			callback.Error(c, callback.ErrUnexpected, err)
 			return
 		}
 
-		res.AccessToken, err = jwt.GenerateAccessToken(claims.UID, appCode, f.Payload)
+		res.AccessToken, err = jwt.GenerateAccessToken(refreshClaims.ID, claims.UID, appCode, f.Payload)
 	}
 
 	if err = appSrv.Commit().Error; err != nil {

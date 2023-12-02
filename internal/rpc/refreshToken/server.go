@@ -71,7 +71,7 @@ func (s *Server) RefreshToken(_ context.Context, req *refreshTokenProto.TokenReq
 		return nil, status.Error(codes.Unauthenticated, "token invalid")
 	}
 
-	accessToken, err := jwt.GenerateAccessToken(claims.UID, req.AppCode, claims.Payload)
+	accessToken, err := jwt.GenerateAccessToken(claims.ID, claims.UID, req.AppCode, claims.Payload)
 	if err != nil {
 		return nil, status.Error(codes.Internal, "generate access token failed")
 	}
