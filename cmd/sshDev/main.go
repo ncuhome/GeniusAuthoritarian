@@ -2,8 +2,8 @@ package main
 
 import (
 	"context"
-	sshDev "github.com/ncuhome/GeniusAuthoritarian/internal/rpc/sshDev/client"
-	"github.com/ncuhome/GeniusAuthoritarian/internal/rpc/sshDev/client/proto"
+	sshDev "github.com/ncuhome/GeniusAuthoritarian/internal/rpc/sshDev/sshDevClient"
+	"github.com/ncuhome/GeniusAuthoritarian/internal/rpc/sshDev/sshDevClient/proto"
 	"github.com/ncuhome/GeniusAuthoritarian/pkg/linux"
 	log "github.com/sirupsen/logrus"
 	"google.golang.org/grpc"

@@ -1,7 +1,7 @@
-package rpcModel
+package sshDevModel
 
 import (
-	"github.com/ncuhome/GeniusAuthoritarian/internal/rpc/sshDev/client/proto"
+	"github.com/ncuhome/GeniusAuthoritarian/internal/rpc/sshDev/sshDevClient/proto"
 )
 
 type SshAccountMsg struct {

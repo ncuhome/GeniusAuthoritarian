@@ -6,8 +6,8 @@ import (
 	"github.com/ncuhome/GeniusAuthoritarian/internal/api/callback"
 	"github.com/ncuhome/GeniusAuthoritarian/internal/db/dto"
 	"github.com/ncuhome/GeniusAuthoritarian/internal/db/redis"
-	"github.com/ncuhome/GeniusAuthoritarian/internal/rpc/sshDev/client/sshTool"
-	"github.com/ncuhome/GeniusAuthoritarian/internal/rpc/sshDev/rpcModel"
+	"github.com/ncuhome/GeniusAuthoritarian/internal/rpc/sshDev/sshDevClient/sshTool"
+	"github.com/ncuhome/GeniusAuthoritarian/internal/rpc/sshDev/sshDevModel"
 	"github.com/ncuhome/GeniusAuthoritarian/internal/service"
 	"github.com/ncuhome/GeniusAuthoritarian/internal/tools"
 	"github.com/ncuhome/GeniusAuthoritarian/pkg/ed25519"
@@ -61,7 +61,7 @@ func ResetSshKeyPair(c *gin.Context) {
 		return
 	}
 
-	if err = redis.PublishSshDev([]rpcModel.SshAccountMsg{
+	if err = redis.PublishSshDev([]sshDevModel.SshAccountMsg{
 		{
 			Username:  sshTool.LinuxAccountName(uid),
 			PublicKey: publicSshStr,
@@ -92,7 +92,7 @@ func ResetSshKeyPair(c *gin.Context) {
 func KillAllProcess(c *gin.Context) {
 	uid := tools.GetUserInfo(c).UID
 
-	err := redis.PublishSshDev([]rpcModel.SshAccountMsg{
+	err := redis.PublishSshDev([]sshDevModel.SshAccountMsg{
 		{
 			IsKill:   true,
 			Username: sshTool.LinuxAccountName(uid),

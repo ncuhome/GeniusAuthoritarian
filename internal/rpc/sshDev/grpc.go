@@ -1,4 +1,4 @@
-package rpc
+package sshDev
 
 import (
 	"context"
@@ -6,8 +6,8 @@ import (
 	"errors"
 	redisPkg "github.com/ncuhome/GeniusAuthoritarian/internal/db/redis"
 	"github.com/ncuhome/GeniusAuthoritarian/internal/rpc/middlewares"
-	"github.com/ncuhome/GeniusAuthoritarian/internal/rpc/sshDev/client/proto"
-	"github.com/ncuhome/GeniusAuthoritarian/internal/rpc/sshDev/rpcModel"
+	"github.com/ncuhome/GeniusAuthoritarian/internal/rpc/sshDev/sshDevClient/proto"
+	"github.com/ncuhome/GeniusAuthoritarian/internal/rpc/sshDev/sshDevModel"
 	"github.com/ncuhome/GeniusAuthoritarian/internal/service"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/codes"
@@ -62,7 +62,7 @@ func (a *SshAccounts) Watch(_ *emptypb.Empty, server proto.SshAccounts_WatchServ
 		return err
 	}
 
-	msgChannel := make(chan []rpcModel.SshAccountMsg)
+	msgChannel := make(chan []sshDevModel.SshAccountMsg)
 	go func() {
 		for {
 			msg, err := sub.ReceiveMessage(context.Background())
@@ -78,7 +78,7 @@ func (a *SshAccounts) Watch(_ *emptypb.Empty, server proto.SshAccounts_WatchServ
 			}
 
 			for _, payload := range msg.PayloadSlice {
-				var msgDecoded []rpcModel.SshAccountMsg
+				var msgDecoded []sshDevModel.SshAccountMsg
 				msgBytes := unsafe.Slice(unsafe.StringData(payload), len(payload))
 				err = json.Unmarshal(msgBytes, &msgDecoded)
 				msgChannel <- msgDecoded

@@ -11,8 +11,8 @@ import (
 	"github.com/ncuhome/GeniusAuthoritarian/internal/db/redis"
 	"github.com/ncuhome/GeniusAuthoritarian/internal/global"
 	"github.com/ncuhome/GeniusAuthoritarian/internal/pkg/feishu"
-	"github.com/ncuhome/GeniusAuthoritarian/internal/rpc/sshDev/client/sshTool"
-	"github.com/ncuhome/GeniusAuthoritarian/internal/rpc/sshDev/rpcModel"
+	"github.com/ncuhome/GeniusAuthoritarian/internal/rpc/sshDev/sshDevClient/sshTool"
+	"github.com/ncuhome/GeniusAuthoritarian/internal/rpc/sshDev/sshDevModel"
 	"github.com/ncuhome/GeniusAuthoritarian/internal/service"
 	"github.com/ncuhome/GeniusAuthoritarian/pkg/departments"
 	"github.com/ncuhome/GeniusAuthoritarian/pkg/feishuApi"
@@ -239,10 +239,10 @@ func userUpdated(c *gin.Context, logger *log.Entry, event json.RawMessage) {
 
 		// 处理研发身份变更,同步 SSH 权限
 		if (prevIsDeveloper || nowIsDeveloper) && prevIsDeveloper != nowIsDeveloper {
-			var msg rpcModel.SshAccountMsg
+			var msg sshDevModel.SshAccountMsg
 			userName := sshTool.LinuxAccountName(userModel.ID)
 			if prevIsDeveloper { // 以前是现在不是
-				msg = rpcModel.SshAccountMsg{
+				msg = sshDevModel.SshAccountMsg{
 					IsDel:    true,
 					Username: userName,
 				}
@@ -259,12 +259,12 @@ func userUpdated(c *gin.Context, logger *log.Entry, event json.RawMessage) {
 					return
 				}
 
-				msg = rpcModel.SshAccountMsg{
+				msg = sshDevModel.SshAccountMsg{
 					Username:  userName,
 					PublicKey: model.PublicSsh,
 				}
 			}
-			err = redis.PublishSshDev([]rpcModel.SshAccountMsg{msg})
+			err = redis.PublishSshDev([]sshDevModel.SshAccountMsg{msg})
 			if err != nil {
 				callback.Error(c, callback.ErrDBOperation, err)
 				return

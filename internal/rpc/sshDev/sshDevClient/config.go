@@ -1,4 +1,4 @@
-package client
+package sshDevClient
 
 import (
 	log "github.com/sirupsen/logrus"

@@ -1,7 +1,7 @@
-package client
+package sshDevClient
 
 import (
-	"github.com/ncuhome/GeniusAuthoritarian/internal/rpc/sshDev/client/proto"
+	"github.com/ncuhome/GeniusAuthoritarian/internal/rpc/sshDev/sshDevClient/proto"
 	"github.com/ncuhome/GeniusAuthoritarian/pkg/linux"
 	log "github.com/sirupsen/logrus"
 )
