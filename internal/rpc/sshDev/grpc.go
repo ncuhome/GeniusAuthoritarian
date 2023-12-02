@@ -13,17 +13,11 @@ import (
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
 	"google.golang.org/protobuf/types/known/emptypb"
-	"net"
 	"time"
 	"unsafe"
 )
 
-func Run(token, addr string) error {
-	tcpListen, err := net.Listen("tcp", addr)
-	if err != nil {
-		return err
-	}
-
+func NewRpc(token string) *grpc.Server {
 	grpcServer := grpc.NewServer(
 		grpc.ChainUnaryInterceptor(
 			middlewares.UnaryLogger(),
@@ -35,8 +29,7 @@ func Run(token, addr string) error {
 		),
 	)
 	proto.RegisterSshAccountsServer(grpcServer, &SshAccounts{})
-
-	return grpcServer.Serve(tcpListen)
+	return grpcServer
 }
 
 type SshAccounts struct {

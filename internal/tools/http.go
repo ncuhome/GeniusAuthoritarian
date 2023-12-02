@@ -1,15 +1,12 @@
 package tools
 
 import (
-	"context"
 	"errors"
 	"github.com/Mmx233/tool"
-	"github.com/gin-gonic/gin"
 	log "github.com/sirupsen/logrus"
+	"google.golang.org/grpc"
+	"net"
 	"net/http"
-	"os"
-	"os/signal"
-	"syscall"
 	"time"
 )
 
@@ -27,32 +24,30 @@ func init() {
 	}))
 }
 
-func SoftHttpSrv(E *gin.Engine) error {
-	srv := &http.Server{
-		Addr:    ":80",
-		Handler: E,
+func MustTcpListen(addr string) net.Listener {
+	tcpListen, err := net.Listen("tcp", addr)
+	if err != nil {
+		log.Fatalf("tcp listen addr %s failed: %v", addr, err)
 	}
+	return tcpListen
+}
 
-	shutdown := make(chan bool)
-	go func(srv *http.Server) {
-		quit := make(chan os.Signal)
-		signal.Notify(quit, os.Interrupt, os.Kill, syscall.SIGTERM)
-		<-quit
-		log.Infoln("Shutdown Server...")
-
-		ctx, cancel := context.WithTimeout(context.Background(), time.Second*20)
-		defer cancel()
-		e := srv.Shutdown(ctx)
-		if e != nil {
-			log.Errorln("Server Shutdown:", e)
-		}
-		close(shutdown)
-	}(srv)
-
+func RunHttpSrv(srv *http.Server) {
 	err := srv.ListenAndServe()
-	if errors.Is(err, http.ErrServerClosed) {
-		<-shutdown
-		return nil
+	if err != nil {
+		if errors.Is(err, http.ErrServerClosed) {
+			return
+		}
+		log.Fatalln("run api server failed:", err)
 	}
-	return err
+}
+
+func RunGrpcSrv(tcpListen net.Listener, srv *grpc.Server) {
+	err := srv.Serve(tcpListen)
+	if err != nil {
+		if errors.Is(err, grpc.ErrServerStopped) {
+			return
+		}
+		log.Fatalln("run rpc server failed:", err)
+	}
 }

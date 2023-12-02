@@ -15,16 +15,10 @@ import (
 	"google.golang.org/grpc/status"
 	"google.golang.org/protobuf/types/known/emptypb"
 	"gorm.io/gorm"
-	"net"
 	"unsafe"
 )
 
-func Run(addr string) error {
-	tcpListen, err := net.Listen("tcp", addr)
-	if err != nil {
-		return err
-	}
-
+func NewRpc() *grpc.Server {
 	grpcServer := grpc.NewServer(
 		grpc.ChainUnaryInterceptor(
 			middlewares.UnaryLogger(),
@@ -34,8 +28,7 @@ func Run(addr string) error {
 		),
 	)
 	refreshTokenProto.RegisterRefreshTokenServer(grpcServer, &Server{})
-
-	return grpcServer.Serve(tcpListen)
+	return grpcServer
 }
 
 type Server struct {
