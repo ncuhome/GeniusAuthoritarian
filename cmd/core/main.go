@@ -47,8 +47,8 @@ func main() {
 	refreshTokenRpc := refreshToken.NewRpc()
 
 	go tools.RunHttpSrv(httpSrv)
-	go tools.RunGrpcSrv(tools.MustTcpListen("81"), sshDevRpc)
-	go tools.RunGrpcSrv(tools.MustTcpListen("82"), refreshTokenRpc)
+	go tools.RunGrpcSrv(tools.MustTcpListen(":81"), sshDevRpc)
+	go tools.RunGrpcSrv(tools.MustTcpListen(":82"), refreshTokenRpc)
 
 	quit := make(chan os.Signal)
 	signal.Notify(quit, os.Interrupt, os.Kill, syscall.SIGTERM)
