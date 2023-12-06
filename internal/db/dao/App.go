@@ -49,7 +49,7 @@ func (a *App) sqlGetForWithGroup(tx *gorm.DB) *gorm.DB {
 	tx = tx.Model(a).Select("apps.*", "base_groups.id AS group_id", "base_groups.name as group_name")
 	tx = a.sqlJoinAppGroups(tx)
 	tx = a.sqlJoinGroups(tx)
-	return tx.Order("base_groups.id,apps.id")
+	return tx.Order("base_groups.id")
 }
 
 func (a *App) sqlOrderForNav(tx *gorm.DB) *gorm.DB {
