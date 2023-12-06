@@ -143,6 +143,7 @@ func (a *App) GetAccessible(tx *gorm.DB) ([]dto.AppShowWithGroup, error) {
 func (a *App) GetAllWithGroup(tx *gorm.DB) ([]dto.AppShowWithGroup, error) {
 	var t []dto.AppShowWithGroup
 	tx = a.sqlGetForWithGroup(tx)
+	tx = a.sqlOrderForNav(tx)
 	return t, tx.Find(&t).Error
 }
 
