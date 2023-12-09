@@ -19,6 +19,7 @@ export const NavAppCard: FC<Props> = ({ app }) => {
       onClick={() => window.open(app.callback, "_blank")}
       sx={{
         transition: "box-shadow .3s ease-in-out",
+        minHeight: "100%",
       }}
     >
       <CardContent
