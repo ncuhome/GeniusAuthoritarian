@@ -147,9 +147,9 @@ export const LoginForm: FC = () => {
                 <Typography
                   variant={"h6"}
                   sx={{
+                    textWrap: "nowrap",
                     "&,&>h6": {
                       letterSpacing: "1px",
-                      textWrap: "balance",
                     },
                   }}
                 >
@@ -157,6 +157,9 @@ export const LoginForm: FC = () => {
                     variant={"h6"}
                     fontWeight={"bold"}
                     display={"inline"}
+                    sx={{
+                      textWrap: "balance",
+                    }}
                   >
                     {appInfo.name}
                   </Typography>
