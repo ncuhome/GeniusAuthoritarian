@@ -3,6 +3,7 @@ package controllers
 import (
 	"bytes"
 	"encoding/base64"
+	"errors"
 	"github.com/Mmx233/daoUtil"
 	"github.com/gin-gonic/gin"
 	"github.com/ncuhome/GeniusAuthoritarian/internal/api/callback"
@@ -77,7 +78,7 @@ func MfaAddCheck(c *gin.Context) {
 	mfaEnableRedis := redis.NewMfaEnable(uid)
 	mfaSecret, err := mfaEnableRedis.Get()
 	if err != nil {
-		if err == redis.Nil {
+		if errors.Is(err, redis.Nil) {
 			callback.Error(c, callback.ErrMfaAddExpired)
 			return
 		}
@@ -106,7 +107,7 @@ func MfaAddCheck(c *gin.Context) {
 		return
 	}
 
-	if err = mfaEnableRedis.Del(); err != nil && err != redis.Nil {
+	if err = mfaEnableRedis.Del(); err != nil && !errors.Is(err, redis.Nil) {
 		callback.Error(c, callback.ErrUnexpected, err)
 		return
 	}

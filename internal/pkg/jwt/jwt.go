@@ -2,6 +2,7 @@ package jwt
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"github.com/Mmx233/daoUtil"
 	"github.com/golang-jwt/jwt/v5"
@@ -38,7 +39,7 @@ func NewTypedClaims(Type string, valid time.Duration) jwtClaims.TypedClaims {
 func NewUserClaims(uid uint, Type string, valid time.Duration) (claims jwtClaims.UserClaims, err error) {
 	redisOperator := redis.NewUserJwt().NewOperator(uid)
 	oid, err := redisOperator.GetOperateID(context.Background())
-	if err == redis.Nil {
+	if errors.Is(err, redis.Nil) {
 		var userSrv service.UserSrv
 		userSrv, err = service.User.Begin()
 		if err != nil {
@@ -149,7 +150,7 @@ func ParseLoginToken(token string) (*jwtClaims.LoginRedis, bool, error) {
 	var redisClaims jwtClaims.LoginRedis
 	err = redis.NewThirdPartyLogin().NewStorePoint(claims.ID).GetAndDestroy(context.Background(), &redisClaims)
 	if err != nil {
-		if err == redis.Nil {
+		if errors.Is(err, redis.Nil) {
 			err = nil
 		}
 		return nil, false, err
@@ -218,7 +219,7 @@ func ParseU2fToken(token, ip string) (bool, error) {
 
 	err = redis.NewU2F().NewStorePoint(claims.ID).Get(context.Background(), nil)
 	if err != nil {
-		if err == redis.Nil {
+		if errors.Is(err, redis.Nil) {
 			err = nil
 		}
 		return false, err

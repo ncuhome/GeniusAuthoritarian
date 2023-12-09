@@ -2,6 +2,7 @@ package redis
 
 import (
 	"context"
+	"errors"
 	"time"
 )
 
@@ -21,7 +22,7 @@ func (a Sms) TryLock() (bool, error) {
 
 func (a Sms) IsLocked() (bool, error) {
 	err := Client.Get(context.Background(), a.key).Err()
-	if err == Nil {
+	if errors.Is(err, Nil) {
 		return false, nil
 	}
 	return err == nil, err

@@ -36,6 +36,7 @@ apiV1User.interceptors.request.use((req) => {
   }
   return req;
 }, undefined);
+
 apiV1User.interceptors.response.use(undefined, (err: ApiError<void>) => {
   console.log(err);
   if (err.response?.status === 401) {

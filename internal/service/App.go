@@ -3,6 +3,7 @@ package service
 import (
 	"container/list"
 	"context"
+	"errors"
 	"fmt"
 	"github.com/Mmx233/daoUtil"
 	"github.com/Mmx233/tool"
@@ -169,7 +170,7 @@ func (a AppSrv) FirstAppKeyPairByAppCode(appCode string) (string, string, error)
 		return "", "", err
 	}
 
-	if err0 == redis.Nil {
+	if errors.Is(err0, redis.Nil) {
 		_ = redisCache.Cache(context.Background(), t.AppSecret)
 	}
 	return t.AppCode, t.AppSecret, nil

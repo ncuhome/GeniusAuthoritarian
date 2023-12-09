@@ -67,7 +67,7 @@ func (a *SyncStat) SetSuccess(ctx context.Context, expire time.Duration) error {
 
 func (a *SyncStat) Succeed(ctx context.Context) (bool, error) {
 	err := Client.Get(ctx, a.key).Err()
-	if err == redis.Nil {
+	if errors.Is(err, redis.Nil) {
 		return false, nil
 	}
 	return true, err

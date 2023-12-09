@@ -2,6 +2,7 @@ package controllers
 
 import (
 	"context"
+	"errors"
 	"github.com/gin-gonic/gin"
 	"github.com/go-webauthn/webauthn/protocol"
 	"github.com/go-webauthn/webauthn/webauthn"
@@ -54,7 +55,7 @@ func FinishPasskeyRegistration(c *gin.Context) {
 	err := redis.NewPasskey(c.ClientIP()).NewUser(uid).
 		ReadSession(context.Background(), &session)
 	if err != nil {
-		if err == redis.Nil {
+		if errors.Is(err, redis.Nil) {
 			callback.Error(c, callback.ErrLoginSessionExpired)
 			return
 		}

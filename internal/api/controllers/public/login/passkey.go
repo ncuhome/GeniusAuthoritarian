@@ -56,7 +56,7 @@ func FinishPasskeyLogin(c *gin.Context) {
 	err = redis.NewPasskey(c.ClientIP()).
 		ReadSession(context.Background(), &sessionData)
 	if err != nil {
-		if err == redis.Nil {
+		if errors.Is(err, redis.Nil) {
 			callback.Error(c, callback.ErrLoginSessionExpired)
 			return
 		}

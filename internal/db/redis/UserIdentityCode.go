@@ -2,6 +2,7 @@ package redis
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"github.com/Mmx233/tool"
 	"math/rand"
@@ -29,7 +30,7 @@ func (a UserIdentityCode) New() (string, error) {
 func (a UserIdentityCode) VerifyAndDestroy(code string) (bool, error) {
 	rCode, err := Client.Get(context.Background(), a.key).Result()
 	if err != nil {
-		if err == Nil {
+		if errors.Is(err, Nil) {
 			err = nil
 		}
 		return false, err
