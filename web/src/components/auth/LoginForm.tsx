@@ -146,12 +146,22 @@ export const LoginForm: FC = () => {
               >
                 <Typography
                   variant={"h6"}
-                  fontWeight={"bold"}
-                  letterSpacing={"1px"}
+                  sx={{
+                    "&,&>h6": {
+                      letterSpacing: "1px",
+                      textWrap: "balance",
+                    },
+                  }}
                 >
-                  {appInfo.name}
+                  <Typography
+                    variant={"h6"}
+                    fontWeight={"bold"}
+                    display={"inline"}
+                  >
+                    {appInfo.name}
+                  </Typography>
+                  {` 请求登录你的帐号`}
                 </Typography>
-                <Typography variant={"h6"}>{` 请求登录你的帐号`}</Typography>
               </Stack>
               <Typography
                 variant={"subtitle1"}
