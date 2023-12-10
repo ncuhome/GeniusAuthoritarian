@@ -8,7 +8,33 @@ const __dirname = resolve();
 
 // https://vitejs.dev/config/
 export default defineConfig({
-  plugins: [react(), legacy()],
+  plugins: [
+    react({
+      babel: {
+        plugins: [
+          [
+            "babel-plugin-import",
+            {
+              libraryName: "@mui/material",
+              libraryDirectory: "",
+              camel2DashComponentName: false,
+            },
+            "core",
+          ],
+          [
+            "babel-plugin-import",
+            {
+              libraryName: "@mui/icons-material",
+              libraryDirectory: "",
+              camel2DashComponentName: false,
+            },
+            "icons",
+          ],
+        ],
+      },
+    }),
+    legacy(),
+  ],
   resolve: {
     alias: {
       "@": resolve(__dirname, "src"),
