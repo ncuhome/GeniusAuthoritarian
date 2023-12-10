@@ -1,24 +1,22 @@
-import { defineConfig } from 'vite'
-import react from '@vitejs/plugin-react'
-import legacy from '@vitejs/plugin-legacy'
-import * as path from "path";
+import { defineConfig } from "vite";
+import react from "@vitejs/plugin-react";
+import legacy from "@vitejs/plugin-legacy";
 
-const __dirname = path.resolve();
+import { resolve } from "path";
+
+const __dirname = resolve();
 
 // https://vitejs.dev/config/
 export default defineConfig({
-  plugins: [
-    react(),
-    legacy(),
-  ],
+  plugins: [react(), legacy()],
   resolve: {
     alias: {
-        "@": path.resolve(__dirname, "src"),
-        "@components": path.resolve(__dirname, "src/components"),
-        "@hooks": path.resolve(__dirname, "src/hooks"),
-        "@api": path.resolve(__dirname, "src/network/api"),
-        "@util": path.resolve(__dirname, "src/util"),
-        "@store": path.resolve(__dirname, "src/store"),
-    }
-  }
-})
+      "@": resolve(__dirname, "src"),
+      "@components": resolve(__dirname, "src/components"),
+      "@hooks": resolve(__dirname, "src/hooks"),
+      "@api": resolve(__dirname, "src/network/api"),
+      "@util": resolve(__dirname, "src/util"),
+      "@store": resolve(__dirname, "src/store"),
+    },
+  },
+});
