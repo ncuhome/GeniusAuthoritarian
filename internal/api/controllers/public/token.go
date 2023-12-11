@@ -7,6 +7,7 @@ import (
 	"github.com/ncuhome/GeniusAuthoritarian/internal/api/models/response"
 	"github.com/ncuhome/GeniusAuthoritarian/internal/db/redis"
 	"github.com/ncuhome/GeniusAuthoritarian/internal/pkg/jwt"
+	"github.com/ncuhome/GeniusAuthoritarian/internal/service"
 	"github.com/ncuhome/GeniusAuthoritarian/internal/tools"
 )
 
@@ -78,5 +79,27 @@ func VerifyAccessToken(c *gin.Context) {
 	callback.Success(c, &response.VerifyAccessToken{
 		UID:     claims.UID,
 		Payload: claims.Payload,
+	})
+}
+
+func GetUserInfo(c *gin.Context) {
+	claims := tools.GetAccessClaims(c)
+	user, err := service.User.UserInfoByID(claims.UID)
+	if err != nil {
+		callback.Error(c, callback.ErrDBOperation, err)
+		return
+	}
+
+	groups, err := service.UserGroups.GetNamesForUser(claims.UID)
+	if err != nil {
+		callback.Error(c, callback.ErrDBOperation, err)
+		return
+	}
+
+	callback.Success(c, gin.H{
+		"userID":    user.ID,
+		"name":      user.Name,
+		"groups":    groups,
+		"avatarUrl": user.AvatarUrl,
 	})
 }
