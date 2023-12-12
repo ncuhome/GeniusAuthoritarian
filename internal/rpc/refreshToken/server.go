@@ -110,3 +110,32 @@ func (s *Server) VerifyAccessToken(_ context.Context, req *refreshTokenProto.Tok
 		Payload: claims.Payload,
 	}, nil
 }
+
+func (s *Server) GetUserInfo(_ context.Context, req *refreshTokenProto.TokenRequest) (*refreshTokenProto.UserInfo, error) {
+	err := s.CheckSignature(req)
+	if err != nil {
+		return nil, err
+	}
+
+	claims, valid, err := jwt.ParseAccessToken(req.Token)
+	if err != nil || !valid {
+		return nil, status.Error(codes.Unauthenticated, "token invalid")
+	}
+
+	user, err := service.User.UserInfoByID(claims.UID)
+	if err != nil {
+		return nil, status.Error(codes.Internal, "database error")
+	}
+
+	groups, err := service.UserGroups.GetNamesForUser(user.ID)
+	if err != nil {
+		return nil, status.Error(codes.Internal, "database error")
+	}
+
+	return &refreshTokenProto.UserInfo{
+		Uid:       uint64(user.ID),
+		Name:      user.Name,
+		AvatarUrl: user.AvatarUrl,
+		Groups:    groups,
+	}, nil
+}
