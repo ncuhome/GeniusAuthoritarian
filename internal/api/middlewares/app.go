@@ -67,7 +67,8 @@ func RequireAppSignature(c *gin.Context) {
 		}
 	}
 
-	if time.Now().Sub(time.Unix(header.TimeStamp, 0)) > time.Minute*5 {
+	timeStampSub := time.Now().Sub(time.Unix(header.TimeStamp, 0))
+	if timeStampSub > time.Minute*5 || timeStampSub < 0 {
 		callback.Error(c, callback.ErrSignatureExpired)
 		return
 	}
