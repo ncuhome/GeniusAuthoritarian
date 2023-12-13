@@ -5,13 +5,13 @@ import logo_webp from "@/assets/img/logo-white.webp";
 
 import bkg from "@/assets/img/bkg.png";
 import bgk_2910230214 from "@/assets/img/bkg_2910230214.png";
-import bgk_627660024 from "@/assets/img/bgk_627660024.png";
-import bgk_627660022 from "@/assets/img/bgk_627660022.png";
+import bgk_627660024 from "@/assets/img/bkg_627660024.png";
+import bgk_627660022 from "@/assets/img/bkg_627660022.png";
 
-import bgk_webp from "@/assets/img/bkg.webp";
-import bgk_2910230214_webp from "@/assets/img/bkg_2910230214.webp";
-import bgk_627660024_webp from "@/assets/img/bgk_627660024.webp";
-import bgk_627660022_webp from "@/assets/img/bgk_627660022.webp";
+import bgk_webp from "../../assets/img/login/bkg/bkg.webp";
+import bgk_2910230214_webp from "../../assets/img/login/bkg/bkg_2910230214.webp";
+import bgk_627660024_webp from "../../assets/img/login/bkg/bkg_627660024.webp";
+import bgk_627660022_webp from "../../assets/img/login/bkg/bkg_627660022.webp";
 
 import { Stack, Box, Paper } from "@mui/material";
 
