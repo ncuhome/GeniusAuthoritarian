@@ -1,14 +1,17 @@
 import { FC, useMemo } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
+import "./style.css";
 
 import img_png from "@/assets/img/error/img_20231213.png";
 import img_webp from "@/assets/img/error/img_20231213.webp";
 
+import { useTheme } from "@mui/material";
 import { Box, Stack, Typography, ButtonGroup, Button } from "@mui/material";
 
 import { GoLogin } from "@util/nav";
 
 export const Error: FC = () => {
+  const theme = useTheme();
   const nav = useNavigate();
   const loc = useLocation();
   const state: ErrorState | undefined = useMemo(() => loc.state, [loc]);
@@ -54,16 +57,20 @@ export const Error: FC = () => {
         </Box>
 
         <Stack alignItems={{ xs: "center", sm: "baseline" }}>
-          <Typography
-            variant={"h1"}
-            fontWeight={"bolder"}
-            letterSpacing={"0.2rem"}
-            mb={4}
-            color={"text.secondary"}
-            display={{ xs: "none", sm: "block" }}
+          <Box
+            className={"ops"}
+            sx={{
+              display: { xs: "none", sm: "block" },
+              color: "text.secondary",
+              mb: 2,
+              "&>h1:nth-of-type(1)": {
+                WebkitTextStroke: `2px ${theme.palette.text.secondary}`,
+              },
+            }}
           >
-            OPS!
-          </Typography>
+            <Typography variant={"h1"}>OPS!</Typography>
+            <Typography variant={"h1"}>OPS!</Typography>
+          </Box>
 
           <Stack px={0.7}>
             <Typography
