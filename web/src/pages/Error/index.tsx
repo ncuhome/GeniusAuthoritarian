@@ -58,18 +58,18 @@ export const Error: FC = () => {
 
         <Stack alignItems={{ xs: "center", sm: "baseline" }}>
           <Box
-            className={"ops"}
+            className={"oops"}
             sx={{
               display: { xs: "none", sm: "block" },
               color: "text.secondary",
-              mb: 2,
+              mb: 3.5,
               "&>h1:nth-of-type(1)": {
                 WebkitTextStroke: `2px ${theme.palette.text.secondary}`,
               },
             }}
           >
-            <Typography variant={"h1"}>OPS!</Typography>
-            <Typography variant={"h1"}>OPS!</Typography>
+            <Typography variant={"h1"}>Oops!</Typography>
+            <Typography variant={"h1"}>Oops!</Typography>
           </Box>
 
           <Stack px={0.7} alignItems={"inherit"}>

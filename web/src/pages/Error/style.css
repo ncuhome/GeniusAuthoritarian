@@ -1,17 +1,18 @@
-.ops {
+.oops {
     position: relative;
 }
 
-.ops h1 {
+.oops h1 {
     font-weight: bolder;
     letter-spacing: 0.2rem;
+    font-size: 4.6rem;
 }
 
-.ops h1:nth-of-type(1) {
+.oops h1:nth-of-type(1) {
     color: transparent;
 }
 
-.ops h1:nth-of-type(2) {
+.oops h1:nth-of-type(2) {
     top: 0;
     position: absolute;
     animation: wave 10s ease-in-out infinite;
