@@ -72,7 +72,7 @@ export const Error: FC = () => {
             <Typography variant={"h1"}>OPS!</Typography>
           </Box>
 
-          <Stack px={0.7}>
+          <Stack px={0.7} alignItems={"inherit"}>
             <Typography
               variant={"h4"}
               fontWeight={"bold"}
@@ -84,7 +84,6 @@ export const Error: FC = () => {
             {state?.content ? (
               <Typography
                 sx={{
-                  color: "#999",
                   wordBreak: "break-all",
                 }}
               >
@@ -93,7 +92,7 @@ export const Error: FC = () => {
             ) : undefined}
           </Stack>
 
-          <Box mt={1.5}>
+          <Box mt={2}>
             <ButtonGroup
               variant="text"
               sx={{
