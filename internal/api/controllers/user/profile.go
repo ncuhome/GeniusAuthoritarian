@@ -19,8 +19,16 @@ func ProfileData(c *gin.Context) {
 		callback.Error(c, callback.ErrDBOperation, err)
 		return
 	}
+	onlineLogin, err := service.LoginRecord.UserOnline(uid)
+	if err != nil {
+		callback.Error(c, callback.ErrDBOperation, err)
+		return
+	}
 	callback.Success(c, gin.H{
-		"user":        profile,
-		"loginRecord": loginRecord,
+		"user": profile,
+		"loginRecord": gin.H{
+			"online":  onlineLogin,
+			"history": loginRecord,
+		},
 	})
 }

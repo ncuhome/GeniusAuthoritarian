@@ -1,8 +1,11 @@
 package service
 
 import (
+	"context"
+	"errors"
 	"github.com/ncuhome/GeniusAuthoritarian/internal/db/dao"
 	"github.com/ncuhome/GeniusAuthoritarian/internal/db/dto"
+	"github.com/ncuhome/GeniusAuthoritarian/internal/db/redis"
 	"gorm.io/gorm"
 	"time"
 )
@@ -39,6 +42,39 @@ func (a LoginRecordSrv) UserHistory(uid uint, limit int) ([]dto.LoginRecord, err
 	return (&dao.LoginRecord{
 		UID: uid,
 	}).GetByUID(a.DB, limit)
+}
+
+func (a LoginRecordSrv) UserOnline(uid uint) ([]dto.LoginRecord, error) {
+	validRecords, err := (&dao.LoginRecord{UID: uid}).GetValidForUser(a.DB)
+	if err != nil {
+		return nil, err
+	}
+
+	var _redis = redis.NewRecordedToken()
+	var validCount int
+	ctx, cancel := context.WithTimeout(context.Background(), time.Second*10)
+	defer cancel()
+	for i, record := range validRecords {
+		err = _redis.NewStorePoint(uint64(record.ID)).Get(ctx, nil)
+		if err != nil {
+			if errors.Is(err, redis.Nil) {
+				validRecords[i].ID = 0
+				continue
+			}
+			return nil, err
+		}
+		validCount++
+	}
+
+	var result = make([]dto.LoginRecord, validCount)
+	if validCount != 0 {
+		for i, record := range validRecords {
+			if record.ID != 0 {
+				result[i] = record
+			}
+		}
+	}
+	return result, nil
 }
 
 func (a LoginRecordSrv) GetViewIDs(aid, startAt uint) ([]uint, error) {
