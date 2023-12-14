@@ -1,21 +1,19 @@
 import { FC, useMemo } from "react";
-import { Tooltip, Typography } from "@mui/material";
+import { Typography } from "@mui/material";
 
 interface Props {
   ip: string;
 }
 
 export const Ip: FC<Props> = ({ ip }) => {
-  const highLight = useMemo(() => ip.indexOf("10.") !== 0, [ip]);
+  const notSchoolNet = useMemo(() => ip.indexOf("10.") !== 0, [ip]);
 
-  return highLight ? (
-    <Tooltip title={"非校园网登录"} placement={"top"} arrow>
-      <Typography variant={"body2"} component={"span"} color={"warning.light"}>
-        {ip}
-      </Typography>
-    </Tooltip>
+  return notSchoolNet ? (
+    <Typography variant={"body2"} component={"span"} color={"warning.light"}>
+      {ip}
+    </Typography>
   ) : (
-    <span>{ip}</span>
+    <span>校园网</span>
   );
 };
-export default Ip
+export default Ip;
