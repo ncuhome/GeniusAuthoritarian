@@ -3,6 +3,7 @@ package service
 import (
 	"context"
 	"errors"
+	"github.com/Mmx233/daoUtil"
 	"github.com/ncuhome/GeniusAuthoritarian/internal/db/dao"
 	"github.com/ncuhome/GeniusAuthoritarian/internal/db/dto"
 	"github.com/ncuhome/GeniusAuthoritarian/internal/db/redis"
@@ -75,6 +76,13 @@ func (a LoginRecordSrv) UserOnline(uid uint) ([]dto.LoginRecord, error) {
 		}
 	}
 	return result, nil
+}
+
+func (a LoginRecordSrv) OnlineRecordExist(uid, id uint, opts ...daoUtil.ServiceOpt) (bool, error) {
+	return (&dao.LoginRecord{
+		ID:  id,
+		UID: uid,
+	}).ValidExist(daoUtil.TxOpts(a.DB, opts...))
 }
 
 func (a LoginRecordSrv) GetViewIDs(aid, startAt uint) ([]uint, error) {

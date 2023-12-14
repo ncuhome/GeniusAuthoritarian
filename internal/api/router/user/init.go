@@ -13,6 +13,7 @@ func Router(G *gin.RouterGroup) {
 	G.Use(middlewares.UserAuth)
 
 	G.POST("logout", controllers.Logout)
+	G.PATCH("logout", middlewares.RequireU2F, controllers.LogoutDevice)
 
 	routerProfile(G.Group("profile"))
 	routerApp(G.Group("app"))

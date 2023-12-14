@@ -32,6 +32,7 @@ const (
 	cErrU2fTokenExpired
 	cErrPasskeyVerifyFailed
 	cErrTokenInvalid
+	cErrTargetDeviceOffline
 )
 
 var (
@@ -189,5 +190,10 @@ var (
 		Code:       cErrTokenInvalid,
 		Msg:        "身份令牌无效或已过期",
 		HttpStatus: 403,
+	}
+	ErrTargetDeviceOffline = &Msg{
+		Code:       cErrTargetDeviceOffline,
+		Msg:        "目标设备不在线",
+		HttpStatus: 404,
 	}
 )

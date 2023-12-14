@@ -29,11 +29,15 @@ func (a *LoginRecord) sqlJoinApps(tx *gorm.DB) *gorm.DB {
 	return tx.Joins("LEFT JOIN apps ON apps.id=login_records.aid")
 }
 
-func (a *LoginRecord) sqlGeByUID(tx *gorm.DB) *gorm.DB {
-	tx = tx.Model(a).Where(a, "UID").Select("login_records.*,IFNULL(apps.name,?) as target", global.ThisAppName)
+func (a *LoginRecord) sqlGetByUID(tx *gorm.DB) *gorm.DB {
+	tx = tx.Model(a).Where(a, "uid").Select("login_records.*,IFNULL(apps.name,?) as target", global.ThisAppName)
 	tx = a.sqlJoinApps(tx)
 	tx = tx.Order("login_records.id DESC")
 	return tx
+}
+
+func (a *LoginRecord) sqlLoginValid(tx *gorm.DB) *gorm.DB {
+	return tx.Where("login_records.valid_before>? AND NOT destroyed=1", time.Now().Unix())
 }
 
 func (a *LoginRecord) Insert(tx *gorm.DB) error {
@@ -42,14 +46,22 @@ func (a *LoginRecord) Insert(tx *gorm.DB) error {
 
 func (a *LoginRecord) GetByUID(tx *gorm.DB, limit int) ([]dto.LoginRecord, error) {
 	var t = make([]dto.LoginRecord, 0)
-	tx = a.sqlGeByUID(tx).Limit(limit)
+	tx = a.sqlGetByUID(tx).Limit(limit)
 	return t, tx.Find(&t).Error
 }
 
 func (a *LoginRecord) GetValidForUser(tx *gorm.DB) ([]dto.LoginRecord, error) {
 	var t = make([]dto.LoginRecord, 0)
-	tx = a.sqlGeByUID(tx)
-	tx = tx.Where("login_records.valid_before>? AND NOT destroyed=1", time.Now().Unix())
+	tx = a.sqlGetByUID(tx)
+	tx = a.sqlLoginValid(tx)
+	return t, tx.Find(&t).Error
+}
+
+func (a *LoginRecord) ValidExist(tx *gorm.DB) (bool, error) {
+	var t bool
+	tx = a.sqlGetByUID(tx)
+	tx = a.sqlLoginValid(tx)
+	tx = tx.Where(a, "id").Limit(1)
 	return t, tx.Find(&t).Error
 }
 
