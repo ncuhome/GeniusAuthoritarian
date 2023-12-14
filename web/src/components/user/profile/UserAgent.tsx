@@ -30,6 +30,12 @@ const UserAgent: FC<Props> = ({ useragent }) => {
         name += ua.os.version;
       }
     }
+    if (ua.device.model) {
+      name += ` ${ua.device.model}`;
+    }
+    if (ua.device.vendor) {
+      name += ` ${ua.device.vendor}`;
+    }
 
     let icon: ReactNode;
     switch (ua.device.type) {
@@ -45,7 +51,7 @@ const UserAgent: FC<Props> = ({ useragent }) => {
 
     return (
       <>
-        {icon} <Typography>{name}</Typography>
+        {icon} <Typography mr={0}>{name}</Typography>
       </>
     );
   };
@@ -73,7 +79,7 @@ const UserAgent: FC<Props> = ({ useragent }) => {
 
     return (
       <>
-        {icon} <Typography mr={0}>{ua.browser.name}</Typography>
+        {icon} <Typography>{ua.browser.name}</Typography>
       </>
     );
   };
@@ -88,8 +94,8 @@ const UserAgent: FC<Props> = ({ useragent }) => {
         },
       }}
     >
-      {renderDevice()}
       {renderBrowser()}
+      {renderDevice()}
     </Stack>
   );
 };
