@@ -9,10 +9,16 @@ import (
 type LoginRecord struct {
 	ID        uint `gorm:"primarykey"`
 	CreatedAt int64
+
+	Destroyed   bool   `gorm:"index;comment:用于加速查询，不能用于销毁登录状态"`
+	ValidBefore uint64 `gorm:"index"`
+
+	IP        string
+	Useragent string
+
 	// User.ID
 	UID  uint  `gorm:"not null;index;column:uid"`
 	User *User `gorm:"foreignKey:UID;constraint:OnDelete:CASCADE"`
-	IP   string
 	// App.ID 为 null 或 0 表示登录的是后台
 	AID *uint `gorm:"column:aid;index"`
 	App *App  `gorm:"foreignKey:AID;constraint:OnDelete:CASCADE"`
