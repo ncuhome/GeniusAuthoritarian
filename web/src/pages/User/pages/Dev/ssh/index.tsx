@@ -140,7 +140,7 @@ const Ssh: FC = () => {
               sshKey
                 ? { transition: "filter 0.25s" }
                 : {
-                    filter: "blur(4.5px)",
+                    filter: "blur(6px)",
                   }
             }
           />
@@ -176,7 +176,6 @@ const Ssh: FC = () => {
 
               <LoadingButton
                 variant={"contained"}
-                color={"secondary"}
                 loading={isUnlockLoading}
                 onClick={onShowSshKeys}
                 startIcon={<Fingerprint />}
