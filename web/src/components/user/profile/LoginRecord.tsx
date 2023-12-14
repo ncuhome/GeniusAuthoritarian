@@ -30,11 +30,12 @@ export const LoginRecord: FC<Props> = ({ records }) => {
             <TableCell>时间</TableCell>
             <TableCell>站点</TableCell>
             <TableCell>IP 地址</TableCell>
+            <TableCell>设备</TableCell>
           </TableRow>
         </TableHead>
         <TableBody>
           {records.map((record) => (
-            <LoginRecordItem {...record} />
+            <LoginRecordItem key={record.id} {...record} />
           ))}
         </TableBody>
       </Table>

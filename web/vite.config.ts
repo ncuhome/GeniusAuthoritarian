@@ -14,7 +14,9 @@ export default defineConfig({
         plugins: [
           [
             "babel-plugin-direct-import",
-            { modules: ["@mui/material", "@mui/icons-material"] },
+            {
+              modules: ["@mui/material", "@mui/icons-material", "react-icons"],
+            },
           ],
         ],
       },

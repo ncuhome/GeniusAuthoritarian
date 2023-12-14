@@ -2,6 +2,7 @@ import { memo } from "react";
 import { unix } from "dayjs";
 
 import Ip from "./Ip";
+import UserAgent from "./UserAgent";
 import { TableCell, TableRow } from "@mui/material";
 
 interface Props extends User.LoginRecord {}
@@ -17,9 +18,14 @@ export const LoginRecordItem = memo<Props>(
         <TableCell>
           <Ip ip={record.ip} />
         </TableCell>
+        <TableCell>
+          {record.useragent ? (
+            <UserAgent useragent={record.useragent} />
+          ) : undefined}
+        </TableCell>
       </TableRow>
     );
   },
-  (prev, next) => prev.id === next.id,
+  () => true,
 );
 export default LoginRecordItem;

@@ -24,10 +24,12 @@
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
     "react-hot-toast": "^2.4.1",
+    "react-icons": "^4.12.0",
     "react-router-dom": "^6.20.1",
     "react-transition-group": "^4.4.5",
     "sass": "^1.69.5",
     "swr": "^2.2.4",
+    "ua-parser-js": "^1.0.37",
     "zustand": "^4.4.7"
   },
   "devDependencies": {
@@ -35,6 +37,7 @@
     "@types/react": "^18.2.43",
     "@types/react-dom": "^18.2.17",
     "@types/react-transition-group": "^4.4.10",
+    "@types/ua-parser-js": "^0.7.39",
     "@vitejs/plugin-legacy": "^5.2.0",
     "@vitejs/plugin-react": "^4.2.1",
     "babel-plugin-direct-import": "^1.0.0",
