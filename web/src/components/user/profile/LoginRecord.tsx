@@ -27,8 +27,8 @@ export const LoginRecord: FC<Props> = ({ records }) => {
       <Table>
         <TableHead>
           <TableRow>
-            <TableCell>时间</TableCell>
-            <TableCell>站点</TableCell>
+            <TableCell>登录时间</TableCell>
+            <TableCell>应用</TableCell>
             <TableCell>地址</TableCell>
             <TableCell>设备</TableCell>
           </TableRow>

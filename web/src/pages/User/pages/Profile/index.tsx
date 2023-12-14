@@ -5,6 +5,8 @@ import Block from "@components/user/Block";
 import ChildBlock from "@components/user/ChildBlock";
 import Mfa from "@components/user/profile/Mfa";
 import Passkey from "@components/user/profile/Passkey";
+import LoginRecord from "@components/user/profile/LoginRecord";
+import OnlineDevice from "@components/user/profile/OnlineDevice";
 import {
   Container,
   Skeleton,
@@ -22,7 +24,6 @@ import { useUserApiV1 } from "@api/v1/user/hook";
 
 import useUser from "@store/useUser";
 import { apiV1User } from "@api/v1/user/base";
-import LoginRecord from "@components/user/profile/LoginRecord";
 
 const u2fMethods: {
   label: string;
@@ -194,9 +195,15 @@ export const Profile: FC = () => {
         </ChildBlock>
       </Block>
 
-      {profile && profile.loginRecord.length ? (
+      {profile && profile.loginRecord.online.length ? (
+        <Block title={"Online"} subtitle={"在线设备"}>
+          <OnlineDevice records={profile.loginRecord.online} />
+        </Block>
+      ) : undefined}
+
+      {profile && profile.loginRecord.history.length ? (
         <Block title={"Record"} subtitle={"最近十次登录"}>
-          <LoginRecord records={profile.loginRecord} />
+          <LoginRecord records={profile.loginRecord.history} />
         </Block>
       ) : undefined}
     </Container>

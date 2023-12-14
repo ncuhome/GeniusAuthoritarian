@@ -10,10 +10,8 @@ interface Props extends User.LoginRecord {}
 export const LoginRecordItem = memo<Props>(
   ({ ...record }) => {
     return (
-      <TableRow key={record.id}>
-        <TableCell>
-          {unix(record.createdAt).format("YYYY/MM/DD HH:mm")}
-        </TableCell>
+      <TableRow>
+        <TableCell>{unix(record.createdAt).format("MM/DD HH:mm")}</TableCell>
         <TableCell>{record.target}</TableCell>
         <TableCell>
           <Ip ip={record.ip} />

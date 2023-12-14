@@ -20,7 +20,10 @@ declare namespace User {
       mfa: boolean;
       groups: Group[];
     };
-    loginRecord: LoginRecord[];
+    loginRecord: {
+      online: LoginRecord[];
+      history: LoginRecord[];
+    };
   };
 
   namespace Login {

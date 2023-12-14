@@ -45,7 +45,7 @@ const UserAgent: FC<Props> = ({ useragent }) => {
 
     return (
       <>
-        {icon} <Typography mr={0}>{name}</Typography>
+        {icon} <Typography>{name}</Typography>
       </>
     );
   };
@@ -73,7 +73,7 @@ const UserAgent: FC<Props> = ({ useragent }) => {
 
     return (
       <>
-        {icon} <Typography>{ua.browser.name}</Typography>
+        {icon} <Typography mr={0}>{ua.browser.name}</Typography>
       </>
     );
   };
@@ -88,8 +88,8 @@ const UserAgent: FC<Props> = ({ useragent }) => {
         },
       }}
     >
-      {renderBrowser()}
       {renderDevice()}
+      {renderBrowser()}
     </Stack>
   );
 };
