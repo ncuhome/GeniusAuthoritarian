@@ -5,6 +5,6 @@ import (
 	"go/types"
 )
 
-func NewRefreshToken() tokenStore.TokenStore[types.Nil] {
-	return tokenStore.NewTokenStore[types.Nil](Client, keyRefreshToken.String())
+func NewRecordedToken() tokenStore.TokenStore[types.Nil] {
+	return tokenStore.NewTokenStore[types.Nil](Client, keyRecordedToken.String())
 }

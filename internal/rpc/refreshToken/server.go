@@ -86,7 +86,7 @@ func (s *Server) DestroyRefreshToken(_ context.Context, req *refreshTokenProto.T
 		return nil, status.Error(codes.Unauthenticated, "token invalid")
 	}
 
-	err = redis.NewRefreshToken().NewStorePoint(claims.ID).Destroy(context.Background())
+	err = redis.NewRecordedToken().NewStorePoint(claims.ID).Destroy(context.Background())
 	if err != nil {
 		return nil, status.Error(codes.Internal, "destroy token failed")
 	}

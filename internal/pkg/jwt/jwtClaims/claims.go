@@ -2,6 +2,7 @@ package jwtClaims
 
 type UserToken struct {
 	UserClaims
+	ID     uint64   `json:"id"`
 	Name   string   `json:"name"`
 	Groups []string `json:"groups,omitempty"`
 }

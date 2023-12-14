@@ -102,22 +102,31 @@ func ParseTokenAndVerify[C jwtClaims.ClaimsUser](Type, token string, target C) (
 }
 
 // GenerateUserToken 生成后台 Token
-func GenerateUserToken(uid uint, name string, groups []string, valid time.Duration) (string, error) {
+func GenerateUserToken(uid uint, lid uint64, name string, groups []string, valid time.Duration) (string, error) {
 	userClaims, err := NewUserClaims(uid, User, valid)
 	if err != nil {
 		return "", err
 	}
 	claims := &jwtClaims.UserToken{
+		ID:         lid,
 		UserClaims: userClaims,
 		Name:       name,
 		Groups:     groups,
+	}
+	err = redis.NewRecordedToken().CreateStorePointWithID(context.Background(), lid, valid, nil)
+	if err != nil {
+		return "", err
 	}
 	token, err := GenerateToken(claims)
 	return token, err
 }
 
 func ParseUserToken(token string) (*jwtClaims.UserToken, bool, error) {
-	return ParseTokenAndVerify(User, token, &jwtClaims.UserToken{})
+	claims, valid, err := ParseTokenAndVerify(User, token, &jwtClaims.UserToken{})
+	if err != nil || !valid {
+		return claims, valid, err
+	}
+	return claims, true, redis.NewRecordedToken().NewStorePoint(claims.ID).Get(context.Background(), nil)
 }
 
 // GenerateLoginToken 生成有效期 5 分钟的登录校验 Token
@@ -227,17 +236,18 @@ func ParseU2fToken(token, ip string) (bool, error) {
 	return true, nil
 }
 
-func GenerateRefreshToken(uid uint, appCode, payload string, valid time.Duration) (string, *jwtClaims.RefreshToken, error) {
+func GenerateRefreshToken(uid uint, lid uint64, appCode, payload string, valid time.Duration) (string, *jwtClaims.RefreshToken, error) {
 	userClaims, err := NewUserClaims(uid, Refresh, valid)
 	if err != nil {
 		return "", nil, err
 	}
 	claims := jwtClaims.RefreshToken{
+		ID:         lid,
 		UserClaims: userClaims,
 		AppCode:    appCode,
 		Payload:    payload,
 	}
-	claims.ID, err = redis.NewRefreshToken().CreateStorePoint(context.Background(), valid, nil)
+	err = redis.NewRecordedToken().CreateStorePointWithID(context.Background(), lid, valid, nil)
 	if err != nil {
 		return "", nil, err
 	}
@@ -250,7 +260,7 @@ func ParseRefreshToken(token string) (*jwtClaims.RefreshToken, bool, error) {
 	if err != nil || !valid {
 		return claims, valid, err
 	}
-	return claims, true, redis.NewRefreshToken().NewStorePoint(claims.ID).Get(context.Background(), nil)
+	return claims, true, redis.NewRecordedToken().NewStorePoint(claims.ID).Get(context.Background(), nil)
 }
 
 func GenerateAccessToken(refreshID uint64, uid uint, appCode, payload string) (string, error) {
@@ -276,5 +286,5 @@ func ParseAccessToken(token string) (*jwtClaims.AccessToken, bool, error) {
 		return claims, valid, err
 	}
 	// 校验 RefreshToken 是否有效
-	return claims, true, redis.NewRefreshToken().NewStorePoint(claims.ID).Get(context.Background(), nil)
+	return claims, true, redis.NewRecordedToken().NewStorePoint(claims.ID).Get(context.Background(), nil)
 }

@@ -65,7 +65,7 @@ func DestroyRefreshToken(c *gin.Context) {
 		return
 	}
 
-	err = redis.NewRefreshToken().NewStorePoint(claims.ID).Destroy(context.Background())
+	err = redis.NewRecordedToken().NewStorePoint(claims.ID).Destroy(context.Background())
 	if err != nil {
 		callback.Error(c, callback.ErrUnexpected, err)
 		return

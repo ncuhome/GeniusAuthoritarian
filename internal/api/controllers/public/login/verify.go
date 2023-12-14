@@ -16,20 +16,20 @@ import (
 )
 
 // 验证 token 并添加登录记录
-func doVerifyToken(c *gin.Context, tx *gorm.DB, token string) *jwtClaims.LoginRedis {
+func doVerifyToken(c *gin.Context, tx *gorm.DB, token string) (uint, *jwtClaims.LoginRedis) {
 	claims, valid, err := jwt.ParseLoginToken(token)
 	if err != nil || !valid {
 		callback.Error(c, callback.ErrUnauthorized, err)
-		return nil
+		return 0, nil
 	}
 
 	loginRecordSrv := service.LoginRecordSrv{DB: tx}
-	if err = loginRecordSrv.Add(claims.UID, claims.AppID, claims.IP); err != nil {
+	lid, err := loginRecordSrv.Add(claims.UID, claims.AppID, claims.IP)
+	if err != nil {
 		callback.Error(c, callback.ErrDBOperation, err)
-		return nil
+		return 0, nil
 	}
-
-	return claims
+	return lid, claims
 }
 
 // CompleteLogin 第三方应用后端调用校验认证权威性
@@ -58,7 +58,7 @@ func CompleteLogin(c *gin.Context) {
 	}
 	defer appSrv.Rollback()
 
-	claims := doVerifyToken(c, appSrv.DB, f.Token)
+	loginRecordID, claims := doVerifyToken(c, appSrv.DB, f.Token)
 	if c.IsAborted() {
 		return
 	}
@@ -85,7 +85,7 @@ func CompleteLogin(c *gin.Context) {
 
 		appCode := tools.GetAppCode(c)
 		var refreshClaims *jwtClaims.RefreshToken
-		res.RefreshToken, refreshClaims, err = jwt.GenerateRefreshToken(claims.UID, appCode, f.Payload, time.Duration(f.Valid)*time.Second)
+		res.RefreshToken, refreshClaims, err = jwt.GenerateRefreshToken(claims.UID, uint64(loginRecordID), appCode, f.Payload, time.Duration(f.Valid)*time.Second)
 		if err != nil {
 			callback.Error(c, callback.ErrUnexpected, err)
 			return
@@ -119,7 +119,7 @@ func DashboardLogin(c *gin.Context) {
 	}
 	defer tx.Rollback()
 
-	claims := doVerifyToken(c, tx, f.Token)
+	loginRecordID, claims := doVerifyToken(c, tx, f.Token)
 	if c.IsAborted() {
 		return
 	} else if claims.AppID != 0 {
@@ -144,7 +144,7 @@ func DashboardLogin(c *gin.Context) {
 
 	var tokenValid = time.Hour * 24 * 3
 
-	token, err := jwt.GenerateUserToken(claims.UID, claims.Name, groups, tokenValid)
+	token, err := jwt.GenerateUserToken(claims.UID, uint64(loginRecordID), claims.Name, groups, tokenValid)
 	if err != nil {
 		callback.Error(c, callback.ErrUnexpected, err)
 		return

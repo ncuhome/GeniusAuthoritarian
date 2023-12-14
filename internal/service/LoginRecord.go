@@ -17,7 +17,7 @@ func (a LoginRecordSrv) Begin() (*LoginRecordSrv, error) {
 	return &a, a.Error
 }
 
-func (a LoginRecordSrv) Add(uid, appID uint, ip string) error {
+func (a LoginRecordSrv) Add(uid, appID uint, ip string) (uint, error) {
 	model := dao.LoginRecord{
 		UID: uid,
 		IP:  ip,
@@ -25,7 +25,7 @@ func (a LoginRecordSrv) Add(uid, appID uint, ip string) error {
 	if appID != 0 {
 		model.AID = &appID
 	}
-	return model.Insert(a.DB)
+	return model.ID, model.Insert(a.DB)
 }
 
 func (a LoginRecordSrv) UserHistory(uid uint, limit int) ([]dto.LoginRecord, error) {
