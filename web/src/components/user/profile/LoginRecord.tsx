@@ -1,7 +1,6 @@
 import { FC } from "react";
-import { unix } from "dayjs";
 
-import Ip from "./Ip";
+import LoginRecordItem from "./LoginRecordItem";
 import {
   Box,
   Table,
@@ -35,15 +34,7 @@ export const LoginRecord: FC<Props> = ({ records }) => {
         </TableHead>
         <TableBody>
           {records.map((record) => (
-            <TableRow key={record.id}>
-              <TableCell>
-                {unix(record.createdAt).format("YYYY/MM/DD HH:mm")}
-              </TableCell>
-              <TableCell>{record.target}</TableCell>
-              <TableCell>
-                <Ip ip={record.ip} />
-              </TableCell>
-            </TableRow>
+            <LoginRecordItem {...record} />
           ))}
         </TableBody>
       </Table>
