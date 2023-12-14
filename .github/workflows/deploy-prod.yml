@@ -38,7 +38,7 @@ jobs:
 
       - name: Build Core Docker Image
         run: |
-          docker build . --file DockerfileCI \
+          docker build . --file Dockerfile.ci \
           --tag ${{ steps.image.outputs.CORE_VERSION }} \
           --tag ${{ steps.image.outputs.CORE_LATEST }}
 
@@ -50,7 +50,7 @@ jobs:
 
       - name: Build sshDev Docker Image
         run: |
-          docker build . --file ./cmd/sshDev/DockerfileCI \
+          docker build . --file ./cmd/sshDev/Dockerfile.ci \
           --tag ${{ steps.image.outputs.SSH_DEV_VERSION }} \
           --tag ${{ steps.image.outputs.SSH_DEV_LATEST }}
 
