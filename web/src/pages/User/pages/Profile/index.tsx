@@ -1,20 +1,12 @@
 import { FC, useMemo } from "react";
-import { unix } from "dayjs";
 import toast from "react-hot-toast";
 
 import Block from "@components/user/Block";
 import ChildBlock from "@components/user/ChildBlock";
-import Ip from "@components/user/profile/Ip";
 import Mfa from "@components/user/profile/Mfa";
 import Passkey from "@components/user/profile/Passkey";
 import {
   Container,
-  Box,
-  Table,
-  TableBody,
-  TableCell,
-  TableRow,
-  TableHead,
   Skeleton,
   Checkbox,
   FormControlLabel,
@@ -30,6 +22,7 @@ import { useUserApiV1 } from "@api/v1/user/hook";
 
 import useUser from "@store/useUser";
 import { apiV1User } from "@api/v1/user/base";
+import LoginRecord from "@components/user/profile/LoginRecord";
 
 const u2fMethods: {
   label: string;
@@ -203,37 +196,7 @@ export const Profile: FC = () => {
 
       {profile && profile.loginRecord.length ? (
         <Block title={"Record"} subtitle={"最近十次登录"}>
-          <Box
-            sx={{
-              marginTop: "0.5rem",
-              width: "100%",
-              overflowY: "auto",
-              whiteSpace: "nowrap",
-            }}
-          >
-            <Table>
-              <TableHead>
-                <TableRow>
-                  <TableCell>登录时间</TableCell>
-                  <TableCell>站点</TableCell>
-                  <TableCell>IP</TableCell>
-                </TableRow>
-              </TableHead>
-              <TableBody>
-                {profile.loginRecord.map((record) => (
-                  <TableRow key={record.id}>
-                    <TableCell>
-                      {unix(record.createdAt).format("YYYY/MM/DD HH:mm")}
-                    </TableCell>
-                    <TableCell>{record.target}</TableCell>
-                    <TableCell>
-                      <Ip ip={record.ip} />
-                    </TableCell>
-                  </TableRow>
-                ))}
-              </TableBody>
-            </Table>
-          </Box>
+          <LoginRecord records={profile.loginRecord} />
         </Block>
       ) : undefined}
     </Container>

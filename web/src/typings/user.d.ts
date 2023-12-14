@@ -4,6 +4,14 @@ declare namespace User {
     name: string;
   };
 
+  type LoginRecord = {
+    id: number;
+    createdAt: number;
+    target: string;
+    ip: string;
+    useragent: string;
+  };
+
   type Profile = {
     user: {
       id: number;
@@ -12,12 +20,7 @@ declare namespace User {
       mfa: boolean;
       groups: Group[];
     };
-    loginRecord: Array<{
-      id: number;
-      createdAt: number;
-      target: string;
-      ip: string;
-    }>;
+    loginRecord: LoginRecord[];
   };
 
   namespace Login {
@@ -75,7 +78,7 @@ declare namespace User {
   }
 
   namespace U2F {
-      type Methods = "phone" | "mfa" | "passkey" | "";
+    type Methods = "phone" | "mfa" | "passkey" | "";
 
     type Status = {
       prefer: Methods;
