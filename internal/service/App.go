@@ -42,12 +42,13 @@ func (a AppSrv) NameExist(name string, opts ...daoUtil.ServiceOpt) (bool, error)
 }
 
 func (a AppSrv) New(uid uint, name, callback string, permitAll bool) (*dao.App, error) {
-	randSrc := rand.NewSource(time.Now().UnixNano())
+	const randLetters = "1234567890qwertyuiopasdfghjklzxcvbnmQWERTYUIOPASDFGHJKLZXCVBNM"
+	_rand := tool.NewRand(rand.NewSource(time.Now().UnixNano())).WithLetters(randLetters)
 	var t = dao.App{
 		Name:           name,
 		UID:            uid,
-		AppCode:        tool.RandString(randSrc, 8),
-		AppSecret:      tool.RandString(randSrc, 100),
+		AppCode:        _rand.String(8),
+		AppSecret:      _rand.String(100),
 		Callback:       callback,
 		PermitAllGroup: permitAll,
 
