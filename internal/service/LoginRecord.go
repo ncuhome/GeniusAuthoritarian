@@ -4,6 +4,7 @@ import (
 	"github.com/ncuhome/GeniusAuthoritarian/internal/db/dao"
 	"github.com/ncuhome/GeniusAuthoritarian/internal/db/dto"
 	"gorm.io/gorm"
+	"time"
 )
 
 var LoginRecord = LoginRecordSrv{dao.DB}
@@ -17,10 +18,16 @@ func (a LoginRecordSrv) Begin() (*LoginRecordSrv, error) {
 	return &a, a.Error
 }
 
-func (a LoginRecordSrv) Add(uid, appID uint, ip string) (uint, error) {
+func (a LoginRecordSrv) Add(uid, appID uint, ip, useragent string, tokenValid time.Duration) (uint, error) {
+	var validBefore uint64
+	if tokenValid != 0 {
+		validBefore = uint64(time.Now().Add(tokenValid).Unix())
+	}
 	model := dao.LoginRecord{
-		UID: uid,
-		IP:  ip,
+		UID:         uid,
+		Useragent:   useragent,
+		IP:          ip,
+		ValidBefore: validBefore,
 	}
 	if appID != 0 {
 		model.AID = &appID

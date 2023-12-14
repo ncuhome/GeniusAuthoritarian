@@ -16,7 +16,7 @@ import (
 )
 
 // 验证 token 并添加登录记录
-func doVerifyToken(c *gin.Context, tx *gorm.DB, token string) (uint, *jwtClaims.LoginRedis) {
+func doVerifyToken(c *gin.Context, tx *gorm.DB, token string, tokenValid time.Duration) (uint, *jwtClaims.LoginRedis) {
 	claims, valid, err := jwt.ParseLoginToken(token)
 	if err != nil || !valid {
 		callback.Error(c, callback.ErrUnauthorized, err)
@@ -24,7 +24,7 @@ func doVerifyToken(c *gin.Context, tx *gorm.DB, token string) (uint, *jwtClaims.
 	}
 
 	loginRecordSrv := service.LoginRecordSrv{DB: tx}
-	lid, err := loginRecordSrv.Add(claims.UID, claims.AppID, claims.IP)
+	lid, err := loginRecordSrv.Add(claims.UID, claims.AppID, claims.IP, c.GetHeader("User-Agent"), tokenValid)
 	if err != nil {
 		callback.Error(c, callback.ErrDBOperation, err)
 		return 0, nil
@@ -51,6 +51,19 @@ func CompleteLogin(c *gin.Context) {
 		return
 	}
 
+	var tokenValid time.Duration
+	var refreshTokenMode bool
+	if f.GrantType == "refresh_token" {
+		refreshTokenMode = true
+		if f.Valid == 0 {
+			f.Valid = 604800
+		} else if f.Valid < 604800 {
+			callback.ErrorWithTip(c, callback.ErrForm, "valid time too short, min 604800 seconds (7 days)")
+			return
+		}
+		tokenValid = time.Duration(f.Valid) * time.Second
+	}
+
 	appSrv, err := service.App.Begin()
 	if err != nil {
 		callback.Error(c, callback.ErrDBOperation, err)
@@ -58,7 +71,7 @@ func CompleteLogin(c *gin.Context) {
 	}
 	defer appSrv.Rollback()
 
-	loginRecordID, claims := doVerifyToken(c, appSrv.DB, f.Token)
+	loginRecordID, claims := doVerifyToken(c, appSrv.DB, f.Token, tokenValid)
 	if c.IsAborted() {
 		return
 	}
@@ -75,17 +88,10 @@ func CompleteLogin(c *gin.Context) {
 		AvatarUrl: claims.AvatarUrl,
 	}
 
-	if f.GrantType == "refresh_token" {
-		if f.Valid == 0 {
-			f.Valid = 604800
-		} else if f.Valid < 604800 {
-			callback.ErrorWithTip(c, callback.ErrForm, "valid too short, min 604800 seconds (7 days)")
-			return
-		}
-
+	if refreshTokenMode {
 		appCode := tools.GetAppCode(c)
 		var refreshClaims *jwtClaims.RefreshToken
-		res.RefreshToken, refreshClaims, err = jwt.GenerateRefreshToken(claims.UID, uint64(loginRecordID), appCode, f.Payload, time.Duration(f.Valid)*time.Second)
+		res.RefreshToken, refreshClaims, err = jwt.GenerateRefreshToken(claims.UID, uint64(loginRecordID), appCode, f.Payload, tokenValid)
 		if err != nil {
 			callback.Error(c, callback.ErrUnexpected, err)
 			return
@@ -119,7 +125,9 @@ func DashboardLogin(c *gin.Context) {
 	}
 	defer tx.Rollback()
 
-	loginRecordID, claims := doVerifyToken(c, tx, f.Token)
+	var tokenValid = time.Hour * 24 * 3
+
+	loginRecordID, claims := doVerifyToken(c, tx, f.Token, tokenValid)
 	if c.IsAborted() {
 		return
 	} else if claims.AppID != 0 {
@@ -141,8 +149,6 @@ func DashboardLogin(c *gin.Context) {
 		callback.Error(c, callback.ErrDBOperation, err)
 		return
 	}
-
-	var tokenValid = time.Hour * 24 * 3
 
 	token, err := jwt.GenerateUserToken(claims.UID, uint64(loginRecordID), claims.Name, groups, tokenValid)
 	if err != nil {
