@@ -1,5 +1,6 @@
 import { FC } from "react";
 import { useNavigate } from "react-router-dom";
+import toast from "react-hot-toast";
 import "./NavHeader.css";
 
 import logo_white from "@/assets/img/logo-white.png";
@@ -18,7 +19,7 @@ import {
 } from "@mui/material";
 import { LogoutRounded, DarkMode, LightMode } from "@mui/icons-material";
 
-import { Logout } from "@api/v1/user/base";
+import { Logout, apiV1User } from "@api/v1/user/base";
 
 import useUser from "@store/useUser";
 import useTheme from "@store/useTheme";
@@ -43,6 +44,15 @@ export const NavHeader: FC<Props> = ({
 
   const darkTheme = useTheme((state) => state.dark);
   const setDarkTheme = useTheme((state) => state.setState("dark"));
+
+  const onLogout = async () => {
+    try {
+      await apiV1User.post("logout");
+      Logout();
+    } catch ({ msg }) {
+      if (msg) toast.error(msg as string);
+    }
+  };
 
   return (
     <Stack
@@ -115,8 +125,9 @@ export const NavHeader: FC<Props> = ({
             onClick={async () => {
               const ok = await setDialog({
                 title: "注销登录",
+                content: "使用的身份令牌将被自动销毁",
               });
-              if (ok) Logout();
+              if (ok) onLogout();
             }}
           >
             <LogoutRounded />
