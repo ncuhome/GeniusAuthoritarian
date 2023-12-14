@@ -39,6 +39,10 @@ func (a LoginRecordSrv) Add(uid, appID uint, ip, useragent string, tokenValid ti
 	return model.ID, model.Insert(a.DB)
 }
 
+func (a LoginRecordSrv) SetDestroyed(id uint) error {
+	return (&dao.LoginRecord{ID: id}).UpdateDestroyedByID(a.DB)
+}
+
 func (a LoginRecordSrv) UserHistory(uid uint, limit int) ([]dto.LoginRecord, error) {
 	return (&dao.LoginRecord{
 		UID: uid,

@@ -86,9 +86,24 @@ func (s *Server) DestroyRefreshToken(_ context.Context, req *refreshTokenProto.T
 		return nil, status.Error(codes.Unauthenticated, "token invalid")
 	}
 
+	loginRecordSrv, err := service.LoginRecord.Begin()
+	if err != nil {
+		return nil, status.Error(codes.Internal, "database error")
+	}
+	defer loginRecordSrv.Rollback()
+
+	err = loginRecordSrv.SetDestroyed(uint(claims.ID))
+	if err != nil {
+		return nil, status.Error(codes.Internal, "database error")
+	}
+
 	err = redis.NewRecordedToken().NewStorePoint(claims.ID).Destroy(context.Background())
 	if err != nil {
 		return nil, status.Error(codes.Internal, "destroy token failed")
+	}
+
+	if err = loginRecordSrv.Commit().Error; err != nil {
+		return nil, status.Error(codes.Internal, "database error")
 	}
 
 	return &emptypb.Empty{}, nil

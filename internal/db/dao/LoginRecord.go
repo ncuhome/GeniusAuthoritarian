@@ -44,6 +44,10 @@ func (a *LoginRecord) Insert(tx *gorm.DB) error {
 	return tx.Create(a).Error
 }
 
+func (a *LoginRecord) UpdateDestroyedByID(tx *gorm.DB) error {
+	return tx.Model(a).Where(a, "id").Update("destroyed", true).Error
+}
+
 func (a *LoginRecord) GetByUID(tx *gorm.DB, limit int) ([]dto.LoginRecord, error) {
 	var t = make([]dto.LoginRecord, 0)
 	tx = a.sqlGetByUID(tx).Limit(limit)
