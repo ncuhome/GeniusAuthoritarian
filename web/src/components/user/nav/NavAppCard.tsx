@@ -20,6 +20,9 @@ export const NavAppCard: FC<Props> = ({ app }) => {
       sx={{
         transition: "box-shadow .3s ease-in-out",
         minHeight: "100%",
+        display: "flex",
+        flexDirection: "column",
+        justifyContent: "space-between",
       }}
     >
       <CardContent
