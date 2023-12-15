@@ -37,7 +37,7 @@ func (a *LoginRecord) sqlGetByUID(tx *gorm.DB) *gorm.DB {
 }
 
 func (a *LoginRecord) sqlLoginValid(tx *gorm.DB) *gorm.DB {
-	return tx.Where("login_records.valid_before>? AND NOT destroyed=1", time.Now().Unix())
+	return tx.Where("login_records.valid_before>? AND NOT login_records.destroyed=1", time.Now().Unix())
 }
 
 func (a *LoginRecord) Insert(tx *gorm.DB) error {
@@ -63,9 +63,9 @@ func (a *LoginRecord) GetValidForUser(tx *gorm.DB) ([]dto.LoginRecordOnline, err
 
 func (a *LoginRecord) ValidExist(tx *gorm.DB) (bool, error) {
 	var t bool
-	tx = a.sqlGetByUID(tx)
+	tx = tx.Model(a).Select("1")
 	tx = a.sqlLoginValid(tx)
-	tx = tx.Where(a, "id").Limit(1)
+	tx = tx.Where(a, "id", "uid").Limit(1)
 	return t, tx.Find(&t).Error
 }
 
