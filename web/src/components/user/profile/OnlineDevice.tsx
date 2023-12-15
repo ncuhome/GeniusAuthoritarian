@@ -29,7 +29,7 @@ export const OnlineDevice: FC<Props> = ({ records }) => {
         <Table>
           <TableHead>
             <TableRow>
-              <TableCell>上线时间</TableCell>
+              <TableCell>令牌有效</TableCell>
               <TableCell>应用</TableCell>
               <TableCell>设备</TableCell>
               <TableCell>操作</TableCell>

@@ -49,11 +49,13 @@ export const OnlineDeviceItem = memo<Props>(({ ...record }) => {
   return (
     <Flipped key={record.id}>
       <TableRow>
-        <TableCell>{unix(record.createdAt).format("MM/DD HH:mm")}</TableCell>
+        <TableCell>{`${unix(record.createdAt).format("MM/DD")}~${unix(
+          record.validBefore,
+        ).format("MM/DD HH:mm")}`}</TableCell>
         <TableCell>{record.target}</TableCell>
         <TableCell>
           {record.useragent ? (
-            <UserAgent useragent={record.useragent} detailed />
+            <UserAgent useragent={record.useragent} />
           ) : undefined}
         </TableCell>
         <TableCell>
