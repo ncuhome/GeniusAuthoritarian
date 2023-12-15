@@ -8,7 +8,8 @@ import (
 )
 
 func ProfileData(c *gin.Context) {
-	uid := tools.GetUserInfo(c).UID
+	claims := tools.GetUserInfo(c)
+	uid := claims.UID
 	profile, err := service.User.UserProfile(uid)
 	if err != nil {
 		callback.Error(c, callback.ErrDBOperation, err)
@@ -19,7 +20,7 @@ func ProfileData(c *gin.Context) {
 		callback.Error(c, callback.ErrDBOperation, err)
 		return
 	}
-	onlineLogin, err := service.LoginRecord.UserOnline(uid)
+	onlineLogin, err := service.LoginRecord.UserOnline(uid, uint(claims.ID))
 	if err != nil {
 		callback.Error(c, callback.ErrDBOperation, err)
 		return

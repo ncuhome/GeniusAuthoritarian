@@ -8,6 +8,13 @@ type LoginRecord struct {
 	Target    string `json:"target"`
 }
 
+type LoginRecordOnline struct {
+	LoginRecord
+	ValidBefore uint64 `json:"validBefore"`
+
+	IsMe bool `json:"isMe" gorm:"-"`
+}
+
 type ViewCount struct {
 	// App.ID
 	ID    uint   `json:"id"`

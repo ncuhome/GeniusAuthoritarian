@@ -49,7 +49,7 @@ func (a LoginRecordSrv) UserHistory(uid uint, limit int) ([]dto.LoginRecord, err
 	}).GetByUID(a.DB, limit)
 }
 
-func (a LoginRecordSrv) UserOnline(uid uint) ([]dto.LoginRecord, error) {
+func (a LoginRecordSrv) UserOnline(uid uint, currentLoginID uint) ([]dto.LoginRecordOnline, error) {
 	validRecords, err := (&dao.LoginRecord{UID: uid}).GetValidForUser(a.DB)
 	if err != nil {
 		return nil, err
@@ -71,10 +71,13 @@ func (a LoginRecordSrv) UserOnline(uid uint) ([]dto.LoginRecord, error) {
 		validCount++
 	}
 
-	var result = make([]dto.LoginRecord, validCount)
+	var result = make([]dto.LoginRecordOnline, validCount)
 	if validCount != 0 {
 		for i, record := range validRecords {
 			if record.ID != 0 {
+				if record.ID == currentLoginID {
+					record.IsMe = true
+				}
 				result[i] = record
 			}
 		}

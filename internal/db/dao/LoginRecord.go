@@ -54,8 +54,8 @@ func (a *LoginRecord) GetByUID(tx *gorm.DB, limit int) ([]dto.LoginRecord, error
 	return t, tx.Find(&t).Error
 }
 
-func (a *LoginRecord) GetValidForUser(tx *gorm.DB) ([]dto.LoginRecord, error) {
-	var t = make([]dto.LoginRecord, 0)
+func (a *LoginRecord) GetValidForUser(tx *gorm.DB) ([]dto.LoginRecordOnline, error) {
+	var t = make([]dto.LoginRecordOnline, 0)
 	tx = a.sqlGetByUID(tx)
 	tx = a.sqlLoginValid(tx)
 	return t, tx.Find(&t).Error
