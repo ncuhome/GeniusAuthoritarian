@@ -20,13 +20,14 @@ interface UserState {
 
   setAuth: (token: string | null, groups?: string[]) => void;
   setDialog: (props: DialogProps) => Promise<boolean>;
+  setDeviceOffline: (id: number) => void;
 
   setState: <T extends keyof UserState>(
-    key: T
+    key: T,
   ) => (value: UserState[T]) => void;
 }
 
-export const useUser = create<UserState>()((set) => ({
+export const useUser = create<UserState>()((set, get) => ({
   token: localStorage.getItem("token"),
   groups: localStorage.getItem("groups")?.split(",") || [],
 
@@ -57,6 +58,19 @@ export const useUser = create<UserState>()((set) => ({
         },
         openDialog: true,
       });
+    });
+  },
+  setDeviceOffline: (id) => {
+    const profile = get().profile;
+    if (!profile) return;
+    set({
+      profile: {
+        ...profile,
+        loginRecord: {
+          ...profile.loginRecord,
+          online: profile.loginRecord.online.filter((item) => item.id != id),
+        },
+      },
     });
   },
 

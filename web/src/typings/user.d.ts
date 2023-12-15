@@ -12,6 +12,11 @@ declare namespace User {
     useragent: string;
   };
 
+  type LoginRecordOnline = LoginRecord & {
+    validBefore: number;
+    isMe: boolean;
+  };
+
   type Profile = {
     user: {
       id: number;
@@ -21,7 +26,7 @@ declare namespace User {
       groups: Group[];
     };
     loginRecord: {
-      online: LoginRecord[];
+      online: LoginRecordOnline[];
       history: LoginRecord[];
     };
   };

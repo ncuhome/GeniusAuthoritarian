@@ -17,9 +17,10 @@ import {
 
 interface Props {
   useragent: string;
+  detailed?: boolean;
 }
 
-const UserAgent: FC<Props> = ({ useragent }) => {
+const UserAgent: FC<Props> = ({ useragent, detailed }) => {
   const ua = parser(useragent);
 
   const renderDevice = () => {
@@ -27,7 +28,7 @@ const UserAgent: FC<Props> = ({ useragent }) => {
     if (ua.os.name) {
       name = ` ${ua.os.name}`;
       if (ua.os.version) {
-        name += ua.os.version;
+        name += ` ${ua.os.version}`;
       }
     }
     if (ua.device.model) {
@@ -59,6 +60,10 @@ const UserAgent: FC<Props> = ({ useragent }) => {
   const renderBrowser = () => {
     if (!ua.browser.name) return undefined;
 
+    const name = detailed
+      ? `${ua.browser.name}${ua.browser.major ? ` ${ua.browser.major}` : ""}`
+      : ua.browser.name;
+
     let icon: ReactNode;
     switch (ua.browser.name) {
       case "Chrome":
@@ -79,7 +84,7 @@ const UserAgent: FC<Props> = ({ useragent }) => {
 
     return (
       <>
-        {icon} <Typography>{ua.browser.name}</Typography>
+        {icon} <Typography>{name}</Typography>
       </>
     );
   };

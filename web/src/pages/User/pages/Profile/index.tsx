@@ -1,4 +1,4 @@
-import { FC, useMemo } from "react";
+import { FC, useCallback, useMemo } from "react";
 import toast from "react-hot-toast";
 
 import Block from "@components/user/Block";
@@ -24,6 +24,7 @@ import { useUserApiV1 } from "@api/v1/user/hook";
 
 import useUser from "@store/useUser";
 import { apiV1User } from "@api/v1/user/base";
+import { mutate } from "swr";
 
 const u2fMethods: {
   label: string;

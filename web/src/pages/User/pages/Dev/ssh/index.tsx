@@ -41,7 +41,7 @@ const invalidKey: User.SSH.Keys = {
 };
 
 const Ssh: FC = () => {
-  const { isLoading: u2fLoading, refreshToken } = useU2F();
+  const { refreshToken } = useU2F();
 
   const [sshKey, setSshKey] = useState<User.SSH.Keys | null>(null);
   const [keyMode, setKeyMode] = useState<User.SSH.KeyMode>("ssh");

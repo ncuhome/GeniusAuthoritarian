@@ -1,5 +1,7 @@
-import { FC } from "react";
+import { FC, useCallback } from "react";
 
+import OnlineDeviceItem from "./OnlineDeviceItem";
+import { Flipper } from "react-flip-toolkit";
 import {
   Box,
   Table,
@@ -8,11 +10,9 @@ import {
   TableHead,
   TableRow,
 } from "@mui/material";
-import { unix } from "dayjs";
-import UserAgent from "@components/user/profile/UserAgent";
 
 interface Props {
-  records: User.LoginRecord[];
+  records: User.LoginRecordOnline[];
 }
 
 export const OnlineDevice: FC<Props> = ({ records }) => {
@@ -25,32 +25,23 @@ export const OnlineDevice: FC<Props> = ({ records }) => {
         whiteSpace: "nowrap",
       }}
     >
-      <Table>
-        <TableHead>
-          <TableRow>
-            <TableCell>上线时间</TableCell>
-            <TableCell>应用</TableCell>
-            <TableCell>设备</TableCell>
-            <TableCell>操作</TableCell>
-          </TableRow>
-        </TableHead>
-        <TableBody>
-          {records.map((record) => (
-            <TableRow key={record.id}>
-              <TableCell>
-                {unix(record.createdAt).format("MM/DD HH:mm")}
-              </TableCell>
-              <TableCell>{record.target}</TableCell>
-              <TableCell>
-                {record.useragent ? (
-                  <UserAgent useragent={record.useragent} />
-                ) : undefined}
-              </TableCell>
-              <TableCell></TableCell>
+      <Flipper flipKey={records}>
+        <Table>
+          <TableHead>
+            <TableRow>
+              <TableCell>上线时间</TableCell>
+              <TableCell>应用</TableCell>
+              <TableCell>设备</TableCell>
+              <TableCell>操作</TableCell>
             </TableRow>
-          ))}
-        </TableBody>
-      </Table>
+          </TableHead>
+          <TableBody>
+            {records.map((record) => (
+              <OnlineDeviceItem key={record.id} {...record} />
+            ))}
+          </TableBody>
+        </Table>
+      </Flipper>
     </Box>
   );
 };
