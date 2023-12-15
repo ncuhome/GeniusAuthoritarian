@@ -3,11 +3,7 @@ import { useNavigate } from "react-router-dom";
 import toast from "react-hot-toast";
 import "./NavHeader.css";
 
-import logo_white from "@/assets/img/logo-white.png";
-import logo_white_webp from "@/assets/img/logo-white.webp";
-import logo_dark from "@/assets/img/logo-dark.png";
-import logo_dark_webp from "@/assets/img/logo-dark.webp";
-
+import Picture from "@components/Picture";
 import {
   Box,
   Stack,
@@ -80,13 +76,10 @@ export const NavHeader: FC<Props> = ({
           },
         }}
       >
-        <picture>
-          <source
-            type="image/webp"
-            srcSet={darkTheme ? logo_white_webp : logo_dark_webp}
-          />
-          <img src={darkTheme ? logo_white : logo_dark} alt={"NCUHOME"} />
-        </picture>
+        <Picture
+          name={`logo-${darkTheme ? "white" : "dark"}`}
+          alt={"NCUHOME"}
+        />
       </Box>
 
       <Stack

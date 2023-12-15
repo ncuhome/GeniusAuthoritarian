@@ -10,11 +10,11 @@ import {
   coerceToBase64Url,
 } from "@util/coerce";
 
-import feishuLogo from "@/assets/img/login/methods/feishu.png";
-import webpFeishuLogo from "@/assets/img/login/methods/feishu.webp";
-import dingLogo from "@/assets/img/login/methods/ding.png";
-import webpDingLogo from "@/assets/img/login/methods/ding.webp";
-import passkeyLogo from "@/assets/img/login/methods/passkeys.svg";
+import feishuLogo from "@/assets/img/login_methods/feishu.png";
+import webpFeishuLogo from "@/assets/img/login_methods/feishu.webp";
+import dingLogo from "@/assets/img/login_methods/ding.png";
+import webpDingLogo from "@/assets/img/login_methods/ding.webp";
+import passkeyLogo from "@/assets/img/login_methods/passkeys.svg";
 
 import LoginItem from "@components/auth/LoginItem";
 import { Stack, Box, Typography, List, Paper, Skeleton } from "@mui/material";

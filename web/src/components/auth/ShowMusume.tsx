@@ -1,84 +1,60 @@
 import { FC, useMemo } from "react";
 
-import logo from "@/assets/img/logo-white.png";
-import logo_webp from "@/assets/img/logo-white.webp";
-
-import bkg from "@/assets/img/login/bkg/bkg.png";
-import bgk_2910230214 from "@/assets/img/login/bkg/bkg_2910230214.png";
-import bgk_627660024 from "@/assets/img/login/bkg/bkg_627660024.png";
-import bgk_627660022 from "@/assets/img/login/bkg/bkg_627660022.png";
-
-import bgk_webp from "@/assets/img/login/bkg/bkg.webp";
-import bgk_2910230214_webp from "@/assets/img/login/bkg/bkg_2910230214.webp";
-import bgk_627660024_webp from "@/assets/img/login/bkg/bkg_627660024.webp";
-import bgk_627660022_webp from "@/assets/img/login/bkg/bkg_627660022.webp";
-
+import Picture from "@/components/Picture";
 import { Stack, Box, Paper } from "@mui/material";
 
-const images = [bkg, bgk_2910230214, bgk_627660024, bgk_627660022];
-const webpImages = [
-  bgk_webp,
-  bgk_2910230214_webp,
-  bgk_627660024_webp,
-  bgk_627660022_webp,
-];
+const images = ["bkg", "bkg_2910230214", "bkg_627660024", "bkg_627660022"];
 
 export const ShowMusume: FC = () => {
-    const img = useMemo(() => {
-      const index = Math.floor(Math.random() * images.length);
-      return { src: images[index], webp: webpImages[index] };
-    }, []);
+  const imgName = useMemo(() => {
+    const index = Math.floor(Math.random() * images.length);
+    return images[index];
+  }, []);
 
-    return (
-      <Stack
+  return (
+    <Stack
+      sx={{
+        height: "100%",
+        width: "100%",
+      }}
+      component={Paper}
+      elevation={5}
+    >
+      <Box
         sx={{
-          height: "100%",
-          width: "100%",
+          padding: "2.5rem 4rem",
+          display: "flex",
+          justifyContent: "center",
+          alignItems: "center",
+          "&>picture>img": {
+            maxHeight: "100%",
+            maxWidth: "100%",
+            width: "15rem",
+          },
         }}
-        component={Paper}
-        elevation={5}
       >
-        <Box
-          sx={{
-            padding: "2.5rem 4rem",
-            display: "flex",
-            justifyContent: "center",
-            alignItems: "center",
-            "&>picture>img": {
-              maxHeight: "100%",
-              maxWidth: "100%",
-              width: "15rem",
-            },
+        <Picture name={"logo-white"} alt={"NCUHOME"} />
+      </Box>
+      <Box
+        sx={{
+          flexGrow: 1,
+          display: "flex",
+          justifyContent: "center",
+          alignItems: "center",
+          boxSizing: "border-box",
+          overflow: "hidden",
+        }}
+      >
+        <Picture
+          dir={"login_bgk"}
+          name={imgName}
+          alt={"GoGoGo"}
+          imgStyle={{
+            width: "100%",
           }}
-        >
-          <picture>
-            <source type="image/webp" srcSet={logo_webp} />
-            <img src={logo} alt={"家园工作室"} />
-          </picture>
-        </Box>
-        <Box
-          sx={{
-            flexGrow: 1,
-            display: "flex",
-            justifyContent: "center",
-            alignItems: "center",
-            boxSizing: "border-box",
-            overflow: "hidden",
-          }}
-        >
-          <picture>
-            <source type="image/webp" srcSet={img.webp} />
-            <img
-              style={{
-                width: "100%",
-              }}
-              src={img.src}
-              alt={"看板 MuSiMie"}
-              title={"“走，上工！”"}
-            />
-          </picture>
-        </Box>
-      </Stack>
-    );
+        />
+      </Box>
+    </Stack>
+  );
 };
 export default ShowMusume;

@@ -2,9 +2,7 @@ import { FC, useMemo } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import "./style.css";
 
-import img_png from "@/assets/img/error/img_20231213.png";
-import img_webp from "@/assets/img/error/img_20231213.webp";
-
+import Picture from "@components/Picture";
 import { useTheme } from "@mui/material";
 import { Box, Stack, Typography, ButtonGroup, Button } from "@mui/material";
 
@@ -50,10 +48,7 @@ export const Error: FC = () => {
             },
           }}
         >
-          <picture>
-            <source srcSet={img_webp} type="image/webp" />
-            <img src={img_png} alt={"ERROR"} />
-          </picture>
+          <Picture dir={"error"} name={"img_20231213"} alt={"ERROR"} />
         </Box>
 
         <Stack alignItems={{ xs: "center", sm: "baseline" }}>
