@@ -1,7 +1,6 @@
 import { FC } from "react";
 
 import OnlineDeviceItem from "./OnlineDeviceItem";
-import { Flipper } from "react-flip-toolkit";
 import {
   Box,
   Table,
@@ -21,27 +20,24 @@ export const OnlineDevice: FC<Props> = ({ records }) => {
       sx={{
         marginTop: "0.5rem",
         width: "100%",
-        overflowY: "auto",
         whiteSpace: "nowrap",
       }}
     >
-      <Flipper flipKey={records}>
-        <Table>
-          <TableHead>
-            <TableRow>
-              <TableCell>令牌有效</TableCell>
-              <TableCell>应用</TableCell>
-              <TableCell>设备</TableCell>
-              <TableCell>操作</TableCell>
-            </TableRow>
-          </TableHead>
-          <TableBody>
-            {records.map((record) => (
-              <OnlineDeviceItem key={record.id} {...record} />
-            ))}
-          </TableBody>
-        </Table>
-      </Flipper>
+      <Table>
+        <TableHead>
+          <TableRow>
+            <TableCell>令牌有效</TableCell>
+            <TableCell>应用</TableCell>
+            <TableCell>设备</TableCell>
+            <TableCell>操作</TableCell>
+          </TableRow>
+        </TableHead>
+        <TableBody>
+          {records.map((record) => (
+            <OnlineDeviceItem key={record.id} {...record} />
+          ))}
+        </TableBody>
+      </Table>
     </Box>
   );
 };

@@ -4,7 +4,6 @@ import useU2F from "@hooks/useU2F";
 import toast from "react-hot-toast";
 
 import UserAgent from "@components/user/profile/UserAgent";
-import { Flipped } from "react-flip-toolkit";
 import { TableCell, TableRow } from "@mui/material";
 import { LoadingButton } from "@mui/lab";
 
@@ -14,6 +13,8 @@ import { apiV1User } from "@api/v1/user/base";
 interface Props extends User.LoginRecordOnline {}
 
 export const OnlineDeviceItem = memo<Props>(({ ...record }) => {
+  const [isLoading, setIsLoading] = useState(false);
+
   const setDeviceOffline = useUser((state) => state.setDeviceOffline);
   const setDialog = useUser((state) => state.setDialog);
 
@@ -28,6 +29,7 @@ export const OnlineDeviceItem = memo<Props>(({ ...record }) => {
 
     const token = await refreshToken();
 
+    setIsLoading(true);
     try {
       await apiV1User.patch(
         "logout",
@@ -44,32 +46,32 @@ export const OnlineDeviceItem = memo<Props>(({ ...record }) => {
     } catch ({ msg }) {
       if (msg) toast.error(msg as string);
     }
+    setIsLoading(false);
   };
 
   return (
-    <Flipped key={record.id}>
-      <TableRow>
-        <TableCell>{`${unix(record.createdAt).format("MM/DD")}~${unix(
-          record.validBefore,
-        ).format("MM/DD HH:mm")}`}</TableCell>
-        <TableCell>{record.target}</TableCell>
-        <TableCell>
-          {record.useragent ? (
-            <UserAgent useragent={record.useragent} />
-          ) : undefined}
-        </TableCell>
-        <TableCell>
-          <LoadingButton
-            size={"small"}
-            variant={"outlined"}
-            color={record.isMe ? undefined : "warning"}
-            onClick={onDeviceOffline}
-          >
-            下线
-          </LoadingButton>
-        </TableCell>
-      </TableRow>
-    </Flipped>
+    <TableRow>
+      <TableCell>{`${unix(record.createdAt).format("MM/DD")}~${unix(
+        record.validBefore,
+      ).format("MM/DD HH:mm")}`}</TableCell>
+      <TableCell>{record.target}</TableCell>
+      <TableCell>
+        {record.useragent ? (
+          <UserAgent useragent={record.useragent} />
+        ) : undefined}
+      </TableCell>
+      <TableCell>
+        <LoadingButton
+          size={"small"}
+          variant={"outlined"}
+          color={record.isMe ? undefined : "warning"}
+          onClick={onDeviceOffline}
+          loading={isLoading}
+        >
+          下线
+        </LoadingButton>
+      </TableCell>
+    </TableRow>
   );
 });
 export default OnlineDeviceItem;
