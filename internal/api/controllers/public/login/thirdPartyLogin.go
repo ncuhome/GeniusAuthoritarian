@@ -123,6 +123,7 @@ func callThirdPartyLoginResult(c *gin.Context, info ThirdPartyLoginContext) {
 		UID:       info.User.ID,
 		Name:      info.User.Name,
 		IP:        info.Ip,
+		Useragent: c.Request.UserAgent(),
 		Groups:    info.Groups,
 		AppID:     info.AppInfo.ID,
 		AvatarUrl: info.User.AvatarUrl,

@@ -1,4 +1,4 @@
-import { FC, useCallback } from "react";
+import { FC } from "react";
 
 import OnlineDeviceItem from "./OnlineDeviceItem";
 import { Flipper } from "react-flip-toolkit";

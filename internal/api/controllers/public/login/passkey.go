@@ -108,6 +108,7 @@ func FinishPasskeyLogin(c *gin.Context) {
 		UID:       user.ID,
 		Name:      user.Name,
 		IP:        c.ClientIP(),
+		Useragent: c.Request.UserAgent(),
 		Groups:    groups,
 		AppID:     appInfo.ID,
 		AvatarUrl: user.AvatarUrl,
