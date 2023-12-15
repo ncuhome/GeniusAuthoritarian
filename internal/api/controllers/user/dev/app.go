@@ -1,6 +1,7 @@
 package controllers
 
 import (
+	"context"
 	"errors"
 	"github.com/Mmx233/daoUtil"
 	"github.com/gin-gonic/gin"
@@ -12,6 +13,7 @@ import (
 	"gorm.io/gorm"
 	"net/url"
 	"sort"
+	"time"
 )
 
 func ListOwnedApp(c *gin.Context) {
@@ -235,6 +237,7 @@ func ModifyApp(c *gin.Context) {
 	appGroupSrv := service.AppGroupSrv{DB: appSrv.DB}
 
 	// 更新组关系
+	var groupPermisstionChanged bool
 	if app.PermitAllGroup != f.PermitAll {
 		if f.PermitAll {
 			err = appGroupSrv.DeleteAllForApp(app.ID)
@@ -249,8 +252,11 @@ func ModifyApp(c *gin.Context) {
 				return
 			}
 		}
+		groupPermisstionChanged = !f.PermitAll
 		appInfoChanged = true
-	} else if !f.PermitAll {
+	}
+
+	if !f.PermitAll {
 		exGroups := make([]uint, len(app.Groups))
 		for i, group := range app.Groups {
 			exGroups[i] = group.ID
@@ -303,6 +309,7 @@ func ModifyApp(c *gin.Context) {
 				callback.Error(c, callback.ErrDBOperation, err)
 				return
 			}
+			groupPermisstionChanged = true
 		}
 		if len(groupToCreate) > 0 {
 			if _, err = appGroupSrv.BindForApp(app.ID, groupToCreate); err != nil {
@@ -314,6 +321,37 @@ func ModifyApp(c *gin.Context) {
 
 	if appInfoChanged {
 		if err = appSrv.UpdateAll(app.ID, f.Name, f.Callback, f.PermitAll); err != nil {
+			callback.Error(c, callback.ErrDBOperation, err)
+			return
+		}
+	}
+
+	if groupPermisstionChanged {
+		// 撤销 token
+
+		loginRecordSrv := service.LoginRecordSrv{DB: appSrv.DB}
+		ids, err := loginRecordSrv.GetValidForApp(f.ID, daoUtil.LockForUpdate)
+		if err != nil {
+			callback.Error(c, callback.ErrDBOperation, err)
+			return
+		}
+
+		_redis := redis.NewRecordedToken()
+		ctx, cancel := context.WithTimeout(context.Background(), time.Second*20)
+		defer cancel()
+		for _, lid := range ids {
+			err = _redis.NewStorePoint(uint64(lid)).Destroy(ctx)
+			if err != nil {
+				if errors.Is(err, redis.Nil) {
+					continue
+				}
+				callback.Error(c, callback.ErrUnexpected, err)
+				return
+			}
+		}
+
+		err = loginRecordSrv.SetDestroyedByIDS(ids)
+		if err != nil {
 			callback.Error(c, callback.ErrDBOperation, err)
 			return
 		}

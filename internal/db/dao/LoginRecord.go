@@ -48,10 +48,23 @@ func (a *LoginRecord) UpdateDestroyedByID(tx *gorm.DB) error {
 	return tx.Model(a).Where(a, "id").Update("destroyed", true).Error
 }
 
+func (a *LoginRecord) UpdateDestroyedByIDSlice(tx *gorm.DB, ids []uint) error {
+	tx = tx.Model(a)
+	tx = a.sqlLoginValid(tx)
+	return tx.Where("id IN ?", ids).Update("destroyed", true).Error
+}
+
 func (a *LoginRecord) GetByUID(tx *gorm.DB, limit int) ([]dto.LoginRecord, error) {
 	var t = make([]dto.LoginRecord, 0)
 	tx = a.sqlGetByUID(tx).Limit(limit)
 	return t, tx.Find(&t).Error
+}
+
+func (a *LoginRecord) GetIdByAID(tx *gorm.DB) ([]uint, error) {
+	var t []uint
+	tx = tx.Model(a).Select("id")
+	tx = a.sqlLoginValid(tx)
+	return t, tx.Where(a, "aid").Find(&t).Error
 }
 
 func (a *LoginRecord) GetValidForUser(tx *gorm.DB) ([]dto.LoginRecordOnline, error) {

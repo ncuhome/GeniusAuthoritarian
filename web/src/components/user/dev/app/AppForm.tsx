@@ -126,7 +126,7 @@ export const AppForm: FC<Props> = ({
     if (!permitAll && (!permitGroups || permitGroups.length === 0)) {
       const yes = await setDialog({
         title: "警告",
-        content: "您没有授权任何身份组使用，你确定要继续创建吗",
+        content: "您没有授权任何身份组使用，你确定要继续吗",
       });
       if (!yes) return false;
     }
