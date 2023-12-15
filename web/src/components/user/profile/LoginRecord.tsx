@@ -20,7 +20,7 @@ export const LoginRecord: FC<Props> = ({ records }) => {
       sx={{
         marginTop: "0.5rem",
         width: "100%",
-        overflowY: "auto",
+        overflowX: "auto",
         whiteSpace: "nowrap",
       }}
     >

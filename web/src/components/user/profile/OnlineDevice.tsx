@@ -20,6 +20,7 @@ export const OnlineDevice: FC<Props> = ({ records }) => {
       sx={{
         marginTop: "0.5rem",
         width: "100%",
+        overflowX: "auto",
         whiteSpace: "nowrap",
       }}
     >
