@@ -20,7 +20,10 @@ const Picture: FC<Props> = ({
   alt,
   dir,
   defaultType = "png",
-  sources = [{ fileType: "webp", mimeType: "image/webp" }],
+  sources = [
+    { fileType: "avif", mimeType: "image/avif" },
+    { fileType: "webp", mimeType: "image/webp" },
+  ],
   imgStyle,
 }) => {
   const getImageUrl = (name: string, type: string) => {
