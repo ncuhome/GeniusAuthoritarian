@@ -9,6 +9,7 @@ import (
 	"github.com/ncuhome/GeniusAuthoritarian/internal/pkg/jwt"
 	"github.com/ncuhome/GeniusAuthoritarian/internal/service"
 	"github.com/ncuhome/GeniusAuthoritarian/internal/tools"
+	"time"
 )
 
 func RefreshToken(c *gin.Context) {
@@ -45,6 +46,45 @@ func RefreshToken(c *gin.Context) {
 		AccessToken: accessToken,
 		Payload:     claims.Payload,
 	})
+}
+
+func ModifyRefreshPayload(c *gin.Context) {
+	var f struct {
+		Token       string `json:"token" binding:"required"`
+		Payload     string `json:"payload" binding:"required"`
+		AccessToken bool   `json:"accessToken"`
+	}
+	if err := tools.ShouldBindReused(c, &f); err != nil {
+		callback.Error(c, callback.ErrForm, err)
+		return
+	}
+
+	claims, valid, err := jwt.ParseRefreshToken(f.Token)
+	if err != nil {
+		callback.Error(c, callback.ErrTokenInvalid, err)
+		return
+	} else if !valid {
+		callback.Error(c, callback.ErrTokenInvalid)
+		return
+	}
+
+	var res response.ModifyPayload
+
+	res.RefreshToken, _, err = jwt.GenerateRefreshToken(claims.UID, claims.ID, claims.AppCode, f.Payload, claims.ExpiresAt.Sub(time.Now()))
+	if err != nil {
+		callback.Error(c, callback.ErrUnexpected, err)
+		return
+	}
+
+	if f.AccessToken {
+		res.AccessToken, err = jwt.GenerateAccessToken(claims.ID, claims.UID, claims.AppCode, f.Payload)
+		if err != nil {
+			callback.Error(c, callback.ErrUnexpected, err)
+			return
+		}
+	}
+
+	callback.Success(c, res)
 }
 
 func DestroyRefreshToken(c *gin.Context) {

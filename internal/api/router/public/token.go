@@ -11,6 +11,7 @@ func routerToken(G *gin.RouterGroup) {
 
 	refresh := G.Group("refresh")
 	refresh.POST("/", controllers.RefreshToken)
+	refresh.PATCH("/", controllers.ModifyRefreshPayload)
 	refresh.DELETE("/", controllers.DestroyRefreshToken)
 
 	access := G.Group("access", middlewares.RequireAccessToken)

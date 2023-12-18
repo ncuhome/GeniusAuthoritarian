@@ -9,3 +9,8 @@ type VerifyAccessToken struct {
 	UID     uint   `json:"uid"`
 	Payload string `json:"payload,omitempty"`
 }
+
+type ModifyPayload struct {
+	RefreshToken string `json:"refreshToken"`
+	AccessToken  string `json:"accessToken,omitempty"`
+}
