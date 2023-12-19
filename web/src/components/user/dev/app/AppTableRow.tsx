@@ -41,11 +41,15 @@ export const AppTableRow: FC<Props> = ({
         )}
       </TableCell>
       <TableCell>{app.appCode}</TableCell>
-      <TableCell>
+      <TableCell
+        sx={{
+          textWrap: "balance",
+        }}
+      >
         {app.permitAllGroup
           ? "ALL"
           : app.groups.length > 0
-            ? app.groups.map((group) => group.name).join("，")
+            ? app.groups.map((group) => group.name).join(", ")
             : "NONE"}
       </TableCell>
       <TableCell>{app.callback}</TableCell>

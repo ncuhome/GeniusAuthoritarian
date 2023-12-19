@@ -175,7 +175,7 @@ const Ssh: FC = () => {
               </Stack>
 
               <LoadingButton
-                variant={"contained"}
+                variant={"outlined"}
                 loading={isUnlockLoading}
                 onClick={onShowSshKeys}
                 startIcon={<Fingerprint />}
