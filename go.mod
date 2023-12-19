@@ -11,7 +11,7 @@ require (
 	github.com/Mmx233/secure/v2 v2.0.6
 	github.com/Mmx233/tool v0.7.4
 	github.com/alibabacloud-go/darabonba-openapi/v2 v2.0.5
-	github.com/alibabacloud-go/dingtalk v1.6.34
+	github.com/alibabacloud-go/dingtalk v1.6.35
 	github.com/alibabacloud-go/tea v1.2.1
 	github.com/alibabacloud-go/tea-utils/v2 v2.0.4
 	github.com/gin-gonic/gin v1.9.1
@@ -22,9 +22,9 @@ require (
 	github.com/pquerna/otp v1.4.0
 	github.com/robfig/cron/v3 v3.0.1
 	github.com/sirupsen/logrus v1.9.3
-	golang.org/x/crypto v0.16.0
+	golang.org/x/crypto v0.17.0
 	golang.org/x/text v0.14.0
-	google.golang.org/grpc v1.60.0
+	google.golang.org/grpc v1.60.1
 	google.golang.org/protobuf v1.31.0
 	gopkg.in/yaml.v3 v3.0.1
 	gorm.io/driver/mysql v1.5.2

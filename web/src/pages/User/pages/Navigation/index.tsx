@@ -1,5 +1,6 @@
 import { FC } from "react";
 
+import LoadingFullContainer from "@components/LoadingFullContainer";
 import AppListBlock from "@components/user/nav/AppListBlock";
 import { Container } from "@mui/material";
 
@@ -39,7 +40,13 @@ export const Navigation: FC = () => {
             }}
           />
         </>
-      ) : null}
+      ) : (
+        <LoadingFullContainer
+          sx={{
+            flexGrow: 1,
+          }}
+        />
+      )}
     </Container>
   );
 };

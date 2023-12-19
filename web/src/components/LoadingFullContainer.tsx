@@ -1,13 +1,18 @@
 import { FC } from "react";
 
-import { CircularProgress, Stack } from "@mui/material";
+import { CircularProgress, Stack, SxProps } from "@mui/material";
 
-export const LoadingFullContainer: FC = () => {
+interface Props {
+  sx?: SxProps;
+}
+
+export const LoadingFullContainer: FC<Props> = ({ sx }) => {
   return (
     <Stack
       sx={{
         height: "100%",
         width: "100%",
+        ...sx,
       }}
       justifyContent={"center"}
       alignItems={"center"}
