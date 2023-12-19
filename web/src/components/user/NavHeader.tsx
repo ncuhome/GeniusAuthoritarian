@@ -3,6 +3,7 @@ import { useNavigate } from "react-router-dom";
 import toast from "react-hot-toast";
 import "./NavHeader.css";
 
+import DarkModeSwitch from "@components/DarkModeSwitch";
 import Picture from "@components/Picture";
 import {
   Box,
@@ -12,8 +13,10 @@ import {
   Tab,
   Typography,
   IconButton,
+  Divider,
+  useTheme as useMuiTheme,
 } from "@mui/material";
-import { LogoutRounded, DarkMode, LightMode } from "@mui/icons-material";
+import { LogoutRounded } from "@mui/icons-material";
 
 import { Logout, apiV1User } from "@api/v1/user/base";
 
@@ -35,6 +38,7 @@ export const NavHeader: FC<Props> = ({
   onChangeTab: handleChangeTab,
 }) => {
   const nav = useNavigate();
+  const muiTheme = useMuiTheme();
 
   const setDialog = useUser((state) => state.setDialog);
 
@@ -105,15 +109,25 @@ export const NavHeader: FC<Props> = ({
         <Stack
           flexDirection={"row"}
           alignItems={"center"}
+          divider={<Divider orientation={"vertical"} variant="middle" />}
           sx={{
-            "&>*": {
-              marginLeft: "0.5rem",
+            "& hr": {
+              mx: 0.6,
+              height: "1rem",
             },
           }}
         >
-          <IconButton onClick={() => setDarkTheme(!darkTheme)}>
-            {darkTheme ? <DarkMode /> : <LightMode />}
-          </IconButton>
+          <DarkModeSwitch
+            onChange={() => setDarkTheme(!darkTheme)}
+            checked={darkTheme}
+            style={{
+              paddingTop: "1px",
+              marginLeft: "5px",
+              marginRight: "5px",
+            }}
+            sunColor={muiTheme.palette.action.active}
+            size={22}
+          />
           <IconButton
             onClick={async () => {
               const ok = await setDialog({
