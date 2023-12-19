@@ -42,10 +42,8 @@ export const defaultProperties = {
       opacity: 1,
     },
   },
-  springConfig: { mass: 4, tension: 250, friction: 35 },
+  springConfig: { mass: 2.5, tension: 350, friction: 35 },
 };
-
-let REACT_TOGGLE_DARK_MODE_GLOBAL_ID = 0;
 
 type SVGProps = Omit<HTMLAttributes<HTMLOrSVGElement>, "onChange">;
 
@@ -70,12 +68,7 @@ export const DarkModeSwitch: FC<Props> = ({
   style,
   ...rest
 }) => {
-  const [id, setId] = useState(0);
-
-  useEffect(() => {
-    REACT_TOGGLE_DARK_MODE_GLOBAL_ID += 1;
-    setId(REACT_TOGGLE_DARK_MODE_GLOBAL_ID);
-  }, [setId]);
+  const uniqueMaskId = useMemo(() => `circle-mask-${Math.random()}`, []);
 
   const properties = useMemo(() => {
     if (animationProperties !== defaultProperties) {
@@ -106,8 +99,6 @@ export const DarkModeSwitch: FC<Props> = ({
 
   const toggle = () => onChange(!checked);
 
-  const uniqueMaskId = `circle-mask-${id}`;
-
   return (
     <animated.svg
       xmlns="http://www.w3.org/2000/svg"
@@ -131,7 +122,7 @@ export const DarkModeSwitch: FC<Props> = ({
       <mask id={uniqueMaskId}>
         <rect x="0" y="0" width="100%" height="100%" fill="white" />
         <animated.circle
-          // @ts-ignore
+          // @ts-expect-error
           style={maskedCircleProps}
           r="9"
           fill="black"

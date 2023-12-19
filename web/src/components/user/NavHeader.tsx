@@ -148,22 +148,19 @@ export const NavHeader: FC<Props> = ({
           divider={<Divider orientation={"vertical"} variant="middle" />}
           sx={{
             "& hr": {
-              mx: 0.6,
+              mx: 0.8,
               height: "1rem",
             },
           }}
         >
-          <DarkModeSwitch
-            onChange={() => setDarkTheme(!darkTheme)}
-            checked={darkTheme}
-            style={{
-              paddingTop: "1px",
-              marginLeft: "5px",
-              marginRight: "5px",
-            }}
-            sunColor={muiTheme.palette.action.active}
-            size={22}
-          />
+          <IconButton>
+            <DarkModeSwitch
+              onChange={() => setDarkTheme(!darkTheme)}
+              checked={darkTheme}
+              sunColor={muiTheme.palette.action.active}
+              size={22}
+            />
+          </IconButton>
           <IconButton
             onClick={async () => {
               const ok = await setDialog({
