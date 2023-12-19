@@ -1,4 +1,4 @@
-import { FC } from "react";
+import { FC, useState, CSSProperties, Fragment } from "react";
 import { useNavigate } from "react-router-dom";
 import toast from "react-hot-toast";
 import "./NavHeader.css";
@@ -14,9 +14,20 @@ import {
   Typography,
   IconButton,
   Divider,
+  Drawer,
+  List,
+  ListItem,
+  ListItemIcon,
+  ListItemButton,
+  ListItemText,
   useTheme as useMuiTheme,
+  useMediaQuery,
 } from "@mui/material";
-import { LogoutRounded } from "@mui/icons-material";
+import {
+  LogoutRounded,
+  Menu,
+  KeyboardArrowRightRounded,
+} from "@mui/icons-material";
 
 import { Logout, apiV1User } from "@api/v1/user/base";
 
@@ -39,6 +50,9 @@ export const NavHeader: FC<Props> = ({
 }) => {
   const nav = useNavigate();
   const muiTheme = useMuiTheme();
+  const isSmallScreen = useMediaQuery(muiTheme.breakpoints.down("sm"));
+
+  const [menuOpen, setMenuOpen] = useState(false);
 
   const setDialog = useUser((state) => state.setDialog);
 
@@ -54,6 +68,21 @@ export const NavHeader: FC<Props> = ({
     }
   };
 
+  const onRoute = (index: number, path: string) => {
+    handleChangeTab(index);
+    nav(path);
+  };
+
+  const renderLogo = (style?: CSSProperties) => {
+    return (
+      <Picture
+        name={`logo-${darkTheme ? "white" : "dark"}`}
+        alt={"NCUHOME"}
+        imgStyle={style}
+      />
+    );
+  };
+
   return (
     <Stack
       id={"user-nav"}
@@ -66,45 +95,52 @@ export const NavHeader: FC<Props> = ({
       elevation={6}
       square
     >
-      <Box
-        sx={{
-          height: "100%",
-          display: { xs: "none", sm: "flex" },
-          alignItems: "center",
-          marginRight: "1rem",
-          "&>picture": {
-            height: "60%",
-            "&>img": {
-              height: "100%",
+      {isSmallScreen ? undefined : (
+        <Box
+          sx={{
+            height: "100%",
+            display: "flex",
+            alignItems: "center",
+            marginRight: "1rem",
+            "&>picture": {
+              height: "60%",
+              "&>img": {
+                height: "100%",
+              },
             },
-          },
-        }}
-      >
-        <Picture
-          name={`logo-${darkTheme ? "white" : "dark"}`}
-          alt={"NCUHOME"}
-        />
-      </Box>
+          }}
+        >
+          {renderLogo()}
+        </Box>
+      )}
 
       <Stack
         flexDirection={"row"}
         flexGrow={1}
         justifyContent={"space-between"}
       >
-        <Tabs value={currentTab} textColor="inherit">
-          {routers.map((r, index) => (
-            <Tab
-              key={r.name}
-              label={<Typography variant={"subtitle1"}>{r.name}</Typography>}
-              value={index}
-              onClick={() => {
-                handleChangeTab(index);
-                nav(r.path);
-              }}
-              disableRipple
-            />
-          ))}
-        </Tabs>
+        {isSmallScreen ? (
+          <IconButton
+            color="inherit"
+            aria-label="open drawer"
+            edge="start"
+            onClick={() => setMenuOpen((open) => !open)}
+          >
+            <Menu />
+          </IconButton>
+        ) : (
+          <Tabs value={currentTab} textColor="inherit">
+            {routers.map((r, index) => (
+              <Tab
+                key={r.name}
+                label={<Typography variant={"subtitle1"}>{r.name}</Typography>}
+                value={index}
+                onClick={() => onRoute(index, r.path)}
+                disableRipple
+              />
+            ))}
+          </Tabs>
+        )}
 
         <Stack
           flexDirection={"row"}
@@ -141,6 +177,60 @@ export const NavHeader: FC<Props> = ({
           </IconButton>
         </Stack>
       </Stack>
+
+      {isSmallScreen ? (
+        <Drawer
+          anchor={"left"}
+          open={menuOpen}
+          onClose={() => setMenuOpen(false)}
+        >
+          <Stack
+            alignItems={"center"}
+            sx={{
+              boxSizing: "border-box",
+              pt: 2,
+              px: 3,
+              minWidth: "100%",
+            }}
+          >
+            {renderLogo({
+              maxWidth: "100%",
+              width: "7.5rem",
+            })}
+          </Stack>
+          <List>
+            {routers.map((r, index) => (
+              <Fragment key={r.name}>
+                <Divider />
+                <ListItem disablePadding>
+                  <ListItemButton
+                    onClick={() => {
+                      onRoute(index, r.path);
+                      setMenuOpen(false);
+                    }}
+                    sx={{
+                      paddingRight: "1.5rem",
+                    }}
+                  >
+                    <ListItemIcon
+                      sx={{
+                        minWidth: "2.2rem",
+                      }}
+                    >
+                      <KeyboardArrowRightRounded
+                        sx={{
+                          color: "text.disabled",
+                        }}
+                      />
+                    </ListItemIcon>
+                    <ListItemText primary={r.name} />
+                  </ListItemButton>
+                </ListItem>
+              </Fragment>
+            ))}
+          </List>
+        </Drawer>
+      ) : undefined}
     </Stack>
   );
 };
