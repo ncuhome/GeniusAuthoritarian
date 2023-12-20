@@ -15,7 +15,7 @@ type App struct {
 	AppCode        string `gorm:"not null;uniqueIndex;type:varchar(36)"`
 	AppSecret      string `gorm:"not null"`
 	Callback       string `gorm:"not null"`
-	PermitAllGroup bool
+	PermitAllGroup bool   `gorm:"index"`
 	// 以下仅用于导航标识
 	LinkOff bool   `gorm:"index"`
 	Views   uint64 `gorm:"index"`
