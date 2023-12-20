@@ -37,11 +37,12 @@ func (a *User) InsertAll(tx *gorm.DB, users []User) error {
 
 func (a *User) Exist(tx *gorm.DB) (bool, error) {
 	var t bool
-	return t, tx.Model(a).Select("1").Where(a, "id").Limit(1).Find(&t).Error
+	return t, tx.Model(a).Select("1").Where(a, "id").
+		Limit(1).Find(&t).Error
 }
 
 func (a *User) FirstByID(tx *gorm.DB) error {
-	return tx.Model(a).Take(a).Error
+	return tx.Take(a, a.ID).Error
 }
 
 func (a *User) FirstByPhone(tx *gorm.DB) error {
@@ -50,19 +51,19 @@ func (a *User) FirstByPhone(tx *gorm.DB) error {
 
 func (a *User) FirstProfileByID(tx *gorm.DB) (*dto.UserProfile, error) {
 	var t dto.UserProfile
-	return &t, tx.Model(a).Take(&t).Error
+	return &t, tx.Model(a).Take(&t, a.ID).Error
 }
 
 func (a *User) FirstForPasskey(tx *gorm.DB) error {
-	return tx.Model(a).Select("name").Take(a).Error
+	return tx.Select("name").Take(a, a.ID).Error
 }
 
 func (a *User) FirstMfa(tx *gorm.DB) error {
-	return tx.Model(a).Select("mfa").Take(a).Error
+	return tx.Select("mfa").Take(a, a.ID).Error
 }
 
 func (a *User) FirstPhoneByID(tx *gorm.DB) error {
-	return tx.Model(a).Select("phone").Take(a).Error
+	return tx.Select("phone").Take(a, a.ID).Error
 }
 
 func (a *User) GetUnscopedByPhoneSlice(tx *gorm.DB, phone []string) ([]User, error) {
@@ -90,14 +91,13 @@ func (a *User) GetNoSshDevIds(tx *gorm.DB) ([]uint, error) {
 
 func (a *User) U2fStatus(tx *gorm.DB) (*dto.UserU2fStatus, error) {
 	var t dto.UserU2fStatus
-	return &t, tx.Model(a).Select("users.prefer_u2f AS prefer", "1 AS phone", "(users.mfa IS NOT NULL AND users.mfa!='') AS mfa", "user_webauthns.id IS NOT NULL AS passkey").
+	return &t, tx.Model(&User{}).Select("users.prefer_u2f AS prefer", "1 AS phone", "(users.mfa IS NOT NULL AND users.mfa!='') AS mfa", "user_webauthns.id IS NOT NULL AS passkey").
 		Joins("LEFT JOIN user_webauthns ON user_webauthns.uid=users.id").
-		Where(a, "id").
-		Limit(1).Find(&t).Error
+		Limit(1).Find(&t, a.ID).Error
 }
 
 func (a *User) FrozeByIDSlice(tx *gorm.DB, ids []uint) error {
-	return tx.Delete(a, "id IN ?", ids).Error
+	return tx.Delete(a, ids).Error
 }
 
 func (a *User) FrozeByPhone(tx *gorm.DB) *gorm.DB {

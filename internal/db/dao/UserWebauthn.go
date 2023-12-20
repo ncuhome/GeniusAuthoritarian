@@ -48,5 +48,5 @@ func (a *UserWebauthn) Exist(tx *gorm.DB) (bool, error) {
 }
 
 func (a *UserWebauthn) Delete(tx *gorm.DB) *gorm.DB {
-	return tx.Model(&UserWebauthn{}).Where(a, "id", "uid").Delete(nil)
+	return tx.Where(a, "id", "uid").Delete(&UserWebauthn{})
 }

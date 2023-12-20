@@ -29,9 +29,9 @@ func (a *AppGroup) sqlGetGroupsByAppCode(tx *gorm.DB, appCode string) *gorm.DB {
 }
 
 func (a *AppGroup) DeleteByAID(tx *gorm.DB) error {
-	return tx.Model(a).Where("aid=?", a.AID).Delete(nil).Error
+	return tx.Where("aid=?", a.AID).Delete(a).Error
 }
 
 func (a *AppGroup) DeleteByGidForApp(tx *gorm.DB, gids ...uint) error {
-	return tx.Model(a).Where("aid=? AND gid IN ?", a.AID, gids).Delete(nil).Error
+	return tx.Where("aid=? AND gid IN ?", a.AID, gids).Delete(a).Error
 }

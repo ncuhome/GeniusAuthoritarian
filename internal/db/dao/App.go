@@ -80,27 +80,28 @@ func (a *App) UserAccessible(tx *gorm.DB) (bool, error) {
 }
 
 func (a *App) FirstByID(tx *gorm.DB) error {
-	return tx.Model(a).Omit("app_secret").Take(a).Error
+	return tx.Omit("app_secret").Take(a, a.ID).Error
 }
 
 func (a *App) FirstAppCodeByID(tx *gorm.DB) error {
-	return tx.Model(&App{}).Where(a, "id", "uid").Select("app_code").Take(a).Error
+	return tx.Where(a, "id", "uid").Select("app_code").Take(a).Error
 }
 
 func (a *App) FirstCallbackByID(tx *gorm.DB) error {
-	return tx.Model(a).Select("callback").Take(a).Error
+	return tx.Select("callback").Take(a, a.ID).Error
 }
 
 func (a *App) FirstByAppCode(tx *gorm.DB) error {
-	return tx.Model(a).Omit("app_secret").Where("app_code=?", a.AppCode).Take(a).Error
+	return tx.Omit("app_secret").
+		Where("app_code=?", a.AppCode).Take(a).Error
 }
 
 func (a *App) FirstAppKeyPairByID(tx *gorm.DB) error {
-	return tx.Model(a).Select("app_code", "app_secret").Take(a, a.ID).Error
+	return tx.Select("app_code", "app_secret").Take(a, a.ID).Error
 }
 
 func (a *App) FirstAppKeyPairByAppCode(tx *gorm.DB) error {
-	return tx.Model(a).Select("app_code", "app_secret").
+	return tx.Select("app_code", "app_secret").
 		Take(a, "app_code=?", a.AppCode).Error
 }
 
@@ -154,7 +155,7 @@ func (a *App) GetForUpdateView(tx *gorm.DB) ([]App, error) {
 }
 
 func (a *App) DeleteByIdForUID(tx *gorm.DB) error {
-	return tx.Model(&App{}).Where(a, "id", "uid").Delete(a).Error
+	return tx.Model(&App{}).Where(a, "id", "uid").Delete(nil).Error
 }
 
 func (a *App) UpdatesByID(tx *gorm.DB) error {
