@@ -41,7 +41,7 @@ func (a *User) Exist(tx *gorm.DB) (bool, error) {
 }
 
 func (a *User) FirstByID(tx *gorm.DB) error {
-	return tx.Where(a, "id").Take(a).Error
+	return tx.Model(a).Take(a).Error
 }
 
 func (a *User) FirstByPhone(tx *gorm.DB) error {
@@ -50,19 +50,19 @@ func (a *User) FirstByPhone(tx *gorm.DB) error {
 
 func (a *User) FirstProfileByID(tx *gorm.DB) (*dto.UserProfile, error) {
 	var t dto.UserProfile
-	return &t, tx.Model(a).Take(&t, "id=?", a.ID).Error
+	return &t, tx.Model(a).Take(&t).Error
 }
 
 func (a *User) FirstForPasskey(tx *gorm.DB) error {
-	return tx.Model(a).Select("name").Where(a, "id").Take(a).Error
+	return tx.Model(a).Select("name").Take(a).Error
 }
 
 func (a *User) FirstMfa(tx *gorm.DB) error {
-	return tx.Model(a).Select("mfa").Where(a, "id").Take(a).Error
+	return tx.Model(a).Select("mfa").Take(a).Error
 }
 
 func (a *User) FirstPhoneByID(tx *gorm.DB) error {
-	return tx.Model(a).Select("phone").Where(a, "id").Take(a).Error
+	return tx.Model(a).Select("phone").Take(a).Error
 }
 
 func (a *User) GetUnscopedByPhoneSlice(tx *gorm.DB, phone []string) ([]User, error) {
@@ -105,7 +105,7 @@ func (a *User) FrozeByPhone(tx *gorm.DB) *gorm.DB {
 }
 
 func (a *User) UpdateMfa(tx *gorm.DB) error {
-	return tx.Model(a).Select("mfa").Where(a, "id").Updates(a).Error
+	return tx.Model(a).Select("mfa").Updates(a).Error
 }
 
 func (a *User) UnfrozeByIDSlice(tx *gorm.DB, ids []uint) error {
@@ -113,14 +113,13 @@ func (a *User) UnfrozeByIDSlice(tx *gorm.DB, ids []uint) error {
 }
 
 func (a *User) UpdateU2fPreferByID(tx *gorm.DB) error {
-	return tx.Model(a).Where(a, "id").Update("prefer_u2f", a.PreferU2F).Error
+	return tx.Model(a).Update("prefer_u2f", a.PreferU2F).Error
 }
 
 func (a *User) UpdateAllInfoByID(tx *gorm.DB) *gorm.DB {
-	return tx.Model(a).Select("name", "phone", "avatar_url").
-		Where(a, "id").Updates(a)
+	return tx.Model(a).Select("name", "phone", "avatar_url").Updates(a)
 }
 
 func (a *User) DelMfa(tx *gorm.DB) error {
-	return tx.Model(a).Model(a).Where(a, "id").Update("mfa", "").Error
+	return tx.Model(a).Update("mfa", "").Error
 }

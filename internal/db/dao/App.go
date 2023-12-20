@@ -67,28 +67,28 @@ func (a *App) Insert(tx *gorm.DB) error {
 
 func (a *App) FirstDetailedByIdAndUID(tx *gorm.DB) (*dto.AppShowDetail, error) {
 	var t dto.AppShowDetail
-	return &t, tx.Model(a).Where(a, "id", "uid").First(&t).Error
+	return &t, tx.Model(&App{}).Where(a, "id", "uid").Take(&t).Error
 }
 
 func (a *App) UserAccessible(tx *gorm.DB) (bool, error) {
 	var t bool
-	tx = tx.Model(a).Select("1")
+	tx = tx.Model(&App{}).Select("1")
 	tx = a.sqlJoinAppGroups(tx)
 	tx = a.sqlJoinGroups(tx)
 	tx = a.sqlJoinUserGroups(tx)
-	return t, tx.Where("apps.id=? AND user_groups.uid=?", a.ID, a.UID).First(&t).Error
+	return t, tx.Where("apps.id=? AND user_groups.uid=?", a.ID, a.UID).Take(&t).Error
 }
 
 func (a *App) FirstByID(tx *gorm.DB) error {
-	return tx.Model(a).Omit("app_secret").First(a, a.ID).Error
+	return tx.Model(a).Omit("app_secret").Take(a).Error
 }
 
 func (a *App) FirstAppCodeByID(tx *gorm.DB) error {
-	return tx.Model(a).Where(a, "id", "uid").Select("app_code").First(a).Error
+	return tx.Model(&App{}).Where(a, "id", "uid").Select("app_code").Take(a).Error
 }
 
 func (a *App) FirstCallbackByID(tx *gorm.DB) error {
-	return tx.Model(a).Select("callback").Take(a, a.ID).Error
+	return tx.Model(a).Select("callback").Take(a).Error
 }
 
 func (a *App) FirstByAppCode(tx *gorm.DB) error {
@@ -149,15 +149,16 @@ func (a *App) GetAllWithGroup(tx *gorm.DB) ([]dto.AppShowWithGroup, error) {
 
 func (a *App) GetForUpdateView(tx *gorm.DB) ([]App, error) {
 	var t []App
-	return t, tx.Model(a).Select("id", "views_id", "views").Where("link_off IS NULL OR link_off=?", false).Order("id").Find(&t).Error
+	return t, tx.Model(a).Select("id", "views_id", "views").
+		Where("link_off IS NULL OR link_off=?", false).Order("id").Find(&t).Error
 }
 
 func (a *App) DeleteByIdForUID(tx *gorm.DB) error {
-	return tx.Model(a).Where(a, "id", "uid").Delete(a).Error
+	return tx.Model(&App{}).Where(a, "id", "uid").Delete(a).Error
 }
 
 func (a *App) UpdatesByID(tx *gorm.DB) error {
-	return tx.Model(a).Select("name", "callback", "permit_all_group").Where(a, "id").Updates(a).Error
+	return tx.Model(a).Select("name", "callback", "permit_all_group").Updates(a).Error
 }
 
 func (a *App) UpdateViewByID(tx *gorm.DB) error {
@@ -165,5 +166,5 @@ func (a *App) UpdateViewByID(tx *gorm.DB) error {
 }
 
 func (a *App) UpdateLinkOff(tx *gorm.DB) error {
-	return tx.Model(a).Where(a, "id", "uid").Update("link_off", a.LinkOff).Error
+	return tx.Model(&App{}).Where(a, "id", "uid").Update("link_off", a.LinkOff).Error
 }

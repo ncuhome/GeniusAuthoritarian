@@ -23,7 +23,8 @@ func (a *UserWebauthn) Insert(tx *gorm.DB) error {
 
 func (a *UserWebauthn) GetByUID(tx *gorm.DB) ([]string, error) {
 	var t []string
-	return t, tx.Model(a).Select("credential").Where(a, "uid").Find(&t).Error
+	return t, tx.Model(a).Select("credential").
+		Where(a, "uid").Find(&t).Error
 }
 
 func (a *UserWebauthn) GetByUidForShow(tx *gorm.DB) ([]dto.UserCredential, error) {
@@ -33,7 +34,7 @@ func (a *UserWebauthn) GetByUidForShow(tx *gorm.DB) ([]dto.UserCredential, error
 }
 
 func (a *UserWebauthn) UpdatesByID(tx *gorm.DB) error {
-	return tx.Where(a, "id").Updates(a).Error
+	return tx.Model(a).Updates(a).Error
 }
 
 func (a *UserWebauthn) UpdateLastUsedAt(tx *gorm.DB) *gorm.DB {
@@ -42,9 +43,10 @@ func (a *UserWebauthn) UpdateLastUsedAt(tx *gorm.DB) *gorm.DB {
 
 func (a *UserWebauthn) Exist(tx *gorm.DB) (bool, error) {
 	var t bool
-	return t, tx.Model(a).Select("1").Where(a, "id", "uid").Limit(1).Find(&t).Find(&t).Error
+	return t, tx.Model(&UserWebauthn{}).Select("1").
+		Where(a, "id", "uid").Limit(1).Find(&t).Error
 }
 
 func (a *UserWebauthn) Delete(tx *gorm.DB) *gorm.DB {
-	return tx.Model(a).Where(a, "id", "uid").Delete(a)
+	return tx.Model(&UserWebauthn{}).Where(a, "id", "uid").Delete(nil)
 }

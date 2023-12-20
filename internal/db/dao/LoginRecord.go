@@ -30,7 +30,8 @@ func (a *LoginRecord) sqlJoinApps(tx *gorm.DB) *gorm.DB {
 }
 
 func (a *LoginRecord) sqlGetByUID(tx *gorm.DB) *gorm.DB {
-	tx = tx.Model(a).Where(a, "uid").Select("login_records.*,IFNULL(apps.name,?) as target", global.ThisAppName)
+	tx = tx.Model(a).Where(a, "uid").
+		Select("login_records.*,IFNULL(apps.name,?) as target", global.ThisAppName)
 	tx = a.sqlJoinApps(tx)
 	tx = tx.Order("login_records.id DESC")
 	return tx
@@ -45,7 +46,7 @@ func (a *LoginRecord) Insert(tx *gorm.DB) error {
 }
 
 func (a *LoginRecord) UpdateDestroyedByID(tx *gorm.DB) error {
-	return tx.Model(a).Where(a, "id").Update("destroyed", true).Error
+	return tx.Model(a).Update("destroyed", true).Error
 }
 
 func (a *LoginRecord) UpdateDestroyedByIDSlice(tx *gorm.DB, ids []uint) error {
@@ -76,7 +77,7 @@ func (a *LoginRecord) GetValidForUser(tx *gorm.DB) ([]dto.LoginRecordOnline, err
 
 func (a *LoginRecord) ValidExist(tx *gorm.DB) (bool, error) {
 	var t bool
-	tx = tx.Model(a).Select("1")
+	tx = tx.Model(&LoginRecord{}).Select("1")
 	tx = a.sqlLoginValid(tx)
 	tx = tx.Where(a, "id", "uid").Limit(1)
 	return t, tx.Find(&t).Error
