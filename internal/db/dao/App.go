@@ -15,10 +15,10 @@ type App struct {
 	AppCode        string `gorm:"not null;uniqueIndex;type:varchar(36)"`
 	AppSecret      string `gorm:"not null"`
 	Callback       string `gorm:"not null"`
-	PermitAllGroup bool   `gorm:"index"`
+	PermitAllGroup bool   `gorm:"index:idx_apps_permit_all_nav,priority:1"`
 	// 以下仅用于导航标识
-	LinkOff bool   `gorm:"index"`
-	Views   uint64 `gorm:"index"`
+	LinkOff bool   `gorm:"index;idx_apps_permit_all_nav,priority:2"`
+	Views   uint64 `gorm:"idx_apps_permit_all_nav,priority:3,sort:DESC"`
 	// LoginRecord.ID 统计用，无需约束
 	ViewsID uint
 }
