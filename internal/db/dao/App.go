@@ -11,7 +11,7 @@ type App struct {
 	// User.ID 拥有者
 	UID            uint   `gorm:"column:uid;index"`
 	User           *User  `gorm:"foreignKey:UID;constraint:OnDelete:SET NULL"`
-	Name           string `gorm:"not null;uniqueIndex;type:varchar(20)"`
+	Name           string `gorm:"not null;uniqueIndex;type:varchar(20);index:idx_apps_permit_all_nav,priority:4"`
 	AppCode        string `gorm:"not null;uniqueIndex;type:varchar(36)"`
 	AppSecret      string `gorm:"not null"`
 	Callback       string `gorm:"not null"`
