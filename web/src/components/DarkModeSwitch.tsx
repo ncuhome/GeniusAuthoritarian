@@ -48,7 +48,7 @@ export const defaultProperties = {
 type SVGProps = Omit<HTMLAttributes<HTMLOrSVGElement>, "onChange">;
 
 export interface Props extends SVGProps {
-  onChange: (checked: boolean) => void;
+  onChange?: (checked: boolean) => void;
   checked?: boolean;
   style?: CSSProperties;
   size?: number | string;
@@ -97,7 +97,7 @@ export const DarkModeSwitch: FC<Props> = ({
     config: animationProperties.springConfig,
   });
 
-  const toggle = () => onChange(!checked);
+  const toggle = () => onChange?.(!checked);
 
   return (
     <animated.svg

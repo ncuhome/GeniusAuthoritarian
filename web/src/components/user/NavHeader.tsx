@@ -153,9 +153,8 @@ export const NavHeader: FC<Props> = ({
             },
           }}
         >
-          <IconButton>
+          <IconButton onClick={() => setDarkTheme(!darkTheme)}>
             <DarkModeSwitch
-              onChange={() => setDarkTheme(!darkTheme)}
               checked={darkTheme}
               sunColor={muiTheme.palette.action.active}
               size={22}
