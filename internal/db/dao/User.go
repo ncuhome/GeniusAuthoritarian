@@ -41,28 +41,28 @@ func (a *User) Exist(tx *gorm.DB) (bool, error) {
 }
 
 func (a *User) FirstByID(tx *gorm.DB) error {
-	return tx.Where(a, "id").First(a).Error
+	return tx.Where(a, "id").Take(a).Error
 }
 
 func (a *User) FirstByPhone(tx *gorm.DB) error {
-	return tx.First(a, "phone=?", a.Phone).Error
+	return tx.Take(a, "phone=?", a.Phone).Error
 }
 
 func (a *User) FirstProfileByID(tx *gorm.DB) (*dto.UserProfile, error) {
 	var t dto.UserProfile
-	return &t, tx.Model(a).First(&t, "id=?", a.ID).Error
+	return &t, tx.Model(a).Take(&t, "id=?", a.ID).Error
 }
 
 func (a *User) FirstForPasskey(tx *gorm.DB) error {
-	return tx.Model(a).Select("name").Where(a, "id").First(a).Error
+	return tx.Model(a).Select("name").Where(a, "id").Take(a).Error
 }
 
 func (a *User) FirstMfa(tx *gorm.DB) error {
-	return tx.Model(a).Select("mfa").Where(a, "id").First(a).Error
+	return tx.Model(a).Select("mfa").Where(a, "id").Take(a).Error
 }
 
 func (a *User) FirstPhoneByID(tx *gorm.DB) error {
-	return tx.Model(a).Select("phone").Where(a, "id").First(a).Error
+	return tx.Model(a).Select("phone").Where(a, "id").Take(a).Error
 }
 
 func (a *User) GetUnscopedByPhoneSlice(tx *gorm.DB, phone []string) ([]User, error) {

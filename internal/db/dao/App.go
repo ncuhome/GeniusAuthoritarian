@@ -88,20 +88,20 @@ func (a *App) FirstAppCodeByID(tx *gorm.DB) error {
 }
 
 func (a *App) FirstCallbackByID(tx *gorm.DB) error {
-	return tx.Model(a).Select("callback").First(a, a.ID).Error
+	return tx.Model(a).Select("callback").Take(a, a.ID).Error
 }
 
 func (a *App) FirstByAppCode(tx *gorm.DB) error {
-	return tx.Model(a).Omit("app_secret").Where("app_code=?", a.AppCode).First(a).Error
+	return tx.Model(a).Omit("app_secret").Where("app_code=?", a.AppCode).Take(a).Error
 }
 
 func (a *App) FirstAppKeyPairByID(tx *gorm.DB) error {
-	return tx.Model(a).Select("app_code", "app_secret").First(a, a.ID).Error
+	return tx.Model(a).Select("app_code", "app_secret").Take(a, a.ID).Error
 }
 
 func (a *App) FirstAppKeyPairByAppCode(tx *gorm.DB) error {
 	return tx.Model(a).Select("app_code", "app_secret").
-		First(a, "app_code=?", a.AppCode).Error
+		Take(a, "app_code=?", a.AppCode).Error
 }
 
 func (a *App) GetAppCode(tx *gorm.DB) ([]string, error) {
