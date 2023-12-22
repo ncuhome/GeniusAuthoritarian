@@ -24,7 +24,7 @@ func New(conf *Config, gormConfig *gorm.Config) (*gorm.DB, error) {
 
 	//连接池设置
 	if sqlDB, err := db.DB(); err == nil {
-		sqlDB.SetConnMaxLifetime(time.Hour * 5)
+		sqlDB.SetConnMaxIdleTime(time.Hour)
 	}
 
 	return db, nil

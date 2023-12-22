@@ -104,7 +104,7 @@ func FinishPasskeyLogin(c *gin.Context) {
 		return
 	}
 
-	claims := jwtClaims.LoginRedis{
+	token, err := jwt.GenerateLoginToken(jwtClaims.LoginRedis{
 		UID:       user.ID,
 		Name:      user.Name,
 		IP:        c.ClientIP(),
@@ -112,9 +112,7 @@ func FinishPasskeyLogin(c *gin.Context) {
 		Groups:    groups,
 		AppID:     appInfo.ID,
 		AvatarUrl: user.AvatarUrl,
-	}
-
-	token, err := jwt.GenerateLoginToken(claims)
+	})
 	if err != nil {
 		callback.Error(c, callback.ErrUnexpected, err)
 		return
