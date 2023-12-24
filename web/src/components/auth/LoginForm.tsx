@@ -53,7 +53,7 @@ export const LoginForm: FC = () => {
           data: { url },
         },
       } = await apiV1.get(`public/login/${thirdParty}/link/${appCode}`);
-      history.replaceState(null, "", url);
+      window.open(url, "_self");
     } catch ({ msg }) {
       if (msg) toast.error(msg as string);
     }
@@ -89,7 +89,7 @@ export const LoginForm: FC = () => {
           },
         },
       );
-      history.replaceState(null, "", data.callback);
+      window.open(data.callback, "_self");
     } catch (err: any) {
       if (err instanceof AxiosError) {
         err = err as ApiError<void>;

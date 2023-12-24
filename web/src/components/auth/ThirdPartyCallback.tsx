@@ -39,7 +39,7 @@ export const ThirdPartyCallback = memo<Props>(
             code,
           },
         );
-        if (!data.mfa) history.replaceState(null, "", data.callback!);
+        if (!data.mfa) window.open(data.callback!, "_self");
         else setMfaToken(data.token);
       } catch ({ msg }) {
         if (msg) ThrowError(nav, "登录失败", msg as string, appCode);
@@ -69,7 +69,7 @@ export const ThirdPartyCallback = memo<Props>(
             code: mfaCode,
           },
         );
-        history.replaceState(null, "", data.callback!);
+        window.open(data.callback, "_self");
       } catch ({ msg }) {
         if (msg) toast.error(msg as string);
       }
