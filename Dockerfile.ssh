@@ -30,7 +30,7 @@ RUN apk update && \
     sed -i 's/.*GatewayPorts.*/GatewayPorts yes/' /etc/ssh/sshd_config && \
     ssh-keygen -A
 
-COPY --from=builder ./rpc /usr/bin/rpc
+COPY --from=builder /build/rpc /usr/bin/rpc
 
 RUN chmod 700 /usr/bin/rpc && \
     chown root /usr/bin/rpc && \
