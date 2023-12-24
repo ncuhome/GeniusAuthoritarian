@@ -1,0 +1,45 @@
+FROM node:alpine as node-builder
+
+RUN npm i -g pnpm
+
+WORKDIR /build
+
+COPY ./web/package.json ./web/pnpm-lock.yaml ./
+
+RUN pnpm install --frozen-lockfile
+
+COPY ./web .
+
+RUN pnpm run build
+
+FROM golang:alpine as go-builder
+
+RUN go env -w CGO_ENABLED=0
+
+WORKDIR /build
+
+COPY ./go.mod ./go.sum ./
+
+RUN go mod download
+
+COPY . .
+COPY --from=node-builder /build/dist ./web/dist
+
+RUN go build -gcflags=-trimpath=$GOPATH -asmflags=-trimpath=$GOPATH -ldflags '-extldflags "-static" -s -w' -o core --tags="web nomsgpack" ./cmd/core
+
+FROM alpine:latest
+
+RUN apk update && \
+    apk upgrade --no-cache && \
+    apk add --no-cache tzdata && \
+    cp /usr/share/zoneinfo/Asia/Shanghai /etc/localtime && \
+    echo 'Asia/Shanghai' >/etc/timezone && \
+    rm -rf /var/cache/apk/*
+
+WORKDIR /data
+
+COPY --from=go-builder /build/core /usr/bin/core
+
+RUN chmod +x /usr/bin/core
+
+ENTRYPOINT [ "/usr/bin/core" ]
