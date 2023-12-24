@@ -1,3 +1,4 @@
 /.idea
-Config.yaml
+/Config.yaml
 /main*
+/*.log
