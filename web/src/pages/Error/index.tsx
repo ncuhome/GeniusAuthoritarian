@@ -108,7 +108,9 @@ export const Error: FC = () => {
               </Button>
 
               {state?.retryAppCode !== undefined ? (
-                <Button onClick={() => GoLogin(nav, state!.retryAppCode!)}>
+                <Button
+                  onClick={() => GoLogin(nav, state!.retryAppCode!, true)}
+                >
                   重试
                 </Button>
               ) : undefined}

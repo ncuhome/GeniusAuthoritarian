@@ -27,7 +27,7 @@ export const Login: FC = () => {
         token,
       });
       setAuth(res.token, res.groups);
-      nav("/user/");
+      nav("/user/", { replace: true });
     } catch ({ msg }) {
       if (msg) ThrowError(nav, "登录失败", msg as string, "");
     }

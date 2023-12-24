@@ -37,12 +37,12 @@ export const ThirdPartyCallback = memo<Props>(
           `public/login/${thirdParty}/${appCode}`,
           {
             code,
-          }
+          },
         );
-        if (!data.mfa) window.open(data.callback!, "_self");
+        if (!data.mfa) history.replaceState(null, "", data.callback!);
         else setMfaToken(data.token);
       } catch ({ msg }) {
-          if (msg) ThrowError(nav, "登录失败", msg as string, appCode);
+        if (msg) ThrowError(nav, "登录失败", msg as string, appCode);
       }
     }
 
@@ -67,9 +67,9 @@ export const ThirdPartyCallback = memo<Props>(
           {
             token: mfaToken,
             code: mfaCode,
-          }
+          },
         );
-        window.open(data.callback, "_self");
+        history.replaceState(null, "", data.callback!);
       } catch ({ msg }) {
         if (msg) toast.error(msg as string);
       }
@@ -78,7 +78,7 @@ export const ThirdPartyCallback = memo<Props>(
 
     useMount(() => {
       if (!code) {
-          ThrowError(nav, "登录失败", "参数缺失", appCode);
+        ThrowError(nav, "登录失败", "参数缺失", appCode);
         return;
       }
       login();
@@ -128,6 +128,6 @@ export const ThirdPartyCallback = memo<Props>(
     ) : (
       <LoginLoading />
     );
-  }
+  },
 );
 export default ThirdPartyCallback;

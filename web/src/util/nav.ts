@@ -4,11 +4,18 @@ export function ThrowError(
   nav: NavigateFunction,
   title: string,
   content?: string,
-  retryAppCode?: string
+  retryAppCode?: string,
 ) {
-  nav("/error", { state: { title, content, retryAppCode } as ErrorState });
+  nav("/error", {
+    state: { title, content, retryAppCode } as ErrorState,
+    replace: true,
+  });
 }
 
-export function GoLogin(nav: NavigateFunction, appCode: string) {
-  nav("/?appCode=" + appCode);
+export function GoLogin(
+  nav: NavigateFunction,
+  appCode: string,
+  replace?: boolean,
+) {
+  nav("/?appCode=" + appCode, { replace });
 }

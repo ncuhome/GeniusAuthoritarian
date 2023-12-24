@@ -53,7 +53,7 @@ export const LoginForm: FC = () => {
           data: { url },
         },
       } = await apiV1.get(`public/login/${thirdParty}/link/${appCode}`);
-      window.open(url, "_self");
+      history.replaceState(null, "", url);
     } catch ({ msg }) {
       if (msg) toast.error(msg as string);
     }
@@ -89,7 +89,7 @@ export const LoginForm: FC = () => {
           },
         },
       );
-      window.open(data.callback, "_self");
+      history.replaceState(null, "", data.callback);
     } catch (err: any) {
       if (err instanceof AxiosError) {
         err = err as ApiError<void>;
@@ -101,7 +101,7 @@ export const LoginForm: FC = () => {
   };
 
   useMount(() => {
-    if (token && !appCode) nav("/user");
+    if (token && !appCode) nav("/user", { replace: true });
     switch (true) {
       case navigator.userAgent.indexOf("Feishu") !== -1:
         onGoFeishuLogin();
