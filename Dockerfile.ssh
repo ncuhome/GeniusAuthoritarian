@@ -32,8 +32,8 @@ RUN apk update && \
 
 COPY --from=builder ./rpc /usr/bin/rpc
 
-RUN chmod 700 /usr/bin/runner && \
-    chown root /usr/bin/runner && \
+RUN chmod 700 /usr/bin/rpc && \
+    chown root /usr/bin/rpc && \
     addgroup -g 1001 -S common
 
 WORKDIR /data
