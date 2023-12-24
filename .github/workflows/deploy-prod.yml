@@ -24,33 +24,15 @@ jobs:
           echo SSH_DEV_LATEST=${SSH_DEV}:latest >> $GITHUB_OUTPUT
           echo SSH_DEV_VERSION=${SSH_DEV}:${GITHUB_REF/refs\/tags\//} >> $GITHUB_OUTPUT
 
-      - name: Build Site
-        run: |
-          cd web
-          pnpm install --frozen-lockfile
-          pnpm run build
-
-      - name: Build Core Binary
-        env:
-          GOPRIVATE: github.com/ncuhome
-          CGO_ENABLED: 0
-        run: go build -gcflags=-trimpath=$GOPATH -asmflags=-trimpath=$GOPATH -ldflags '-extldflags "-static" -s -w' -o runner --tags="web nomsgpack" ./cmd/core
-
       - name: Build Core Docker Image
         run: |
-          docker build . --file Dockerfile.ci \
+          docker build . --file Dockerfile.core \
           --tag ${{ steps.image.outputs.CORE_VERSION }} \
           --tag ${{ steps.image.outputs.CORE_LATEST }}
 
-      - name: Build sshDev Binary
-        env:
-          GOPRIVATE: github.com/ncuhome
-          CGO_ENABLED: 0
-        run: go build -gcflags=-trimpath=$GOPATH -asmflags=-trimpath=$GOPATH -ldflags '-extldflags "-static" -s -w' -o runner ./cmd/sshDev
-
       - name: Build sshDev Docker Image
         run: |
-          docker build . --file ./cmd/sshDev/Dockerfile.ci \
+          docker build . --file ./cmd/sshDev/Dockerfile.ssh \
           --tag ${{ steps.image.outputs.SSH_DEV_VERSION }} \
           --tag ${{ steps.image.outputs.SSH_DEV_LATEST }}
 

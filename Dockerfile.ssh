@@ -1,3 +1,17 @@
+FROM golang:alpine as builder
+
+RUN go env -w CGO_ENABLED=0
+
+WORKDIR /build
+
+COPY go.mod go.sum ./
+
+RUN go mod download
+
+COPY . .
+
+RUN go build -gcflags=-trimpath=$GOPATH -asmflags=-trimpath=$GOPATH -ldflags '-extldflags "-static" -s -w' -o rpc ./cmd/sshDev
+
 FROM alpine:latest
 
 RUN apk update && \
@@ -16,7 +30,7 @@ RUN apk update && \
     sed -i 's/.*GatewayPorts.*/GatewayPorts yes/' /etc/ssh/sshd_config && \
     ssh-keygen -A
 
-COPY ./runner /usr/bin/runner
+COPY --from=builder ./rpc /usr/bin/rpc
 
 RUN chmod 700 /usr/bin/runner && \
     chown root /usr/bin/runner && \
@@ -24,4 +38,4 @@ RUN chmod 700 /usr/bin/runner && \
 
 WORKDIR /data
 
-ENTRYPOINT [ "/usr/bin/runner" ]
+ENTRYPOINT [ "/usr/bin/rpc" ]
