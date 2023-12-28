@@ -7,6 +7,7 @@ import (
 	"google.golang.org/grpc"
 	"net"
 	"net/http"
+	"strings"
 	"time"
 )
 
@@ -50,4 +51,9 @@ func RunGrpcSrv(tcpListen net.Listener, srv *grpc.Server) {
 		}
 		log.Fatalln("run rpc server failed:", err)
 	}
+}
+
+// IsIntranet 是否是同一局域网
+func IsIntranet(ip string) bool {
+	return strings.HasPrefix(ip, "192.168.")
 }
