@@ -2,6 +2,7 @@ package controllers
 
 import (
 	"context"
+	"fmt"
 	"github.com/gin-gonic/gin"
 	"github.com/ncuhome/GeniusAuthoritarian/internal/api/callback"
 	"github.com/ncuhome/GeniusAuthoritarian/internal/db/redis"
@@ -22,7 +23,8 @@ func ListPasskey(c *gin.Context) {
 }
 
 func PasskeyOptions(c *gin.Context) {
-	user, err := webAuthn.NewUser(tools.GetUserInfo(c).UID)
+	uid := tools.GetUserInfo(c).UID
+	user, err := webAuthn.NewUser(uid)
 	if err != nil {
 		callback.Error(c, callback.ErrDBOperation, err)
 		return
@@ -34,7 +36,7 @@ func PasskeyOptions(c *gin.Context) {
 		return
 	}
 
-	err = redis.NewPasskey(c.ClientIP()).StoreSession(context.Background(), session, time.Minute*5)
+	err = redis.NewPasskey(c.ClientIP(), fmt.Sprint(uid)).StoreSession(context.Background(), session, time.Minute*5)
 	if err != nil {
 		callback.Error(c, callback.ErrDBOperation, err)
 		return

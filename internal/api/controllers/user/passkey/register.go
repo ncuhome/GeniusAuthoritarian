@@ -3,6 +3,7 @@ package controllers
 import (
 	"context"
 	"errors"
+	"fmt"
 	"github.com/gin-gonic/gin"
 	"github.com/go-webauthn/webauthn/protocol"
 	"github.com/go-webauthn/webauthn/webauthn"
@@ -38,7 +39,7 @@ func BeginPasskeyRegistration(c *gin.Context) {
 		callback.Error(c, callback.ErrUnexpected, err)
 	}
 
-	err = redis.NewPasskey(c.ClientIP()).NewUser(uid).
+	err = redis.NewPasskey(c.ClientIP(), fmt.Sprint(uid)).
 		StoreSession(context.Background(), session, time.Minute*10)
 	if err != nil {
 		callback.Error(c, callback.ErrDBOperation, err)
@@ -52,7 +53,7 @@ func FinishPasskeyRegistration(c *gin.Context) {
 	uid := tools.GetUserInfo(c).UID
 
 	var session webauthn.SessionData
-	err := redis.NewPasskey(c.ClientIP()).NewUser(uid).
+	err := redis.NewPasskey(c.ClientIP(), fmt.Sprint(uid)).
 		ReadSession(context.Background(), &session)
 	if err != nil {
 		if errors.Is(err, redis.Nil) {

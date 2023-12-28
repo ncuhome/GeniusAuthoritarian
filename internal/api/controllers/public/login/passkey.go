@@ -3,6 +3,7 @@ package controllers
 import (
 	"context"
 	"errors"
+	"github.com/Mmx233/tool"
 	"github.com/gin-gonic/gin"
 	"github.com/go-webauthn/webauthn/protocol"
 	"github.com/go-webauthn/webauthn/webauthn"
@@ -15,10 +16,14 @@ import (
 	"github.com/ncuhome/GeniusAuthoritarian/internal/service"
 	"github.com/ncuhome/GeniusAuthoritarian/internal/tools"
 	"gorm.io/gorm"
+	"math/rand"
 	"strconv"
 	"time"
 	"unsafe"
 )
+
+const passkeyCookieName = "session-key"
+const passkeyKeyLength = 6
 
 func BeginPasskeyLogin(c *gin.Context) {
 	options, sessionData, err := webAuthn.Client.BeginDiscoverableLogin()
@@ -27,13 +32,18 @@ func BeginPasskeyLogin(c *gin.Context) {
 		return
 	}
 
-	err = redis.NewPasskey(c.ClientIP()).
+	identity := tool.NewRand(rand.NewSource(time.Now().UnixNano())).
+		WithLetters("qwertyuiopasdfghjklzxcvbnmQWERTYUIOPASDFGHJKLZXCVBNM").
+		String(passkeyKeyLength)
+
+	err = redis.NewPasskey(c.ClientIP(), identity).
 		StoreSession(context.Background(), sessionData, time.Minute*5)
 	if err != nil {
 		callback.Error(c, callback.ErrDBOperation, err)
 		return
 	}
 
+	c.SetCookie(passkeyCookieName, identity, int((time.Minute * 5).Seconds()), "", "", true, true)
 	callback.Success(c, options)
 }
 
@@ -52,8 +62,14 @@ func FinishPasskeyLogin(c *gin.Context) {
 		return
 	}
 
+	identity, err := c.Cookie(passkeyCookieName)
+	if err != nil || len(identity) != passkeyKeyLength {
+		callback.Error(c, callback.ErrLoginSessionExpired, err)
+		return
+	}
+
 	var sessionData webauthn.SessionData
-	err = redis.NewPasskey(c.ClientIP()).
+	err = redis.NewPasskey(c.ClientIP(), identity).
 		ReadSession(context.Background(), &sessionData)
 	if err != nil {
 		if errors.Is(err, redis.Nil) {

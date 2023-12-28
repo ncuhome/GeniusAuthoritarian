@@ -3,6 +3,7 @@ package controllers
 import (
 	"context"
 	"errors"
+	"fmt"
 	"github.com/gin-gonic/gin"
 	"github.com/go-webauthn/webauthn/webauthn"
 	"github.com/ncuhome/GeniusAuthoritarian/internal/api/callback"
@@ -79,7 +80,7 @@ func BeginU2F(c *gin.Context) {
 		}
 	case "passkey":
 		var sessionData webauthn.SessionData
-		err := redis.NewPasskey(c.ClientIP()).
+		err := redis.NewPasskey(c.ClientIP(), fmt.Sprint(uid)).
 			ReadSession(context.Background(), &sessionData)
 		if err != nil {
 			if errors.Is(err, redis.Nil) {
