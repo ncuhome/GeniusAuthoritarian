@@ -36,7 +36,7 @@ func PasskeyOptions(c *gin.Context) {
 		return
 	}
 
-	err = redis.NewPasskey(c.ClientIP(), fmt.Sprint(uid)).StoreSession(context.Background(), session, time.Minute*5)
+	err = redis.NewPasskey(c.ClientIP(), redis.PasskeyUser, fmt.Sprint(uid)).StoreSession(context.Background(), session, time.Minute*5)
 	if err != nil {
 		callback.Error(c, callback.ErrDBOperation, err)
 		return

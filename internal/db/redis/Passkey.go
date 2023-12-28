@@ -6,9 +6,17 @@ import (
 	"time"
 )
 
-func NewPasskey(ip, identity string) Passkey {
+type PasskeyNamespace string
+
+const (
+	PasskeyUser         PasskeyNamespace = "u"
+	PasskeyUserRegister PasskeyNamespace = "ur"
+	PasskeyLogin        PasskeyNamespace = "l"
+)
+
+func NewPasskey(ip string, namespace PasskeyNamespace, identity string) Passkey {
 	return Passkey{
-		key: keyPasskey.String() + "ip" + ip + "id" + identity,
+		key: keyPasskey.String() + "ip" + ip + string(namespace) + identity,
 	}
 }
 

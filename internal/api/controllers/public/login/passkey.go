@@ -32,11 +32,11 @@ func BeginPasskeyLogin(c *gin.Context) {
 		return
 	}
 
-	identity := tool.NewRand(rand.NewSource(time.Now().UnixNano())).
+	identity := "r" + tool.NewRand(rand.NewSource(time.Now().UnixNano())).
 		WithLetters("qwertyuiopasdfghjklzxcvbnmQWERTYUIOPASDFGHJKLZXCVBNM").
-		String(passkeyKeyLength)
+		String(passkeyKeyLength-1)
 
-	err = redis.NewPasskey(c.ClientIP(), identity).
+	err = redis.NewPasskey(c.ClientIP(), redis.PasskeyLogin, identity).
 		StoreSession(context.Background(), sessionData, time.Minute*5)
 	if err != nil {
 		callback.Error(c, callback.ErrDBOperation, err)
@@ -69,7 +69,7 @@ func FinishPasskeyLogin(c *gin.Context) {
 	}
 
 	var sessionData webauthn.SessionData
-	err = redis.NewPasskey(c.ClientIP(), identity).
+	err = redis.NewPasskey(c.ClientIP(), redis.PasskeyLogin, identity).
 		ReadSession(context.Background(), &sessionData)
 	if err != nil {
 		if errors.Is(err, redis.Nil) {
