@@ -184,7 +184,8 @@ export const NavHeader: FC<Props> = ({
             alignItems={"center"}
             sx={{
               boxSizing: "border-box",
-              pt: 2,
+              pt: 3,
+              pb: 1,
               px: 3,
               minWidth: "100%",
             }}
@@ -195,35 +196,40 @@ export const NavHeader: FC<Props> = ({
             })}
           </Stack>
           <List>
-            {routers.map((r, index) => (
-              <Fragment key={r.name}>
-                <Divider />
-                <ListItem disablePadding>
-                  <ListItemButton
-                    onClick={() => {
-                      onRoute(index, r.path);
-                      setMenuOpen(false);
-                    }}
-                    sx={{
-                      paddingRight: "1.5rem",
-                    }}
-                  >
-                    <ListItemIcon
-                      sx={{
-                        minWidth: "2.2rem",
+            {routers.map((r, index) => {
+              const selected = currentTab === index;
+              return (
+                <Fragment key={r.name}>
+                  <Divider />
+                  <ListItem disablePadding>
+                    <ListItemButton
+                      onClick={() => {
+                        onRoute(index, r.path);
+                        setMenuOpen(false);
                       }}
+                      sx={{
+                        paddingRight: "1.5rem",
+                      }}
+                      selected={selected}
                     >
-                      <KeyboardArrowRightRounded
+                      <ListItemIcon
                         sx={{
-                          color: "text.disabled",
+                          minWidth: "2.2rem",
                         }}
-                      />
-                    </ListItemIcon>
-                    <ListItemText primary={r.name} />
-                  </ListItemButton>
-                </ListItem>
-              </Fragment>
-            ))}
+                      >
+                        <KeyboardArrowRightRounded
+                          sx={{
+                            transition: "color 0.3s ease-in-out",
+                            color: selected ? undefined : "text.disabled",
+                          }}
+                        />
+                      </ListItemIcon>
+                      <ListItemText primary={r.name} />
+                    </ListItemButton>
+                  </ListItem>
+                </Fragment>
+              );
+            })}
           </List>
         </Drawer>
       ) : undefined}
