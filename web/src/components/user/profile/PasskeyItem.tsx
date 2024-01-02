@@ -34,7 +34,7 @@ export const PasskeyItem: FC<Props> = ({
   const [newName, setNewName] = useState(name);
 
   const lastUsed = useMemo(() => {
-    if (item.last_used_at === 0) return "还未使用过";
+    if (item.last_used_at === 0) return "从未使用过";
     const time = duration(new Date().getTime() - item.last_used_at * 1000);
     let word = "上次使用于 ";
     const month = time.months();
@@ -43,9 +43,13 @@ export const PasskeyItem: FC<Props> = ({
       const day = time.days();
       if (day > 0) word += `${day} 天`;
       else {
-        const minute = time.minutes();
-        if (minute > 0) word += `${minute} 分钟`;
-        else word += `${time.seconds()} 秒`;
+        const hour = time.hours();
+        if (hour > 0) word += `${hour} 小时`;
+        else {
+          const minute = time.minutes();
+          if (minute > 0) word += `${minute} 分钟`;
+          else word += `${time.seconds()} 秒`;
+        }
       }
     }
     return word + "前";
