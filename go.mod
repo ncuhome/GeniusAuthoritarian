@@ -1,6 +1,6 @@
 module github.com/ncuhome/GeniusAuthoritarian
 
-go 1.21.4
+go 1.22.0
 
 require (
 	github.com/Mmx233/EnvConfig v0.0.2
