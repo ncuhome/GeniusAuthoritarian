@@ -29,6 +29,9 @@ dependencies:
   '@mui/material':
     specifier: ^5.15.11
     version: 5.15.11(@emotion/react@11.11.4)(@emotion/styled@11.11.0)(@types/react@18.2.60)(react-dom@18.2.0)(react@18.2.0)
+  '@mui/system':
+    specifier: ^5.15.11
+    version: 5.15.11(@emotion/react@11.11.4)(@emotion/styled@11.11.0)(@types/react@18.2.60)(react@18.2.0)
   '@mui/x-charts':
     specifier: ^6.19.5
     version: 6.19.5(@emotion/react@11.11.4)(@emotion/styled@11.11.0)(@mui/material@5.15.11)(@mui/system@5.15.11)(@types/react@18.2.60)(react-dom@18.2.0)(react@18.2.0)

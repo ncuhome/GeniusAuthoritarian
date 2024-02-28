@@ -17,6 +17,7 @@
     "@mui/icons-material": "^5.15.11",
     "@mui/lab": "5.0.0-alpha.129",
     "@mui/material": "^5.15.11",
+    "@mui/system": "^5.15.11",
     "@mui/x-charts": "^6.19.5",
     "@react-spring/web": "^9.7.3",
     "axios": "^1.6.7",
