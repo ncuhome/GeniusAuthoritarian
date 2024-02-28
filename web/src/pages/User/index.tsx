@@ -4,6 +4,7 @@ import useKeyDown from "@hooks/useKeyDown";
 import "./style.css";
 
 const Dev = lazy(() => import("./pages/Dev"));
+const Admin = lazy(() => import("./pages/Admin"));
 import Navigation from "./pages/Navigation";
 import Profile from "./pages/Profile";
 
@@ -51,6 +52,17 @@ const UserRoutersExtra: {
       ),
     },
   ],
+  中心: [
+    {
+      name: "管理后台",
+      path: "admin",
+      element: (
+        <Suspense>
+          <Admin />
+        </Suspense>
+      ),
+    },
+  ],
 };
 
 export const User: FC = () => {
@@ -67,7 +79,7 @@ export const User: FC = () => {
       }
     });
 
-  const groups = useUser((state) => state.groups);
+    const groups = useUser((state) => state.groups);
 
   const isDarkTheme = useTheme((state) => state.dark);
 
