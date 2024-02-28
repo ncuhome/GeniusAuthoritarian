@@ -14,11 +14,7 @@ export const Dev: FC = () => {
 
   return (
     <Container>
-      <Block
-        sx={{
-          padding: "unset!important",
-        }}
-      >
+      <Block disablePadding>
         <Tabs
           value={index}
           variant="scrollable"

@@ -8,9 +8,22 @@ interface Props extends PropsWithChildren {
   title?: string;
   subtitle?: string;
   sx?: SxProps;
+  disablePadding?: boolean;
 }
 
-export const Block: FC<Props> = ({ title, subtitle, children, sx }) => {
+export const Block: FC<Props> = ({
+  title,
+  subtitle,
+  children,
+  sx,
+  disablePadding,
+}) => {
+  if (disablePadding)
+    sx = {
+      ...sx,
+      padding: "unset!important",
+    };
+
   return (
     <Box component={Paper} elevation={5} sx={sx} className={"user-block"}>
       {title ? <BlockTitle>{title}</BlockTitle> : null}
