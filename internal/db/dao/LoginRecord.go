@@ -8,8 +8,8 @@ import (
 )
 
 type LoginRecord struct {
-	ID        uint `gorm:"primarykey"`
-	CreatedAt int64
+	ID        uint  `gorm:"primarykey"`
+	CreatedAt int64 `gorm:"index"`
 
 	Destroyed   bool   `gorm:"index;comment:用于加速查询，不能用于销毁登录状态"`
 	ValidBefore uint64 `gorm:"index"`
@@ -103,4 +103,9 @@ func (a *LoginRecord) GetViewIds(tx *gorm.DB, startAt uint) ([]uint, error) {
 	tx = tx.Model(a).Select("login_records.id")
 	tx = a.sqlJoinApps(tx)
 	return t, tx.Where("apps.id=? AND login_records.id>?", a.AID, startAt).Order("login_records.id DESC").Find(&t).Error
+}
+
+func (a *LoginRecord) GetAdminViews(tx *gorm.DB, startAt int64) ([]dto.LoginRecordAdminView, error) {
+	var t = make([]dto.LoginRecordAdminView, 0)
+	return t, tx.Model(a).Where("created_at>=?", startAt).Order("id DESC").Find(&t).Error
 }

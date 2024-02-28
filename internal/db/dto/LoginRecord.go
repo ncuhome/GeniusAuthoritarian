@@ -27,3 +27,12 @@ type ViewID struct {
 	// App.ID
 	AID uint `gorm:"column:aid"`
 }
+
+type LoginRecordAdminView struct {
+	ID        uint
+	CreatedAt int64
+
+	Destroyed   bool
+	ValidBefore uint64
+	UID         uint
+}

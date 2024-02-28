@@ -8,4 +8,6 @@ import (
 
 func Router(G *gin.RouterGroup) {
 	G.Use(middlewares.LimitGroup(departments.UCe))
+
+	routerData(G.Group("data"))
 }
