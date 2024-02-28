@@ -10,6 +10,7 @@ declare namespace User {
     target: string;
     ip: string;
     useragent: string;
+    method: string;
   };
 
   type LoginRecordOnline = LoginRecord & {
