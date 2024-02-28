@@ -30,8 +30,8 @@ func (a *SyncStat) TryLock(ctx context.Context, expire time.Duration) (bool, err
 }
 
 func (a *SyncStat) ShouldLock(ctx context.Context, expire time.Duration) (bool, error) {
-	var count uint8
-	for ; count < 255; count++ {
+	var count uint16
+	for ; count < 500; count++ {
 		ok, err := a.Succeed(ctx)
 		if err != nil {
 			return false, err
@@ -45,7 +45,7 @@ func (a *SyncStat) ShouldLock(ctx context.Context, expire time.Duration) (bool, 
 		} else if ok {
 			return true, nil
 		}
-		time.Sleep(time.Millisecond * 100)
+		time.Sleep(time.Millisecond * 35)
 	}
 
 	return false, errors.New("wait for sync lock timeout")
