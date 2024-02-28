@@ -29,10 +29,10 @@ type ViewID struct {
 }
 
 type LoginRecordAdminView struct {
-	ID        uint
-	CreatedAt int64
+	ID        uint  `json:"id"`
+	CreatedAt int64 `json:"createdAt"`
 
-	Destroyed   bool
-	ValidBefore uint64
-	UID         uint
+	Destroyed   bool   `json:"destroyed"`
+	ValidBefore uint64 `json:"validBefore"`
+	UID         uint   `json:"uid"`
 }

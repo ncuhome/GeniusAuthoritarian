@@ -23,11 +23,11 @@ func LoginData(c *gin.Context) {
 		log.Warnln("admin login data controller encountered unhandled form parameters")
 		fallthrough
 	case "week":
-		startTime.Add(-time.Hour * 24 * 7)
+		startTime = startTime.Add(-time.Hour * 24 * 7)
 	case "month":
-		startTime.Add(-time.Hour * 24 * 30)
+		startTime = startTime.Add(-time.Hour * 24 * 30)
 	case "year":
-		startTime.Add(-time.Hour * 24 * 365)
+		startTime = startTime.Add(-time.Hour * 24 * 365)
 	}
 
 	data, err := service.LoginRecord.GetForAdminView(startTime)
