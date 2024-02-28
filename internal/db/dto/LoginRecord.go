@@ -6,6 +6,7 @@ type LoginRecord struct {
 	Useragent string `json:"useragent"`
 	IP        string `json:"ip"`
 	Target    string `json:"target"`
+	Method    string `json:"method"`
 }
 
 type LoginRecordOnline struct {
@@ -28,17 +29,19 @@ type ViewID struct {
 	AID uint `gorm:"column:aid"`
 }
 
-type AdminLoginDataView struct {
-	Apps    []AppDataView         `json:"apps"`
-	Records []LoginRecordDataView `json:"records"`
-}
-
 type LoginRecordDataView struct {
 	ID        uint  `json:"id"`
 	CreatedAt int64 `json:"createdAt"`
 
+	UID uint `json:"uid" gorm:"column:uid"`
+	AID uint `json:"aid" gorm:"column:aid"`
+
+	Method      string `json:"method"`
 	Destroyed   bool   `json:"destroyed"`
 	ValidBefore uint64 `json:"validBefore"`
-	UID         uint   `json:"uid" gorm:"column:uid"`
-	AID         uint   `json:"aid" gorm:"column:aid"`
+}
+
+type AdminLoginDataView struct {
+	Apps    []AppDataView         `json:"apps"`
+	Records []LoginRecordDataView `json:"records"`
 }
