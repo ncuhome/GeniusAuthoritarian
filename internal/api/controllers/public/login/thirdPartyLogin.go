@@ -66,15 +66,15 @@ func GetLoginLink(c *gin.Context) {
 }
 
 // 根据前端传来的 code 获取用户电话号码
-func loadUserIdentity(c *gin.Context, code string) *dto.UserThirdPartyIdentity {
+func loadUserIdentity(c *gin.Context, code string) (string, *dto.UserThirdPartyIdentity) {
 	switch c.Param("app") {
 	case appDingTalk:
-		return loginDingTalk(c, code)
+		return appDingTalk, loginDingTalk(c, code)
 	case appFeishu:
-		return loginFeishu(c, code)
+		return appFeishu, loginFeishu(c, code)
 	default:
 		callback.Error(c, callback.ErrForm)
-		return nil
+		return "", nil
 	}
 }
 
@@ -115,6 +115,7 @@ type ThirdPartyLoginContext struct {
 	AppInfo *dao.App
 	Groups  []string
 	Ip      string
+	Method  string
 }
 
 // 根据数据完成请求响应
@@ -127,6 +128,7 @@ func callThirdPartyLoginResult(c *gin.Context, info ThirdPartyLoginContext) {
 		Groups:    info.Groups,
 		AppID:     info.AppInfo.ID,
 		AvatarUrl: info.User.AvatarUrl,
+		Method:    info.Method,
 	}
 
 	if info.User.MFA == "" {
@@ -171,7 +173,7 @@ func ThirdPartySelfLogin(c *gin.Context) {
 		return
 	}
 
-	userIdentity := loadUserIdentity(c, f.Code)
+	loginMethod, userIdentity := loadUserIdentity(c, f.Code)
 	if c.IsAborted() {
 		return
 	} else if userIdentity == nil {
@@ -192,6 +194,7 @@ func ThirdPartySelfLogin(c *gin.Context) {
 		AppInfo: appInfo,
 		Groups:  nil,
 		Ip:      c.ClientIP(),
+		Method:  loginMethod,
 	})
 }
 
@@ -215,7 +218,7 @@ func ThirdPartyLogin(c *gin.Context) {
 		return
 	}
 
-	userIdentity := loadUserIdentity(c, f.Code)
+	loginMethod, userIdentity := loadUserIdentity(c, f.Code)
 	if c.IsAborted() {
 		return
 	} else if userIdentity == nil {
@@ -249,5 +252,6 @@ func ThirdPartyLogin(c *gin.Context) {
 		AppInfo: appInfo,
 		Groups:  groups,
 		Ip:      c.ClientIP(),
+		Method:  loginMethod,
 	})
 }

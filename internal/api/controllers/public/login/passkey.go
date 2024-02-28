@@ -128,6 +128,7 @@ func FinishPasskeyLogin(c *gin.Context) {
 		Groups:    groups,
 		AppID:     appInfo.ID,
 		AvatarUrl: user.AvatarUrl,
+		Method:    "passkey",
 	})
 	if err != nil {
 		callback.Error(c, callback.ErrUnexpected, err)

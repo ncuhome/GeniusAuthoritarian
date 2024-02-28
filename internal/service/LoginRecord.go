@@ -23,16 +23,17 @@ func (a LoginRecordSrv) Begin() (*LoginRecordSrv, error) {
 	return &a, a.Error
 }
 
-func (a LoginRecordSrv) Add(uid, appID uint, ip, useragent string, tokenValid time.Duration) (uint, error) {
+func (a LoginRecordSrv) Add(uid, appID uint, ip, useragent, method string, tokenValid time.Duration) (uint, error) {
 	var validBefore uint64
 	if tokenValid != 0 {
 		validBefore = uint64(time.Now().Add(tokenValid).Unix())
 	}
 	model := dao.LoginRecord{
 		UID:         uid,
+		ValidBefore: validBefore,
 		Useragent:   useragent,
 		IP:          ip,
-		ValidBefore: validBefore,
+		Method:      method,
 	}
 	if appID != 0 {
 		model.AID = &appID

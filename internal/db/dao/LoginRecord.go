@@ -16,6 +16,7 @@ type LoginRecord struct {
 
 	IP        string
 	Useragent string
+	Method    string `gorm:"comment:登录方法"`
 
 	// User.ID
 	UID  uint  `gorm:"not null;index;column:uid"`

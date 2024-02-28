@@ -10,6 +10,7 @@ type LoginRedis struct {
 
 	IP        string `json:"ip"`
 	Useragent string `json:"useragent"`
+	Method    string `json:"method"`
 }
 
 type MfaRedis struct {

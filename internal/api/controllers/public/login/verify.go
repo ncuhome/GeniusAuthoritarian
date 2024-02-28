@@ -24,7 +24,10 @@ func doVerifyToken(c *gin.Context, tx *gorm.DB, token string, tokenValid time.Du
 	}
 
 	loginRecordSrv := service.LoginRecordSrv{DB: tx}
-	lid, err := loginRecordSrv.Add(claims.UID, claims.AppID, claims.IP, claims.Useragent, tokenValid)
+	lid, err := loginRecordSrv.Add(
+		claims.UID, claims.AppID,
+		claims.IP, claims.Useragent, claims.Method,
+		tokenValid)
 	if err != nil {
 		callback.Error(c, callback.ErrDBOperation, err)
 		return 0, nil
