@@ -1,7 +1,7 @@
 import { ReactNode } from "react";
 
-import App from "./app";
-import Ssh from "./ssh";
+import App from "./App";
+import Ssh from "./Ssh";
 
 interface Route {
   label: string;
