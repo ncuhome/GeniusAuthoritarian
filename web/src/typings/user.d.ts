@@ -17,14 +17,16 @@ declare namespace User {
     isMe: boolean;
   };
 
+  type ProfileInfo = {
+    id: number;
+    name: string;
+    avatar_url: string;
+    mfa: boolean;
+    groups: Group[];
+  };
+
   type Profile = {
-    user: {
-      id: number;
-      name: string;
-      avatar_url: string;
-      mfa: boolean;
-      groups: Group[];
-    };
+    user: ProfileInfo;
     loginRecord: {
       online: LoginRecordOnline[];
       history: LoginRecord[];

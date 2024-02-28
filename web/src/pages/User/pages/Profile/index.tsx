@@ -1,4 +1,4 @@
-import { FC, useCallback, useMemo } from "react";
+import { FC, useMemo } from "react";
 import toast from "react-hot-toast";
 
 import Block from "@components/user/Block";
@@ -7,6 +7,7 @@ import Mfa from "@components/user/profile/Mfa";
 import Passkey from "@components/user/profile/Passkey";
 import LoginRecord from "@components/user/profile/LoginRecord";
 import OnlineDevice from "@components/user/profile/OnlineDevice";
+import Avatar from "@components/user/Avatar";
 import {
   Container,
   Skeleton,
@@ -14,7 +15,6 @@ import {
   FormControlLabel,
   Stack,
   Tooltip,
-  Avatar,
   Typography,
   Paper,
 } from "@mui/material";
@@ -24,7 +24,6 @@ import { useUserApiV1 } from "@api/v1/user/hook";
 
 import useUser from "@store/useUser";
 import { apiV1User } from "@api/v1/user/base";
-import { mutate } from "swr";
 
 const u2fMethods: {
   label: string;
@@ -86,17 +85,11 @@ export const Profile: FC = () => {
           },
         }}
       >
-        {profile ? (
-          <Avatar
-            component={Paper}
-            elevation={3}
-            src={profile.user.avatar_url}
-          />
-        ) : (
-          <Skeleton variant={"circular"}>
-            <Avatar />
-          </Skeleton>
-        )}
+        <Avatar
+          component={Paper}
+          elevation={3}
+          src={profile?.user.avatar_url}
+        />
         <Stack ml={3} width={"100%"} justifyContent={"space-between"}>
           <Typography
             variant={"h5"}
