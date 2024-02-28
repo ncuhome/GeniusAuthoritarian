@@ -7,6 +7,7 @@ import (
 	"github.com/ncuhome/GeniusAuthoritarian/internal/db/dao"
 	"github.com/ncuhome/GeniusAuthoritarian/internal/db/dto"
 	"github.com/ncuhome/GeniusAuthoritarian/internal/db/redis"
+	"github.com/ncuhome/GeniusAuthoritarian/internal/global"
 	"gorm.io/gorm"
 	"time"
 )
@@ -118,6 +119,9 @@ func (a LoginRecordSrv) GetForAdminView(startTime time.Time) (*dto.AdminLoginDat
 
 	appIdMap := make(map[uint]struct{}, 4)
 	for _, record := range records {
+		if record.AID == 0 {
+			continue
+		}
 		appIdMap[record.AID] = struct{}{}
 	}
 	appIds := make([]uint, len(appIdMap))
@@ -131,6 +135,10 @@ func (a LoginRecordSrv) GetForAdminView(startTime time.Time) (*dto.AdminLoginDat
 	if err != nil {
 		return nil, err
 	}
+	apps = append(apps, dto.AppDataView{
+		ID:   0,
+		Name: global.ThisAppName,
+	})
 
 	return &dto.AdminLoginDataView{
 		Apps:    apps,
