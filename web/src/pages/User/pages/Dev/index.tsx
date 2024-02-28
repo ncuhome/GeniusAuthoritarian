@@ -1,4 +1,4 @@
-import { FC, useMemo } from "react";
+import { FC } from "react";
 
 import routes from "./route";
 import Block from "@components/user/Block";
@@ -10,8 +10,6 @@ export const Dev: FC = () => {
   const index = useDevRoute((state) => state.index);
   const setIndex = useDevRoute((state) => state.setState("index"));
 
-  const content = useMemo(() => routes[index], [index]);
-
   return (
     <Container>
       <Block disablePadding>
@@ -19,7 +17,7 @@ export const Dev: FC = () => {
           value={index}
           variant="scrollable"
           scrollButtons="auto"
-          onChange={(e, target: number) => setIndex(target)}
+          onChange={(_e, target: number) => setIndex(target)}
         >
           {routes.map((route) => (
             <Tab key={route.label} label={route.label} />
@@ -35,10 +33,10 @@ export const Dev: FC = () => {
           whiteSpace: "pre-wrap",
         }}
       >
-        {content.description}
+        {routes[index].description}
       </Typography>
 
-      {content.element}
+      {routes[index].element}
     </Container>
   );
 };
