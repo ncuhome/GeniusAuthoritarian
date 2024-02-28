@@ -34,3 +34,8 @@ type AppGroupClassified struct {
 	Group Group     `json:"group"`
 	App   []AppShow `json:"app"`
 }
+
+type AppDataView struct {
+	ID   uint   `json:"id"`
+	Name string `json:"name"`
+}

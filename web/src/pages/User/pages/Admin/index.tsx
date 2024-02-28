@@ -6,7 +6,7 @@ import { Container } from "@mui/material";
 import useLoginData from "@hooks/data/useLoginData";
 
 export const Admin: FC = () => {
-    useLoginData("week");
+  useLoginData("week");
 
   return (
     <Container>

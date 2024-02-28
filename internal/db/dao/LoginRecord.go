@@ -105,7 +105,7 @@ func (a *LoginRecord) GetViewIds(tx *gorm.DB, startAt uint) ([]uint, error) {
 	return t, tx.Where("apps.id=? AND login_records.id>?", a.AID, startAt).Order("login_records.id DESC").Find(&t).Error
 }
 
-func (a *LoginRecord) GetAdminViews(tx *gorm.DB, startAt int64) ([]dto.LoginRecordAdminView, error) {
-	var t = make([]dto.LoginRecordAdminView, 0)
+func (a *LoginRecord) GetAdminViews(tx *gorm.DB, startAt int64) ([]dto.LoginRecordDataView, error) {
+	var t = make([]dto.LoginRecordDataView, 0)
 	return t, tx.Model(a).Where("created_at>=?", startAt).Order("id DESC").Find(&t).Error
 }

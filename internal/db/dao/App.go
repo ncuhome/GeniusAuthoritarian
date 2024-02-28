@@ -154,6 +154,11 @@ func (a *App) GetForUpdateView(tx *gorm.DB) ([]App, error) {
 		Where("link_off IS NULL OR link_off=?", false).Order("id").Find(&t).Error
 }
 
+func (a *App) GetDataViewByIds(tx *gorm.DB, ids ...uint) ([]dto.AppDataView, error) {
+	var t = make([]dto.AppDataView, 0)
+	return t, tx.Model(a).Where("id IN ?", ids).Order("id").Find(&t).Error
+}
+
 func (a *App) DeleteByIdForUID(tx *gorm.DB) error {
 	return tx.Model(&App{}).Where(a, "id", "uid").Delete(nil).Error
 }

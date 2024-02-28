@@ -110,6 +110,30 @@ func (a LoginRecordSrv) GetMultipleViewsIDs(apps []dao.App) ([]dto.ViewID, error
 	return (&dao.LoginRecord{}).GetMultipleViewsIds(a.DB, apps)
 }
 
-func (a LoginRecordSrv) GetForAdminView(startTime time.Time) ([]dto.LoginRecordAdminView, error) {
-	return (&dao.LoginRecord{}).GetAdminViews(a.DB, startTime.Unix())
+func (a LoginRecordSrv) GetForAdminView(startTime time.Time) (*dto.AdminLoginDataView, error) {
+	records, err := (&dao.LoginRecord{}).GetAdminViews(a.DB, startTime.Unix())
+	if err != nil {
+		return nil, err
+	}
+
+	appIdMap := make(map[uint]struct{}, 4)
+	for _, record := range records {
+		appIdMap[record.AID] = struct{}{}
+	}
+	appIds := make([]uint, len(appIdMap))
+	i := 0
+	for id := range appIdMap {
+		appIds[i] = id
+		i++
+	}
+
+	apps, err := (&dao.App{}).GetDataViewByIds(a.DB, appIds...)
+	if err != nil {
+		return nil, err
+	}
+
+	return &dto.AdminLoginDataView{
+		Apps:    apps,
+		Records: records,
+	}, nil
 }

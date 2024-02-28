@@ -28,11 +28,17 @@ type ViewID struct {
 	AID uint `gorm:"column:aid"`
 }
 
-type LoginRecordAdminView struct {
+type AdminLoginDataView struct {
+	Apps    []AppDataView         `json:"apps"`
+	Records []LoginRecordDataView `json:"records"`
+}
+
+type LoginRecordDataView struct {
 	ID        uint  `json:"id"`
 	CreatedAt int64 `json:"createdAt"`
 
 	Destroyed   bool   `json:"destroyed"`
 	ValidBefore uint64 `json:"validBefore"`
-	UID         uint   `json:"uid"`
+	UID         uint   `json:"uid" gorm:"column:uid"`
+	AID         uint   `json:"aid" gorm:"column:aid"`
 }
