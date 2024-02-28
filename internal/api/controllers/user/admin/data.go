@@ -10,7 +10,7 @@ import (
 
 func LoginData(c *gin.Context) {
 	var f struct {
-		Range string `json:"range" form:"range" binging:"eq=week|eq=month|eq=year"`
+		Range string `json:"range" form:"range" binding:"eq=week|eq=month|eq=year"`
 	}
 	if err := c.ShouldBind(&f); err != nil {
 		callback.Error(c, callback.ErrForm, err)
