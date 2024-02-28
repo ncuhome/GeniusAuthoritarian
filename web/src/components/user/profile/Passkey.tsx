@@ -12,7 +12,7 @@ import { List, Box, Collapse, Alert } from "@mui/material";
 import { LoadingButton } from "@mui/lab";
 import { Add } from "@mui/icons-material";
 
-import useU2F from "@hooks/useU2F";
+import useU2F from "@hooks/data/useU2F";
 
 import { AxiosError } from "axios";
 import { apiV1User } from "@api/v1/user/base";

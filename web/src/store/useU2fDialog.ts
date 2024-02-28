@@ -1,6 +1,5 @@
 import { create } from "zustand";
 import { shallow } from "zustand/shallow";
-import { apiV1User } from "@api/v1/user/base";
 
 interface U2fDialog extends User.U2F.Status {
   open: boolean;

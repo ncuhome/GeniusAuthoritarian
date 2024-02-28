@@ -17,15 +17,6 @@ declare namespace User {
     isMe: boolean;
   };
 
-  type LoginRecordAdminView = {
-    id: number;
-    createdAt: number;
-    validBefore: number;
-    uid: number;
-    // unstable
-    destroyed: boolean;
-  };
-
   type ProfileInfo = {
     id: number;
     name: string;

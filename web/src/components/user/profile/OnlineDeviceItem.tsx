@@ -1,6 +1,6 @@
 import { memo, useState } from "react";
 import { unix } from "dayjs";
-import useU2F from "@hooks/useU2F";
+import useU2F from "@hooks/data/useU2F";
 import toast from "react-hot-toast";
 
 import UserAgent from "@components/user/profile/UserAgent";

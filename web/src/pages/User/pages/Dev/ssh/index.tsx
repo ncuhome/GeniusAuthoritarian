@@ -18,7 +18,7 @@ import KeyPair from "@components/user/dev/ssh/KeyPair";
 
 import { apiV1User } from "@api/v1/user/base";
 
-import useU2F from "@hooks/useU2F";
+import useU2F from "@hooks/data/useU2F";
 
 const invalidKey: User.SSH.Keys = {
   username: "114514",

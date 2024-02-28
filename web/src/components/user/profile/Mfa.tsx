@@ -23,7 +23,7 @@ import { Done, Remove } from "@mui/icons-material";
 
 import { apiV1User } from "@api/v1/user/base";
 
-import useU2F from "@hooks/useU2F";
+import useU2F from "@hooks/data/useU2F";
 import useNewMfaForm from "@store/useNewMfa";
 
 interface Props extends StackProps {
