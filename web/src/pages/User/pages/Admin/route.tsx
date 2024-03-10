@@ -1,4 +1,5 @@
 import { ReactNode } from "react";
+import Status from "./Status";
 
 interface Route {
   label: string;
@@ -8,7 +9,7 @@ interface Route {
 const routes: Route[] = [
   {
     label: "统计数据",
-    element: null,
+    element: <Status />,
   },
   {
     label: "应用管理",
