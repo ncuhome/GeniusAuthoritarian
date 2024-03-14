@@ -62,7 +62,7 @@ func (a *UserGroups) GetUserGroupsForPubByUIDWithPreOrder(tx *gorm.DB, uid ...ui
 	groupModel := &BaseGroup{}
 	tx = tx.Model(groupModel)
 	tx = groupModel.sqlJoinUserGroups(tx)
-	return t, tx.Where("user_groups.uid IN ?", uid).
+	return t, tx.Select("base_groups.id", "base_groups.name", "user_groups.uid").Where("user_groups.uid IN ?", uid).
 		Clauses(clause.OrderBy{Expression: clause.Expr{SQL: "FIELD(user_groups.uid,?),user_groups.id DESC", Vars: []interface{}{uid}, WithoutParentheses: true}}).
 		Find(&t).Error
 }
