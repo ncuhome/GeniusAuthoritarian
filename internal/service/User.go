@@ -1,6 +1,7 @@
 package service
 
 import (
+	"container/list"
 	"context"
 	"github.com/Mmx233/daoUtil"
 	"github.com/ncuhome/GeniusAuthoritarian/internal/db/dao"
@@ -30,7 +31,37 @@ func (a UserSrv) GetUserNotInPhoneSlice(phone []string) ([]dao.User, error) {
 }
 
 func (a UserSrv) GetUserInfoPublic(id ...uint) ([]dto.UserInfoPublic, error) {
-	return (&dao.User{}).GetUserInfoPubByIds(a.DB, id...)
+	data, err := (&dao.User{}).GetUserInfoPubByIds(a.DB, id...)
+	if err != nil {
+		return nil, err
+	}
+
+	groups, err := (&dao.UserGroups{}).GetUserGroupsForPubByUIDWithPreOrder(a.DB, id...)
+	if err != nil {
+		return nil, err
+	}
+
+	for i, ii := 0, 0; i < len(data) && ii < len(groups); i++ {
+		user := &data[i]
+		userGroups := list.New()
+		for ii < len(groups) {
+			group := groups[ii]
+			if user.ID != group.UID {
+				break
+			}
+			userGroups.PushBack(dto.Group{
+				ID:   group.ID,
+				Name: group.Name,
+			})
+			ii++
+		}
+		user.Groups = make([]dto.Group, userGroups.Len())
+		for el, iii := userGroups.Front(), 0; el != nil; el, iii = el.Next(), iii+1 {
+			user.Groups[iii] = el.Value.(dto.Group)
+		}
+	}
+
+	return data, nil
 }
 
 func (a UserSrv) CreateAll(users []dao.User) error {

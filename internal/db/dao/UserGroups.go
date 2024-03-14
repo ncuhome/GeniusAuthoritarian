@@ -3,6 +3,7 @@ package dao
 import (
 	"github.com/ncuhome/GeniusAuthoritarian/internal/db/dto"
 	"gorm.io/gorm"
+	"gorm.io/gorm/clause"
 )
 
 type UserGroups struct {
@@ -54,6 +55,16 @@ func (a *UserGroups) GetGetUserGroupIdsByUID(tx *gorm.DB) ([]uint, error) {
 func (a *UserGroups) GetUserGroupsForShowByUID(tx *gorm.DB) ([]dto.Group, error) {
 	var t = make([]dto.Group, 0)
 	return t, a.sqlGetUserGroupsByUID(tx).Find(&t).Error
+}
+
+func (a *UserGroups) GetUserGroupsForPubByUIDWithPreOrder(tx *gorm.DB, uid ...uint) ([]dto.GroupWithOrder, error) {
+	var t []dto.GroupWithOrder
+	groupModel := &BaseGroup{}
+	tx = tx.Model(groupModel)
+	tx = groupModel.sqlJoinUserGroups(tx)
+	return t, tx.Where("user_groups.uid IN ?", uid).
+		Clauses(clause.OrderBy{Expression: clause.Expr{SQL: "FIELD(user_groups.uid,?),user_groups.id DESC", Vars: []interface{}{uid}, WithoutParentheses: true}}).
+		Find(&t).Error
 }
 
 func (a *UserGroups) GetUserGroupsForAppCodeByUID(tx *gorm.DB, appCode string) *gorm.DB {

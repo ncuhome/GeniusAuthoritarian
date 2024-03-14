@@ -91,9 +91,7 @@ func (a *User) GetNoSshDevIds(tx *gorm.DB) ([]uint, error) {
 
 func (a *User) GetUserInfoPubByIds(tx *gorm.DB, ids ...uint) ([]dto.UserInfoPublic, error) {
 	var t = make([]dto.UserInfoPublic, 0)
-	tx = tx.Model(a)
-	tx = a.sqlJoinUserGroups(tx)
-	return t, tx.Where("id IN ?", ids).
+	return t, tx.Model(a).Where("id IN ?", ids).
 		Clauses(clause.OrderBy{Expression: clause.Expr{SQL: "FIELD(id,?)", Vars: []interface{}{ids}, WithoutParentheses: true}}).
 		Find(&t).Error
 }
