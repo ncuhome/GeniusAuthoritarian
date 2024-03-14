@@ -29,6 +29,10 @@ func (a UserSrv) GetUserNotInPhoneSlice(phone []string) ([]dao.User, error) {
 	return (&dao.User{}).GetNotInPhoneSlice(a.DB, phone)
 }
 
+func (a UserSrv) GetUserInfoPublic(id ...uint) ([]dto.UserInfoPublic, error) {
+	return (&dao.User{}).GetUserInfoPubByIds(a.DB, id...)
+}
+
 func (a UserSrv) CreateAll(users []dao.User) error {
 	return (&dao.User{}).InsertAll(a.DB, users)
 }

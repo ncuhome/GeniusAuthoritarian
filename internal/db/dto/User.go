@@ -19,3 +19,10 @@ type UserU2fStatus struct {
 	Mfa     bool   `json:"mfa"`
 	Passkey bool   `json:"passkey"`
 }
+
+type UserInfoPublic struct {
+	ID        uint    `json:"id"`
+	Name      string  `json:"name"`
+	AvatarUrl string  `json:"avatar_url"`
+	Groups    []Group `json:"groups" gorm:"-"`
+}

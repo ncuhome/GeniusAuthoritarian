@@ -1,4 +1,4 @@
-package public
+package controllers
 
 import (
 	"context"

@@ -89,6 +89,15 @@ func (a *User) GetNoSshDevIds(tx *gorm.DB) ([]uint, error) {
 	return t, tx.Select("users.id").Where("base_groups.name=? AND user_sshes.id IS NULL", departments.UDev).Find(&t).Error
 }
 
+func (a *User) GetUserInfoPubByIds(tx *gorm.DB, ids ...uint) ([]dto.UserInfoPublic, error) {
+	var t = make([]dto.UserInfoPublic, 0)
+	tx = tx.Model(a)
+	tx = a.sqlJoinUserGroups(tx)
+	return t, tx.Where("id IN ?", ids).
+		Clauses(clause.OrderBy{Expression: clause.Expr{SQL: "FIELD(id,?)", Vars: []interface{}{ids}, WithoutParentheses: true}}).
+		Find(&t).Error
+}
+
 func (a *User) U2fStatus(tx *gorm.DB) (*dto.UserU2fStatus, error) {
 	var t dto.UserU2fStatus
 	return &t, tx.Model(&User{}).Select("users.prefer_u2f AS prefer", "1 AS phone", "(users.mfa IS NOT NULL AND users.mfa!='') AS mfa", "user_webauthns.id IS NOT NULL AS passkey").
