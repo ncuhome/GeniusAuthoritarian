@@ -50,9 +50,9 @@ func RefreshToken(c *gin.Context) {
 
 func ModifyRefreshPayload(c *gin.Context) {
 	var f struct {
-		Token       string `json:"token" binding:"required"`
-		Payload     string `json:"payload" binding:"required"`
-		AccessToken bool   `json:"accessToken"`
+		Token       string `json:"token" form:"token" binding:"required"`
+		Payload     string `json:"payload" form:"payload" binding:"required"`
+		AccessToken bool   `json:"accessToken" form:"accessToken"`
 	}
 	if err := tools.ShouldBindReused(c, &f); err != nil {
 		callback.Error(c, callback.ErrForm, err)
@@ -89,7 +89,7 @@ func ModifyRefreshPayload(c *gin.Context) {
 
 func DestroyRefreshToken(c *gin.Context) {
 	var f struct {
-		Token string `json:"token" binding:"required"`
+		Token string `json:"token" form:"token" binding:"required"`
 	}
 	if err := tools.ShouldBindReused(c, &f); err != nil {
 		callback.Error(c, callback.ErrForm, err)
