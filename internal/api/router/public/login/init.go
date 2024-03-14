@@ -8,13 +8,13 @@ import (
 
 func Router(G *gin.RouterGroup) {
 	G.POST("/", controllers.DashboardLogin) // 个人页面登录
-	G.POST("/mfa", controllers.VerifyMfa)
+	G.POST("/mfa", middlewares.Secure(), controllers.VerifyMfa)
 
 	G.POST("/verify", middlewares.RequireAppSignature, controllers.CompleteLogin)
 
 	routerLoginPasskey(G.Group("passkey"))
 
-	thirdParty := G.Group(":app")
+	thirdParty := G.Group(":app", middlewares.Secure())
 	thirdParty.POST("/", controllers.ThirdPartySelfLogin) // 登录鉴权控制系统
 	thirdParty.POST("/:appCode", controllers.ThirdPartyLogin)
 
