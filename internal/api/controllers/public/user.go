@@ -4,19 +4,31 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/ncuhome/GeniusAuthoritarian/internal/api/callback"
 	"github.com/ncuhome/GeniusAuthoritarian/internal/service"
-	"github.com/ncuhome/GeniusAuthoritarian/internal/tools"
+	"strconv"
+	"strings"
 )
 
 func GetUserPublicInfo(c *gin.Context) {
 	var f struct {
-		ID []uint `json:"id" form:"id" binding:"required"`
+		ID string `json:"id" form:"id" binding:"required"`
 	}
-	if err := tools.ShouldBindReused(c, &f); err != nil {
+	if err := c.ShouldBindQuery(&f); err != nil {
 		callback.Error(c, callback.ErrForm, err)
 		return
 	}
 
-	data, err := service.User.GetUserInfoPublic(f.ID...)
+	idStrArr := strings.Split(f.ID, ",")
+	idNums := make([]uint, len(idStrArr))
+	for i, str := range idStrArr {
+		id, err := strconv.ParseUint(str, 10, 64)
+		if err != nil {
+			callback.Error(c, callback.ErrForm, err)
+			return
+		}
+		idNums[i] = uint(id)
+	}
+
+	data, err := service.User.GetUserInfoPublic(idNums...)
 	if err != nil {
 		callback.Error(c, callback.ErrDBOperation, err)
 		return

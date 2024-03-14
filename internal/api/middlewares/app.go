@@ -23,8 +23,8 @@ import (
 func RequireAppSignature(c *gin.Context) {
 	var header struct {
 		AppCode   string `json:"appCode" form:"appCode" binding:"required"`
-		TimeStamp int64  `json:"timeStamp" form:"appCode" binding:"required"`
-		Signature string `json:"signature" form:"appCode" binding:"required"`
+		TimeStamp int64  `json:"timeStamp" form:"timeStamp" binding:"required"`
+		Signature string `json:"signature" form:"signature" binding:"required"`
 	}
 	var form map[string]interface{}
 	var err error
@@ -55,7 +55,7 @@ func RequireAppSignature(c *gin.Context) {
 			return
 		}
 	} else {
-		if err = c.ShouldBindQuery(&header); err != nil {
+		if err = c.ShouldBindWith(&header, binding.Form); err != nil {
 			callback.Error(c, callback.ErrForm, err)
 			return
 		}
