@@ -17,10 +17,10 @@ func init() {
 	defaultTimeout := time.Second * 30
 
 	Http = tool.NewHttpTool(tool.GenHttpClient(&tool.HttpClientOptions{
-		Transport: tool.GenHttpTransport(&tool.HttpTransportOptions{
-			Timeout:         defaultTimeout,
-			IdleConnTimeout: time.Hour,
-		}),
+		Transport: &http.Transport{
+			TLSHandshakeTimeout: defaultTimeout,
+			IdleConnTimeout:     time.Hour * 3,
+		},
 		Timeout: defaultTimeout,
 	}))
 }
