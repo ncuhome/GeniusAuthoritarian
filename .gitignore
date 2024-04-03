@@ -1,4 +1,7 @@
 /.idea
+
+/config/
 /Config.yaml
+
 /main*
 /*.log
