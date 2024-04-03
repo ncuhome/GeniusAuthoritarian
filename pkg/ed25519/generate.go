@@ -2,9 +2,7 @@ package ed25519
 
 import (
 	"crypto/ed25519"
-	"crypto/x509"
-	"encoding/pem"
-	"golang.org/x/crypto/ssh"
+	"github.com/ncuhome/GeniusAuthoritarian/pkg/keypair"
 	"math/rand"
 )
 
@@ -26,35 +24,25 @@ type KeyPair struct {
 }
 
 func (a KeyPair) MarshalPem() (public []byte, private []byte, err error) {
-	publicPem, err := x509.MarshalPKIXPublicKey(a.Public)
+	publicPem, err := keypair.PemMarshalPublic(a.Public)
 	if err != nil {
 		return nil, nil, err
 	}
-
-	privatePem, err := x509.MarshalPKCS8PrivateKey(a.Private)
+	privatePem, err := keypair.PemMarshalPrivate(a.Private)
 	if err != nil {
 		return nil, nil, err
 	}
-
-	return pem.EncodeToMemory(&pem.Block{
-			Type:  "PUBLIC KEY",
-			Bytes: publicPem,
-		}), pem.EncodeToMemory(&pem.Block{
-			Type:  "PRIVATE KEY",
-			Bytes: privatePem,
-		}), nil
+	return publicPem, privatePem, nil
 }
 
 func (a KeyPair) MarshalSSH() (public []byte, private []byte, err error) {
-	publicSshKey, err := ssh.NewPublicKey(a.Public)
+	publicSshKey, err := keypair.SshMarshalPublic(a.Public)
 	if err != nil {
 		return nil, nil, err
 	}
-
-	privatePem, err := ssh.MarshalPrivateKey(a.Private, "")
+	privatePem, err := keypair.SshMarshalPrivate(a.Private, "")
 	if err != nil {
 		return nil, nil, err
 	}
-
-	return ssh.MarshalAuthorizedKey(publicSshKey), pem.EncodeToMemory(privatePem), nil
+	return publicSshKey, privatePem, nil
 }

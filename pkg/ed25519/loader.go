@@ -6,6 +6,7 @@ import (
 	"encoding/pem"
 	"errors"
 	"fmt"
+	"github.com/ncuhome/GeniusAuthoritarian/pkg/keypair"
 	"os"
 	"path"
 )
@@ -31,7 +32,7 @@ func (loader Loader) LoadPemBlock(filename, targetType string) (*pem.Block, erro
 }
 
 func (loader Loader) LoadPrivateKey(filename string) (ed25519.PrivateKey, error) {
-	block, err := loader.LoadPemBlock(filename, "PRIVATE KEY")
+	block, err := loader.LoadPemBlock(filename, keypair.TypePemPrivate)
 	if err != nil {
 		return nil, err
 	}
@@ -49,7 +50,7 @@ func (loader Loader) LoadPrivateKey(filename string) (ed25519.PrivateKey, error)
 }
 
 func (loader Loader) LoadPublicKey(filename string) (ed25519.PublicKey, error) {
-	block, err := loader.LoadPemBlock(filename, "PUBLIC KEY")
+	block, err := loader.LoadPemBlock(filename, keypair.TypePemPublic)
 	if err != nil {
 		return nil, err
 	}
