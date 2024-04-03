@@ -9,6 +9,7 @@ import (
 var Config _Config
 
 const ThisAppName = "统一授权系统"
+const ConfigDir = "config"
 
 func checkConfig() {
 	if Config.SshDev.Token == "" {
