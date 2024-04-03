@@ -14,8 +14,6 @@ import (
 	"time"
 )
 
-var key = []byte(global.Config.Jwt.SignKey)
-
 const (
 	User    = "User"
 	Login   = "Login"
@@ -73,14 +71,14 @@ func NewUserClaims(uid uint, Type string, valid time.Duration) (claims jwtClaims
 }
 
 func GenerateToken(claims jwtClaims.Claims) (string, error) {
-	return jwt.NewWithClaims(jwt.SigningMethodHS256, claims).SignedString(key)
+	return jwt.NewWithClaims(&jwt.SigningMethodEd25519{}, claims).SignedString(global.JwtEd25519.PrivateKey)
 }
 
 func ParseToken[C jwtClaims.Claims](Type, token string, target C) (claims C, valid bool, err error) {
 	var t *jwt.Token
 	t, err = jwt.ParseWithClaims(
 		token, target, func(t *jwt.Token) (interface{}, error) {
-			return key, nil
+			return global.JwtEd25519.PublicKey, nil
 		},
 		jwt.WithLeeway(time.Second*3),
 	)
