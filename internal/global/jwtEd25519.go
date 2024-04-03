@@ -4,7 +4,6 @@ import (
 	"crypto/ed25519"
 	ed25519Pkg "github.com/ncuhome/GeniusAuthoritarian/pkg/ed25519"
 	log "github.com/sirupsen/logrus"
-	"os"
 	"path"
 )
 
@@ -27,11 +26,7 @@ func initJwtEd25519() {
 	JwtEd25519.PublicKey, err = loader.LoadPublicKey(PublicKeyName)
 	if err != nil {
 		JwtEd25519.PublicKey = JwtEd25519.PrivateKey.Public().(ed25519.PublicKey)
-		if os.IsNotExist(err) {
-			log.Debugln("jwt public key not exist, generated from private key")
-		} else {
-			log.Warnln("jwt public key load failed, generated from private key:", err)
-		}
+		log.Warnln("load jwt public key failed, generated from private key:", err)
 	}
 }
 
