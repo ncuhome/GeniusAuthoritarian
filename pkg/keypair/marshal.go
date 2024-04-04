@@ -37,14 +37,14 @@ func PemEncodePrivate(content []byte) []byte {
 	})
 }
 
-func PemMarshalPublic(key any) ([]byte, error) {
+func PemMarshalPublic(key crypto.PublicKey) ([]byte, error) {
 	publicPem, err := x509.MarshalPKIXPublicKey(key)
 	if err != nil {
 		return nil, err
 	}
 	return PemEncodePublic(publicPem), nil
 }
-func PemMarshalPrivate(key any) ([]byte, error) {
+func PemMarshalPrivate(key crypto.PrivateKey) ([]byte, error) {
 	privatePem, err := x509.MarshalPKCS8PrivateKey(key)
 	if err != nil {
 		return nil, err
@@ -87,14 +87,14 @@ func PemUnmarshalPrivate[T crypto.PrivateKey](content []byte) (key T, err error)
 	return
 }
 
-func SshMarshalPublic(key any) ([]byte, error) {
+func SshMarshalPublic(key crypto.PublicKey) ([]byte, error) {
 	publicSshKey, err := ssh.NewPublicKey(key)
 	if err != nil {
 		return nil, err
 	}
 	return ssh.MarshalAuthorizedKey(publicSshKey), nil
 }
-func SshMarshalPrivate(key any, comment string) ([]byte, error) {
+func SshMarshalPrivate(key crypto.PrivateKey, comment string) ([]byte, error) {
 	privatePem, err := ssh.MarshalPrivateKey(key, comment)
 	if err != nil {
 		return nil, err
