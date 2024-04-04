@@ -9,7 +9,7 @@ require (
 	github.com/Mmx233/config v0.1.0
 	github.com/Mmx233/daoUtil v0.6.1
 	github.com/Mmx233/secure/v2 v2.0.6
-	github.com/Mmx233/tool v0.7.6
+	github.com/Mmx233/tool v0.7.7
 	github.com/alibabacloud-go/darabonba-openapi/v2 v2.0.6
 	github.com/alibabacloud-go/dingtalk v1.6.65
 	github.com/alibabacloud-go/tea v1.2.2

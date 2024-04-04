@@ -5,14 +5,12 @@ import (
 	"github.com/ncuhome/GeniusAuthoritarian/internal/db/dao"
 	"github.com/ncuhome/GeniusAuthoritarian/internal/db/redis"
 	"github.com/ncuhome/GeniusAuthoritarian/internal/pkg/cronAgent"
-	sshTool2 "github.com/ncuhome/GeniusAuthoritarian/internal/rpc/sshDev/sshDevClient/sshTool"
+	"github.com/ncuhome/GeniusAuthoritarian/internal/rpc/sshDev/sshDevClient/sshTool"
 	"github.com/ncuhome/GeniusAuthoritarian/internal/rpc/sshDev/sshDevModel"
 	"github.com/ncuhome/GeniusAuthoritarian/internal/service"
 	"github.com/ncuhome/GeniusAuthoritarian/pkg/backoff"
 	"github.com/robfig/cron/v3"
 	log "github.com/sirupsen/logrus"
-	"math/rand"
-	"time"
 )
 
 // 研发哥容器内 ssh 账号管理器
@@ -47,13 +45,10 @@ func DoSync() error {
 		return err
 	}
 
-	randSource := rand.NewSource(time.Now().UnixNano())
-	randRand := rand.New(randSource)
-
 	// 生成密钥对
 	userSshToCreate := make([]dao.UserSsh, len(users))
 	for i, uid := range users {
-		userSshToCreate[i], err = sshTool2.NewSshDevModel(randRand, uid)
+		userSshToCreate[i], err = sshTool.NewSshDevModel(uid)
 		if err != nil {
 			return err
 		}
@@ -83,7 +78,7 @@ func DoSync() error {
 		i := 0
 		for _, userSsh := range userSshToCreate {
 			sshRpcMessages[i] = sshDevModel.SshAccountMsg{
-				Username:  sshTool2.LinuxAccountName(userSsh.UID),
+				Username:  sshTool.LinuxAccountName(userSsh.UID),
 				PublicKey: userSsh.PublicSsh,
 			}
 			i++
@@ -91,7 +86,7 @@ func DoSync() error {
 		for _, userSsh := range userToDelete {
 			sshRpcMessages[i] = sshDevModel.SshAccountMsg{
 				IsDel:    true,
-				Username: sshTool2.LinuxAccountName(userSsh.UID),
+				Username: sshTool.LinuxAccountName(userSsh.UID),
 			}
 			i++
 		}

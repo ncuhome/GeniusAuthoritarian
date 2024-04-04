@@ -2,12 +2,12 @@ package ed25519
 
 import (
 	"crypto/ed25519"
+	"crypto/rand"
 	"github.com/ncuhome/GeniusAuthoritarian/pkg/keypair"
-	"math/rand"
 )
 
-func Generate(randRand *rand.Rand) (*KeyPair, error) {
-	publicKey, privateKey, err := ed25519.GenerateKey(rand.New(randRand))
+func Generate() (*KeyPair, error) {
+	publicKey, privateKey, err := ed25519.GenerateKey(rand.Reader)
 	if err != nil {
 		return nil, err
 	}

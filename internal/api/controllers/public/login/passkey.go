@@ -16,7 +16,6 @@ import (
 	"github.com/ncuhome/GeniusAuthoritarian/internal/service"
 	"github.com/ncuhome/GeniusAuthoritarian/internal/tools"
 	"gorm.io/gorm"
-	"math/rand"
 	"strconv"
 	"time"
 	"unsafe"
@@ -32,9 +31,13 @@ func BeginPasskeyLogin(c *gin.Context) {
 		return
 	}
 
-	identity := "r" + tool.NewRand(rand.NewSource(time.Now().UnixNano())).
-		WithLetters("qwertyuiopasdfghjklzxcvbnmQWERTYUIOPASDFGHJKLZXCVBNM").
-		String(passkeyKeyLength-1)
+	identity, err := tool.RandCrypto("qwertyuiopasdfghjklzxcvbnmQWERTYUIOPASDFGHJKLZXCVBNM").
+		String(passkeyKeyLength - 1)
+	if err != nil {
+		callback.Error(c, callback.ErrUnexpected, err)
+		return
+	}
+	identity = "r" + identity
 
 	err = redis.NewPasskey(c.ClientIP(), redis.PasskeyLogin, identity).
 		StoreSession(context.Background(), sessionData, time.Minute*5)

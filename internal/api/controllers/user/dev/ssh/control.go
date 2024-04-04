@@ -11,8 +11,6 @@ import (
 	"github.com/ncuhome/GeniusAuthoritarian/internal/service"
 	"github.com/ncuhome/GeniusAuthoritarian/internal/tools"
 	"github.com/ncuhome/GeniusAuthoritarian/pkg/ed25519"
-	"math/rand"
-	"time"
 )
 
 func ResetSshKeyPair(c *gin.Context) {
@@ -34,7 +32,7 @@ func ResetSshKeyPair(c *gin.Context) {
 		return
 	}
 
-	keyPair, err := ed25519.Generate(rand.New(rand.NewSource(time.Now().UnixNano())))
+	keyPair, err := ed25519.Generate()
 	if err != nil {
 		callback.Error(c, callback.ErrUnexpected, err)
 		return

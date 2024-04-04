@@ -2,10 +2,11 @@ package redis
 
 import (
 	"context"
+	"crypto/rand"
 	"errors"
 	"fmt"
-	"github.com/Mmx233/tool"
-	"math/rand"
+	"math/big"
+	"strconv"
 	"time"
 )
 
@@ -21,7 +22,11 @@ type UserIdentityCode struct {
 
 // New 新建身份校验码，五分钟有效，每用户仅存在一个
 func (a UserIdentityCode) New() (string, error) {
-	code := fmt.Sprint(tool.NewRand(rand.NewSource(time.Now().UnixNano())).Num(12345, 99999))
+	codeInt, err := rand.Int(rand.Reader, big.NewInt(87654))
+	if err != nil {
+		return "", err
+	}
+	code := strconv.FormatInt(codeInt.Add(codeInt, big.NewInt(12345)).Int64(), 10)
 	return code, Client.Set(context.Background(), a.key, code, time.Minute*5).Err()
 }
 

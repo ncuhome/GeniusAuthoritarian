@@ -3,11 +3,10 @@ package sshTool
 import (
 	"github.com/ncuhome/GeniusAuthoritarian/internal/db/dao"
 	"github.com/ncuhome/GeniusAuthoritarian/pkg/ed25519"
-	"math/rand"
 )
 
-func NewSshDevModel(randRand *rand.Rand, uid uint) (model dao.UserSsh, err error) {
-	sshKey, err := ed25519.Generate(randRand)
+func NewSshDevModel(uid uint) (model dao.UserSsh, err error) {
+	sshKey, err := ed25519.Generate()
 	if err != nil {
 		return
 	}

@@ -12,8 +12,6 @@ import (
 	"github.com/ncuhome/GeniusAuthoritarian/internal/db/redis"
 	"github.com/ncuhome/GeniusAuthoritarian/internal/global"
 	"gorm.io/gorm"
-	"math/rand"
-	"time"
 )
 
 var App = AppSrv{dao.DB}
@@ -42,13 +40,20 @@ func (a AppSrv) NameExist(name string, opts ...daoUtil.ServiceOpt) (bool, error)
 }
 
 func (a AppSrv) New(uid uint, name, callback string, permitAll bool) (*dao.App, error) {
-	const randLetters = "1234567890qwertyuiopasdfghjklzxcvbnmQWERTYUIOPASDFGHJKLZXCVBNM"
-	_rand := tool.NewRand(rand.NewSource(time.Now().UnixNano())).WithLetters(randLetters)
+	_rand := tool.RandCrypto("1234567890qwertyuiopasdfghjklzxcvbnmQWERTYUIOPASDFGHJKLZXCVBNM")
+	appCode, err := _rand.String(8)
+	if err != nil {
+		return nil, err
+	}
+	appSecret, err := _rand.String(100)
+	if err != nil {
+		return nil, err
+	}
 	var t = dao.App{
 		Name:           name,
 		UID:            uid,
-		AppCode:        _rand.String(8),
-		AppSecret:      _rand.String(100),
+		AppCode:        appCode,
+		AppSecret:      appSecret,
 		Callback:       callback,
 		PermitAllGroup: permitAll,
 

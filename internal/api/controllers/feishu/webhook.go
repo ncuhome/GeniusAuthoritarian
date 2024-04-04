@@ -18,8 +18,6 @@ import (
 	"github.com/ncuhome/GeniusAuthoritarian/pkg/feishuApi"
 	log "github.com/sirupsen/logrus"
 	"gorm.io/gorm"
-	"math/rand"
-	"time"
 )
 
 func Webhook(c *gin.Context) {
@@ -247,7 +245,7 @@ func userUpdated(c *gin.Context, logger *log.Entry, event json.RawMessage) {
 					Username: userName,
 				}
 			} else { // 以前不是现在是
-				model, err := sshTool.NewSshDevModel(rand.New(rand.NewSource(time.Now().UnixNano())), userModel.ID)
+				model, err := sshTool.NewSshDevModel(userModel.ID)
 				if err != nil {
 					callback.Error(c, callback.ErrUnexpected, err)
 					return
