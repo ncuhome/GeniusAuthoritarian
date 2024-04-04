@@ -9,9 +9,11 @@ import (
 )
 
 const (
-	_PublicCrtName  = "cert.crt"
 	_PublicKeyName  = "public.pem"
 	_PrivateKeyName = "private.pem"
+
+	_PublicTlsKeyName  = "tls.crt"
+	_PrivateTlsKeyName = "tls.key"
 
 	dirJwt = "jwt"
 	dirCa  = "ca"
@@ -38,11 +40,11 @@ func initCaIssuer() {
 	var loader = ed25519Pkg.Loader{
 		Dir: path.Join(ConfigDir, dirCa),
 	}
-	certBytes, err := loader.LoadPem(_PublicCrtName)
+	certBytes, err := loader.LoadPem(_PublicTlsKeyName)
 	if err != nil {
 		log.Fatalln("read ca cert failed:", err)
 	}
-	keyBytes, err := loader.LoadPem(_PrivateKeyName)
+	keyBytes, err := loader.LoadPem(_PrivateTlsKeyName)
 	if err != nil {
 		log.Fatalln("read ca key failed:", err)
 	}
