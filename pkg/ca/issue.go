@@ -35,7 +35,7 @@ type Issuer struct {
 	caKey ed25519.PrivateKey
 }
 
-func (i Issuer) Issue(dnsNames []string, validYears int) (fullChain, private []byte, err error) {
+func (i Issuer) Issue(dnsNames []string, notAfter time.Time) (fullChain, private []byte, err error) {
 	ed25519Keypair, err := ed25519Pkg.Generate()
 	if err != nil {
 		return nil, nil, err
@@ -46,8 +46,8 @@ func (i Issuer) Issue(dnsNames []string, validYears int) (fullChain, private []b
 		Subject: pkix.Name{
 			CommonName: "GeniusAuthoritarian Client Cert",
 		},
-		NotBefore:   time.Now(),
-		NotAfter:    time.Now().AddDate(validYears, 0, 0),
+		NotBefore:   time.Now().Add(-time.Minute),
+		NotAfter:    notAfter,
 		KeyUsage:    x509.KeyUsageDigitalSignature | x509.KeyUsageKeyEncipherment,
 		ExtKeyUsage: []x509.ExtKeyUsage{x509.ExtKeyUsageClientAuth},
 		DNSNames:    dnsNames,

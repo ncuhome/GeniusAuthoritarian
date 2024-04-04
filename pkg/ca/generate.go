@@ -10,7 +10,7 @@ import (
 	"time"
 )
 
-func NewRoot(validYear int) (public []byte, private []byte, err error) {
+func NewRoot(notAfter time.Time) (public []byte, private []byte, err error) {
 	ed25519Keypair, err := ed25519.Generate()
 	if err != nil {
 		return nil, nil, err
@@ -21,8 +21,8 @@ func NewRoot(validYear int) (public []byte, private []byte, err error) {
 		Subject: pkix.Name{
 			CommonName: "GeniusAuthoritarian Root",
 		},
-		NotBefore:             time.Now(),
-		NotAfter:              time.Now().AddDate(validYear, 0, 0),
+		NotBefore:             time.Now().Add(-time.Minute),
+		NotAfter:              notAfter,
 		KeyUsage:              x509.KeyUsageCertSign | x509.KeyUsageCRLSign,
 		IsCA:                  true,
 		BasicConstraintsValid: true,
