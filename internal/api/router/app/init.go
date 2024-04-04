@@ -11,4 +11,5 @@ func Router(G *gin.RouterGroup) {
 
 	keypair := G.Group("keypair")
 	keypair.GET("server", controllers.ServerPublicKeys)
+	keypair.POST("rpc", controllers.RpcClientCredential)
 }
