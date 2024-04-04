@@ -5,6 +5,7 @@ import (
 	"crypto/rand"
 	"crypto/x509"
 	"crypto/x509/pkix"
+	"errors"
 	ed25519Pkg "github.com/ncuhome/GeniusAuthoritarian/pkg/ed25519"
 	"github.com/ncuhome/GeniusAuthoritarian/pkg/keypair"
 	"math/big"
@@ -16,6 +17,10 @@ func NewIssuer(certPem, keyPem []byte) (*Issuer, error) {
 	if err != nil {
 		return nil, err
 	}
+	if caCert.NotAfter.Before(time.Now()) {
+		return nil, errors.New("cert has expired")
+	}
+
 	caPrivateKey, err := keypair.PemUnmarshalPrivate[ed25519.PrivateKey](keypair.FormatECDSA, keyPem)
 	if err != nil {
 		return nil, err
