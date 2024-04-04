@@ -16,5 +16,6 @@ func ServerPublicKeys(c *gin.Context) {
 
 	callback.Success(c, gin.H{
 		"jwt": jwtPublic,
+		"ca":  global.CaIssuer.CaCertPem,
 	})
 }

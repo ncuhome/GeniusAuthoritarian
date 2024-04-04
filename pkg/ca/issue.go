@@ -22,15 +22,15 @@ func NewIssuer(certPem, keyPem []byte) (*Issuer, error) {
 	}
 
 	return &Issuer{
-		caCertPem: certPem,
-		caCert:    caCert,
+		CaCertPem: certPem,
+		CaCert:    caCert,
 		caKey:     caPrivateKey,
 	}, nil
 }
 
 type Issuer struct {
-	caCertPem []byte
-	caCert    *x509.Certificate
+	CaCertPem []byte
+	CaCert    *x509.Certificate
 
 	caKey ed25519.PrivateKey
 }
@@ -51,15 +51,15 @@ func (i Issuer) Issue(dnsNames []string, notAfter time.Time) (fullChain, private
 		KeyUsage:    x509.KeyUsageDigitalSignature | x509.KeyUsageKeyEncipherment,
 		ExtKeyUsage: []x509.ExtKeyUsage{x509.ExtKeyUsageClientAuth},
 		DNSNames:    dnsNames,
-	}, i.caCert, ed25519Keypair.Public, i.caKey)
+	}, i.CaCert, ed25519Keypair.Public, i.caKey)
 	if err != nil {
 		return nil, nil, err
 	}
 
 	certPem := keypair.PemEncodeCertificate(clientCert)
-	fullChain = make([]byte, 0, len(certPem)+len(i.caCertPem))
+	fullChain = make([]byte, 0, len(certPem)+len(i.CaCertPem))
 	fullChain = append(fullChain, certPem...)
-	fullChain = append(fullChain, i.caCertPem...)
+	fullChain = append(fullChain, i.CaCertPem...)
 
 	privatePem := keypair.PemEncodePrivate(keypair.FormatECDSA, ed25519Keypair.Private)
 
