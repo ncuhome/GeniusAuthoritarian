@@ -10,8 +10,9 @@ import (
 )
 
 const (
-	TypePemPublic  = "PUBLIC KEY"
-	TypePemPrivate = "PRIVATE KEY"
+	TypePemPublic   = "PUBLIC KEY"
+	TypePemPrivate  = "PRIVATE KEY"
+	TypeCertificate = "CERTIFICATE"
 )
 
 func DecodePemBlock(content []byte, targetType string) (*pem.Block, error) {
@@ -24,6 +25,12 @@ func DecodePemBlock(content []byte, targetType string) (*pem.Block, error) {
 	return block, nil
 }
 
+func PemEncodeCertificate(content []byte) []byte {
+	return pem.EncodeToMemory(&pem.Block{
+		Type:  TypeCertificate,
+		Bytes: content,
+	})
+}
 func PemEncodePublic(content []byte) []byte {
 	return pem.EncodeToMemory(&pem.Block{
 		Type:  TypePemPublic,
@@ -52,6 +59,13 @@ func PemMarshalPrivate(key crypto.PrivateKey) ([]byte, error) {
 	return PemEncodePrivate(privatePem), nil
 }
 
+func PemUnmarshalCertificate(content []byte) (*x509.Certificate, error) {
+	block, err := DecodePemBlock(content, TypeCertificate)
+	if err != nil {
+		return nil, err
+	}
+	return x509.ParseCertificate(block.Bytes)
+}
 func PemUnmarshalPublic[T crypto.PublicKey](content []byte) (key T, err error) {
 	block, err := DecodePemBlock(content, TypePemPublic)
 	if err != nil {
