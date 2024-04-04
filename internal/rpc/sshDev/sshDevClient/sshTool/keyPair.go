@@ -15,7 +15,7 @@ func NewSshDevModel(uid uint) (model dao.UserSsh, err error) {
 	if err != nil {
 		return
 	}
-	publicSsh, privateSsh, err := sshKey.MarshalSSH()
+	publicSsh, privateSsh, err := sshKey.MarshalSSH("")
 	if err != nil {
 		return
 	}

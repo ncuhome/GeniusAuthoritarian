@@ -9,65 +9,59 @@ import (
 	"golang.org/x/crypto/ssh"
 )
 
-const (
-	TypePemPublic   = "PUBLIC KEY"
-	TypePemPrivate  = "PRIVATE KEY"
-	TypeCertificate = "CERTIFICATE"
-)
-
-func DecodePemBlock(content []byte, targetType string) (*pem.Block, error) {
+func DecodePemBlock(header PemType, content []byte) (*pem.Block, error) {
 	block, _ := pem.Decode(content)
 	if block == nil {
 		return nil, errors.New("not pem format")
-	} else if block.Type != targetType {
-		return nil, fmt.Errorf("pem type should be %s, got %s", targetType, block.Type)
+	} else if headerStr := header.String(); block.Type != headerStr {
+		return nil, fmt.Errorf("pem type should be %s, got %s", headerStr, block.Type)
 	}
 	return block, nil
 }
 
 func PemEncodeCertificate(content []byte) []byte {
 	return pem.EncodeToMemory(&pem.Block{
-		Type:  TypeCertificate,
+		Type:  TypeCertificate.String(),
 		Bytes: content,
 	})
 }
-func PemEncodePublic(content []byte) []byte {
+func PemEncodePublic(format Format, content []byte) []byte {
 	return pem.EncodeToMemory(&pem.Block{
-		Type:  TypePemPublic,
+		Type:  TypePemPublic.Format(format).String(),
 		Bytes: content,
 	})
 }
-func PemEncodePrivate(content []byte) []byte {
+func PemEncodePrivate(format Format, content []byte) []byte {
 	return pem.EncodeToMemory(&pem.Block{
-		Type:  TypePemPrivate,
+		Type:  TypePemPrivate.Format(format).String(),
 		Bytes: content,
 	})
 }
 
-func PemMarshalPublic(key crypto.PublicKey) ([]byte, error) {
+func PemMarshalPublic(format Format, key crypto.PublicKey) ([]byte, error) {
 	publicPem, err := x509.MarshalPKIXPublicKey(key)
 	if err != nil {
 		return nil, err
 	}
-	return PemEncodePublic(publicPem), nil
+	return PemEncodePublic(format, publicPem), nil
 }
-func PemMarshalPrivate(key crypto.PrivateKey) ([]byte, error) {
+func PemMarshalPrivate(format Format, key crypto.PrivateKey) ([]byte, error) {
 	privatePem, err := x509.MarshalPKCS8PrivateKey(key)
 	if err != nil {
 		return nil, err
 	}
-	return PemEncodePrivate(privatePem), nil
+	return PemEncodePrivate(format, privatePem), nil
 }
 
 func PemUnmarshalCertificate(content []byte) (*x509.Certificate, error) {
-	block, err := DecodePemBlock(content, TypeCertificate)
+	block, err := DecodePemBlock(TypeCertificate, content)
 	if err != nil {
 		return nil, err
 	}
 	return x509.ParseCertificate(block.Bytes)
 }
-func PemUnmarshalPublic[T crypto.PublicKey](content []byte) (key T, err error) {
-	block, err := DecodePemBlock(content, TypePemPublic)
+func PemUnmarshalPublic[T crypto.PublicKey](format Format, content []byte) (key T, err error) {
+	block, err := DecodePemBlock(TypePemPublic.Format(format), content)
 	if err != nil {
 		return
 	}
@@ -83,8 +77,8 @@ func PemUnmarshalPublic[T crypto.PublicKey](content []byte) (key T, err error) {
 	}
 	return
 }
-func PemUnmarshalPrivate[T crypto.PrivateKey](content []byte) (key T, err error) {
-	block, err := DecodePemBlock(content, TypePemPrivate)
+func PemUnmarshalPrivate[T crypto.PrivateKey](format Format, content []byte) (key T, err error) {
+	block, err := DecodePemBlock(TypePemPrivate.Format(format), content)
 	if err != nil {
 		return
 	}

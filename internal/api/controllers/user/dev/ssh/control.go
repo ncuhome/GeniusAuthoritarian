@@ -42,7 +42,7 @@ func ResetSshKeyPair(c *gin.Context) {
 		callback.Error(c, callback.ErrUnexpected, err)
 		return
 	}
-	publicSsh, privateSsh, err := keyPair.MarshalSSH()
+	publicSsh, privateSsh, err := keyPair.MarshalSSH("")
 	if err != nil {
 		callback.Error(c, callback.ErrUnexpected, err)
 		return

@@ -4,14 +4,13 @@ import (
 	"crypto/rand"
 	"crypto/x509"
 	"crypto/x509/pkix"
-	"encoding/pem"
 	"github.com/ncuhome/GeniusAuthoritarian/pkg/ed25519"
 	"github.com/ncuhome/GeniusAuthoritarian/pkg/keypair"
 	"math/big"
 	"time"
 )
 
-func NewRoot(valid time.Duration) (public []byte, private []byte, err error) {
+func NewRoot(validYear int) (public []byte, private []byte, err error) {
 	ed25519Keypair, err := ed25519.Generate()
 	if err != nil {
 		return nil, nil, err
@@ -23,7 +22,7 @@ func NewRoot(valid time.Duration) (public []byte, private []byte, err error) {
 			CommonName: "GeniusAuthoritarian Root",
 		},
 		NotBefore:             time.Now(),
-		NotAfter:              time.Now().Add(valid),
+		NotAfter:              time.Now().AddDate(validYear, 0, 0),
 		KeyUsage:              x509.KeyUsageCertSign | x509.KeyUsageCRLSign,
 		IsCA:                  true,
 		BasicConstraintsValid: true,
@@ -32,11 +31,8 @@ func NewRoot(valid time.Duration) (public []byte, private []byte, err error) {
 	if err != nil {
 		return nil, nil, err
 	}
-	certPem := pem.EncodeToMemory(&pem.Block{
-		Type:  "CERTIFICATE",
-		Bytes: certBytes,
-	})
-	privateKeyPem, err := keypair.PemMarshalPrivate(ed25519Keypair.Private)
+	certPem := keypair.PemEncodeCertificate(certBytes)
+	privateKeyPem, err := keypair.PemMarshalPrivate(keypair.FormatECDSA, ed25519Keypair.Private)
 	if err != nil {
 		return nil, nil, err
 	}

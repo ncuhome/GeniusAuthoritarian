@@ -23,24 +23,24 @@ type KeyPair struct {
 	Private ed25519.PrivateKey
 }
 
-func (a KeyPair) MarshalPem() (public []byte, private []byte, err error) {
-	publicPem, err := keypair.PemMarshalPublic(a.Public)
+func (a KeyPair) MarshalPem() (public, private []byte, err error) {
+	publicPem, err := keypair.PemMarshalPublic(keypair.FormatECDSA, a.Public)
 	if err != nil {
 		return nil, nil, err
 	}
-	privatePem, err := keypair.PemMarshalPrivate(a.Private)
+	privatePem, err := keypair.PemMarshalPrivate(keypair.FormatECDSA, a.Private)
 	if err != nil {
 		return nil, nil, err
 	}
 	return publicPem, privatePem, nil
 }
 
-func (a KeyPair) MarshalSSH() (public []byte, private []byte, err error) {
+func (a KeyPair) MarshalSSH(comment string) (public, private []byte, err error) {
 	publicSshKey, err := keypair.SshMarshalPublic(a.Public)
 	if err != nil {
 		return nil, nil, err
 	}
-	privatePem, err := keypair.SshMarshalPrivate(a.Private, "")
+	privatePem, err := keypair.SshMarshalPrivate(a.Private, comment)
 	if err != nil {
 		return nil, nil, err
 	}

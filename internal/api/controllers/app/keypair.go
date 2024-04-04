@@ -8,7 +8,7 @@ import (
 )
 
 func ServerPublicKeys(c *gin.Context) {
-	jwtPublic, err := keypair.PemMarshalPublic(global.JwtEd25519.PublicKey)
+	jwtPublic, err := keypair.PemMarshalPublic(keypair.FormatECDSA, global.JwtEd25519.PublicKey)
 	if err != nil {
 		callback.Error(c, callback.ErrUnexpected, err)
 		return

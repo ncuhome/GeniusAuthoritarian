@@ -21,7 +21,7 @@ func (loader Loader) LoadPrivateKey(filename string) (ed25519.PrivateKey, error)
 	if err != nil {
 		return nil, err
 	}
-	return keypair.PemUnmarshalPrivate[ed25519.PrivateKey](keyBytes)
+	return keypair.PemUnmarshalPrivate[ed25519.PrivateKey](keypair.FormatECDSA, keyBytes)
 }
 
 func (loader Loader) LoadPublicKey(filename string) (ed25519.PublicKey, error) {
@@ -29,5 +29,5 @@ func (loader Loader) LoadPublicKey(filename string) (ed25519.PublicKey, error) {
 	if err != nil {
 		return nil, err
 	}
-	return keypair.PemUnmarshalPublic[ed25519.PublicKey](keyBytes)
+	return keypair.PemUnmarshalPublic[ed25519.PublicKey](keypair.FormatECDSA, keyBytes)
 }
