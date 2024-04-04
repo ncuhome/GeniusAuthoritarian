@@ -3,6 +3,8 @@ package global
 func init() {
 	initConfig()
 	initLog()
-	initJwtEd25519()
 	checkConfig()
+
+	initJwtEd25519()
+	initCaIssuer()
 }
