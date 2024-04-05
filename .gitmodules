@@ -1,0 +1,3 @@
+[submodule "internal/rpc/protos"]
+	path = internal/rpc/protos
+	url = https://github.com/ncuhome/GeniusAuthoritarianProtos
