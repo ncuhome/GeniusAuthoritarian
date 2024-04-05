@@ -2,7 +2,6 @@ package service
 
 import (
 	"context"
-	"errors"
 	"github.com/Mmx233/daoUtil"
 	"github.com/ncuhome/GeniusAuthoritarian/internal/db/dao"
 	"github.com/ncuhome/GeniusAuthoritarian/internal/db/dto"
@@ -64,35 +63,31 @@ func (a LoginRecordSrv) UserOnline(uid uint, currentLoginID uint) ([]dto.LoginRe
 	if err != nil {
 		return nil, err
 	}
+	if len(validRecords) == 0 {
+		return validRecords, nil
+	}
 
-	var _redis = redis.NewRecordedToken()
-	var validCount int
-	ctx, cancel := context.WithTimeout(context.Background(), time.Second*10)
-	defer cancel()
+	ids := make([]uint64, len(validRecords))
 	for i, record := range validRecords {
-		err = _redis.NewStorePoint(uint64(record.ID)).Get(ctx, nil)
-		if err != nil {
-			if errors.Is(err, redis.Nil) {
-				validRecords[i].ID = 0
-				continue
-			}
-			return nil, err
-		}
-		validCount++
+		ids[i] = uint64(record.ID)
+	}
+	recordState, err := redis.NewRecordedToken().MPointGet(context.Background(), ids...)
+	if err != nil {
+		return nil, err
 	}
 
-	var result = make([]dto.LoginRecordOnline, validCount)
-	if validCount != 0 {
-		for i, record := range validRecords {
-			if record.ID != 0 {
-				if record.ID == currentLoginID {
-					record.IsMe = true
-				}
-				result[i] = record
-			}
+	pointer := 0
+	for i := 0; i < len(validRecords); i++ {
+		if recordState[i] == redis.Nil {
+			continue
 		}
+		validRecords[i].IsMe = validRecords[i].ID == currentLoginID
+		if i != pointer {
+			validRecords[pointer] = validRecords[i]
+		}
+		pointer++
 	}
-	return result, nil
+	return validRecords[0:pointer], nil
 }
 
 func (a LoginRecordSrv) OnlineRecordExist(uid, id uint, opts ...daoUtil.ServiceOpt) (bool, error) {

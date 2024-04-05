@@ -50,6 +50,14 @@ func (a TokenStore[C]) CreateStorePoint(ctx context.Context, valid time.Duration
 	return id, a.CreateStorePointWithID(ctx, id, valid, claims)
 }
 
+func (a TokenStore[C]) MPointGet(ctx context.Context, ids ...uint64) ([]interface{}, error) {
+	keys := make([]string, len(ids))
+	for i, id := range ids {
+		keys[i] = a.genKey(id)
+	}
+	return a.client.MGet(ctx, keys...).Result()
+}
+
 func (a TokenStore[C]) NewStorePoint(id uint64) Point[C] {
 	return Point[C]{
 		s:   a,
