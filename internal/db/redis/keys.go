@@ -27,4 +27,5 @@ const (
 	keyU2F
 	keyUserJwt
 	keyRecordedToken
+	keyCanceledToken
 )
