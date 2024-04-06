@@ -9,10 +9,12 @@ import (
 	"github.com/ncuhome/GeniusAuthoritarian/internal/db/redis"
 	"github.com/ncuhome/GeniusAuthoritarian/internal/service"
 	"github.com/ncuhome/GeniusAuthoritarian/internal/tools"
+	"gorm.io/gorm"
+	"time"
 )
 
 func Logout(c *gin.Context) {
-	userClaims := tools.GetUserInfo(c)
+	loginID := tools.GetUserInfo(c).ID
 
 	loginRecordSrv, err := service.LoginRecord.Begin()
 	if err != nil {
@@ -21,13 +23,13 @@ func Logout(c *gin.Context) {
 	}
 	defer loginRecordSrv.Rollback()
 
-	err = loginRecordSrv.SetDestroyed(uint(userClaims.ID))
+	err = loginRecordSrv.SetDestroyed(uint(loginID))
 	if err != nil {
 		callback.Error(c, callback.ErrDBOperation, err)
 		return
 	}
 
-	err = redis.CancelToken(context.Background(), userClaims.ID, userClaims.ExpiresAt.Time)
+	err = redis.NewRecordedToken().NewStorePoint(loginID).Destroy(context.Background())
 	if err != nil {
 		callback.Error(c, callback.ErrUnexpected, err)
 		return
@@ -57,13 +59,14 @@ func LogoutDevice(c *gin.Context) {
 	}
 	defer loginRecordSrv.Rollback()
 
-	userClaims := tools.GetUserInfo(c)
-	exist, err := loginRecordSrv.OnlineRecordExist(userClaims.UID, f.ID, daoUtil.LockForUpdate)
+	uid := tools.GetUserInfo(c).UID
+	loginRecord, err := loginRecordSrv.TakeOnlineRecord(uid, f.ID, daoUtil.LockForUpdate)
 	if err != nil {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			callback.Error(c, callback.ErrTargetDeviceOffline)
+			return
+		}
 		callback.Error(c, callback.ErrDBOperation, err)
-		return
-	} else if !exist {
-		callback.Error(c, callback.ErrTargetDeviceOffline)
 		return
 	}
 
@@ -73,7 +76,7 @@ func LogoutDevice(c *gin.Context) {
 		return
 	}
 
-	err = redis.CancelToken(context.Background(), userClaims.ID, userClaims.ExpiresAt.Time)
+	err = redis.CancelToken(context.Background(), uint64(loginRecord.ID), loginRecord.AppCode, time.Unix(int64(loginRecord.ValidBefore), 0))
 	if err != nil {
 		if errors.Is(err, redis.Nil) {
 			callback.Error(c, callback.ErrTargetDeviceOffline)

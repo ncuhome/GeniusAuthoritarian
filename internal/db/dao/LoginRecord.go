@@ -42,6 +42,14 @@ func (a *LoginRecord) sqlLoginValid(tx *gorm.DB) *gorm.DB {
 	return tx.Where("login_records.valid_before>? AND NOT login_records.destroyed=1", time.Now().Unix())
 }
 
+func (a *LoginRecord) sqlGetForCancel(tx *gorm.DB) *gorm.DB {
+	tx = tx.Model(&LoginRecord{})
+	tx = a.sqlJoinApps(tx)
+	tx = a.sqlLoginValid(tx)
+	tx = tx.Select("login_records.id", "login_records.valid_before", "apps.app_code")
+	return tx
+}
+
 func (a *LoginRecord) Insert(tx *gorm.DB) error {
 	return tx.Create(a).Error
 }
@@ -62,10 +70,9 @@ func (a *LoginRecord) GetByUID(tx *gorm.DB, limit int) ([]dto.LoginRecord, error
 	return t, tx.Find(&t).Error
 }
 
-func (a *LoginRecord) GetByAID(tx *gorm.DB) ([]dto.LoginRecordForCancel, error) {
+func (a *LoginRecord) GetForCancelByAID(tx *gorm.DB) ([]dto.LoginRecordForCancel, error) {
 	var t []dto.LoginRecordForCancel
-	tx = tx.Model(a)
-	tx = a.sqlLoginValid(tx)
+	tx = a.sqlGetForCancel(tx)
 	return t, tx.Where(a, "aid").Find(&t).Error
 }
 
@@ -73,14 +80,6 @@ func (a *LoginRecord) GetValidForUser(tx *gorm.DB) ([]dto.LoginRecordOnline, err
 	var t = make([]dto.LoginRecordOnline, 0)
 	tx = a.sqlGetByUID(tx)
 	tx = a.sqlLoginValid(tx)
-	return t, tx.Find(&t).Error
-}
-
-func (a *LoginRecord) ValidExist(tx *gorm.DB) (bool, error) {
-	var t bool
-	tx = tx.Model(&LoginRecord{}).Select("1")
-	tx = a.sqlLoginValid(tx)
-	tx = tx.Where(a, "id", "uid").Limit(1)
 	return t, tx.Find(&t).Error
 }
 
@@ -109,4 +108,11 @@ func (a *LoginRecord) GetViewIds(tx *gorm.DB, startAt uint) ([]uint, error) {
 func (a *LoginRecord) GetAdminViews(tx *gorm.DB, startAt int64) ([]dto.LoginRecordDataView, error) {
 	var t = make([]dto.LoginRecordDataView, 0)
 	return t, tx.Model(a).Where("created_at>=?", startAt).Order("id DESC").Find(&t).Error
+}
+
+func (a *LoginRecord) TakeValidForCancel(tx *gorm.DB) (*dto.LoginRecordForCancel, error) {
+	var t dto.LoginRecordForCancel
+	tx = a.sqlGetForCancel(tx)
+	tx = tx.Where(a, "id", "uid")
+	return &t, tx.Take(&t).Error
 }

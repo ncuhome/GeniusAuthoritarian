@@ -48,5 +48,6 @@ type AdminLoginDataView struct {
 
 type LoginRecordForCancel struct {
 	ID          uint   `json:"id"`
+	AppCode     string `json:"appCode"`
 	ValidBefore uint64 `json:"validBefore"`
 }

@@ -341,7 +341,7 @@ func ModifyApp(c *gin.Context) {
 		ids := make([]uint, len(records))
 		for i, record := range records {
 			ids[i] = record.ID
-			err = redis.CancelToken(ctx, uint64(record.ID), time.Unix(int64(record.ValidBefore), 0))
+			err = redis.CancelToken(ctx, uint64(record.ID), record.AppCode, time.Unix(int64(record.ValidBefore), 0))
 			if err != nil {
 				if errors.Is(err, redis.Nil) {
 					continue

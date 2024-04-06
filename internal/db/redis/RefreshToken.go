@@ -2,6 +2,7 @@ package redis
 
 import (
 	"context"
+	"encoding/json"
 	"github.com/Mmx233/tool"
 	"github.com/go-redis/redis/v8"
 	"github.com/ncuhome/GeniusAuthoritarian/pkg/tokenStore"
@@ -9,17 +10,22 @@ import (
 	"go/types"
 	"strconv"
 	"time"
+	"unsafe"
 )
 
-func CancelToken(ctx context.Context, id uint64, validBefore time.Time) error {
-	err := NewCanceledToken().Add(ctx, CanceledToken{
-		ID:          id,
-		ValidBefore: validBefore,
-	})
+func CancelToken(ctx context.Context, id uint64, appCode string, validBefore time.Time) error {
+	canceledToken := CanceledToken{
+		ID: id,
+		CanceledTokenPayload: CanceledTokenPayload{
+			AppCode:     appCode,
+			ValidBefore: validBefore,
+		},
+	}
+	err := NewCanceledToken().Add(ctx, canceledToken)
 	if err != nil {
 		return err
 	}
-	if err = NewCanceledTokenChannel().Publish(ctx, id); err != nil {
+	if err = NewCanceledTokenChannel().Publish(ctx, canceledToken); err != nil {
 		return err
 	}
 	return NewRecordedToken().NewStorePoint(id).Destroy(ctx)
@@ -39,8 +45,12 @@ type CanceledTokenChannel struct {
 	key string
 }
 
-func (a CanceledTokenChannel) Publish(ctx context.Context, id uint64) error {
-	return Client.Publish(ctx, a.key, strconv.FormatUint(id, 10)).Err()
+func (a CanceledTokenChannel) Publish(ctx context.Context, token CanceledToken) error {
+	data, err := json.Marshal(token)
+	if err != nil {
+		return err
+	}
+	return Client.Publish(ctx, a.key, data).Err()
 }
 
 func (a CanceledTokenChannel) Subscribe(ctx context.Context) *redis.PubSub {
@@ -53,76 +63,82 @@ func NewCanceledToken() CanceledTokenTable {
 	}
 }
 
+type CanceledTokenPayload struct {
+	AppCode     string    `json:"appCode"`
+	ValidBefore time.Time `json:"validBefore"`
+}
+
 type CanceledToken struct {
-	ID          uint64
-	ValidBefore time.Time
+	ID uint64 `json:"id"`
+	CanceledTokenPayload
 }
 
 func (a CanceledToken) Key() string {
 	return strconv.FormatUint(a.ID, 10)
 }
 
-func (a CanceledToken) Value() string {
-	return a.ValidBefore.Format(time.RFC3339)
-}
-
 type CanceledTokenTable struct {
 	key string
 }
 
-func (a CanceledTokenTable) Add(ctx context.Context, id ...CanceledToken) error {
-	fields := make([]interface{}, len(id)*2)
-	for i, v := range id {
+func (a CanceledTokenTable) Add(ctx context.Context, tokens ...CanceledToken) error {
+	fields := make([]interface{}, len(tokens)*2)
+	for i, v := range tokens {
 		fields[i*2] = v.Key()
-		fields[i*2+1] = v.Value()
+		data, err := json.Marshal(v.CanceledTokenPayload)
+		if err != nil {
+			return err
+		}
+		fields[i*2+1] = data
 	}
 	return Client.HSet(ctx, a.key, fields...).Err()
 }
 
-func (a CanceledTokenTable) Get(ctx context.Context) ([]uint64, error) {
+func (a CanceledTokenTable) Get(ctx context.Context) ([]CanceledToken, error) {
 	result, err := Client.HGetAll(ctx, a.key).Result()
 	if err != nil {
 		return nil, err
 	}
-	ids := make([]uint64, len(result))
+	canceledTokens := make([]CanceledToken, len(result))
 	left, right := 0, len(result)-1
 	for k, v := range result {
-		id, err := strconv.ParseUint(k, 10, 64)
+		var canceledToken CanceledToken
+		var err error
+		canceledToken.ID, err = strconv.ParseUint(k, 10, 64)
 		if err != nil {
 			log.Errorln("parse id failed", err)
 			continue
 		}
-		validBefore, err := time.Parse(time.RFC3339, v)
-		if err != nil {
-			log.Errorln("parse time failed", err)
+		if err = json.Unmarshal(unsafe.Slice(unsafe.StringData(v), len(v)), &canceledToken.CanceledTokenPayload); err != nil {
+			log.Errorln("parse canceled token failed", err)
 			continue
 		}
-		if validBefore.After(time.Now()) {
-			ids[left] = id
+		if canceledToken.ValidBefore.After(time.Now()) {
+			canceledTokens[left] = canceledToken
 			left++
 		} else {
-			ids[right] = id
+			canceledTokens[right] = canceledToken
 			right--
 		}
 	}
 	if left != len(result)-1 {
-		go a.clean(ids[left+1:]...)
+		go a.clean(canceledTokens[left+1:]...)
 	}
-	return ids[:left], nil
+	return canceledTokens[:left], nil
 }
 
-func (a CanceledTokenTable) clean(id ...uint64) {
+func (a CanceledTokenTable) clean(tokens ...CanceledToken) {
 	defer tool.Recover()
-	err := a.remove(context.Background(), id...)
+	err := a.remove(context.Background(), tokens...)
 	if err != nil {
 		log.Errorln("clean canceled token failed", err)
 	}
 }
 
-func (a CanceledTokenTable) remove(ctx context.Context, id ...uint64) error {
-	keyGroup := make([]string, len(id))
-	for i, v := range id {
-		keyGroup[i] = strconv.FormatUint(v, 10)
+func (a CanceledTokenTable) remove(ctx context.Context, tokens ...CanceledToken) error {
+	keyGroup := make([]string, len(tokens))
+	for i, v := range tokens {
+		keyGroup[i] = v.Key()
 	}
 	return Client.HDel(ctx, a.key, keyGroup...).Err()
 

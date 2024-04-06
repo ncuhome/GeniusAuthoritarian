@@ -105,7 +105,7 @@ func DestroyRefreshToken(c *gin.Context) {
 		return
 	}
 
-	err = redis.CancelToken(context.Background(), claims.ID, claims.ExpiresAt.Time)
+	err = redis.CancelToken(context.Background(), claims.ID, claims.AppCode, claims.ExpiresAt.Time)
 	if err != nil {
 		callback.Error(c, callback.ErrUnexpected, err)
 		return

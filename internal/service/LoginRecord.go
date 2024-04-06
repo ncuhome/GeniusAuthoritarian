@@ -49,7 +49,7 @@ func (a LoginRecordSrv) SetDestroyedByIDS(ids []uint) error {
 }
 
 func (a LoginRecordSrv) GetValidForApp(aid uint, opt ...daoUtil.ServiceOpt) ([]dto.LoginRecordForCancel, error) {
-	return (&dao.LoginRecord{AID: &aid}).GetByAID(daoUtil.TxOpts(a.DB, opt...))
+	return (&dao.LoginRecord{AID: &aid}).GetForCancelByAID(daoUtil.TxOpts(a.DB, opt...))
 }
 
 func (a LoginRecordSrv) UserHistory(uid uint, limit int) ([]dto.LoginRecord, error) {
@@ -90,11 +90,11 @@ func (a LoginRecordSrv) UserOnline(uid uint, currentLoginID uint) ([]dto.LoginRe
 	return validRecords[0:pointer], nil
 }
 
-func (a LoginRecordSrv) OnlineRecordExist(uid, id uint, opts ...daoUtil.ServiceOpt) (bool, error) {
+func (a LoginRecordSrv) TakeOnlineRecord(uid, id uint, opts ...daoUtil.ServiceOpt) (*dto.LoginRecordForCancel, error) {
 	return (&dao.LoginRecord{
 		ID:  id,
 		UID: uid,
-	}).ValidExist(daoUtil.TxOpts(a.DB, opts...))
+	}).TakeValidForCancel(daoUtil.TxOpts(a.DB, opts...))
 }
 
 func (a LoginRecordSrv) GetViewIDs(aid, startAt uint) ([]uint, error) {
