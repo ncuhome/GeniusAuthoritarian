@@ -12,7 +12,7 @@ import (
 )
 
 func Logout(c *gin.Context) {
-	loginID := tools.GetUserInfo(c).ID
+	userClaims := tools.GetUserInfo(c)
 
 	loginRecordSrv, err := service.LoginRecord.Begin()
 	if err != nil {
@@ -21,13 +21,13 @@ func Logout(c *gin.Context) {
 	}
 	defer loginRecordSrv.Rollback()
 
-	err = loginRecordSrv.SetDestroyed(uint(loginID))
+	err = loginRecordSrv.SetDestroyed(uint(userClaims.ID))
 	if err != nil {
 		callback.Error(c, callback.ErrDBOperation, err)
 		return
 	}
 
-	err = redis.NewRecordedToken().NewStorePoint(loginID).Destroy(context.Background())
+	err = redis.CancelToken(context.Background(), userClaims.ID, userClaims.ExpiresAt.Time)
 	if err != nil {
 		callback.Error(c, callback.ErrUnexpected, err)
 		return
@@ -57,8 +57,8 @@ func LogoutDevice(c *gin.Context) {
 	}
 	defer loginRecordSrv.Rollback()
 
-	uid := tools.GetUserInfo(c).UID
-	exist, err := loginRecordSrv.OnlineRecordExist(uid, f.ID, daoUtil.LockForUpdate)
+	userClaims := tools.GetUserInfo(c)
+	exist, err := loginRecordSrv.OnlineRecordExist(userClaims.UID, f.ID, daoUtil.LockForUpdate)
 	if err != nil {
 		callback.Error(c, callback.ErrDBOperation, err)
 		return
@@ -73,7 +73,7 @@ func LogoutDevice(c *gin.Context) {
 		return
 	}
 
-	err = redis.NewRecordedToken().NewStorePoint(uint64(f.ID)).Destroy(context.Background())
+	err = redis.CancelToken(context.Background(), userClaims.ID, userClaims.ExpiresAt.Time)
 	if err != nil {
 		if errors.Is(err, redis.Nil) {
 			callback.Error(c, callback.ErrTargetDeviceOffline)

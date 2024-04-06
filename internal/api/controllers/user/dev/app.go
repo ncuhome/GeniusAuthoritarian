@@ -330,17 +330,18 @@ func ModifyApp(c *gin.Context) {
 		// 撤销 token
 
 		loginRecordSrv := service.LoginRecordSrv{DB: appSrv.DB}
-		ids, err := loginRecordSrv.GetValidForApp(f.ID, daoUtil.LockForUpdate)
+		records, err := loginRecordSrv.GetValidForApp(f.ID, daoUtil.LockForUpdate)
 		if err != nil {
 			callback.Error(c, callback.ErrDBOperation, err)
 			return
 		}
 
-		_redis := redis.NewRecordedToken()
 		ctx, cancel := context.WithTimeout(context.Background(), time.Second*20)
 		defer cancel()
-		for _, lid := range ids {
-			err = _redis.NewStorePoint(uint64(lid)).Destroy(ctx)
+		ids := make([]uint, len(records))
+		for i, record := range records {
+			ids[i] = record.ID
+			err = redis.CancelToken(ctx, uint64(record.ID), time.Unix(int64(record.ValidBefore), 0))
 			if err != nil {
 				if errors.Is(err, redis.Nil) {
 					continue

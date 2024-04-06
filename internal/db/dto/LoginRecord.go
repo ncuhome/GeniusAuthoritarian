@@ -45,3 +45,8 @@ type AdminLoginDataView struct {
 	Apps    []AppDataView         `json:"apps"`
 	Records []LoginRecordDataView `json:"records"`
 }
+
+type LoginRecordForCancel struct {
+	ID          uint   `json:"id"`
+	ValidBefore uint64 `json:"validBefore"`
+}

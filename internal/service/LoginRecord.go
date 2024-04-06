@@ -48,8 +48,8 @@ func (a LoginRecordSrv) SetDestroyedByIDS(ids []uint) error {
 	return (&dao.LoginRecord{}).UpdateDestroyedByIDSlice(a.DB, ids)
 }
 
-func (a LoginRecordSrv) GetValidForApp(aid uint, opt ...daoUtil.ServiceOpt) ([]uint, error) {
-	return (&dao.LoginRecord{AID: &aid}).GetIdByAID(daoUtil.TxOpts(a.DB, opt...))
+func (a LoginRecordSrv) GetValidForApp(aid uint, opt ...daoUtil.ServiceOpt) ([]dto.LoginRecordForCancel, error) {
+	return (&dao.LoginRecord{AID: &aid}).GetByAID(daoUtil.TxOpts(a.DB, opt...))
 }
 
 func (a LoginRecordSrv) UserHistory(uid uint, limit int) ([]dto.LoginRecord, error) {

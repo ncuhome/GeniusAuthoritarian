@@ -62,9 +62,9 @@ func (a *LoginRecord) GetByUID(tx *gorm.DB, limit int) ([]dto.LoginRecord, error
 	return t, tx.Find(&t).Error
 }
 
-func (a *LoginRecord) GetIdByAID(tx *gorm.DB) ([]uint, error) {
-	var t []uint
-	tx = tx.Model(a).Select("id")
+func (a *LoginRecord) GetByAID(tx *gorm.DB) ([]dto.LoginRecordForCancel, error) {
+	var t []dto.LoginRecordForCancel
+	tx = tx.Model(a)
 	tx = a.sqlLoginValid(tx)
 	return t, tx.Where(a, "aid").Find(&t).Error
 }
