@@ -7,7 +7,7 @@ import (
 	"github.com/ncuhome/GeniusAuthoritarian/internal/rpc/sshDev/sshDevModel"
 )
 
-func SubScribeSshDev() *redis.PubSub {
+func SubscribeSshDev() *redis.PubSub {
 	return Client.Subscribe(context.Background(), keySshDevSub.String())
 }
 

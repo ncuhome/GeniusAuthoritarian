@@ -3,6 +3,7 @@ package redis
 import (
 	"context"
 	"github.com/Mmx233/tool"
+	"github.com/go-redis/redis/v8"
 	"github.com/ncuhome/GeniusAuthoritarian/pkg/tokenStore"
 	log "github.com/sirupsen/logrus"
 	"go/types"
@@ -10,13 +11,45 @@ import (
 	"time"
 )
 
+func CancelToken(ctx context.Context, id uint64, validBefore time.Time) error {
+	err := NewCanceledToken().Add(ctx, CanceledToken{
+		ID:          id,
+		ValidBefore: validBefore,
+	})
+	if err != nil {
+		return err
+	}
+	if err = NewCanceledTokenChannel().Publish(ctx, id); err != nil {
+		return err
+	}
+	return NewRecordedToken().NewStorePoint(id).Destroy(ctx)
+}
+
 func NewRecordedToken() tokenStore.TokenStore[types.Nil] {
 	return tokenStore.NewTokenStore[types.Nil](Client, keyRecordedToken.String())
 }
 
+func NewCanceledTokenChannel() CanceledTokenChannel {
+	return CanceledTokenChannel{
+		key: keyCanceledToken.String() + "sub",
+	}
+}
+
+type CanceledTokenChannel struct {
+	key string
+}
+
+func (a CanceledTokenChannel) Publish(ctx context.Context, id uint64) error {
+	return Client.Publish(ctx, a.key, strconv.FormatUint(id, 10)).Err()
+}
+
+func (a CanceledTokenChannel) Subscribe(ctx context.Context) *redis.PubSub {
+	return Client.Subscribe(ctx, a.key)
+}
+
 func NewCanceledToken() CanceledTokenTable {
 	return CanceledTokenTable{
-		key: keyCanceledToken.String(),
+		key: keyCanceledToken.String() + "table",
 	}
 }
 
