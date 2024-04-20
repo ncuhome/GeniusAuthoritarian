@@ -20,9 +20,10 @@ import (
 const _ = grpc.SupportPackageIsVersion7
 
 const (
-	App_GetTokenStatus_FullMethodName = "/appProto.App/GetTokenStatus"
-	App_DestroyToken_FullMethodName   = "/appProto.App/DestroyToken"
-	App_GetUserInfo_FullMethodName    = "/appProto.App/GetUserInfo"
+	App_GetTokenStatus_FullMethodName   = "/appProto.App/GetTokenStatus"
+	App_GetTokenCanceled_FullMethodName = "/appProto.App/GetTokenCanceled"
+	App_DestroyToken_FullMethodName     = "/appProto.App/DestroyToken"
+	App_GetUserInfo_FullMethodName      = "/appProto.App/GetUserInfo"
 )
 
 // AppClient is the client API for App service.
@@ -30,6 +31,7 @@ const (
 // For semantics around ctx use and closing/ending streaming RPCs, please refer to https://pkg.go.dev/google.golang.org/grpc/?tab=doc#ClientConn.NewStream.
 type AppClient interface {
 	GetTokenStatus(ctx context.Context, in *TokenRequest, opts ...grpc.CallOption) (*TokenStatus, error)
+	GetTokenCanceled(ctx context.Context, in *emptypb.Empty, opts ...grpc.CallOption) (App_GetTokenCanceledClient, error)
 	DestroyToken(ctx context.Context, in *TokenRequest, opts ...grpc.CallOption) (*emptypb.Empty, error)
 	GetUserInfo(ctx context.Context, in *TokenRequest, opts ...grpc.CallOption) (*UserInfo, error)
 }
@@ -49,6 +51,38 @@ func (c *appClient) GetTokenStatus(ctx context.Context, in *TokenRequest, opts .
 		return nil, err
 	}
 	return out, nil
+}
+
+func (c *appClient) GetTokenCanceled(ctx context.Context, in *emptypb.Empty, opts ...grpc.CallOption) (App_GetTokenCanceledClient, error) {
+	stream, err := c.cc.NewStream(ctx, &App_ServiceDesc.Streams[0], App_GetTokenCanceled_FullMethodName, opts...)
+	if err != nil {
+		return nil, err
+	}
+	x := &appGetTokenCanceledClient{stream}
+	if err := x.ClientStream.SendMsg(in); err != nil {
+		return nil, err
+	}
+	if err := x.ClientStream.CloseSend(); err != nil {
+		return nil, err
+	}
+	return x, nil
+}
+
+type App_GetTokenCanceledClient interface {
+	Recv() (*TokenCanceled, error)
+	grpc.ClientStream
+}
+
+type appGetTokenCanceledClient struct {
+	grpc.ClientStream
+}
+
+func (x *appGetTokenCanceledClient) Recv() (*TokenCanceled, error) {
+	m := new(TokenCanceled)
+	if err := x.ClientStream.RecvMsg(m); err != nil {
+		return nil, err
+	}
+	return m, nil
 }
 
 func (c *appClient) DestroyToken(ctx context.Context, in *TokenRequest, opts ...grpc.CallOption) (*emptypb.Empty, error) {
@@ -74,6 +108,7 @@ func (c *appClient) GetUserInfo(ctx context.Context, in *TokenRequest, opts ...g
 // for forward compatibility
 type AppServer interface {
 	GetTokenStatus(context.Context, *TokenRequest) (*TokenStatus, error)
+	GetTokenCanceled(*emptypb.Empty, App_GetTokenCanceledServer) error
 	DestroyToken(context.Context, *TokenRequest) (*emptypb.Empty, error)
 	GetUserInfo(context.Context, *TokenRequest) (*UserInfo, error)
 	mustEmbedUnimplementedAppServer()
@@ -85,6 +120,9 @@ type UnimplementedAppServer struct {
 
 func (UnimplementedAppServer) GetTokenStatus(context.Context, *TokenRequest) (*TokenStatus, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method GetTokenStatus not implemented")
+}
+func (UnimplementedAppServer) GetTokenCanceled(*emptypb.Empty, App_GetTokenCanceledServer) error {
+	return status.Errorf(codes.Unimplemented, "method GetTokenCanceled not implemented")
 }
 func (UnimplementedAppServer) DestroyToken(context.Context, *TokenRequest) (*emptypb.Empty, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method DestroyToken not implemented")
@@ -121,6 +159,27 @@ func _App_GetTokenStatus_Handler(srv interface{}, ctx context.Context, dec func(
 		return srv.(AppServer).GetTokenStatus(ctx, req.(*TokenRequest))
 	}
 	return interceptor(ctx, in, info, handler)
+}
+
+func _App_GetTokenCanceled_Handler(srv interface{}, stream grpc.ServerStream) error {
+	m := new(emptypb.Empty)
+	if err := stream.RecvMsg(m); err != nil {
+		return err
+	}
+	return srv.(AppServer).GetTokenCanceled(m, &appGetTokenCanceledServer{stream})
+}
+
+type App_GetTokenCanceledServer interface {
+	Send(*TokenCanceled) error
+	grpc.ServerStream
+}
+
+type appGetTokenCanceledServer struct {
+	grpc.ServerStream
+}
+
+func (x *appGetTokenCanceledServer) Send(m *TokenCanceled) error {
+	return x.ServerStream.SendMsg(m)
 }
 
 func _App_DestroyToken_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
@@ -179,6 +238,12 @@ var App_ServiceDesc = grpc.ServiceDesc{
 			Handler:    _App_GetUserInfo_Handler,
 		},
 	},
-	Streams:  []grpc.StreamDesc{},
+	Streams: []grpc.StreamDesc{
+		{
+			StreamName:    "GetTokenCanceled",
+			Handler:       _App_GetTokenCanceled_Handler,
+			ServerStreams: true,
+		},
+	},
 	Metadata: "protos/app.proto",
 }
