@@ -8,6 +8,7 @@ import (
 	"encoding/json"
 	"errors"
 	"github.com/ncuhome/GeniusAuthoritarian/internal/db/redis"
+	"github.com/ncuhome/GeniusAuthoritarian/internal/pkg/jwt"
 	"github.com/ncuhome/GeniusAuthoritarian/internal/rpc/app/appProto"
 	"github.com/ncuhome/GeniusAuthoritarian/internal/service"
 	"google.golang.org/grpc/codes"
@@ -79,8 +80,22 @@ func (s *Server) GetTokenCanceled(_ *emptypb.Empty, srv appProto.App_GetTokenCan
 	return status.Error(codes.DataLoss, "send message failed")
 }
 
-func (s *Server) DestroyToken(ctx context.Context, req *appProto.TokenRequest) (*emptypb.Empty, error) {
-	return nil, status.Error(codes.Unimplemented, "todo")
+func (s *Server) DestroyToken(ctx context.Context, req *appProto.Token) (*emptypb.Empty, error) {
+	claims, valid, err := jwt.ParseRefreshToken(req.Token)
+	if err != nil {
+		return nil, status.Error(codes.Unauthenticated, err.Error())
+	} else if !valid {
+		return nil, nil
+	}
+
+	if GetAuthInfo(ctx).AppCode != claims.AppCode {
+		return nil, status.Error(codes.Unauthenticated, "token ownership not correct")
+	}
+	err = redis.CancelToken(ctx, claims.ID, claims.AppCode, claims.ExpiresAt.Time)
+	if err != nil {
+		return nil, status.Error(codes.Internal, err.Error())
+	}
+	return &emptypb.Empty{}, nil
 }
 
 func (s *Server) GetUserInfo(_ context.Context, req *appProto.TokenRequest) (*appProto.UserInfo, error) {

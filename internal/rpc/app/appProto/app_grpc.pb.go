@@ -32,7 +32,7 @@ const (
 type AppClient interface {
 	GetTokenStatus(ctx context.Context, in *TokenRequest, opts ...grpc.CallOption) (*TokenStatus, error)
 	GetTokenCanceled(ctx context.Context, in *emptypb.Empty, opts ...grpc.CallOption) (App_GetTokenCanceledClient, error)
-	DestroyToken(ctx context.Context, in *TokenRequest, opts ...grpc.CallOption) (*emptypb.Empty, error)
+	DestroyToken(ctx context.Context, in *Token, opts ...grpc.CallOption) (*emptypb.Empty, error)
 	GetUserInfo(ctx context.Context, in *TokenRequest, opts ...grpc.CallOption) (*UserInfo, error)
 }
 
@@ -85,7 +85,7 @@ func (x *appGetTokenCanceledClient) Recv() (*TokenCanceled, error) {
 	return m, nil
 }
 
-func (c *appClient) DestroyToken(ctx context.Context, in *TokenRequest, opts ...grpc.CallOption) (*emptypb.Empty, error) {
+func (c *appClient) DestroyToken(ctx context.Context, in *Token, opts ...grpc.CallOption) (*emptypb.Empty, error) {
 	out := new(emptypb.Empty)
 	err := c.cc.Invoke(ctx, App_DestroyToken_FullMethodName, in, out, opts...)
 	if err != nil {
@@ -109,7 +109,7 @@ func (c *appClient) GetUserInfo(ctx context.Context, in *TokenRequest, opts ...g
 type AppServer interface {
 	GetTokenStatus(context.Context, *TokenRequest) (*TokenStatus, error)
 	GetTokenCanceled(*emptypb.Empty, App_GetTokenCanceledServer) error
-	DestroyToken(context.Context, *TokenRequest) (*emptypb.Empty, error)
+	DestroyToken(context.Context, *Token) (*emptypb.Empty, error)
 	GetUserInfo(context.Context, *TokenRequest) (*UserInfo, error)
 	mustEmbedUnimplementedAppServer()
 }
@@ -124,7 +124,7 @@ func (UnimplementedAppServer) GetTokenStatus(context.Context, *TokenRequest) (*T
 func (UnimplementedAppServer) GetTokenCanceled(*emptypb.Empty, App_GetTokenCanceledServer) error {
 	return status.Errorf(codes.Unimplemented, "method GetTokenCanceled not implemented")
 }
-func (UnimplementedAppServer) DestroyToken(context.Context, *TokenRequest) (*emptypb.Empty, error) {
+func (UnimplementedAppServer) DestroyToken(context.Context, *Token) (*emptypb.Empty, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method DestroyToken not implemented")
 }
 func (UnimplementedAppServer) GetUserInfo(context.Context, *TokenRequest) (*UserInfo, error) {
@@ -183,7 +183,7 @@ func (x *appGetTokenCanceledServer) Send(m *TokenCanceled) error {
 }
 
 func _App_DestroyToken_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(TokenRequest)
+	in := new(Token)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
@@ -195,7 +195,7 @@ func _App_DestroyToken_Handler(srv interface{}, ctx context.Context, dec func(in
 		FullMethod: App_DestroyToken_FullMethodName,
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(AppServer).DestroyToken(ctx, req.(*TokenRequest))
+		return srv.(AppServer).DestroyToken(ctx, req.(*Token))
 	}
 	return interceptor(ctx, in, info, handler)
 }
