@@ -9,6 +9,7 @@ import (
 	"errors"
 	"github.com/ncuhome/GeniusAuthoritarian/internal/db/redis"
 	"github.com/ncuhome/GeniusAuthoritarian/internal/rpc/app/appProto"
+	"github.com/ncuhome/GeniusAuthoritarian/internal/service"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
 	"google.golang.org/protobuf/types/known/emptypb"
@@ -76,4 +77,25 @@ func (s *Server) GetTokenCanceled(_ *emptypb.Empty, srv appProto.App_GetTokenCan
 		}
 	}
 	return status.Error(codes.DataLoss, "send message failed")
+}
+
+func (s *Server) DestroyToken(ctx context.Context, req *appProto.TokenRequest) (*emptypb.Empty, error) {
+	return nil, status.Error(codes.Unimplemented, "todo")
+}
+
+func (s *Server) GetUserInfo(_ context.Context, req *appProto.TokenRequest) (*appProto.UserInfo, error) {
+	user, err := service.User.UserInfoByID(uint(req.Id))
+	if err != nil {
+		return nil, status.Error(codes.Internal, "database error")
+	}
+	groups, err := service.UserGroups.GetNamesForUser(user.ID)
+	if err != nil {
+		return nil, status.Error(codes.Internal, "database error")
+	}
+	return &appProto.UserInfo{
+		Uid:       req.Id,
+		Name:      user.Name,
+		AvatarUrl: user.AvatarUrl,
+		Groups:    groups,
+	}, nil
 }
