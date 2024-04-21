@@ -5,9 +5,14 @@ package app
 
 import (
 	"context"
+	"encoding/json"
 	"errors"
 	"github.com/ncuhome/GeniusAuthoritarian/internal/db/redis"
 	"github.com/ncuhome/GeniusAuthoritarian/internal/rpc/app/appProto"
+	"google.golang.org/grpc/codes"
+	"google.golang.org/grpc/status"
+	"google.golang.org/protobuf/types/known/emptypb"
+	"unsafe"
 )
 
 type Server struct {
@@ -22,8 +27,53 @@ func (s *Server) GetTokenStatus(ctx context.Context, req *appProto.TokenRequest)
 				Valid: false,
 			}, nil
 		}
+		return nil, status.Error(codes.Internal, err.Error())
 	}
 	return &appProto.TokenStatus{
 		Valid: true,
 	}, nil
+}
+
+func (s *Server) GetTokenCanceled(_ *emptypb.Empty, srv appProto.App_GetTokenCanceledServer) error {
+	msgChan := redis.NewCanceledTokenChannel().Subscribe(context.TODO()).Channel()
+	list, err := redis.NewCanceledToken().Get(context.TODO())
+	if err != nil {
+		if !errors.Is(err, redis.Nil) {
+			return status.Error(codes.Internal, err.Error())
+		}
+	}
+	var listId = make([]uint64, len(list))
+	for i, v := range list {
+		listId[i] = v.ID
+	}
+	if err = srv.Send(&appProto.TokenCanceled{
+		Id: listId,
+	}); err != nil {
+		return err
+	}
+
+	for {
+		msg, ok := <-msgChan
+		if !ok {
+			break
+		}
+		if msg.Payload != "" {
+			msg.PayloadSlice = append(msg.PayloadSlice, msg.Payload)
+		}
+		canceledTokenList := make([]uint64, len(msg.PayloadSlice))
+		for i, payload := range msg.PayloadSlice {
+			var tokenCanceled redis.CanceledToken
+			err := json.Unmarshal(unsafe.Slice(unsafe.StringData(payload), len(payload)), &tokenCanceled)
+			if err != nil {
+				return status.Error(codes.Internal, err.Error())
+			}
+			canceledTokenList[i] = tokenCanceled.ID
+		}
+		if err = srv.Send(&appProto.TokenCanceled{
+			Id: listId,
+		}); err != nil {
+			return err
+		}
+	}
+	return status.Error(codes.DataLoss, "send message failed")
 }
