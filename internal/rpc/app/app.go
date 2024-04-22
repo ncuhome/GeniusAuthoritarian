@@ -20,12 +20,19 @@ import (
 	"google.golang.org/grpc/credentials"
 	"google.golang.org/grpc/status"
 	"google.golang.org/protobuf/types/known/emptypb"
+	"sync"
+	"time"
 	"unsafe"
 )
 
 func NewRpc() *grpc.Server {
 	caPool := x509.NewCertPool()
 	caPool.AddCert(global.CaIssuer.CaCert)
+
+	var rpcCert *tls.Certificate
+	var rpcCertValidBefore time.Time
+	var rpcCertLock sync.RWMutex
+
 	grpcServer := grpc.NewServer(
 		grpc.ChainUnaryInterceptor(
 			middlewares.UnaryLogger(),
@@ -36,6 +43,28 @@ func NewRpc() *grpc.Server {
 			StreamAuth(),
 		),
 		grpc.Creds(credentials.NewTLS(&tls.Config{
+			GetCertificate: func(info *tls.ClientHelloInfo) (*tls.Certificate, error) {
+				rpcCertLock.RLock()
+				if !rpcCertValidBefore.IsZero() && rpcCertValidBefore.After(time.Now().Add(time.Minute*5)) {
+					defer rpcCertLock.RUnlock()
+					return rpcCert, nil
+				}
+				rpcCertLock.RUnlock()
+				rpcCertLock.Lock()
+				defer rpcCertLock.Unlock()
+				if rpcCertValidBefore.IsZero() || rpcCertValidBefore.Before(time.Now().Add(time.Minute*5)) {
+					fullChain, key, err := global.CaIssuer.IssueServer(info.ServerName, time.Now().AddDate(0, 1, 0))
+					if err != nil {
+						return nil, err
+					}
+					newCert, err := tls.X509KeyPair(fullChain, key)
+					if err != nil {
+						return nil, err
+					}
+					rpcCert = &newCert
+				}
+				return rpcCert, nil
+			},
 			ClientAuth: tls.RequireAndVerifyClientCert,
 			ClientCAs:  caPool,
 		})),
