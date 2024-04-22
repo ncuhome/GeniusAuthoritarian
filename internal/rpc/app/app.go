@@ -48,7 +48,7 @@ type Server struct {
 	appProto.UnimplementedAppServer
 }
 
-func (s *Server) GetTokenStatus(ctx context.Context, req *appProto.TokenRequest) (*appProto.TokenStatus, error) {
+func (s *Server) GetTokenStatus(ctx context.Context, req *appProto.TokenIDRequest) (*appProto.TokenStatus, error) {
 	err := redis.NewRecordedToken().NewStorePoint(req.Id).Get(ctx, nil)
 	if err != nil {
 		if errors.Is(err, redis.Nil) {
@@ -107,7 +107,7 @@ func (s *Server) GetTokenCanceled(_ *emptypb.Empty, srv appProto.App_GetTokenCan
 	return status.Error(codes.DataLoss, "send message failed")
 }
 
-func (s *Server) DestroyToken(ctx context.Context, req *appProto.Token) (*emptypb.Empty, error) {
+func (s *Server) DestroyToken(ctx context.Context, req *appProto.RefreshTokenRequest) (*emptypb.Empty, error) {
 	claims, valid, err := jwt.ParseRefreshToken(req.Token)
 	if err != nil {
 		return nil, status.Error(codes.Unauthenticated, err.Error())
@@ -125,7 +125,7 @@ func (s *Server) DestroyToken(ctx context.Context, req *appProto.Token) (*emptyp
 	return &emptypb.Empty{}, nil
 }
 
-func (s *Server) GetUserInfo(_ context.Context, req *appProto.TokenRequest) (*appProto.UserInfo, error) {
+func (s *Server) GetUserInfo(_ context.Context, req *appProto.UserIDRequest) (*appProto.UserInfo, error) {
 	user, err := service.User.UserInfoByID(uint(req.Id))
 	if err != nil {
 		return nil, status.Error(codes.Internal, "database error")

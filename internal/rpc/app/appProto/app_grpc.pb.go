@@ -30,10 +30,10 @@ const (
 //
 // For semantics around ctx use and closing/ending streaming RPCs, please refer to https://pkg.go.dev/google.golang.org/grpc/?tab=doc#ClientConn.NewStream.
 type AppClient interface {
-	GetTokenStatus(ctx context.Context, in *TokenRequest, opts ...grpc.CallOption) (*TokenStatus, error)
+	GetTokenStatus(ctx context.Context, in *TokenIDRequest, opts ...grpc.CallOption) (*TokenStatus, error)
 	GetTokenCanceled(ctx context.Context, in *emptypb.Empty, opts ...grpc.CallOption) (App_GetTokenCanceledClient, error)
-	DestroyToken(ctx context.Context, in *Token, opts ...grpc.CallOption) (*emptypb.Empty, error)
-	GetUserInfo(ctx context.Context, in *TokenRequest, opts ...grpc.CallOption) (*UserInfo, error)
+	DestroyToken(ctx context.Context, in *RefreshTokenRequest, opts ...grpc.CallOption) (*emptypb.Empty, error)
+	GetUserInfo(ctx context.Context, in *UserIDRequest, opts ...grpc.CallOption) (*UserInfo, error)
 }
 
 type appClient struct {
@@ -44,7 +44,7 @@ func NewAppClient(cc grpc.ClientConnInterface) AppClient {
 	return &appClient{cc}
 }
 
-func (c *appClient) GetTokenStatus(ctx context.Context, in *TokenRequest, opts ...grpc.CallOption) (*TokenStatus, error) {
+func (c *appClient) GetTokenStatus(ctx context.Context, in *TokenIDRequest, opts ...grpc.CallOption) (*TokenStatus, error) {
 	out := new(TokenStatus)
 	err := c.cc.Invoke(ctx, App_GetTokenStatus_FullMethodName, in, out, opts...)
 	if err != nil {
@@ -85,7 +85,7 @@ func (x *appGetTokenCanceledClient) Recv() (*TokenCanceled, error) {
 	return m, nil
 }
 
-func (c *appClient) DestroyToken(ctx context.Context, in *Token, opts ...grpc.CallOption) (*emptypb.Empty, error) {
+func (c *appClient) DestroyToken(ctx context.Context, in *RefreshTokenRequest, opts ...grpc.CallOption) (*emptypb.Empty, error) {
 	out := new(emptypb.Empty)
 	err := c.cc.Invoke(ctx, App_DestroyToken_FullMethodName, in, out, opts...)
 	if err != nil {
@@ -94,7 +94,7 @@ func (c *appClient) DestroyToken(ctx context.Context, in *Token, opts ...grpc.Ca
 	return out, nil
 }
 
-func (c *appClient) GetUserInfo(ctx context.Context, in *TokenRequest, opts ...grpc.CallOption) (*UserInfo, error) {
+func (c *appClient) GetUserInfo(ctx context.Context, in *UserIDRequest, opts ...grpc.CallOption) (*UserInfo, error) {
 	out := new(UserInfo)
 	err := c.cc.Invoke(ctx, App_GetUserInfo_FullMethodName, in, out, opts...)
 	if err != nil {
@@ -107,10 +107,10 @@ func (c *appClient) GetUserInfo(ctx context.Context, in *TokenRequest, opts ...g
 // All implementations must embed UnimplementedAppServer
 // for forward compatibility
 type AppServer interface {
-	GetTokenStatus(context.Context, *TokenRequest) (*TokenStatus, error)
+	GetTokenStatus(context.Context, *TokenIDRequest) (*TokenStatus, error)
 	GetTokenCanceled(*emptypb.Empty, App_GetTokenCanceledServer) error
-	DestroyToken(context.Context, *Token) (*emptypb.Empty, error)
-	GetUserInfo(context.Context, *TokenRequest) (*UserInfo, error)
+	DestroyToken(context.Context, *RefreshTokenRequest) (*emptypb.Empty, error)
+	GetUserInfo(context.Context, *UserIDRequest) (*UserInfo, error)
 	mustEmbedUnimplementedAppServer()
 }
 
@@ -118,16 +118,16 @@ type AppServer interface {
 type UnimplementedAppServer struct {
 }
 
-func (UnimplementedAppServer) GetTokenStatus(context.Context, *TokenRequest) (*TokenStatus, error) {
+func (UnimplementedAppServer) GetTokenStatus(context.Context, *TokenIDRequest) (*TokenStatus, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method GetTokenStatus not implemented")
 }
 func (UnimplementedAppServer) GetTokenCanceled(*emptypb.Empty, App_GetTokenCanceledServer) error {
 	return status.Errorf(codes.Unimplemented, "method GetTokenCanceled not implemented")
 }
-func (UnimplementedAppServer) DestroyToken(context.Context, *Token) (*emptypb.Empty, error) {
+func (UnimplementedAppServer) DestroyToken(context.Context, *RefreshTokenRequest) (*emptypb.Empty, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method DestroyToken not implemented")
 }
-func (UnimplementedAppServer) GetUserInfo(context.Context, *TokenRequest) (*UserInfo, error) {
+func (UnimplementedAppServer) GetUserInfo(context.Context, *UserIDRequest) (*UserInfo, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method GetUserInfo not implemented")
 }
 func (UnimplementedAppServer) mustEmbedUnimplementedAppServer() {}
@@ -144,7 +144,7 @@ func RegisterAppServer(s grpc.ServiceRegistrar, srv AppServer) {
 }
 
 func _App_GetTokenStatus_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(TokenRequest)
+	in := new(TokenIDRequest)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
@@ -156,7 +156,7 @@ func _App_GetTokenStatus_Handler(srv interface{}, ctx context.Context, dec func(
 		FullMethod: App_GetTokenStatus_FullMethodName,
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(AppServer).GetTokenStatus(ctx, req.(*TokenRequest))
+		return srv.(AppServer).GetTokenStatus(ctx, req.(*TokenIDRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }
@@ -183,7 +183,7 @@ func (x *appGetTokenCanceledServer) Send(m *TokenCanceled) error {
 }
 
 func _App_DestroyToken_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(Token)
+	in := new(RefreshTokenRequest)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
@@ -195,13 +195,13 @@ func _App_DestroyToken_Handler(srv interface{}, ctx context.Context, dec func(in
 		FullMethod: App_DestroyToken_FullMethodName,
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(AppServer).DestroyToken(ctx, req.(*Token))
+		return srv.(AppServer).DestroyToken(ctx, req.(*RefreshTokenRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }
 
 func _App_GetUserInfo_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(TokenRequest)
+	in := new(UserIDRequest)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
@@ -213,7 +213,7 @@ func _App_GetUserInfo_Handler(srv interface{}, ctx context.Context, dec func(int
 		FullMethod: App_GetUserInfo_FullMethodName,
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(AppServer).GetUserInfo(ctx, req.(*TokenRequest))
+		return srv.(AppServer).GetUserInfo(ctx, req.(*UserIDRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }
