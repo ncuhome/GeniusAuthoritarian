@@ -21,7 +21,7 @@ func NewIssuer(certPem, keyPem []byte) (*Issuer, error) {
 		return nil, errors.New("cert has expired")
 	}
 
-	caPrivateKey, err := keypair.PemUnmarshalPrivate[ed25519.PrivateKey](keypair.FormatECDSA, keyPem)
+	caPrivateKey, err := keypair.PemUnmarshalPKCS8Private[ed25519.PrivateKey](keypair.FormatECDSA, keyPem)
 	if err != nil {
 		return nil, err
 	}

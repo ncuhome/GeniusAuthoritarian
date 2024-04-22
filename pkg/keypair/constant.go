@@ -1,6 +1,8 @@
 package keypair
 
-import "fmt"
+import (
+	"fmt"
+)
 
 type Type string
 type Format string

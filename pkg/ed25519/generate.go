@@ -28,7 +28,7 @@ func (a KeyPair) MarshalPem() (public, private []byte, err error) {
 	if err != nil {
 		return nil, nil, err
 	}
-	privatePem, err := keypair.PemMarshalPrivate(keypair.FormatECDSA, a.Private)
+	privatePem, err := keypair.PemMarshalPKCS8Private(keypair.FormatECDSA, a.Private)
 	if err != nil {
 		return nil, nil, err
 	}

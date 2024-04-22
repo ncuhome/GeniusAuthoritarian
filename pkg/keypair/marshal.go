@@ -2,6 +2,7 @@ package keypair
 
 import (
 	"crypto"
+	"crypto/ecdsa"
 	"crypto/x509"
 	"encoding/pem"
 	"errors"
@@ -45,12 +46,19 @@ func PemMarshalPublic(format Format, key crypto.PublicKey) ([]byte, error) {
 	}
 	return PemEncodePublic(format, publicPem), nil
 }
-func PemMarshalPrivate(format Format, key crypto.PrivateKey) ([]byte, error) {
+func PemMarshalPKCS8Private(format Format, key crypto.PrivateKey) ([]byte, error) {
 	privatePem, err := x509.MarshalPKCS8PrivateKey(key)
 	if err != nil {
 		return nil, err
 	}
 	return PemEncodePrivate(format, privatePem), nil
+}
+func PemMarshalECPrivate(key *ecdsa.PrivateKey) ([]byte, error) {
+	privatePem, err := x509.MarshalECPrivateKey(key)
+	if err != nil {
+		return nil, err
+	}
+	return PemEncodePrivate(FormatECDSA, privatePem), nil
 }
 
 func PemUnmarshalCertificate(content []byte) (*x509.Certificate, error) {
@@ -77,13 +85,30 @@ func PemUnmarshalPublic[T crypto.PublicKey](format Format, content []byte) (key 
 	}
 	return
 }
-func PemUnmarshalPrivate[T crypto.PrivateKey](format Format, content []byte) (key T, err error) {
+func PemUnmarshalPKCS8Private[T crypto.PrivateKey](format Format, content []byte) (key T, err error) {
 	block, err := DecodePemBlock(TypePemPrivate.Format(format), content)
 	if err != nil {
 		return
 	}
 
 	privateKey, err := x509.ParsePKCS8PrivateKey(block.Bytes)
+	if err != nil {
+		err = fmt.Errorf("parse private key failed: %v", err)
+		return
+	}
+	key, ok := privateKey.(T)
+	if !ok {
+		err = errors.New("private key format error")
+	}
+	return
+}
+func PemUnmarshalECPrivate(content []byte) (*ecdsa.PrivateKey, error) {
+	block, err := DecodePemBlock(TypePemPrivate.Format(FormatECDSA), content)
+	if err != nil {
+		return nil, err
+	}
+
+	privateKey, err := x509.ParseECPrivateKey(block.Bytes)
 	if err != nil {
 		err = fmt.Errorf("parse private key failed: %v", err)
 		return

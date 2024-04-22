@@ -32,7 +32,7 @@ func NewRoot(notAfter time.Time) (public []byte, private []byte, err error) {
 		return nil, nil, err
 	}
 	certPem := keypair.PemEncodeCertificate(certBytes)
-	privateKeyPem, err := keypair.PemMarshalPrivate(keypair.FormatECDSA, ed25519Keypair.Private)
+	privateKeyPem, err := keypair.PemMarshalPKCS8Private(keypair.FormatECDSA, ed25519Keypair.Private)
 	if err != nil {
 		return nil, nil, err
 	}
