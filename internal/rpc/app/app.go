@@ -5,17 +5,44 @@ package app
 
 import (
 	"context"
+	"crypto/tls"
+	"crypto/x509"
 	"encoding/json"
 	"errors"
 	"github.com/ncuhome/GeniusAuthoritarian/internal/db/redis"
+	"github.com/ncuhome/GeniusAuthoritarian/internal/global"
 	"github.com/ncuhome/GeniusAuthoritarian/internal/pkg/jwt"
 	"github.com/ncuhome/GeniusAuthoritarian/internal/rpc/app/appProto"
+	"github.com/ncuhome/GeniusAuthoritarian/internal/rpc/middlewares"
 	"github.com/ncuhome/GeniusAuthoritarian/internal/service"
+	"google.golang.org/grpc"
 	"google.golang.org/grpc/codes"
+	"google.golang.org/grpc/credentials"
 	"google.golang.org/grpc/status"
 	"google.golang.org/protobuf/types/known/emptypb"
 	"unsafe"
 )
+
+func NewRpc() *grpc.Server {
+	caPool := x509.NewCertPool()
+	caPool.AddCert(global.CaIssuer.CaCert)
+	grpcServer := grpc.NewServer(
+		grpc.ChainUnaryInterceptor(
+			middlewares.UnaryLogger(),
+			UnaryAuth(),
+		),
+		grpc.ChainStreamInterceptor(
+			middlewares.StreamLogger(),
+			StreamAuth(),
+		),
+		grpc.Creds(credentials.NewTLS(&tls.Config{
+			ClientAuth: tls.RequireAndVerifyClientCert,
+			ClientCAs:  caPool,
+		})),
+	)
+	appProto.RegisterAppServer(grpcServer, &Server{})
+	return grpcServer
+}
 
 type Server struct {
 	appProto.UnimplementedAppServer

@@ -9,6 +9,7 @@ import (
 	"github.com/ncuhome/GeniusAuthoritarian/internal/pkg/feishu"
 	"github.com/ncuhome/GeniusAuthoritarian/internal/pkg/views"
 	"github.com/ncuhome/GeniusAuthoritarian/internal/router"
+	"github.com/ncuhome/GeniusAuthoritarian/internal/rpc/app"
 	"github.com/ncuhome/GeniusAuthoritarian/internal/rpc/refreshToken"
 	"github.com/ncuhome/GeniusAuthoritarian/internal/rpc/sshDev"
 	sshDevServer "github.com/ncuhome/GeniusAuthoritarian/internal/rpc/sshDev/sshDevSync"
@@ -45,10 +46,12 @@ func main() {
 	}
 	sshDevRpc := sshDev.NewRpc(global.Config.SshDev.Token)
 	refreshTokenRpc := refreshToken.NewRpc()
+	appRpc := app.NewRpc()
 
 	go tools.RunHttpSrv(httpSrv)
 	go tools.RunGrpcSrv(tools.MustTcpListen(":81"), sshDevRpc)
 	go tools.RunGrpcSrv(tools.MustTcpListen(":82"), refreshTokenRpc)
+	go tools.RunGrpcSrv(tools.MustTcpListen(":83"), appRpc)
 
 	quit := make(chan os.Signal)
 	signal.Notify(quit, os.Interrupt, os.Kill, syscall.SIGTERM)
