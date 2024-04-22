@@ -9,7 +9,6 @@ import (
 	"crypto/x509"
 	"encoding/json"
 	"errors"
-	"fmt"
 	"github.com/ncuhome/GeniusAuthoritarian/internal/db/redis"
 	"github.com/ncuhome/GeniusAuthoritarian/internal/global"
 	"github.com/ncuhome/GeniusAuthoritarian/internal/pkg/jwt"
@@ -48,7 +47,6 @@ func NewRpc() *grpc.Server {
 				rpcCertLock.RLock()
 				if !rpcCertValidBefore.IsZero() && rpcCertValidBefore.After(time.Now().Add(time.Minute*5)) {
 					defer rpcCertLock.RUnlock()
-					fmt.Println("pre")
 					return rpcCert, nil
 				}
 				rpcCertLock.RUnlock()
@@ -61,7 +59,6 @@ func NewRpc() *grpc.Server {
 					}
 					newCert, err := tls.X509KeyPair(fullChain, key)
 					if err != nil {
-						fmt.Println(err)
 						return nil, err
 					}
 					rpcCert = &newCert

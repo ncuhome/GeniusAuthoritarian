@@ -50,14 +50,15 @@ func (i Issuer) issue(certificate *x509.Certificate) (fullChain, private []byte,
 	if err != nil {
 		return nil, nil, err
 	}
-
 	certPem := keypair.PemEncodeCertificate(clientCert)
 	fullChain = make([]byte, 0, len(certPem)+len(i.CaCertPem))
 	fullChain = append(fullChain, certPem...)
 	fullChain = append(fullChain, i.CaCertPem...)
 
-	privatePem := keypair.PemEncodePrivate(keypair.FormatECDSA, ed25519Keypair.Private)
-
+	privatePem, err := keypair.PemMarshalPKCS8Private(keypair.FormatECDSA, ed25519Keypair.Private)
+	if err != nil {
+		return nil, nil, err
+	}
 	return fullChain, privatePem, nil
 }
 
