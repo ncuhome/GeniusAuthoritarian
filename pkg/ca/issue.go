@@ -40,23 +40,13 @@ type Issuer struct {
 	caKey ed25519.PrivateKey
 }
 
-func (i Issuer) Issue(dnsNames []string, notAfter time.Time) (fullChain, private []byte, err error) {
+func (i Issuer) issue(certificate *x509.Certificate) (fullChain, private []byte, err error) {
 	ed25519Keypair, err := ed25519Pkg.Generate()
 	if err != nil {
 		return nil, nil, err
 	}
 
-	clientCert, err := x509.CreateCertificate(rand.Reader, &x509.Certificate{
-		SerialNumber: big.NewInt(time.Now().UnixNano()),
-		Subject: pkix.Name{
-			CommonName: "GeniusAuthoritarian Client Cert",
-		},
-		NotBefore:   time.Now().Add(-time.Minute),
-		NotAfter:    notAfter,
-		KeyUsage:    x509.KeyUsageDigitalSignature | x509.KeyUsageKeyEncipherment,
-		ExtKeyUsage: []x509.ExtKeyUsage{x509.ExtKeyUsageClientAuth},
-		DNSNames:    dnsNames,
-	}, i.CaCert, ed25519Keypair.Public, i.caKey)
+	clientCert, err := x509.CreateCertificate(rand.Reader, certificate, i.CaCert, ed25519Keypair.Public, i.caKey)
 	if err != nil {
 		return nil, nil, err
 	}
@@ -69,4 +59,30 @@ func (i Issuer) Issue(dnsNames []string, notAfter time.Time) (fullChain, private
 	privatePem := keypair.PemEncodePrivate(keypair.FormatECDSA, ed25519Keypair.Private)
 
 	return fullChain, privatePem, nil
+}
+
+func (i Issuer) IssueServer(serverName string, notAfter time.Time) (fullChain, private []byte, err error) {
+	return i.issue(&x509.Certificate{
+		SerialNumber: big.NewInt(time.Now().UnixNano()),
+		Subject: pkix.Name{
+			CommonName: serverName,
+		},
+		NotBefore:   time.Now().Add(-time.Minute),
+		NotAfter:    notAfter,
+		KeyUsage:    x509.KeyUsageDigitalSignature | x509.KeyUsageKeyEncipherment,
+		ExtKeyUsage: []x509.ExtKeyUsage{x509.ExtKeyUsageServerAuth},
+	})
+}
+
+func (i Issuer) IssueClient(serverName string, notAfter time.Time) (fullChain, private []byte, err error) {
+	return i.issue(&x509.Certificate{
+		SerialNumber: big.NewInt(time.Now().UnixNano()),
+		Subject: pkix.Name{
+			CommonName: serverName,
+		},
+		NotBefore:   time.Now().Add(-time.Minute),
+		NotAfter:    notAfter,
+		KeyUsage:    x509.KeyUsageDigitalSignature | x509.KeyUsageKeyEncipherment,
+		ExtKeyUsage: []x509.ExtKeyUsage{x509.ExtKeyUsageClientAuth},
+	})
 }

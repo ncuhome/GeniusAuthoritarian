@@ -26,7 +26,7 @@ func RpcClientCredential(c *gin.Context) {
 	appCode := tools.GetAppCode(c)
 
 	validBefore := time.Now().AddDate(0, 0, 7)
-	certPem, privatePem, err := global.CaIssuer.Issue([]string{appCode}, validBefore)
+	certPem, privatePem, err := global.CaIssuer.IssueClient(appCode, validBefore)
 	if err != nil {
 		callback.Error(c, callback.ErrUnexpected, err)
 		return
