@@ -72,6 +72,7 @@ func (i Issuer) IssueServer(serverName string, notAfter time.Time) (fullChain, p
 		NotAfter:    notAfter,
 		KeyUsage:    x509.KeyUsageDigitalSignature | x509.KeyUsageKeyEncipherment,
 		ExtKeyUsage: []x509.ExtKeyUsage{x509.ExtKeyUsageServerAuth},
+		DNSNames:    []string{serverName},
 	})
 }
 
@@ -85,5 +86,6 @@ func (i Issuer) IssueClient(serverName string, notAfter time.Time) (fullChain, p
 		NotAfter:    notAfter,
 		KeyUsage:    x509.KeyUsageDigitalSignature | x509.KeyUsageKeyEncipherment,
 		ExtKeyUsage: []x509.ExtKeyUsage{x509.ExtKeyUsageClientAuth},
+		DNSNames:    []string{serverName},
 	})
 }
