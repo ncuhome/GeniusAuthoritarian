@@ -92,47 +92,52 @@ func (s *Server) GetTokenStatus(ctx context.Context, req *appProto.TokenIDReques
 	}, nil
 }
 
-func (s *Server) GetTokenCanceled(_ *emptypb.Empty, srv appProto.App_GetTokenCanceledServer) error {
-	msgChan := redis.NewCanceledTokenChannel().Subscribe(context.TODO()).Channel()
+func (s *Server) WatchTokenOperation(_ *emptypb.Empty, srv appProto.App_WatchTokenOperationServer) error {
+	canceledTokenChan := redis.NewCanceledTokenChannel().Subscribe(context.TODO()).Channel()
 	list, err := redis.NewCanceledToken().Get(context.TODO())
 	if err != nil {
 		if !errors.Is(err, redis.Nil) {
 			return status.Error(codes.Internal, err.Error())
 		}
 	}
-	var listId = make([]uint64, len(list))
+	var canceledTokenList = make([]uint64, len(list))
 	for i, v := range list {
-		listId[i] = v.ID
+		canceledTokenList[i] = v.ID
 	}
-	if err = srv.Send(&appProto.TokenCanceled{
-		Id: listId,
+	if err = srv.Send(&appProto.TokenOperation{
+		UserOperation:   nil, // todo
+		CanceledTokenId: canceledTokenList,
 	}); err != nil {
 		return err
 	}
 
 	for {
-		msg, ok := <-msgChan
-		if !ok {
-			break
-		}
-		if msg.Payload != "" {
-			msg.PayloadSlice = append(msg.PayloadSlice, msg.Payload)
-		}
-		canceledTokenList := make([]uint64, len(msg.PayloadSlice))
-		for i, payload := range msg.PayloadSlice {
-			var tokenCanceled redis.CanceledToken
-			err := json.Unmarshal(unsafe.Slice(unsafe.StringData(payload), len(payload)), &tokenCanceled)
-			if err != nil {
-				return status.Error(codes.Internal, err.Error())
+		select {
+		case msg, ok := <-canceledTokenChan:
+			if !ok {
+				goto endStream
 			}
-			canceledTokenList[i] = tokenCanceled.ID
-		}
-		if err = srv.Send(&appProto.TokenCanceled{
-			Id: listId,
-		}); err != nil {
-			return err
+			if msg.Payload != "" {
+				msg.PayloadSlice = append(msg.PayloadSlice, msg.Payload)
+			}
+
+			canceledTokenList := make([]uint64, len(msg.PayloadSlice))
+			for i, payload := range msg.PayloadSlice {
+				var tokenCanceled redis.CanceledToken
+				err := json.Unmarshal(unsafe.Slice(unsafe.StringData(payload), len(payload)), &tokenCanceled)
+				if err != nil {
+					return status.Error(codes.Internal, err.Error())
+				}
+				canceledTokenList[i] = tokenCanceled.ID
+			}
+			if err = srv.Send(&appProto.TokenOperation{
+				CanceledTokenId: canceledTokenList,
+			}); err != nil {
+				return err
+			}
 		}
 	}
+endStream:
 	return status.Error(codes.DataLoss, "send message failed")
 }
 

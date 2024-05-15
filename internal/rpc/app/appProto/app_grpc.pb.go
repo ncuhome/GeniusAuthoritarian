@@ -20,10 +20,10 @@ import (
 const _ = grpc.SupportPackageIsVersion7
 
 const (
-	App_GetTokenStatus_FullMethodName   = "/appProto.App/GetTokenStatus"
-	App_GetTokenCanceled_FullMethodName = "/appProto.App/GetTokenCanceled"
-	App_DestroyToken_FullMethodName     = "/appProto.App/DestroyToken"
-	App_GetUserInfo_FullMethodName      = "/appProto.App/GetUserInfo"
+	App_GetTokenStatus_FullMethodName      = "/appProto.App/GetTokenStatus"
+	App_WatchTokenOperation_FullMethodName = "/appProto.App/WatchTokenOperation"
+	App_DestroyToken_FullMethodName        = "/appProto.App/DestroyToken"
+	App_GetUserInfo_FullMethodName         = "/appProto.App/GetUserInfo"
 )
 
 // AppClient is the client API for App service.
@@ -31,7 +31,7 @@ const (
 // For semantics around ctx use and closing/ending streaming RPCs, please refer to https://pkg.go.dev/google.golang.org/grpc/?tab=doc#ClientConn.NewStream.
 type AppClient interface {
 	GetTokenStatus(ctx context.Context, in *TokenIDRequest, opts ...grpc.CallOption) (*TokenStatus, error)
-	GetTokenCanceled(ctx context.Context, in *emptypb.Empty, opts ...grpc.CallOption) (App_GetTokenCanceledClient, error)
+	WatchTokenOperation(ctx context.Context, in *emptypb.Empty, opts ...grpc.CallOption) (App_WatchTokenOperationClient, error)
 	DestroyToken(ctx context.Context, in *RefreshTokenRequest, opts ...grpc.CallOption) (*emptypb.Empty, error)
 	GetUserInfo(ctx context.Context, in *UserIDRequest, opts ...grpc.CallOption) (*UserInfo, error)
 }
@@ -53,12 +53,12 @@ func (c *appClient) GetTokenStatus(ctx context.Context, in *TokenIDRequest, opts
 	return out, nil
 }
 
-func (c *appClient) GetTokenCanceled(ctx context.Context, in *emptypb.Empty, opts ...grpc.CallOption) (App_GetTokenCanceledClient, error) {
-	stream, err := c.cc.NewStream(ctx, &App_ServiceDesc.Streams[0], App_GetTokenCanceled_FullMethodName, opts...)
+func (c *appClient) WatchTokenOperation(ctx context.Context, in *emptypb.Empty, opts ...grpc.CallOption) (App_WatchTokenOperationClient, error) {
+	stream, err := c.cc.NewStream(ctx, &App_ServiceDesc.Streams[0], App_WatchTokenOperation_FullMethodName, opts...)
 	if err != nil {
 		return nil, err
 	}
-	x := &appGetTokenCanceledClient{stream}
+	x := &appWatchTokenOperationClient{stream}
 	if err := x.ClientStream.SendMsg(in); err != nil {
 		return nil, err
 	}
@@ -68,17 +68,17 @@ func (c *appClient) GetTokenCanceled(ctx context.Context, in *emptypb.Empty, opt
 	return x, nil
 }
 
-type App_GetTokenCanceledClient interface {
-	Recv() (*TokenCanceled, error)
+type App_WatchTokenOperationClient interface {
+	Recv() (*TokenOperation, error)
 	grpc.ClientStream
 }
 
-type appGetTokenCanceledClient struct {
+type appWatchTokenOperationClient struct {
 	grpc.ClientStream
 }
 
-func (x *appGetTokenCanceledClient) Recv() (*TokenCanceled, error) {
-	m := new(TokenCanceled)
+func (x *appWatchTokenOperationClient) Recv() (*TokenOperation, error) {
+	m := new(TokenOperation)
 	if err := x.ClientStream.RecvMsg(m); err != nil {
 		return nil, err
 	}
@@ -108,7 +108,7 @@ func (c *appClient) GetUserInfo(ctx context.Context, in *UserIDRequest, opts ...
 // for forward compatibility
 type AppServer interface {
 	GetTokenStatus(context.Context, *TokenIDRequest) (*TokenStatus, error)
-	GetTokenCanceled(*emptypb.Empty, App_GetTokenCanceledServer) error
+	WatchTokenOperation(*emptypb.Empty, App_WatchTokenOperationServer) error
 	DestroyToken(context.Context, *RefreshTokenRequest) (*emptypb.Empty, error)
 	GetUserInfo(context.Context, *UserIDRequest) (*UserInfo, error)
 	mustEmbedUnimplementedAppServer()
@@ -121,8 +121,8 @@ type UnimplementedAppServer struct {
 func (UnimplementedAppServer) GetTokenStatus(context.Context, *TokenIDRequest) (*TokenStatus, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method GetTokenStatus not implemented")
 }
-func (UnimplementedAppServer) GetTokenCanceled(*emptypb.Empty, App_GetTokenCanceledServer) error {
-	return status.Errorf(codes.Unimplemented, "method GetTokenCanceled not implemented")
+func (UnimplementedAppServer) WatchTokenOperation(*emptypb.Empty, App_WatchTokenOperationServer) error {
+	return status.Errorf(codes.Unimplemented, "method WatchTokenOperation not implemented")
 }
 func (UnimplementedAppServer) DestroyToken(context.Context, *RefreshTokenRequest) (*emptypb.Empty, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method DestroyToken not implemented")
@@ -161,24 +161,24 @@ func _App_GetTokenStatus_Handler(srv interface{}, ctx context.Context, dec func(
 	return interceptor(ctx, in, info, handler)
 }
 
-func _App_GetTokenCanceled_Handler(srv interface{}, stream grpc.ServerStream) error {
+func _App_WatchTokenOperation_Handler(srv interface{}, stream grpc.ServerStream) error {
 	m := new(emptypb.Empty)
 	if err := stream.RecvMsg(m); err != nil {
 		return err
 	}
-	return srv.(AppServer).GetTokenCanceled(m, &appGetTokenCanceledServer{stream})
+	return srv.(AppServer).WatchTokenOperation(m, &appWatchTokenOperationServer{stream})
 }
 
-type App_GetTokenCanceledServer interface {
-	Send(*TokenCanceled) error
+type App_WatchTokenOperationServer interface {
+	Send(*TokenOperation) error
 	grpc.ServerStream
 }
 
-type appGetTokenCanceledServer struct {
+type appWatchTokenOperationServer struct {
 	grpc.ServerStream
 }
 
-func (x *appGetTokenCanceledServer) Send(m *TokenCanceled) error {
+func (x *appWatchTokenOperationServer) Send(m *TokenOperation) error {
 	return x.ServerStream.SendMsg(m)
 }
 
@@ -240,8 +240,8 @@ var App_ServiceDesc = grpc.ServiceDesc{
 	},
 	Streams: []grpc.StreamDesc{
 		{
-			StreamName:    "GetTokenCanceled",
-			Handler:       _App_GetTokenCanceled_Handler,
+			StreamName:    "WatchTokenOperation",
+			Handler:       _App_WatchTokenOperation_Handler,
 			ServerStreams: true,
 		},
 	},
