@@ -93,18 +93,21 @@ func (s *Server) GetTokenStatus(ctx context.Context, req *appProto.TokenIDReques
 }
 
 func (s *Server) WatchTokenOperation(_ *emptypb.Empty, srv appProto.App_WatchTokenOperationServer) error {
+	ctx, cancel := context.WithCancel(srv.Context())
+	defer cancel()
+
 	// register listen channels
-	canceledTokenChan := redis.NewCanceledTokenChannel().Subscribe(context.TODO()).Channel()
-	// todo watch operation id change
+	canceledTokenChan := redis.NewCanceledTokenChannel().Subscribe(ctx).Channel()
+	operationIDChan := redis.NewUserOperationIDChannel().Subscribe(ctx).Channel()
 
 	// load current data
-	operationIDMap, err := redis.NewUserJwt().GetOperationTable(context.TODO())
+	operationIDMap, err := redis.NewUserJwt().GetOperationTable(ctx)
 	if err != nil {
 		if !errors.Is(err, redis.Nil) {
 			return status.Error(codes.Internal, err.Error())
 		}
 	}
-	list, err := redis.NewCanceledToken().Get(context.TODO())
+	list, err := redis.NewCanceledToken().Get(ctx)
 	if err != nil {
 		if !errors.Is(err, redis.Nil) {
 			return status.Error(codes.Internal, err.Error())
@@ -132,6 +135,8 @@ func (s *Server) WatchTokenOperation(_ *emptypb.Empty, srv appProto.App_WatchTok
 
 	for {
 		select {
+		case <-ctx.Done():
+			return status.Error(codes.Canceled, ctx.Err().Error())
 		case msg, ok := <-canceledTokenChan:
 			if !ok {
 				goto endStream
@@ -139,7 +144,6 @@ func (s *Server) WatchTokenOperation(_ *emptypb.Empty, srv appProto.App_WatchTok
 			if msg.Payload != "" {
 				msg.PayloadSlice = append(msg.PayloadSlice, msg.Payload)
 			}
-
 			canceledTokenList := make([]uint64, len(msg.PayloadSlice))
 			for i, payload := range msg.PayloadSlice {
 				var tokenCanceled redis.CanceledToken
@@ -149,8 +153,32 @@ func (s *Server) WatchTokenOperation(_ *emptypb.Empty, srv appProto.App_WatchTok
 				}
 				canceledTokenList[i] = tokenCanceled.ID
 			}
-			if err = srv.Send(&appProto.TokenOperation{
+			if err := srv.Send(&appProto.TokenOperation{
 				CanceledTokenId: canceledTokenList,
+			}); err != nil {
+				return err
+			}
+		case msg, ok := <-operationIDChan:
+			if !ok {
+				goto endStream
+			}
+			if msg.Payload != "" {
+				msg.PayloadSlice = append(msg.PayloadSlice, msg.Payload)
+			}
+			operationIDList := make([]*appProto.UserOperationID, len(msg.PayloadSlice))
+			for i, payload := range msg.PayloadSlice {
+				var operationIDInfo redis.UserOperationIDInfo
+				err := json.Unmarshal(unsafe.Slice(unsafe.StringData(payload), len(payload)), &operationIDInfo)
+				if err != nil {
+					return status.Error(codes.Internal, err.Error())
+				}
+				operationIDList[i] = &appProto.UserOperationID{
+					Uid:         uint64(operationIDInfo.UID),
+					OperationId: operationIDInfo.OperationID,
+				}
+			}
+			if err := srv.Send(&appProto.TokenOperation{
+				UserOperation: operationIDList,
 			}); err != nil {
 				return err
 			}
