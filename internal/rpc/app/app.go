@@ -93,19 +93,38 @@ func (s *Server) GetTokenStatus(ctx context.Context, req *appProto.TokenIDReques
 }
 
 func (s *Server) WatchTokenOperation(_ *emptypb.Empty, srv appProto.App_WatchTokenOperationServer) error {
+	// register listen channels
 	canceledTokenChan := redis.NewCanceledTokenChannel().Subscribe(context.TODO()).Channel()
+	// todo watch operation id change
+
+	// load current data
+	operationIDMap, err := redis.NewUserJwt().GetOperationTable(context.TODO())
+	if err != nil {
+		if !errors.Is(err, redis.Nil) {
+			return status.Error(codes.Internal, err.Error())
+		}
+	}
 	list, err := redis.NewCanceledToken().Get(context.TODO())
 	if err != nil {
 		if !errors.Is(err, redis.Nil) {
 			return status.Error(codes.Internal, err.Error())
 		}
 	}
+	var operationIDList = make([]*appProto.UserOperationID, 0, len(operationIDMap))
+	for uid, operationID := range operationIDMap {
+		operationIDList = append(operationIDList, &appProto.UserOperationID{
+			Uid:         uint64(uid),
+			OperationId: operationID,
+		})
+	}
 	var canceledTokenList = make([]uint64, len(list))
 	for i, v := range list {
 		canceledTokenList[i] = v.ID
 	}
+
+	// send current data to client
 	if err = srv.Send(&appProto.TokenOperation{
-		UserOperation:   nil, // todo
+		UserOperation:   operationIDList,
 		CanceledTokenId: canceledTokenList,
 	}); err != nil {
 		return err

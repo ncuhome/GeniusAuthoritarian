@@ -5,6 +5,7 @@ import (
 	"errors"
 	"fmt"
 	"github.com/go-redis/redis/v8"
+	"strconv"
 )
 
 // NewUserJwt user jwt Operate ID hash 表
@@ -31,6 +32,26 @@ func (u UserJwt) NewOperator(uid uint) UserJwtOperator {
 		key:     u.key,
 		userKey: fmt.Sprint(uid),
 	}
+}
+
+func (u UserJwt) GetOperationTable(ctx context.Context) (map[uint]uint64, error) {
+	values, err := Client.HGetAll(ctx, u.key).Result()
+	if err != nil {
+		return nil, err
+	}
+	var result = make(map[uint]uint64, len(values))
+	for uidStr, operationIDStr := range values {
+		uid, err := strconv.ParseUint(uidStr, 10, 64)
+		if err != nil {
+			return nil, err
+		}
+		operationID, err := strconv.ParseUint(operationIDStr, 10, 64)
+		if err != nil {
+			return nil, err
+		}
+		result[uint(uid)] = operationID
+	}
+	return result, nil
 }
 
 type UserJwtOperator struct {
