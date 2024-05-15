@@ -13,9 +13,31 @@ import (
 	"unsafe"
 )
 
-func CancelToken(ctx context.Context, id uint64, appCode string, validBefore time.Time) error {
+type RefreshTokenStore struct {
+	tokenStore.TokenStore[types.Nil]
+}
+
+func NewRecordedToken() RefreshTokenStore {
+	return RefreshTokenStore{
+		tokenStore.NewTokenStore[types.Nil](Client, keyRecordedToken.String()),
+	}
+}
+
+func (store RefreshTokenStore) NewStorePoint(id uint64) RefreshTokenStorePoint {
+	return RefreshTokenStorePoint{
+		Point: store.TokenStore.NewStorePoint(id),
+		id:    id,
+	}
+}
+
+type RefreshTokenStorePoint struct {
+	tokenStore.Point[types.Nil]
+	id uint64
+}
+
+func (point RefreshTokenStorePoint) Destroy(ctx context.Context, appCode string, validBefore time.Time) error {
 	canceledToken := CanceledToken{
-		ID: id,
+		ID: point.id,
 		CanceledTokenPayload: CanceledTokenPayload{
 			AppCode:     appCode,
 			ValidBefore: validBefore,
@@ -28,11 +50,11 @@ func CancelToken(ctx context.Context, id uint64, appCode string, validBefore tim
 	if err = NewCanceledTokenChannel().Publish(ctx, canceledToken); err != nil {
 		return err
 	}
-	return NewRecordedToken().NewStorePoint(id).Destroy(ctx)
+	return point.Point.Destroy(ctx)
 }
 
-func NewRecordedToken() tokenStore.TokenStore[types.Nil] {
-	return tokenStore.NewTokenStore[types.Nil](Client, keyRecordedToken.String())
+type CanceledTokenChannel struct {
+	key string
 }
 
 func NewCanceledTokenChannel() CanceledTokenChannel {
@@ -41,20 +63,16 @@ func NewCanceledTokenChannel() CanceledTokenChannel {
 	}
 }
 
-type CanceledTokenChannel struct {
-	key string
-}
-
-func (a CanceledTokenChannel) Publish(ctx context.Context, token CanceledToken) error {
+func (channel CanceledTokenChannel) Publish(ctx context.Context, token CanceledToken) error {
 	data, err := json.Marshal(token)
 	if err != nil {
 		return err
 	}
-	return Client.Publish(ctx, a.key, data).Err()
+	return Client.Publish(ctx, channel.key, data).Err()
 }
 
-func (a CanceledTokenChannel) Subscribe(ctx context.Context) *redis.PubSub {
-	return Client.Subscribe(ctx, a.key)
+func (channel CanceledTokenChannel) Subscribe(ctx context.Context) *redis.PubSub {
+	return Client.Subscribe(ctx, channel.key)
 }
 
 func NewCanceledToken() CanceledTokenTable {
@@ -73,15 +91,15 @@ type CanceledToken struct {
 	CanceledTokenPayload
 }
 
-func (a CanceledToken) Key() string {
-	return strconv.FormatUint(a.ID, 10)
+func (token CanceledToken) Key() string {
+	return strconv.FormatUint(token.ID, 10)
 }
 
 type CanceledTokenTable struct {
 	key string
 }
 
-func (a CanceledTokenTable) Add(ctx context.Context, tokens ...CanceledToken) error {
+func (table CanceledTokenTable) Add(ctx context.Context, tokens ...CanceledToken) error {
 	fields := make([]interface{}, len(tokens)*2)
 	for i, v := range tokens {
 		fields[i*2] = v.Key()
@@ -91,11 +109,11 @@ func (a CanceledTokenTable) Add(ctx context.Context, tokens ...CanceledToken) er
 		}
 		fields[i*2+1] = data
 	}
-	return Client.HSet(ctx, a.key, fields...).Err()
+	return Client.HSet(ctx, table.key, fields...).Err()
 }
 
-func (a CanceledTokenTable) Get(ctx context.Context) ([]CanceledToken, error) {
-	result, err := Client.HGetAll(ctx, a.key).Result()
+func (table CanceledTokenTable) Get(ctx context.Context) ([]CanceledToken, error) {
+	result, err := Client.HGetAll(ctx, table.key).Result()
 	if err != nil {
 		return nil, err
 	}
@@ -122,24 +140,24 @@ func (a CanceledTokenTable) Get(ctx context.Context) ([]CanceledToken, error) {
 		}
 	}
 	if left != len(result)-1 {
-		go a.clean(canceledTokens[left+1:]...)
+		go table.clean(canceledTokens[left+1:]...)
 	}
 	return canceledTokens[:left], nil
 }
 
-func (a CanceledTokenTable) clean(tokens ...CanceledToken) {
+func (table CanceledTokenTable) clean(tokens ...CanceledToken) {
 	defer tool.Recover()
-	err := a.remove(context.Background(), tokens...)
+	err := table.remove(context.Background(), tokens...)
 	if err != nil {
 		log.Errorln("clean canceled token failed", err)
 	}
 }
 
-func (a CanceledTokenTable) remove(ctx context.Context, tokens ...CanceledToken) error {
+func (table CanceledTokenTable) remove(ctx context.Context, tokens ...CanceledToken) error {
 	keyGroup := make([]string, len(tokens))
 	for i, v := range tokens {
 		keyGroup[i] = v.Key()
 	}
-	return Client.HDel(ctx, a.key, keyGroup...).Err()
+	return Client.HDel(ctx, table.key, keyGroup...).Err()
 
 }

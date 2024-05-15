@@ -29,7 +29,7 @@ func Logout(c *gin.Context) {
 		return
 	}
 
-	err = redis.NewRecordedToken().NewStorePoint(loginID).Destroy(context.Background())
+	err = redis.NewRecordedToken().NewStorePoint(loginID).Point.Destroy(context.Background())
 	if err != nil {
 		callback.Error(c, callback.ErrUnexpected, err)
 		return
@@ -76,7 +76,7 @@ func LogoutDevice(c *gin.Context) {
 		return
 	}
 
-	err = redis.CancelToken(context.Background(), uint64(loginRecord.ID), loginRecord.AppCode, time.Unix(int64(loginRecord.ValidBefore), 0))
+	err = redis.NewRecordedToken().NewStorePoint(uint64(loginRecord.ID)).Destroy(context.Background(), loginRecord.AppCode, time.Unix(int64(loginRecord.ValidBefore), 0))
 	if err != nil {
 		if errors.Is(err, redis.Nil) {
 			callback.Error(c, callback.ErrTargetDeviceOffline)

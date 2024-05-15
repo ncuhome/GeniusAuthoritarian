@@ -64,7 +64,7 @@ func (s *Server) DestroyRefreshToken(ctx context.Context, req *refreshTokenProto
 		return nil, status.Error(codes.Internal, "database error")
 	}
 
-	err = redis.CancelToken(ctx, claims.ID, claims.AppCode, claims.ExpiresAt.Time)
+	err = redis.NewRecordedToken().NewStorePoint(claims.ID).Destroy(ctx, claims.AppCode, claims.ExpiresAt.Time)
 	if err != nil {
 		return nil, status.Error(codes.Internal, "destroy token failed")
 	}

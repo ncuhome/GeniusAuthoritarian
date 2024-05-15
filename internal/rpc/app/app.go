@@ -147,7 +147,7 @@ func (s *Server) DestroyToken(ctx context.Context, req *appProto.RefreshTokenReq
 	if GetAuthInfo(ctx).AppCode != claims.AppCode {
 		return nil, status.Error(codes.Unauthenticated, "token ownership not correct")
 	}
-	err = redis.CancelToken(ctx, claims.ID, claims.AppCode, claims.ExpiresAt.Time)
+	err = redis.NewRecordedToken().NewStorePoint(claims.ID).Destroy(ctx, claims.AppCode, claims.ExpiresAt.Time)
 	if err != nil {
 		return nil, status.Error(codes.Internal, err.Error())
 	}
