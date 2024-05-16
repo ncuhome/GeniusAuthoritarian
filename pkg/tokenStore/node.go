@@ -67,5 +67,6 @@ func (node NodeWithClient) GenID(ctx context.Context) (uint64, error) {
 	}
 	tokenID := node.TokenID.Add(1)
 	tokenID = (tokenID << 18) + (node.ID << 10) + node.IDTimeMark
+	fmt.Println(tokenID)
 	return tokenID, nil
 }

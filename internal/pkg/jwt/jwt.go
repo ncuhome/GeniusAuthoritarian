@@ -100,18 +100,18 @@ func ParseTokenAndVerify[C jwtClaims.ClaimsUser](Type, token string, target C) (
 }
 
 // GenerateUserToken 生成后台 Token
-func GenerateUserToken(uid uint, lid uint64, name string, groups []string, valid time.Duration) (string, error) {
+func GenerateUserToken(uid uint, loginRecordID uint64, name string, groups []string, valid time.Duration) (string, error) {
 	userClaims, err := NewUserClaims(uid, User, valid)
 	if err != nil {
 		return "", err
 	}
 	claims := &jwtClaims.UserToken{
-		ID:         lid,
+		ID:         loginRecordID,
 		UserClaims: userClaims,
 		Name:       name,
 		Groups:     groups,
 	}
-	err = redis.NewRecordedToken().CreateStorePointWithID(context.Background(), lid, valid, nil)
+	err = redis.NewRecordedToken().CreateStorePointWithID(context.Background(), loginRecordID, valid, nil)
 	if err != nil {
 		return "", err
 	}
@@ -123,9 +123,6 @@ func ParseUserToken(token string) (*jwtClaims.UserToken, bool, error) {
 	claims, valid, err := ParseTokenAndVerify(User, token, &jwtClaims.UserToken{})
 	if err != nil || !valid {
 		return claims, valid, err
-	}
-	if err != nil {
-		return nil, false, err
 	}
 	return claims, true, redis.NewRecordedToken().NewStorePoint(claims.ID).Get(context.Background(), nil)
 }
@@ -237,18 +234,18 @@ func ParseU2fToken(token, ip string) (bool, error) {
 	return true, nil
 }
 
-func GenerateRefreshToken(uid uint, lid uint64, appCode, payload string, valid time.Duration) (string, *jwtClaims.RefreshToken, error) {
+func GenerateRefreshToken(uid uint, loginRecordID uint64, appCode, payload string, valid time.Duration) (string, *jwtClaims.RefreshToken, error) {
 	userClaims, err := NewUserClaims(uid, Refresh, valid)
 	if err != nil {
 		return "", nil, err
 	}
 	claims := jwtClaims.RefreshToken{
-		ID:         lid,
+		ID:         loginRecordID,
 		UserClaims: userClaims,
 		AppCode:    appCode,
 		Payload:    payload,
 	}
-	err = redis.NewRecordedToken().CreateStorePointWithID(context.Background(), lid, valid, nil)
+	err = redis.NewRecordedToken().CreateStorePointWithID(context.Background(), loginRecordID, valid, nil)
 	if err != nil {
 		return "", nil, err
 	}
