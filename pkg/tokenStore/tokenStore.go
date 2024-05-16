@@ -10,6 +10,7 @@ import (
 	"time"
 )
 
+// NewTokenStoreFactory only support maximum 128 partial program instance, and maximum 1 year validate of token.
 func NewTokenStoreFactory[C any](keyPrefix string, getClient func() *redis.Client) func() TokenStore[C] {
 	node := &Node{
 		keyNodeIDPrefix: keyPrefix + "id",
