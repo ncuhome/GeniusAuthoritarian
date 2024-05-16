@@ -5,6 +5,4 @@ import (
 	"github.com/ncuhome/GeniusAuthoritarian/pkg/tokenStore"
 )
 
-func NewThirdPartyLogin() tokenStore.TokenStore[jwtClaims.LoginRedis] {
-	return tokenStore.NewTokenStore[jwtClaims.LoginRedis](Client, keyThirdPartyLogin.String())
-}
+var NewThirdPartyLogin = tokenStore.NewTokenStoreFactory[jwtClaims.LoginRedis](Client, keyThirdPartyLogin.String())

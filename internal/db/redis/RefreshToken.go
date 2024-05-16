@@ -17,9 +17,11 @@ type RefreshTokenStore struct {
 	tokenStore.TokenStore[types.Nil]
 }
 
+var _NewRefreshTokenStore = tokenStore.NewTokenStoreFactory[types.Nil](Client, keyRecordedToken.String())
+
 func NewRecordedToken() RefreshTokenStore {
 	return RefreshTokenStore{
-		tokenStore.NewTokenStore[types.Nil](Client, keyRecordedToken.String()),
+		_NewRefreshTokenStore(),
 	}
 }
 

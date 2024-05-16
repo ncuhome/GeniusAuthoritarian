@@ -5,6 +5,4 @@ import (
 	"go/types"
 )
 
-func NewU2F() tokenStore.TokenStore[types.Nil] {
-	return tokenStore.NewTokenStore[types.Nil](Client, keyU2F.String())
-}
+var NewU2F = tokenStore.NewTokenStoreFactory[types.Nil](Client, keyU2F.String())
