@@ -12,7 +12,7 @@ import (
 type Node struct {
 	// this is a unique id for each node process, it
 	// will be reallocated every day.
-	// ID must be smaller than 100.
+	// ID must be smaller than 128.
 	ID uint64
 
 	keyNodeIDPrefix string
@@ -56,11 +56,11 @@ func (node NodeWithClient) GenID(ctx context.Context) (uint64, error) {
 		if err != nil {
 			return 0, err
 		}
-		node.ID = newNodeID % 100
+		node.ID = newNodeID % 128
 		node.TokenID.Store(0)
 		node.IDTimeMark = currentTimeMark
 	}
 	tokenID := node.TokenID.Add(1)
-	tokenID = (tokenID << 5) + (node.ID << 3) + node.IDTimeMark
+	tokenID = (tokenID << 18) + (node.ID << 10) + node.IDTimeMark
 	return tokenID, nil
 }
