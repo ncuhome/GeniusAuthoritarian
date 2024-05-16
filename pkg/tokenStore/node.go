@@ -52,7 +52,12 @@ func (node NodeWithClient) GenID(ctx context.Context) (uint64, error) {
 			return node.GenID(ctx)
 		}
 		defer node.Lock.Unlock()
-		newNodeID, err := node.client.Incr(ctx, node.keyNodeID(currentTimeMark)).Uint64()
+		keyNodeID := node.keyNodeID(currentTimeMark)
+		err := node.client.SetNX(ctx, keyNodeID, 1, time.Hour*24).Err()
+		if err != nil {
+			return 0, err
+		}
+		newNodeID, err := node.client.Incr(ctx, keyNodeID).Uint64()
 		if err != nil {
 			return 0, err
 		}
