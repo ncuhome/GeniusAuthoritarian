@@ -124,6 +124,9 @@ func ParseUserToken(token string) (*jwtClaims.UserToken, bool, error) {
 	if err != nil || !valid {
 		return claims, valid, err
 	}
+	if err != nil {
+		return nil, false, err
+	}
 	return claims, true, redis.NewRecordedToken().NewStorePoint(claims.ID).Get(context.Background(), nil)
 }
 

@@ -17,7 +17,9 @@ type RefreshTokenStore struct {
 	tokenStore.TokenStore[types.Nil]
 }
 
-var _NewRefreshTokenStore = tokenStore.NewTokenStoreFactory[types.Nil](Client, keyRecordedToken.String())
+var _NewRefreshTokenStore = tokenStore.NewTokenStoreFactory[types.Nil](keyRecordedToken.String(), func() *redis.Client {
+	return Client
+})
 
 func NewRecordedToken() RefreshTokenStore {
 	return RefreshTokenStore{
