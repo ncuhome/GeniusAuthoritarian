@@ -15,11 +15,12 @@ func SetAuthInfoWithContext(ctx context.Context) (context.Context, error) {
 		return ctx, status.Error(codes.Unauthenticated, "get peer from context failed")
 	}
 	tlsAuth, ok := p.AuthInfo.(credentials.TLSInfo)
-	if !ok {
+	if !ok || len(tlsAuth.State.PeerCertificates) == 0 || len(tlsAuth.State.PeerCertificates[0].DNSNames) == 0 {
 		return ctx, status.Error(codes.Unauthenticated, "get tls info from peer failed")
 	}
+
 	return SetAuthInfo(ctx, &AuthInfo{
-		AppCode: tlsAuth.State.ServerName,
+		AppCode: tlsAuth.State.PeerCertificates[0].DNSNames[0],
 	}), nil
 }
 
