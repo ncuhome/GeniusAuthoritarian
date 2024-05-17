@@ -121,6 +121,9 @@ func (table CanceledTokenTable) Get(ctx context.Context) ([]CanceledToken, error
 	if err != nil {
 		return nil, err
 	}
+	if len(result) == 0 {
+		return nil, nil
+	}
 	canceledTokens := make([]CanceledToken, len(result))
 	left, right := 0, len(result)-1
 	for k, v := range result {
@@ -143,7 +146,7 @@ func (table CanceledTokenTable) Get(ctx context.Context) ([]CanceledToken, error
 			right--
 		}
 	}
-	if left != len(result)-1 {
+	if left < len(result)-1 {
 		go table.clean(canceledTokens[left+1:]...)
 	}
 	return canceledTokens[:left], nil
