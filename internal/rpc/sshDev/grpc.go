@@ -18,12 +18,14 @@ import (
 func NewRpc(token string) *grpc.Server {
 	grpcServer := grpc.NewServer(
 		grpc.ChainUnaryInterceptor(
-			middlewares.UnaryLogger(),
 			UnaryTokenAuth(token),
+			middlewares.UnaryLogger(),
+			middlewares.UnaryRecovery(),
 		),
 		grpc.ChainStreamInterceptor(
-			middlewares.StreamLogger(),
 			StreamTokenAuth(token),
+			middlewares.StreamLogger(),
+			middlewares.StreamRecovery(),
 		),
 	)
 	proto.RegisterSshAccountsServer(grpcServer, &SshAccounts{})

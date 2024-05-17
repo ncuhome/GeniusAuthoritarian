@@ -35,12 +35,14 @@ func NewRpc() *grpc.Server {
 
 	grpcServer := grpc.NewServer(
 		grpc.ChainUnaryInterceptor(
-			middlewares.UnaryLogger(),
 			UnaryAuth(),
+			middlewares.UnaryLogger(),
+			middlewares.UnaryRecovery(),
 		),
 		grpc.ChainStreamInterceptor(
-			middlewares.StreamLogger(),
 			StreamAuth(),
+			middlewares.StreamLogger(),
+			middlewares.StreamRecovery(),
 		),
 		grpc.Creds(credentials.NewTLS(&tls.Config{
 			GetCertificate: func(info *tls.ClientHelloInfo) (*tls.Certificate, error) {
