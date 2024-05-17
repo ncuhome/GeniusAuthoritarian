@@ -3,6 +3,7 @@ package service
 import (
 	"container/list"
 	"context"
+	"errors"
 	"github.com/Mmx233/daoUtil"
 	"github.com/ncuhome/GeniusAuthoritarian/internal/db/dao"
 	"github.com/ncuhome/GeniusAuthoritarian/internal/db/dto"
@@ -96,8 +97,12 @@ func (a UserSrv) UserInfoByID(id uint) (*dao.User, error) {
 func (a UserSrv) UserIdExist(uid uint, opts ...daoUtil.ServiceOpt) (bool, error) {
 	cache := redis.NewUserJwt().NewOperator(uid)
 	exist, err0 := cache.Exist(context.Background())
-	if err0 == nil && exist {
-		return true, nil
+	if err0 == nil {
+		if exist {
+			return true, nil
+		}
+	} else if errors.Is(err0, redis.Nil) {
+		err0 = nil
 	}
 
 	exist, err := (&dao.User{ID: uid}).Exist(daoUtil.TxOpts(a.DB, opts...))
