@@ -93,6 +93,7 @@ func (s *Server) GetTokenStatus(ctx context.Context, req *appProto.TokenIDReques
 }
 
 func (s *Server) WatchTokenOperation(_ *emptypb.Empty, srv appProto.App_WatchTokenOperationServer) error {
+	appCode := GetAuthInfo(srv.Context()).AppCode
 	ctx, cancel := context.WithCancel(srv.Context())
 	defer cancel()
 
@@ -120,12 +121,15 @@ func (s *Server) WatchTokenOperation(_ *emptypb.Empty, srv appProto.App_WatchTok
 			OperationId: operationID,
 		})
 	}
-	var canceledTokenList = make([]*appProto.CanceledToken, len(list))
-	for i, v := range list {
-		canceledTokenList[i] = &appProto.CanceledToken{
+	var canceledTokenList = make([]*appProto.CanceledToken, 0, len(list))
+	for _, v := range list {
+		if v.AppCode != appCode {
+			continue
+		}
+		canceledTokenList = append(canceledTokenList, &appProto.CanceledToken{
 			Id:          v.ID,
 			ValidBefore: v.ValidBefore.Unix(),
-		}
+		})
 	}
 
 	// send current data to client
@@ -147,22 +151,27 @@ func (s *Server) WatchTokenOperation(_ *emptypb.Empty, srv appProto.App_WatchTok
 			if msg.Payload != "" {
 				msg.PayloadSlice = append(msg.PayloadSlice, msg.Payload)
 			}
-			canceledTokenList := make([]*appProto.CanceledToken, len(msg.PayloadSlice))
-			for i, payload := range msg.PayloadSlice {
+			canceledTokenList := make([]*appProto.CanceledToken, 0, len(msg.PayloadSlice))
+			for _, payload := range msg.PayloadSlice {
 				var tokenCanceled redis.CanceledToken
 				err := json.Unmarshal(unsafe.Slice(unsafe.StringData(payload), len(payload)), &tokenCanceled)
 				if err != nil {
 					return status.Error(codes.Internal, err.Error())
 				}
-				canceledTokenList[i] = &appProto.CanceledToken{
+				if tokenCanceled.AppCode != appCode {
+					continue
+				}
+				canceledTokenList = append(canceledTokenList, &appProto.CanceledToken{
 					Id:          tokenCanceled.ID,
 					ValidBefore: tokenCanceled.ValidBefore.Unix(),
-				}
+				})
 			}
-			if err := srv.Send(&appProto.TokenOperation{
-				CanceledToken: canceledTokenList,
-			}); err != nil {
-				return err
+			if len(canceledTokenList) != 0 {
+				if err := srv.Send(&appProto.TokenOperation{
+					CanceledToken: canceledTokenList,
+				}); err != nil {
+					return err
+				}
 			}
 		case msg, ok := <-operationIDChan:
 			if !ok {
