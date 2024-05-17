@@ -120,15 +120,18 @@ func (s *Server) WatchTokenOperation(_ *emptypb.Empty, srv appProto.App_WatchTok
 			OperationId: operationID,
 		})
 	}
-	var canceledTokenList = make([]uint64, len(list))
+	var canceledTokenList = make([]*appProto.CanceledToken, len(list))
 	for i, v := range list {
-		canceledTokenList[i] = v.ID
+		canceledTokenList[i] = &appProto.CanceledToken{
+			Id:          v.ID,
+			ValidBefore: v.ValidBefore.Unix(),
+		}
 	}
 
 	// send current data to client
 	if err = srv.Send(&appProto.TokenOperation{
-		UserOperation:   operationIDList,
-		CanceledTokenId: canceledTokenList,
+		UserOperation: operationIDList,
+		CanceledToken: canceledTokenList,
 	}); err != nil {
 		return err
 	}
@@ -144,17 +147,20 @@ func (s *Server) WatchTokenOperation(_ *emptypb.Empty, srv appProto.App_WatchTok
 			if msg.Payload != "" {
 				msg.PayloadSlice = append(msg.PayloadSlice, msg.Payload)
 			}
-			canceledTokenList := make([]uint64, len(msg.PayloadSlice))
+			canceledTokenList := make([]*appProto.CanceledToken, len(msg.PayloadSlice))
 			for i, payload := range msg.PayloadSlice {
 				var tokenCanceled redis.CanceledToken
 				err := json.Unmarshal(unsafe.Slice(unsafe.StringData(payload), len(payload)), &tokenCanceled)
 				if err != nil {
 					return status.Error(codes.Internal, err.Error())
 				}
-				canceledTokenList[i] = tokenCanceled.ID
+				canceledTokenList[i] = &appProto.CanceledToken{
+					Id:          tokenCanceled.ID,
+					ValidBefore: tokenCanceled.ValidBefore.Unix(),
+				}
 			}
 			if err := srv.Send(&appProto.TokenOperation{
-				CanceledTokenId: canceledTokenList,
+				CanceledToken: canceledTokenList,
 			}); err != nil {
 				return err
 			}
