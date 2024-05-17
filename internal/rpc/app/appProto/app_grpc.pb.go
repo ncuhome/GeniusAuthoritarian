@@ -22,6 +22,7 @@ const _ = grpc.SupportPackageIsVersion7
 const (
 	App_GetTokenStatus_FullMethodName      = "/appProto.App/GetTokenStatus"
 	App_WatchTokenOperation_FullMethodName = "/appProto.App/WatchTokenOperation"
+	App_RefreshToken_FullMethodName        = "/appProto.App/RefreshToken"
 	App_DestroyToken_FullMethodName        = "/appProto.App/DestroyToken"
 	App_GetUserInfo_FullMethodName         = "/appProto.App/GetUserInfo"
 )
@@ -32,6 +33,7 @@ const (
 type AppClient interface {
 	GetTokenStatus(ctx context.Context, in *TokenIDRequest, opts ...grpc.CallOption) (*TokenStatus, error)
 	WatchTokenOperation(ctx context.Context, in *emptypb.Empty, opts ...grpc.CallOption) (App_WatchTokenOperationClient, error)
+	RefreshToken(ctx context.Context, in *RefreshTokenRequest, opts ...grpc.CallOption) (*AccessToken, error)
 	DestroyToken(ctx context.Context, in *RefreshTokenRequest, opts ...grpc.CallOption) (*emptypb.Empty, error)
 	GetUserInfo(ctx context.Context, in *UserIDRequest, opts ...grpc.CallOption) (*UserInfo, error)
 }
@@ -85,6 +87,15 @@ func (x *appWatchTokenOperationClient) Recv() (*TokenOperation, error) {
 	return m, nil
 }
 
+func (c *appClient) RefreshToken(ctx context.Context, in *RefreshTokenRequest, opts ...grpc.CallOption) (*AccessToken, error) {
+	out := new(AccessToken)
+	err := c.cc.Invoke(ctx, App_RefreshToken_FullMethodName, in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 func (c *appClient) DestroyToken(ctx context.Context, in *RefreshTokenRequest, opts ...grpc.CallOption) (*emptypb.Empty, error) {
 	out := new(emptypb.Empty)
 	err := c.cc.Invoke(ctx, App_DestroyToken_FullMethodName, in, out, opts...)
@@ -109,6 +120,7 @@ func (c *appClient) GetUserInfo(ctx context.Context, in *UserIDRequest, opts ...
 type AppServer interface {
 	GetTokenStatus(context.Context, *TokenIDRequest) (*TokenStatus, error)
 	WatchTokenOperation(*emptypb.Empty, App_WatchTokenOperationServer) error
+	RefreshToken(context.Context, *RefreshTokenRequest) (*AccessToken, error)
 	DestroyToken(context.Context, *RefreshTokenRequest) (*emptypb.Empty, error)
 	GetUserInfo(context.Context, *UserIDRequest) (*UserInfo, error)
 	mustEmbedUnimplementedAppServer()
@@ -123,6 +135,9 @@ func (UnimplementedAppServer) GetTokenStatus(context.Context, *TokenIDRequest) (
 }
 func (UnimplementedAppServer) WatchTokenOperation(*emptypb.Empty, App_WatchTokenOperationServer) error {
 	return status.Errorf(codes.Unimplemented, "method WatchTokenOperation not implemented")
+}
+func (UnimplementedAppServer) RefreshToken(context.Context, *RefreshTokenRequest) (*AccessToken, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method RefreshToken not implemented")
 }
 func (UnimplementedAppServer) DestroyToken(context.Context, *RefreshTokenRequest) (*emptypb.Empty, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method DestroyToken not implemented")
@@ -182,6 +197,24 @@ func (x *appWatchTokenOperationServer) Send(m *TokenOperation) error {
 	return x.ServerStream.SendMsg(m)
 }
 
+func _App_RefreshToken_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(RefreshTokenRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(AppServer).RefreshToken(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: App_RefreshToken_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(AppServer).RefreshToken(ctx, req.(*RefreshTokenRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 func _App_DestroyToken_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
 	in := new(RefreshTokenRequest)
 	if err := dec(in); err != nil {
@@ -228,6 +261,10 @@ var App_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "GetTokenStatus",
 			Handler:    _App_GetTokenStatus_Handler,
+		},
+		{
+			MethodName: "RefreshToken",
+			Handler:    _App_RefreshToken_Handler,
 		},
 		{
 			MethodName: "DestroyToken",

@@ -203,12 +203,31 @@ endStream:
 	return status.Error(codes.DataLoss, "send message failed")
 }
 
+func (s *Server) RefreshToken(ctx context.Context, req *appProto.RefreshTokenRequest) (*appProto.AccessToken, error) {
+	claims, valid, err := jwt.ParseRefreshToken(req.Token)
+	if err != nil {
+		return nil, status.Error(codes.Unauthenticated, err.Error())
+	} else if !valid || claims.AppCode != GetAuthInfo(ctx).AppCode {
+		return nil, status.Error(codes.Unauthenticated, "refresh token invalid")
+	}
+
+	accessToken, err := jwt.GenerateAccessToken(claims.ID, claims.UID, claims.AppCode, claims.Payload)
+	if err != nil {
+		return nil, status.Error(codes.Internal, "generate access token failed")
+	}
+
+	return &appProto.AccessToken{
+		AccessToken: accessToken,
+		Payload:     claims.Payload,
+	}, nil
+}
+
 func (s *Server) DestroyToken(ctx context.Context, req *appProto.RefreshTokenRequest) (*emptypb.Empty, error) {
 	claims, valid, err := jwt.ParseRefreshToken(req.Token)
 	if err != nil {
 		return nil, status.Error(codes.Unauthenticated, err.Error())
-	} else if !valid {
-		return nil, nil
+	} else if !valid || claims.AppCode != GetAuthInfo(ctx).AppCode {
+		return &emptypb.Empty{}, nil
 	}
 
 	if GetAuthInfo(ctx).AppCode != claims.AppCode {
