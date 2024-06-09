@@ -28,7 +28,7 @@ RUN go mod download
 COPY . .
 COPY --from=node-builder /build/dist ./web/dist
 
-RUN go build -gcflags=-trimpath=$GOPATH -asmflags=-trimpath=$GOPATH -ldflags '-extldflags "-static" -s -w' -tags="web nomsgpack" -o core ./cmd/core
+RUN go build -trimpath -ldflags '-extldflags "-static -fpic" -s -w' -tags="web nomsgpack" -o core ./cmd/core
 
 FROM alpine:latest
 

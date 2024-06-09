@@ -10,7 +10,7 @@ RUN go mod download
 
 COPY . .
 
-RUN go build -gcflags=-trimpath=$GOPATH -asmflags=-trimpath=$GOPATH -ldflags '-extldflags "-static" -s -w' -o rpc ./cmd/sshDev
+RUN go build -trimpath -ldflags '-extldflags "-static -fpic" -s -w' -o rpc ./cmd/sshDev
 
 FROM alpine:latest
 
