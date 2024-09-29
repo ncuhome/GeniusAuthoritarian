@@ -32,21 +32,21 @@ func BeginPasskeyLogin(c *gin.Context) {
 	}
 
 	identity, err := tool.RandCrypto("qwertyuiopasdfghjklzxcvbnmQWERTYUIOPASDFGHJKLZXCVBNM").
-		String(passkeyKeyLength - 1)
+		Text(passkeyKeyLength - 1)
 	if err != nil {
 		callback.Error(c, callback.ErrUnexpected, err)
 		return
 	}
-	identity = "r" + identity
+	identityStr := "r" + string(identity)
 
-	err = redis.NewPasskey(c.ClientIP(), redis.PasskeyLogin, identity).
+	err = redis.NewPasskey(c.ClientIP(), redis.PasskeyLogin, identityStr).
 		StoreSession(context.Background(), sessionData, time.Minute*5)
 	if err != nil {
 		callback.Error(c, callback.ErrDBOperation, err)
 		return
 	}
 
-	c.SetCookie(passkeyCookieName, identity, int((time.Minute * 5).Seconds()), "", "", true, true)
+	c.SetCookie(passkeyCookieName, identityStr, int((time.Minute * 5).Seconds()), "", "", true, true)
 	callback.Success(c, options)
 }
 

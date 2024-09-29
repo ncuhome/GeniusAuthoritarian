@@ -41,19 +41,19 @@ func (a AppSrv) NameExist(name string, opts ...daoUtil.ServiceOpt) (bool, error)
 
 func (a AppSrv) New(uid uint, name, callback string, permitAll bool) (*dao.App, error) {
 	_rand := tool.RandCrypto("1234567890qwertyuiopasdfghjklzxcvbnmQWERTYUIOPASDFGHJKLZXCVBNM")
-	appCode, err := _rand.String(8)
+	appCode, err := _rand.Text(8)
 	if err != nil {
 		return nil, err
 	}
-	appSecret, err := _rand.String(100)
+	appSecret, err := _rand.Text(100)
 	if err != nil {
 		return nil, err
 	}
 	var t = dao.App{
 		Name:           name,
 		UID:            uid,
-		AppCode:        appCode,
-		AppSecret:      appSecret,
+		AppCode:        string(appCode),
+		AppSecret:      string(appSecret),
 		Callback:       callback,
 		PermitAllGroup: permitAll,
 
