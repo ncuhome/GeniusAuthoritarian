@@ -40,10 +40,6 @@ func InitSync(c *cron.Cron) {
 		log.Fatalln(err)
 	}
 
-	c.Schedule(deparmentSchedule, cron.FuncJob(func() {
-		_ = departmentBackoff.Run(context.Background())
-	}))
-	c.Schedule(userSyncSchedule, cron.FuncJob(func() {
-		_ = userSyncBackoff.Run(context.Background())
-	}))
+	c.Schedule(deparmentSchedule, cronAgent.FuncJobWithSingleton(departmentBackoff))
+	c.Schedule(userSyncSchedule, cronAgent.FuncJobWithSingleton(userSyncBackoff))
 }

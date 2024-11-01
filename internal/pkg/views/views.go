@@ -38,9 +38,7 @@ func InitRenewAgent(c *cron.Cron, stat redis.SyncStat) {
 		OuterConstFactor: time.Second,
 	})
 
-	c.Schedule(renewSchedule, cron.FuncJob(func() {
-		_ = renewBackoff.Run(context.Background())
-	}))
+	c.Schedule(renewSchedule, cronAgent.FuncJobWithSingleton(renewBackoff))
 }
 
 func Renew() error {
