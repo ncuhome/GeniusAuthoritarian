@@ -24,7 +24,7 @@ func main() {
 
 	// 连接 grpc
 	creds := credentials.NewClientTLSFromCert(nil, "")
-	conn, err := grpc.Dial(
+	conn, err := grpc.NewClient(
 		conf.Addr,
 		grpc.WithTransportCredentials(creds),
 		grpc.WithPerRPCCredentials(&sshDev.GrpcAuth{Token: conf.Token}),

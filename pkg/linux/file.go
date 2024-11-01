@@ -16,7 +16,7 @@ func PrepareSshDir(username string) error {
 	if exist, err := tool.File.Exists(dirPath); err != nil {
 		return err
 	} else if !exist {
-		err = os.Mkdir(dirPath, 0700)
+		err = os.Mkdir(dirPath, 0500)
 		if err != nil {
 			return err
 		}
@@ -27,7 +27,7 @@ func PrepareSshDir(username string) error {
 
 func WriteAuthorizedKeys(username, publicKey string) error {
 	filePath := path.Join(UserHomePath(username), ".ssh", "authorized_keys")
-	f, err := os.OpenFile(filePath, os.O_CREATE|os.O_WRONLY|os.O_TRUNC, 0600)
+	f, err := os.OpenFile(filePath, os.O_CREATE|os.O_WRONLY|os.O_TRUNC, 0400)
 	if err != nil {
 		return err
 	}
