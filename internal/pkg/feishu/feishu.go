@@ -1,6 +1,7 @@
 package feishu
 
 import (
+	"context"
 	"github.com/ncuhome/GeniusAuthoritarian/internal/db/redis"
 	"github.com/ncuhome/GeniusAuthoritarian/internal/global"
 	"github.com/ncuhome/GeniusAuthoritarian/internal/pkg/cronAgent"
@@ -22,7 +23,7 @@ func InitSync(c *cron.Cron) {
 		redis.NewSyncStat("feishu-department"),
 		deparmentSchedule,
 	)
-	if err = departmentBackoff.Content(); err != nil {
+	if err = departmentBackoff.Run(context.Background()); err != nil {
 		log.Fatalln(err)
 	}
 
@@ -35,10 +36,14 @@ func InitSync(c *cron.Cron) {
 		redis.NewSyncStat("feishu-user"),
 		userSyncSchedule,
 	)
-	if err = userSyncBackoff.Content(); err != nil {
+	if err = userSyncBackoff.Run(context.Background()); err != nil {
 		log.Fatalln(err)
 	}
 
-	c.Schedule(deparmentSchedule, cron.FuncJob(departmentBackoff.Start))
-	c.Schedule(userSyncSchedule, cron.FuncJob(userSyncBackoff.Start))
+	c.Schedule(deparmentSchedule, cron.FuncJob(func() {
+		_ = departmentBackoff.Run(context.Background())
+	}))
+	c.Schedule(userSyncSchedule, cron.FuncJob(func() {
+		_ = userSyncBackoff.Run(context.Background())
+	}))
 }

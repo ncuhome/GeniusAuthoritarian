@@ -1,8 +1,9 @@
 module github.com/ncuhome/GeniusAuthoritarian
 
-go 1.22.3
+go 1.23.1
 
 require (
+	github.com/Mmx233/BackoffCli/backoff v0.0.0-20241003124604-657194ccba99
 	github.com/Mmx233/EnvConfig v0.0.2
 	github.com/Mmx233/Gateway/v2 v2.0.8
 	github.com/Mmx233/GinWebServe v1.0.5
@@ -74,7 +75,7 @@ require (
 	github.com/x448/float16 v0.8.4 // indirect
 	golang.org/x/arch v0.8.0 // indirect
 	golang.org/x/net v0.25.0 // indirect
-	golang.org/x/sys v0.20.0 // indirect
+	golang.org/x/sys v0.25.0 // indirect
 	google.golang.org/genproto/googleapis/rpc v0.0.0-20240513163218-0867130af1f8 // indirect
 	gopkg.in/ini.v1 v1.67.0 // indirect
 )

@@ -3,11 +3,11 @@ package feishu
 import (
 	"container/list"
 	"context"
+	"github.com/Mmx233/BackoffCli/backoff"
 	"github.com/Mmx233/daoUtil"
 	"github.com/ncuhome/GeniusAuthoritarian/internal/db/dao"
 	"github.com/ncuhome/GeniusAuthoritarian/internal/db/redis"
 	"github.com/ncuhome/GeniusAuthoritarian/internal/service"
-	"github.com/ncuhome/GeniusAuthoritarian/pkg/backoff"
 	"github.com/robfig/cron/v3"
 	log "github.com/sirupsen/logrus"
 	"gorm.io/gorm"
@@ -16,20 +16,20 @@ import (
 )
 
 func NewUserSyncBackoff(stat redis.SyncStat, schedule cron.Schedule) backoff.Backoff {
-	return backoff.New(backoff.Conf{
-		Content: stat.Inject(schedule, func() error {
-			sync := UserSyncProcessor{}
-			err := sync.Run()
-			if err != nil {
-				log.Errorf("同步飞书用户列表失败: %v", err)
-			} else {
-				log.Infof("飞书用户列表同步成功，差异处理耗时 %dms", sync.Cost.Milliseconds())
-				sync.PrintSyncResult()
-			}
+	return backoff.New(stat.Inject(schedule, func(ctx context.Context) error {
+		sync := UserSyncProcessor{}
+		err := sync.Run()
+		if err != nil {
+			log.Errorf("同步飞书用户列表失败: %v", err)
+		} else {
+			log.Infof("飞书用户列表同步成功，差异处理耗时 %dms", sync.Cost.Milliseconds())
+			sync.PrintSyncResult()
+		}
 
-			return err
-		}),
-		MaxRetryDelay: time.Minute * 60,
+		return err
+	}), backoff.Conf{
+		Logger:      log.StandardLogger(),
+		MaxDuration: time.Minute * 60,
 	})
 }
 

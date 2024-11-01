@@ -74,9 +74,9 @@ func (a *SyncStat) Succeed(ctx context.Context) (bool, error) {
 }
 
 // Inject 注入 backoff 内容函数，使其支持分布式锁与成功跳过
-func (a *SyncStat) Inject(schedule cron.Schedule, f func() error) func() error {
-	return func() error {
-		ok, err := a.Succeed(context.Background())
+func (a *SyncStat) Inject(schedule cron.Schedule, f func(ctx context.Context) error) func(ctx context.Context) error {
+	return func(ctx context.Context) error {
+		ok, err := a.Succeed(ctx)
 		if err != nil {
 			return err
 		} else if ok {
@@ -90,15 +90,15 @@ func (a *SyncStat) Inject(schedule cron.Schedule, f func() error) func() error {
 			return nil
 		}
 
-		defer a.Unlock(context.Background())
+		defer a.Unlock(ctx)
 
-		if err = f(); err != nil {
+		if err = f(ctx); err != nil {
 			return err
 		} else {
 			next := schedule.Next(time.Now())
 			expire := next.Sub(time.Now()) - time.Second*5
 			if expire > 0 {
-				ctx, cancel := context.WithTimeout(context.Background(), time.Second*5)
+				ctx, cancel := context.WithTimeout(ctx, time.Second*5)
 				defer cancel()
 				_ = a.SetSuccess(ctx, expire)
 			}

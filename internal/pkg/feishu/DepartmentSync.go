@@ -2,11 +2,12 @@ package feishu
 
 import (
 	"container/list"
+	"context"
+	"github.com/Mmx233/BackoffCli/backoff"
 	"github.com/Mmx233/daoUtil"
 	"github.com/ncuhome/GeniusAuthoritarian/internal/db/dao"
 	"github.com/ncuhome/GeniusAuthoritarian/internal/db/redis"
 	"github.com/ncuhome/GeniusAuthoritarian/internal/service"
-	"github.com/ncuhome/GeniusAuthoritarian/pkg/backoff"
 	"github.com/ncuhome/GeniusAuthoritarian/pkg/departments"
 	"github.com/robfig/cron/v3"
 	log "github.com/sirupsen/logrus"
@@ -15,18 +16,19 @@ import (
 )
 
 func NewDepartmentSyncBackOff(stat redis.SyncStat, schedule cron.Schedule) backoff.Backoff {
-	return backoff.New(backoff.Conf{
-		Content: stat.Inject(schedule, func() error {
-			startAt := time.Now()
-			err := doDepartmentSync()
-			if err != nil {
-				log.Errorf("同步飞书部门失败: %v", err)
-			} else {
-				log.Infof("飞书部门同步成功，总耗时 %dms", time.Now().Sub(startAt).Milliseconds())
-			}
-			return err
-		}),
-		MaxRetryDelay: time.Minute * 30,
+	return backoff.New(stat.Inject(schedule, func(ctx context.Context) error {
+		startAt := time.Now()
+		err := doDepartmentSync()
+		if err != nil {
+			log.Errorf("同步飞书部门失败: %v", err)
+		} else {
+			log.Infof("飞书部门同步成功，总耗时 %dms", time.Now().Sub(startAt).Milliseconds())
+		}
+		return err
+	}), backoff.Conf{
+		Logger:          log.StandardLogger(),
+		DisableRecovery: false,
+		MaxDuration:     time.Minute * 30,
 	})
 }
 

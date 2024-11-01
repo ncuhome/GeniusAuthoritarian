@@ -1,6 +1,8 @@
 package sshDevSync
 
 import (
+	"context"
+	"github.com/Mmx233/BackoffCli/backoff"
 	"github.com/Mmx233/tool"
 	"github.com/ncuhome/GeniusAuthoritarian/internal/db/dao"
 	"github.com/ncuhome/GeniusAuthoritarian/internal/db/redis"
@@ -8,9 +10,9 @@ import (
 	"github.com/ncuhome/GeniusAuthoritarian/internal/rpc/sshDev/sshDevClient/sshTool"
 	"github.com/ncuhome/GeniusAuthoritarian/internal/rpc/sshDev/sshDevModel"
 	"github.com/ncuhome/GeniusAuthoritarian/internal/service"
-	"github.com/ncuhome/GeniusAuthoritarian/pkg/backoff"
 	"github.com/robfig/cron/v3"
 	log "github.com/sirupsen/logrus"
+	"time"
 )
 
 // 研发哥容器内 ssh 账号管理器
@@ -21,20 +23,24 @@ func AddSshAccountCron(c *cron.Cron, stat redis.SyncStat) {
 		log.Fatalln("规划定时同步研发 SSH 账号失败:", err)
 	}
 
-	sshAccountBackoff := backoff.New(backoff.Conf{
-		Content: stat.Inject(schedule, func() error {
-			err := DoSync()
-			if err != nil {
-				log.Errorln("同步 SSH 账号失败:", err)
-			} else {
-				log.Infoln("同步 SSH 账号成功")
-			}
-			return err
-		}),
-		MaxRetryDelay: 0,
+	sshAccountBackoff := backoff.NewInstance(stat.Inject(schedule, func(ctx context.Context) error {
+		err := DoSync()
+		if err != nil {
+			log.Errorln("同步 SSH 账号失败:", err)
+		} else {
+			log.Infoln("同步 SSH 账号成功")
+		}
+		return err
+	}), backoff.Conf{
+		Logger:           log.StandardLogger(),
+		MaxDuration:      time.Second * 10,
+		ExponentFactor:   0,
+		OuterConstFactor: time.Second,
 	})
 
-	c.Schedule(schedule, cron.FuncJob(sshAccountBackoff.Start))
+	c.Schedule(schedule, cron.FuncJob(func() {
+		_ = sshAccountBackoff.Run(context.Background())
+	}))
 }
 
 func DoSync() error {

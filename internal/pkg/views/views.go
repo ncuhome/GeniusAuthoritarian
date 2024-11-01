@@ -4,12 +4,13 @@ package views
 
 import (
 	"container/list"
+	"context"
+	"github.com/Mmx233/BackoffCli/backoff"
 	"github.com/Mmx233/daoUtil"
 	"github.com/ncuhome/GeniusAuthoritarian/internal/db/dao"
 	"github.com/ncuhome/GeniusAuthoritarian/internal/db/redis"
 	"github.com/ncuhome/GeniusAuthoritarian/internal/pkg/cronAgent"
 	"github.com/ncuhome/GeniusAuthoritarian/internal/service"
-	"github.com/ncuhome/GeniusAuthoritarian/pkg/backoff"
 	"github.com/robfig/cron/v3"
 	log "github.com/sirupsen/logrus"
 	"time"
@@ -21,21 +22,25 @@ func InitRenewAgent(c *cron.Cron, stat redis.SyncStat) {
 		log.Fatalln("规划 views 定时刷新任务失败:", err)
 	}
 
-	renewBackoff := backoff.New(backoff.Conf{
-		Content: stat.Inject(renewSchedule, func() error {
-			startAt := time.Now()
-			if err = Renew(); err != nil {
-				log.Errorln("更新 app views 失败:", err)
-				return err
-			}
+	renewBackoff := backoff.NewInstance(stat.Inject(renewSchedule, func(ctx context.Context) error {
+		startAt := time.Now()
+		if err = Renew(); err != nil {
+			log.Errorln("更新 app views 失败:", err)
+			return err
+		}
 
-			log.Infof("App views 刷新成功，耗时 %d ms", time.Now().Sub(startAt).Milliseconds())
-			return nil
-		}),
-		MaxRetryDelay: 0,
+		log.Infof("App views 刷新成功，耗时 %d ms", time.Now().Sub(startAt).Milliseconds())
+		return nil
+	}), backoff.Conf{
+		Logger:           log.StandardLogger(),
+		MaxDuration:      time.Second * 10,
+		ExponentFactor:   0,
+		OuterConstFactor: time.Second,
 	})
 
-	c.Schedule(renewSchedule, cron.FuncJob(renewBackoff.Start))
+	c.Schedule(renewSchedule, cron.FuncJob(func() {
+		_ = renewBackoff.Run(context.Background())
+	}))
 }
 
 func Renew() error {
