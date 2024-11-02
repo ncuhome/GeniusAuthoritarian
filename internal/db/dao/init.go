@@ -31,7 +31,7 @@ func init() {
 		&BaseGroup{},
 		&App{},
 		&LoginRecord{},
-		&UserGroups{},
+		&User2Groups{},
 		&FeishuGroups{},
 		&AppGroup{},
 		&UserSsh{},

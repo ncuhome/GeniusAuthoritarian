@@ -34,7 +34,7 @@ func (a *App) sqlJoinGroups(tx *gorm.DB) *gorm.DB {
 
 // join Groups first
 func (a *App) sqlJoinUserGroups(tx *gorm.DB) *gorm.DB {
-	return tx.Joins("INNER JOIN user_groups ON user_groups.gid=base_groups.id")
+	return tx.Joins("INNER JOIN user2groups ON user2groups.gid=base_groups.id")
 }
 
 func (a *App) sqlGetForActionByUID(tx *gorm.DB) *gorm.DB {
@@ -76,7 +76,7 @@ func (a *App) UserAccessible(tx *gorm.DB) (bool, error) {
 	tx = a.sqlJoinAppGroups(tx)
 	tx = a.sqlJoinGroups(tx)
 	tx = a.sqlJoinUserGroups(tx)
-	return t, tx.Where("apps.id=? AND user_groups.uid=?", a.ID, a.UID).Take(&t).Error
+	return t, tx.Where("apps.id=? AND user2groups.uid=?", a.ID, a.UID).Take(&t).Error
 }
 
 func (a *App) FirstByID(tx *gorm.DB) error {
@@ -138,7 +138,7 @@ func (a *App) GetAccessible(tx *gorm.DB) ([]dto.AppShowWithGroup, error) {
 	tx = a.sqlGetForWithGroup(tx)
 	tx = a.sqlJoinUserGroups(tx)
 	tx = a.sqlOrderForNav(tx)
-	return t, tx.Where("user_groups.uid=?", a.UID).Find(&t).Error
+	return t, tx.Where("user2groups.uid=?", a.UID).Find(&t).Error
 }
 
 func (a *App) GetAllWithGroup(tx *gorm.DB) ([]dto.AppShowWithGroup, error) {

@@ -39,8 +39,8 @@ func (a *UserSsh) UpdateByUid(tx *gorm.DB) error {
 // GetInvalid 获取应该清除的 user ssh
 func (a *UserSsh) GetInvalid(tx *gorm.DB) ([]UserSsh, error) {
 	tx = tx.Model(a).Joins("LEFT JOIN users ON users.id=user_sshes.uid") // 无 deleted_at 限制，相当于 UnScoped
-	tx = tx.Joins("LEFT JOIN user_groups ON user_groups.uid=user_sshes.uid")
-	tx = tx.Joins("LEFT JOIN base_groups ON base_groups.id=user_groups.gid AND base_groups.name=?", departments.UDev)
+	tx = tx.Joins("LEFT JOIN user2groups ON user2groups.uid=user_sshes.uid")
+	tx = tx.Joins("LEFT JOIN base_groups ON base_groups.id=user2groups.gid AND base_groups.name=?", departments.UDev)
 
 	var t []UserSsh
 	return t, tx.Group("user_sshes.id,users.deleted_at").Having("COUNT(base_groups.id)=0 OR users.deleted_at IS NOT NULL").Find(&t).Error

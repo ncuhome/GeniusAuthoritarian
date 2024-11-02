@@ -5,7 +5,7 @@ import (
 	"gorm.io/gorm"
 )
 
-// BaseGroup 该模型仅用于添加数据库约束，请勿用于创建含写入操作的 CRUD 接口
+// BaseGroup 权限组
 type BaseGroup struct {
 	ID   uint   `gorm:"primarykey"`
 	Name string `gorm:"not null;uniqueIndex;type:varchar(10)"`
@@ -16,7 +16,7 @@ func (a *BaseGroup) sqlJoinAppGroups(tx *gorm.DB) *gorm.DB {
 }
 
 func (a *BaseGroup) sqlJoinUserGroups(tx *gorm.DB) *gorm.DB {
-	return tx.Joins("INNER JOIN user_groups ON user_groups.gid=base_groups.id")
+	return tx.Joins("INNER JOIN user2groups ON user2groups.gid=base_groups.id")
 }
 
 func (a *BaseGroup) sqlJoinFeishuGroups(tx *gorm.DB) *gorm.DB {

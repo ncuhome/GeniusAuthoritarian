@@ -37,7 +37,7 @@ func (a UserSrv) GetUserInfoPublic(id ...uint) ([]dto.UserInfoPublic, error) {
 		return nil, err
 	}
 
-	groups, err := (&dao.UserGroups{}).GetUserGroupsForPubByUIDWithPreOrder(a.DB, id...)
+	groups, err := (&dao.User2Groups{}).GetUserGroupsForPubByUIDWithPreOrder(a.DB, id...)
 	if err != nil {
 		return nil, err
 	}
@@ -128,7 +128,7 @@ func (a UserSrv) UserProfile(id uint) (*dto.UserProfile, error) {
 
 	profile.MfaEnabled = profile.Mfa != ""
 
-	profile.Groups, err = (&dao.UserGroups{
+	profile.Groups, err = (&dao.User2Groups{
 		UID: id,
 	}).GetUserGroupsForShowByUID(a.DB)
 	return profile, err

@@ -95,7 +95,7 @@ func (a *UserSyncProcessor) Run() error {
 	if err != nil {
 		return err
 	}
-	err = a.tx.Model(&dao.UserGroups{}).Clauses(clause.Locking{Strength: "UPDATE"}).Find(nil).Error
+	err = a.tx.Model(&dao.User2Groups{}).Clauses(clause.Locking{Strength: "UPDATE"}).Find(nil).Error
 	if err != nil {
 		return err
 	}
@@ -234,19 +234,19 @@ func (a *UserSyncProcessor) doSyncUserGroups(userList []*User, groupMap map[stri
 	if err != nil {
 		return err
 	}
-	var exUserGroupMap map[uint][]dao.UserGroups
+	var exUserGroupMap map[uint][]dao.User2Groups
 
 	// 处理特殊情况
 	if len(existUserGroups) == 0 {
 		var length int
-		var modelSlice = make([][]dao.UserGroups, len(userList))
+		var modelSlice = make([][]dao.User2Groups, len(userList))
 		for i, user := range userList {
 			userDepartmentModels := user.Departments(groupMap).Models(user.ID)
 			length += len(userDepartmentModels)
 			modelSlice[i] = userDepartmentModels
 		}
 		a.createdUserGroup = length
-		models := make([]dao.UserGroups, length)
+		models := make([]dao.User2Groups, length)
 		length = 0
 		for _, modelSliceEl := range modelSlice {
 			for _, userGroup := range modelSliceEl {
@@ -258,7 +258,7 @@ func (a *UserSyncProcessor) doSyncUserGroups(userList []*User, groupMap map[stri
 	}
 
 	// 转换数据库数据为 uid 映射
-	exUserGroupMap = make(map[uint][]dao.UserGroups, len(userList)-a.createdUser-a.frozenUser)
+	exUserGroupMap = make(map[uint][]dao.User2Groups, len(userList)-a.createdUser-a.frozenUser)
 	var beginIndex int
 	var lastUID uint
 	lastUID = existUserGroups[0].UID
@@ -272,7 +272,7 @@ func (a *UserSyncProcessor) doSyncUserGroups(userList []*User, groupMap map[stri
 	exUserGroupMap[lastUID] = existUserGroups[beginIndex:]
 
 	// 计算差异
-	var userGroupsToAdd = list.New()    // dao.UserGroups
+	var userGroupsToAdd = list.New()    // dao.User2Groups
 	var userGroupsToDelete = list.New() // uint
 	redisJwt := redis.NewUserJwt()
 	for _, user := range userList {
@@ -285,7 +285,7 @@ func (a *UserSyncProcessor) doSyncUserGroups(userList []*User, groupMap map[stri
 					goto nextUserGroup
 				}
 			}
-			userGroupsToAdd.PushBack(dao.UserGroups{
+			userGroupsToAdd.PushBack(dao.User2Groups{
 				UID: user.ID,
 				GID: gid,
 			})
@@ -319,9 +319,9 @@ func (a *UserSyncProcessor) doSyncUserGroups(userList []*User, groupMap map[stri
 	// 存储计算结果
 	if userGroupsToAdd.Len() != 0 {
 		a.createdUserGroup = userGroupsToAdd.Len()
-		userGroupsToAddModels := make([]dao.UserGroups, userGroupsToAdd.Len())
+		userGroupsToAddModels := make([]dao.User2Groups, userGroupsToAdd.Len())
 		for i, el := 0, userGroupsToAdd.Front(); el != nil; i, el = i+1, el.Next() {
-			userGroupsToAddModels[i] = el.Value.(dao.UserGroups)
+			userGroupsToAddModels[i] = el.Value.(dao.User2Groups)
 		}
 		if err = userGroupSrv.CreateAll(userGroupsToAddModels); err != nil {
 			return err

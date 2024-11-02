@@ -15,8 +15,8 @@ func (d UserDepartment) Ids() []uint {
 	return d.GidList
 }
 
-func (d UserDepartment) Models(uid uint) []dao.UserGroups {
-	models := make([]dao.UserGroups, len(d.GidList))
+func (d UserDepartment) Models(uid uint) []dao.User2Groups {
+	models := make([]dao.User2Groups, len(d.GidList))
 	for i, gid := range d.GidList {
 		models[i].UID = uid
 		models[i].GID = gid

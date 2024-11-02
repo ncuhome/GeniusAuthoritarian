@@ -20,7 +20,7 @@ type User struct {
 }
 
 func (a *User) sqlJoinUserGroups(tx *gorm.DB) *gorm.DB {
-	return tx.Joins("INNER JOIN user_groups ON user_groups.uid=users.id")
+	return tx.Joins("INNER JOIN user2groups ON user2groups.uid=users.id")
 }
 
 func (a *User) sqlJoinUserSshs(tx *gorm.DB) *gorm.DB {
@@ -83,7 +83,7 @@ func (a *User) GetNoSshDevIds(tx *gorm.DB) ([]uint, error) {
 	tx = tx.Model(a)
 	tx = a.sqlJoinUserGroups(tx)
 	tx = a.sqlJoinUserSshs(tx)
-	tx = (&UserGroups{}).sqlJoinBaseGroups(tx)
+	tx = (&User2Groups{}).sqlJoinBaseGroups(tx)
 
 	var t []uint
 	return t, tx.Select("users.id").Where("base_groups.name=? AND user_sshes.id IS NULL", departments.UDev).Find(&t).Error
