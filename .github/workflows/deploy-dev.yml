@@ -19,7 +19,6 @@ jobs:
           images: harbor.ncuos.com/genius-auth/core
 
       - name: Build Docker Core Image and Push
-        id: docker_build
         uses: docker/build-push-action@v6
         with:
           push: true
@@ -35,7 +34,6 @@ jobs:
           images: harbor.ncuos.com/genius-auth/ssh-server
 
       - name: Build Docker SSH Server Image and Push
-        id: docker_build
         uses: docker/build-push-action@v6
         with:
           push: true
@@ -55,9 +53,9 @@ jobs:
             -
               genius-auth:
                 core:
-                  image: ${{ steps.image.outputs.CORE_VERSION }}
+                  image: harbor.ncuos.com/genius-auth/core:${{ steps.core-meta.outputs.version }}
                   wait: true
             -
               genius-auth:
                 ssh-server:
-                  image: ${{ steps.image.outputs.SSH_DEV_VERSION }}
+                  image: harbor.ncuos.com/genius-auth/ssh-server:${{ steps.ssh-server-meta.outputs.version }}
