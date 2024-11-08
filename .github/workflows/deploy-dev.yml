@@ -53,9 +53,9 @@ jobs:
             -
               genius-auth:
                 core:
-                  image: harbor.ncuos.com/genius-auth/core:${{ steps.core-meta.outputs.version }}
+                  image: ${{ steps.core-meta.outputs.tags[0] }}
                   wait: true
             -
               genius-auth:
                 ssh-server:
-                  image: harbor.ncuos.com/genius-auth/ssh-server:${{ steps.ssh-server-meta.outputs.version }}
+                  image: ${{ steps.ssh-server-meta.outputs.tags[0] }}
