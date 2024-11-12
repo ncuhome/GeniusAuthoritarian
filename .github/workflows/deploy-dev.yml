@@ -53,9 +53,9 @@ jobs:
             -
               genius-auth:
                 core:
-                  image: ${{ steps.core-meta.outputs.tags[0] }}
+                  image: ${{ fromJSON(steps.core-meta.outputs.json).tags[0] }}
                   wait: true
             -
               genius-auth:
                 ssh-server:
-                  image: ${{ steps.ssh-server-meta.outputs.tags[0] }}
+                  image: ${{ fromJSON(steps.ssh-server-meta.outputs.json).tags[0] }}
