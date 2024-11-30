@@ -1,0 +1,54 @@
+name: 'Release Core'
+
+on:
+  push:
+    tags:
+      - v**
+      - '!v**-ssh'
+
+jobs:
+  build-docker-image:
+    runs-on: self-hosted
+    outputs:
+      image_tag: ${{ fromJSON(steps.meta.outputs.json).tags[0] }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Docker meta
+        id: meta
+        uses: docker/metadata-action@v5
+        with:
+          images: harbor.ncuos.com/genius-auth/core
+
+      - name: Build Docker Image and Push
+        uses: docker/build-push-action@v6
+        with:
+          push: true
+          context: .
+          file: ./Dockerfile.core
+          tags: ${{ steps.meta.outputs.tags }}
+          labels: ${{ steps.meta.outputs.labels }}
+
+  deploy:
+    needs: build-docker-image
+    runs-on: self-hosted
+    steps:
+      - name: Update Dev Deployment
+        uses: MultiMx/K8sSetImageAction@v0.5
+        with:
+          backend: 'https://rancher.ncuhome.club'
+          token: ${{ secrets.CATTLE_TOKEN_LOCAL }}
+          namespace: 'genius-auth'
+          workload: 'core'
+          image: ${{ needs.build-docker-image.outputs.image_tag }}
+
+      - name: Update Prod Deployment
+        uses: MultiMx/K8sSetImageAction@v0.5
+        if: ${{ !contains(github.ref, 'beta') }}
+        with:
+          backend: 'https://rancher.ncuos.com'
+          token: ${{ secrets.CATTLE_TOKEN }}
+          namespace: 'genius-auth'
+          workload: 'core'
+          image: ${{ needs.build-docker-image.outputs.image_tag }}
