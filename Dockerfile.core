@@ -1,4 +1,4 @@
-FROM node:alpine as node-builder
+FROM node:alpine AS node-builder
 
 ENV PNPM_HOME="/pnpm"
 ENV PATH="$PNPM_HOME:$PATH"
@@ -15,7 +15,7 @@ COPY web .
 
 RUN pnpm run build
 
-FROM golang:alpine as go-builder
+FROM golang:alpine AS go-builder
 
 RUN go env -w CGO_ENABLED=0
 
