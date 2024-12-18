@@ -79,13 +79,14 @@ func CompleteLogin(c *gin.Context) {
 		return
 	}
 
-	if f.ClientIp != "" && claims.IP != "" &&
-		// 跳过 192.168.*.* ip 变动
+	// logic of strict client ip verify
+	/*if f.ClientIp != "" && claims.IP != "" &&
+	    // ignore internal ip changes
 		!tools.IsIntranet(f.ClientIp) && !tools.IsIntranet(claims.IP) &&
 		claims.IP != f.ClientIp {
 		callback.Error(c, callback.ErrNetContextChanged, "context="+claims.IP, "got="+f.ClientIp)
 		return
-	}
+	}*/
 
 	res := &response.VerifyTokenSuccess{
 		UserID:    claims.UID,
