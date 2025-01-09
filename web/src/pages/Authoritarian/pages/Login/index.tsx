@@ -9,6 +9,7 @@ import LoginLoading from "@components/auth/LoginLoading";
 import { apiV1 } from "@api/base";
 
 import useUser from "@store/useUser";
+import toast from "react-hot-toast";
 
 // 用户登录用户中心处理
 export const Login: FC = () => {
@@ -28,8 +29,8 @@ export const Login: FC = () => {
       });
       setAuth(res.token, res.groups);
       nav("/user/", { replace: true });
-    } catch ({ msg }) {
-      if (msg) ThrowError(nav, "登录失败", msg as string, "");
+    } catch (err) {
+      if (err instanceof Error) toast.error(err.message);
     }
   }
 

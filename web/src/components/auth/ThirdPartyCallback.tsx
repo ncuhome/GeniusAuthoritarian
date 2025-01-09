@@ -41,8 +41,9 @@ export const ThirdPartyCallback = memo<Props>(
         );
         if (!data.mfa) window.open(data.callback!, "_self");
         else setMfaToken(data.token);
-      } catch ({ msg }) {
-        if (msg) ThrowError(nav, "登录失败", msg as string, appCode);
+      } catch (err) {
+        if (err instanceof Error && err.message)
+          ThrowError(nav, "登录失败", err.message, appCode);
       }
     }
 
@@ -70,8 +71,8 @@ export const ThirdPartyCallback = memo<Props>(
           },
         );
         window.open(data.callback, "_self");
-      } catch ({ msg }) {
-        if (msg) toast.error(msg as string);
+      } catch (err) {
+        if (err instanceof Error) toast.error(err.message);
       }
       setMfaLoading(false);
     }

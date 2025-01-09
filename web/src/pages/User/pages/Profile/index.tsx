@@ -67,8 +67,8 @@ export const Profile: FC = () => {
         ...u2fStatus!,
         prefer: target,
       });
-    } catch ({ msg }) {
-      if (msg) toast.error(msg as string);
+    } catch (err) {
+      if (err instanceof Error) toast.error(err.message);
     }
   };
 

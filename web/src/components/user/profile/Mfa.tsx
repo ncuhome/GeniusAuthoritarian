@@ -66,8 +66,8 @@ export const Mfa: FC<Props> = ({ enabled, setEnabled, ...props }) => {
       });
       setMfaNew(data);
       setNewMfaStep(1);
-    } catch ({ msg }) {
-      if (msg) toast.error(msg as string);
+    } catch (err) {
+      if (err instanceof Error) toast.error(err.message);
       setShowNewMfa(false);
     }
     setNewMfaNextStepLoading(false);
@@ -81,8 +81,8 @@ export const Mfa: FC<Props> = ({ enabled, setEnabled, ...props }) => {
       setEnabled(true);
       setShowNewMfa(false);
       toast.success("已启用双因素认证");
-    } catch ({ msg }) {
-      if (msg) toast.error(msg as string);
+    } catch (err) {
+      if (err instanceof Error) toast.error(err.message);
     }
   }
 
@@ -97,8 +97,8 @@ export const Mfa: FC<Props> = ({ enabled, setEnabled, ...props }) => {
         });
         setEnabled(false);
         toast.success("已关闭双因素认证");
-      } catch ({ msg }) {
-        if (msg) toast.error(msg as string);
+      } catch (err) {
+        if (err instanceof Error) toast.error(err.message);
       }
     } catch (err) {}
   }

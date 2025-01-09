@@ -72,8 +72,8 @@ export const AppControlBlock: FC = () => {
       });
       setApps((apps || []).filter((a) => a.id !== app.id));
       toast.success("删除成功");
-    } catch ({ msg }) {
-      if (msg) toast.error(msg as string);
+    } catch (err) {
+      if (err instanceof Error) toast.error(err.message);
     }
   }
 
@@ -96,8 +96,8 @@ export const AppControlBlock: FC = () => {
         ),
       );
       toast.success("修改成功");
-    } catch ({ msg }) {
-      if (msg) toast.error(msg as string);
+    } catch (err) {
+      if (err instanceof Error) toast.error(err.message);
     }
   }
 
@@ -128,8 +128,8 @@ export const AppControlBlock: FC = () => {
         ),
       );
       setOnModifyApp(null);
-    } catch ({ msg }) {
-      if (msg) toast.error(msg as string);
+    } catch (err) {
+      if (err instanceof Error) toast.error(err.message);
     }
     setModifyingApp(false);
   }

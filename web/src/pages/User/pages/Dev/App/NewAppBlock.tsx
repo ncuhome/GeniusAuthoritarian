@@ -58,8 +58,8 @@ export const NewAppBlock: FC = () => {
           </Stack>
         ),
       });
-    } catch ({ msg }) {
-      if (msg) toast.error(msg as string);
+    } catch (err) {
+      if (err instanceof Error) toast.error(err.message);
     }
     setOnCreateApp(false);
   }

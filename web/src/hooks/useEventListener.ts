@@ -1,21 +1,21 @@
 import { useEffect, useRef } from "react";
 
 type EventListener<K extends keyof DocumentEventMap> = (
-  ev: DocumentEventMap[K]
+  ev: DocumentEventMap[K],
 ) => any;
 export const useEventListener = <K extends keyof DocumentEventMap>(
   event: K | null,
   callback: EventListener<K>,
-  options?: boolean | AddEventListenerOptions
+  options?: boolean | AddEventListenerOptions,
 ) => {
-  const savedCallback = useRef<EventListener<K>>();
+  const savedCallback = useRef<EventListener<K> | undefined>(undefined);
   useEffect(() => {
     savedCallback.current = callback;
   }, [callback]);
   useEffect(() => {
     if (event != null) {
       const handler: EventListener<K> = (ev) => {
-        savedCallback.current!(ev);
+        savedCallback.current?.(ev);
       };
       document.addEventListener(event, handler, options);
       return () => {

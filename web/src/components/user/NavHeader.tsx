@@ -63,8 +63,8 @@ export const NavHeader: FC<Props> = ({
     try {
       await apiV1User.post("logout");
       Logout();
-    } catch ({ msg }) {
-      if (msg) toast.error(msg as string);
+    } catch (err) {
+      if (err instanceof Error) toast.error(err.message);
     }
   };
 

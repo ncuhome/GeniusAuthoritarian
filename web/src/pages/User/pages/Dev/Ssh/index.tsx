@@ -61,8 +61,8 @@ const Ssh: FC = () => {
           },
         });
         setSshKey(data);
-      } catch ({ msg }) {
-        if (msg) toast.error(msg as string);
+      } catch (err) {
+        if (err instanceof Error) toast.error(err.message);
       }
     } catch (err) {}
     setIsUnlockLoading(false);
@@ -80,8 +80,8 @@ const Ssh: FC = () => {
       });
       setSshKey(data);
       toast.success("SSH 密钥已重新生成");
-    } catch ({ msg }) {
-      if (msg) toast.error(msg as string);
+    } catch (err) {
+      if (err instanceof Error) toast.error(err.message);
     }
   }
 
@@ -94,8 +94,8 @@ const Ssh: FC = () => {
         },
       });
       toast.success("已发送 KILLALL 指令");
-    } catch ({ msg }) {
-      if (msg) toast.error(msg as string);
+    } catch (err) {
+      if (err instanceof Error) toast.error(err.message);
     }
   }
 

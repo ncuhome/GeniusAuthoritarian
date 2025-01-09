@@ -165,8 +165,8 @@ const U2fDialog: FC = () => {
       states.setToken(result);
       if (states.resolve) states.resolve(result);
       states.closeDialog();
-    } catch ({ msg }) {
-      if (msg) toast.error(msg as any);
+    } catch (err) {
+      if (err instanceof Error) toast.error(err.message);
     }
     setIsLoading(false);
   };
@@ -177,8 +177,8 @@ const U2fDialog: FC = () => {
     try {
       await apiV1User.post("identity/sms");
       setSmsCoolDown(60);
-    } catch ({ msg }) {
-      if (msg) toast.error(msg as string);
+    } catch (err) {
+      if (err instanceof Error) toast.error(err.message);
     }
     setIsSendingSms(false);
   }

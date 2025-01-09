@@ -54,8 +54,8 @@ export const LoginForm: FC = () => {
         },
       } = await apiV1.get(`public/login/${thirdParty}/link/${appCode}`);
       window.open(url, "_self");
-    } catch ({ msg }) {
-      if (msg) toast.error(msg as string);
+    } catch (err) {
+      if (err instanceof Error) toast.error(err.message);
     }
   }
 

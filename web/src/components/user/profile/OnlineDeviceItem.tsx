@@ -43,8 +43,8 @@ export const OnlineDeviceItem = memo<Props>(({ ...record }) => {
         },
       );
       setDeviceOffline(record.id);
-    } catch ({ msg }) {
-      if (msg) toast.error(msg as string);
+    } catch (err) {
+      if (err instanceof Error) toast.error(err.message);
     }
     setIsLoading(false);
   };

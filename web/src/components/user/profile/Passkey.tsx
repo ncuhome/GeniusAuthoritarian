@@ -46,8 +46,8 @@ export const Passkey: FC = () => {
       const index = data!.findIndex((el) => el.id === id);
       data![index].name = name;
       mutate([...data!]);
-    } catch ({ msg }) {
-      if (msg) toast.error(msg as any);
+    } catch (err) {
+      if (err instanceof Error) toast.error(err.message);
     }
   };
   const onDelete = async (item: User.Passkey.Cred) => {
@@ -63,8 +63,8 @@ export const Passkey: FC = () => {
       });
       mutate((data) => [...data!.filter((el) => el.id !== item.id)]);
       toast.success("删除成功");
-    } catch ({ msg }) {
-      if (msg) toast.error(msg as string);
+    } catch (err) {
+      if (err instanceof Error) toast.error(err.message);
     }
   };
   const onRegister = async () => {

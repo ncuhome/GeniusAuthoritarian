@@ -1,11 +1,4 @@
-import {
-  FC,
-  useEffect,
-  useMemo,
-  useState,
-  HTMLAttributes,
-  CSSProperties,
-} from "react";
+import { FC, useMemo, HTMLAttributes, CSSProperties } from "react";
 import { useSpring, animated } from "@react-spring/web";
 
 // https://github.com/JoseRFelix/react-toggle-dark-mode/blob/master/src/index.tsx
@@ -100,6 +93,8 @@ export const DarkModeSwitch: FC<Props> = ({
   const toggle = () => onChange?.(!checked);
 
   return (
+    // type error for element children, no fix method
+    // @ts-ignore https://github.com/pmndrs/react-spring/issues/508
     <animated.svg
       xmlns="http://www.w3.org/2000/svg"
       width={size}
@@ -133,10 +128,13 @@ export const DarkModeSwitch: FC<Props> = ({
         cx="12"
         cy="12"
         fill={checked ? moonColor : sunColor}
-        // @ts-ignore
+        // @ts-expect-error
         style={centerCircleProps}
         mask={`url(#${uniqueMaskId})`}
       />
+
+      {/* type error for element children, no fix method */}
+      {/* @ts-ignore https://github.com/pmndrs/react-spring/issues/508 */}
       <animated.g stroke="currentColor" style={linesProps}>
         <line x1="12" y1="1" x2="12" y2="3" />
         <line x1="12" y1="21" x2="12" y2="23" />

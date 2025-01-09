@@ -1,5 +1,5 @@
 import { FC, ReactNode } from "react";
-import parser from "ua-parser-js";
+import { UAParser } from "ua-parser-js";
 
 import { Stack, Typography } from "@mui/material";
 import {
@@ -20,7 +20,7 @@ interface Props {
 }
 
 const UserAgent: FC<Props> = ({ useragent }) => {
-  const ua = parser(useragent);
+  const ua = UAParser(useragent);
 
   const renderDevice = () => {
     let name: string = "";
