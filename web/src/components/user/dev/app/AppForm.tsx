@@ -87,7 +87,7 @@ export const AppForm: FC<Props> = ({
   const [showSelectGroups, setShowSelectGroups] = useState(!permitAll);
 
   const groups = useGroup((state) => state.groups);
-  const setGroups = useGroup((state) => state.setState("groups"));
+  const setGroups = useGroup((state) => state.setGroups);
 
   const notOnlyCenterSelected = useMemo(
     () =>

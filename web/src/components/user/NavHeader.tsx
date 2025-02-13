@@ -57,7 +57,7 @@ export const NavHeader: FC<Props> = ({
   const setDialog = useUser((state) => state.setDialog);
 
   const darkTheme = useTheme((state) => state.dark);
-  const setDarkTheme = useTheme((state) => state.setState("dark"));
+  const setDarkTheme = useTheme((state) => state.setDarkMode);
 
   const onLogout = async () => {
     try {

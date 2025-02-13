@@ -29,7 +29,7 @@ import useUser from "@store/useUser";
 
 export const AppControlBlock: FC = () => {
   const apps = useUser((state) => state.apps);
-  const setApps = useUser((state) => state.setState("apps"));
+  const setApps = useUser((state) => state.setApps);
   const setDialog = useUser((state) => state.setDialog);
 
   useUserApiV1<App.Detailed[]>("dev/app/", {

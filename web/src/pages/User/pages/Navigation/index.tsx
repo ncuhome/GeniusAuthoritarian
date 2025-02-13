@@ -10,9 +10,7 @@ import useUser from "@store/useUser";
 
 export const Navigation: FC = () => {
   const accessibleApps = useUser((state) => state.accessibleApps);
-  const setAccessibleApps = useUser((state) =>
-    state.setState("accessibleApps"),
-  );
+  const setAccessibleApps = useUser((state) => state.setAccessibleApps);
 
   useUserApiV1<App.Accessible>("app/accessible", {
     enableLoading: true,

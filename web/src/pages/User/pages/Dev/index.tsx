@@ -8,7 +8,7 @@ import useDevRoute from "@store/useDevRoute";
 
 export const Dev: FC = () => {
   const index = useDevRoute((state) => state.index);
-  const setIndex = useDevRoute((state) => state.setState("index"));
+  const setIndex = useDevRoute((state) => state.setIndex);
 
   return (
     <Container>

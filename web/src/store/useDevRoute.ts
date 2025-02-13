@@ -3,13 +3,14 @@ import { create } from "zustand";
 type DevRouteState = {
   index: number;
 
-  setState: <T extends keyof DevRouteState>(
-    key: T
-  ) => (value: DevRouteState[T]) => void;
+  setIndex: (index: number) => void;
 };
 
 export const useDevRoute = create<DevRouteState>()((set) => ({
   index: 0,
-  setState: (key) => (value) => set({ [key]: value }),
+
+  setIndex: (index: number) => {
+    set({ index });
+  },
 }));
 export default useDevRoute;

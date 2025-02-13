@@ -36,7 +36,7 @@ const u2fMethods: {
 
 export const Profile: FC = () => {
   const profile = useUser((state) => state.profile);
-  const setProfile = useUser((state) => state.setState("profile"));
+  const setProfile = useUser((state) => state.setProfile);
 
   const userGroups: string = useMemo(() => {
     if (!profile) return "";

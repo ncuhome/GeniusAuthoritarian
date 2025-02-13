@@ -3,12 +3,12 @@ import { create } from "zustand";
 type GroupState = {
   groups?: User.Group[];
 
-  setState: <T extends keyof GroupState>(
-    key: T
-  ) => (value: GroupState[T]) => void;
+  setGroups: (groups: User.Group[]) => void;
 };
 
 export const useGroup = create<GroupState>()((set) => ({
-  setState: (key) => (value) => set({ [key]: value }),
+  setGroups: (groups) => {
+    set({ groups });
+  },
 }));
 export default useGroup;

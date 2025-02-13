@@ -13,7 +13,7 @@ import useUser from "@store/useUser";
 
 export const NewAppBlock: FC = () => {
   const apps = useUser((state) => state.apps);
-  const setApps = useUser((state) => state.setState("apps"));
+  const setApps = useUser((state) => state.setApps);
   const setDialog = useUser((state) => state.setDialog);
 
   const [name, callback, permitAll, permitGroups] = useAppForm(

@@ -21,10 +21,9 @@ interface UserState {
   setAuth: (token: string | null, groups?: string[]) => void;
   setDialog: (props: DialogProps) => Promise<boolean>;
   setDeviceOffline: (id: number) => void;
-
-  setState: <T extends keyof UserState>(
-    key: T,
-  ) => (value: UserState[T]) => void;
+  setProfile: (profile: User.Profile) => void;
+  setApps: (apps: App.Detailed[]) => void;
+  setAccessibleApps: (apps: App.Accessible) => void;
 }
 
 export const useUser = create<UserState>()((set, get) => ({
@@ -73,7 +72,14 @@ export const useUser = create<UserState>()((set, get) => ({
       },
     });
   },
-
-  setState: (key) => (value) => set({ [key]: value }),
+  setProfile: (profile) => {
+    set({ profile });
+  },
+  setApps: (apps) => {
+    set({ apps });
+  },
+  setAccessibleApps: (accessibleApps) => {
+    set({ accessibleApps });
+  },
 }));
 export default useUser;

@@ -4,9 +4,7 @@ import { persist, createJSONStorage } from "zustand/middleware";
 interface ThemeState {
   dark?: boolean;
 
-  setState: <T extends keyof ThemeState>(
-    key: T
-  ) => (value: ThemeState[T]) => void;
+  setDarkMode: (dark: boolean) => void;
 }
 
 export const useTheme = create<ThemeState>()(
@@ -14,12 +12,14 @@ export const useTheme = create<ThemeState>()(
     (set, get) => ({
       dark: window.matchMedia("(prefers-color-scheme: dark)").matches ?? true,
 
-      setState: (key) => (value) => set({ [key]: value }),
+      setDarkMode: (dark: boolean) => {
+        set({ dark });
+      },
     }),
     {
       name: "theme",
       storage: createJSONStorage(() => localStorage),
-    }
-  )
+    },
+  ),
 );
 export default useTheme;
