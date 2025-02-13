@@ -104,7 +104,10 @@ export const LoginForm: FC = () => {
   };
 
   useMount(() => {
-    if (token && !appCode) nav("/user", { replace: true });
+    if (token && !appCode) {
+      nav("/user", { replace: true });
+      return;
+    }
     switch (true) {
       case navigator.userAgent.indexOf("Feishu") !== -1:
         onGoFeishuLogin();

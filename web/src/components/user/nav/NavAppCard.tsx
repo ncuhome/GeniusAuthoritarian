@@ -61,9 +61,11 @@ export const NavAppCard: FC<Props> = ({ app }) => {
           <Chip
             variant="outlined"
             size="small"
-            color={"warning"}
             icon={<ExtensionOff />}
             label={"未接入"}
+            sx={{
+              opacity: 0.7,
+            }}
           />
         ) : (
           <Chip
