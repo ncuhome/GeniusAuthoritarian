@@ -1,13 +1,7 @@
 import { FC } from "react";
-import { Route, Routes, Outlet } from "react-router";
-
-import Home from "./Home";
-import Feishu from "./Feishu";
-import DingTalk from "./DingTalk";
-import Login from "./Login";
+import { Outlet } from "react-router";
 
 import { Toaster } from "react-hot-toast";
-import PageNotFound from "@components/PageNotFound";
 
 export const Authoritarian: FC = () => {
   return (
@@ -22,13 +16,6 @@ export const Authoritarian: FC = () => {
         }}
       />
       <Outlet />
-      <Routes>
-        <Route index element={<Home />} />
-        <Route path={"feishu"} element={<Feishu />} />
-        <Route path={"dingTalk"} element={<DingTalk />} />
-        <Route path={"login"} element={<Login />} />
-        <Route path={"*"} element={<PageNotFound />} />
-      </Routes>
     </>
   );
 };

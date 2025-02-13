@@ -1,12 +1,10 @@
-import { FC, ReactNode, useMemo, useState, lazy } from "react";
-import { Routes, Route, Outlet } from "react-router";
+import { FC, useMemo, useState } from "react";
+import { Outlet } from "react-router";
 import useKeyDown from "@hooks/useKeyDown";
 import "./style.css";
 
 import { createTheme, ThemeProvider } from "@mui/material/styles";
 import U2fDialog from "@components/user/U2fDialog";
-import Suspense from "@components/Suspense";
-import PageNotFound from "@components/PageNotFound";
 import NavHeader from "@components/user/NavHeader";
 import { Toaster } from "react-hot-toast";
 import {
