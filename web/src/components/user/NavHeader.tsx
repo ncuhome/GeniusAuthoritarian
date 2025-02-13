@@ -1,5 +1,5 @@
 import { FC, useState, CSSProperties, Fragment } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate } from "react-router";
 import toast from "react-hot-toast";
 import "./NavHeader.css";
 
@@ -70,7 +70,7 @@ export const NavHeader: FC<Props> = ({
 
   const onRoute = (index: number, path: string) => {
     handleChangeTab(index);
-    nav(path);
+    nav(`${path}`);
   };
 
   const renderLogo = (style?: CSSProperties) => {

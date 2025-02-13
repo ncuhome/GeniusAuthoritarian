@@ -36,8 +36,12 @@ export const Mfa: FC<Props> = ({ enabled, setEnabled, ...props }) => {
 
   const newMfaStep = useNewMfaForm((state) => state.step);
   const newMfaCode = useNewMfaForm((state) => state.mfaCode);
-  const setNewMfaStep = useNewMfaForm((state) => state.setStep);
-  const setNewMfaCode = useNewMfaForm((state) => state.setMfaCode);
+  const setNewMfaStep = (step: number) => {
+    useNewMfaForm.setState({ step });
+  };
+  const setNewMfaCode = (code: string) => {
+    useNewMfaForm.setState({ mfaCode: code });
+  };
   const resetNewMfaForm = useNewMfaForm((state) => state.reset);
 
   const [newMfaNextStepLoading, setNewMfaNextStepLoading] = useState(false);

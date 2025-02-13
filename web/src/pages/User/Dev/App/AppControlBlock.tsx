@@ -46,15 +46,7 @@ export const AppControlBlock: FC = () => {
       state.permitGroups,
     ]),
   );
-  const [setName, setCallback, setPermitAll, setPermitGroups] =
-    useAppModifyForm(
-      useShallow((state) => [
-        state.setState("name"),
-        state.setState("callback"),
-        state.setState("permitAll"),
-        state.setState("permitGroups"),
-      ]),
-    );
+  const setAppModifyForm = useAppModifyForm((state) => state.setApp);
   const [onModifyApp, setOnModifyApp] = useState<App.Detailed | null>(null);
   const [modifyingApp, setModifyingApp] = useState(false);
 
@@ -135,10 +127,7 @@ export const AppControlBlock: FC = () => {
   }
 
   function showModifyAppDialog(app: App.Detailed) {
-    setName(app.name);
-    setCallback(app.callback);
-    setPermitAll(app.permitAllGroup);
-    setPermitGroups(app.groups);
+    setAppModifyForm(app);
     setOnModifyApp(app);
   }
 

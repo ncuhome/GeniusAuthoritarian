@@ -1,7 +1,7 @@
 import { memo, useRef, useState } from "react";
 import { createUseQuery } from "@hooks/useQuery";
 import useMount from "@hooks/useMount";
-import { useNavigate } from "react-router-dom";
+import { useNavigate } from "react-router";
 import { ThrowError } from "@util/nav";
 import toast from "react-hot-toast";
 

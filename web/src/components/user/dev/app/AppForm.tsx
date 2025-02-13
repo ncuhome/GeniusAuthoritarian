@@ -67,27 +67,9 @@ export const AppForm: FC<Props> = ({
         state.callbackError,
       ]),
     );
-  const [
-    setName,
-    setCallback,
-    setPermitAll,
-    setPermitGroups,
-    setNameError,
-    setCallbackError,
-  ] = useForm(
-    useShallow((state) => [
-      state.setState("name"),
-      state.setState("callback"),
-      state.setState("permitAll"),
-      state.setState("permitGroups"),
-      state.setState("nameError"),
-      state.setState("callbackError"),
-    ]),
-  );
   const [showSelectGroups, setShowSelectGroups] = useState(!permitAll);
 
   const groups = useGroup((state) => state.groups);
-  const setGroups = useGroup((state) => state.setGroups);
 
   const notOnlyCenterSelected = useMemo(
     () =>
@@ -101,26 +83,26 @@ export const AppForm: FC<Props> = ({
   useUserApiV1<User.Group[]>(!permitAll ? "group/list" : null, {
     immutable: true,
     enableLoading: true,
-    onSuccess: (data) => setGroups(data),
+    onSuccess: (data) => useGroup.setState({ groups: data }),
   });
 
   async function checkForm(): Promise<boolean> {
     if (!name) {
-      setNameError(true);
+      useForm.setState({ nameError: true });
       toast.error("应用名称不能为空");
       nameInput.current!.focus();
       return false;
     } else {
-      setNameError(false);
+      useForm.setState({ nameError: false });
     }
 
     if (callback.length <= 8) {
-      setCallbackError(true);
+      useForm.setState({ callbackError: true });
       toast.error("回调地址不能为空");
       callbackInput.current!.focus();
       return false;
     } else {
-      setCallbackError(false);
+      useForm.setState({ callbackError: false });
     }
 
     if (!permitAll && (!permitGroups || permitGroups.length === 0)) {
@@ -154,7 +136,7 @@ export const AppForm: FC<Props> = ({
             inputRef={nameInput}
             color={nameError ? "error" : "primary"}
             value={name}
-            onChange={(e) => setName(e.target.value)}
+            onChange={(e) => useForm.setState({ name: e.target.value })}
           />
         </Grid>
         <Grid item xs={12} sm={6}>
@@ -167,7 +149,7 @@ export const AppForm: FC<Props> = ({
             onChange={(e) => {
               const text = e.target.value;
               if (!hasValidScheme(text)) return;
-              setCallback(text);
+              useForm.setState({ callback: text });
             }}
           />
         </Grid>
@@ -181,7 +163,9 @@ export const AppForm: FC<Props> = ({
               control={
                 <Checkbox
                   checked={permitAll}
-                  onChange={(e) => setPermitAll(e.target.checked)}
+                  onChange={(e) =>
+                    useForm.setState({ permitAll: e.target.checked })
+                  }
                 />
               }
               label="允许所有成员使用"
@@ -210,7 +194,9 @@ export const AppForm: FC<Props> = ({
               <SelectPermitGroup
                 groups={groups}
                 permitGroups={permitGroups}
-                setPermitGroups={setPermitGroups}
+                setPermitGroups={(data) =>
+                  useForm.setState({ permitGroups: data })
+                }
                 fullWidth
                 sx={{ pb: "1rem" }}
               />

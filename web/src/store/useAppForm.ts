@@ -12,9 +12,8 @@ interface AppFormState {
 
 interface AppFormActions {
   reset: () => void;
-  setState: <T extends keyof AppFormState>(
-    key: T
-  ) => (value: AppFormState[T]) => void;
+
+  setApp: (app: App.Detailed) => void;
 }
 
 const initialAppForm: AppFormState = {
@@ -36,7 +35,14 @@ const createAppForm = (): UseAppForm =>
     reset: () => {
       set(initialAppForm);
     },
-    setState: (key) => (value) => set({ [key]: value }),
+    setApp: (app: App.Detailed) => {
+      set({
+        name: app.name,
+        callback: app.callback,
+        permitAll: app.permitAllGroup,
+        permitGroups: app.groups,
+      });
+    },
   }));
 
 export const useAppForm = createAppForm();

@@ -1,5 +1,5 @@
 import { FC, useMemo } from "react";
-import { useLocation, useNavigate } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router";
 import "./style.css";
 
 import Picture from "@components/Picture";

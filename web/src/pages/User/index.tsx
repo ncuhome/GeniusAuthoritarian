@@ -1,13 +1,9 @@
 import { FC, ReactNode, useMemo, useState, lazy } from "react";
-import { Routes, Route } from "react-router-dom";
+import { Routes, Route, Outlet } from "react-router";
 import useKeyDown from "@hooks/useKeyDown";
 import "./style.css";
 
-const Dev = lazy(() => import("./pages/Dev"));
-const Admin = lazy(() => import("./pages/Admin"));
-import Navigation from "./pages/Navigation";
-import Profile from "./pages/Profile";
-
+import { createTheme, ThemeProvider } from "@mui/material/styles";
 import U2fDialog from "@components/user/U2fDialog";
 import Suspense from "@components/Suspense";
 import PageNotFound from "@components/PageNotFound";
@@ -30,12 +26,11 @@ import useTheme from "@store/useTheme";
 type RouterElement = {
   name: string;
   path: string;
-  element: ReactNode;
 };
 
 const BaseUserRouters: RouterElement[] = [
-  { name: "导航", path: "", element: <Navigation /> },
-  { name: "个人资料", path: "profile", element: <Profile /> },
+  { name: "导航", path: "" },
+  { name: "个人资料", path: "profile" },
 ];
 
 const UserRoutersExtra: {
@@ -45,22 +40,12 @@ const UserRoutersExtra: {
     {
       name: "研发中控",
       path: "dev",
-      element: (
-        <Suspense>
-          <Dev />
-        </Suspense>
-      ),
     },
   ],
   中心: [
     {
       name: "管理后台",
       path: "admin",
-      element: (
-        <Suspense>
-          <Admin />
-        </Suspense>
-      ),
     },
   ],
 };
@@ -73,15 +58,25 @@ export const User: FC = () => {
       state.dialogResolver,
     ]),
   );
-    useKeyDown("Enter", () => {
-      if (openDialog) {
-        dialogResolver?.(true);
-      }
-    });
+  useKeyDown("Enter", () => {
+    if (openDialog) {
+      dialogResolver?.(true);
+    }
+  });
 
-    const groups = useUser((state) => state.groups);
+  const groups = useUser((state) => state.groups);
 
   const isDarkTheme = useTheme((state) => state.dark);
+
+  const theme = useMemo(
+    () =>
+      createTheme({
+        palette: {
+          mode: isDarkTheme ? "dark" : undefined,
+        },
+      }),
+    [isDarkTheme],
+  );
 
   const UserRouters = useMemo<RouterElement[]>(() => {
     let routers = BaseUserRouters;
@@ -102,7 +97,7 @@ export const User: FC = () => {
   });
 
   return (
-    <>
+    <ThemeProvider theme={theme}>
       <Toaster
         toastOptions={
           isDarkTheme
@@ -147,12 +142,7 @@ export const User: FC = () => {
             minHeight: "calc(100% - 3.5rem)",
           }}
         >
-          <Routes>
-            {UserRouters.map((tab) => (
-              <Route key={tab.path} {...tab} />
-            ))}
-            <Route path={"*"} element={<PageNotFound />} />
-          </Routes>
+          <Outlet />
         </Box>
 
         <U2fDialog />
@@ -173,7 +163,7 @@ export const User: FC = () => {
           </DialogActions>
         </Dialog>
       </Stack>
-    </>
+    </ThemeProvider>
   );
 };
 export default User;

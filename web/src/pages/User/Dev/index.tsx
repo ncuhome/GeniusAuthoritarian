@@ -8,7 +8,6 @@ import useDevRoute from "@store/useDevRoute";
 
 export const Dev: FC = () => {
   const index = useDevRoute((state) => state.index);
-  const setIndex = useDevRoute((state) => state.setIndex);
 
   return (
     <Container>
@@ -17,7 +16,9 @@ export const Dev: FC = () => {
           value={index}
           variant="scrollable"
           scrollButtons="auto"
-          onChange={(_e, target: number) => setIndex(target)}
+          onChange={(_e, target: number) =>
+            useDevRoute.setState({ index: target })
+          }
         >
           {routes.map((route) => (
             <Tab key={route.label} label={route.label} />

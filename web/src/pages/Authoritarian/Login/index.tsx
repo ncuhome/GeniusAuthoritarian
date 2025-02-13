@@ -1,5 +1,5 @@
 import { FC } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate } from "react-router";
 import { createUseQuery } from "@hooks/useQuery";
 import useMount from "@hooks/useMount";
 import { ThrowError } from "@util/nav";

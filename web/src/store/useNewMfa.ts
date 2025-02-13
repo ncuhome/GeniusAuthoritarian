@@ -1,4 +1,4 @@
-import { create, StoreApi, UseBoundStore } from "zustand";
+import { create } from "zustand";
 
 interface NewMfaForm {
   step: number;
@@ -7,9 +7,6 @@ interface NewMfaForm {
 
 interface NewMfaAction {
   reset: () => void;
-
-  setStep: (step: number) => void;
-  setMfaCode: (mfaCode: string) => void;
 }
 
 const initialMfaForm: NewMfaForm = {
@@ -17,19 +14,11 @@ const initialMfaForm: NewMfaForm = {
   mfaCode: "",
 };
 
-export type UseAppForm = UseBoundStore<StoreApi<NewMfaForm & NewMfaAction>>;
-
 const useNewMfaForm = create<NewMfaForm & NewMfaAction>()((set) => ({
   ...initialMfaForm,
 
   reset: () => {
     set(initialMfaForm);
-  },
-  setStep: (step: number) => {
-    set({ step });
-  },
-  setMfaCode: (mfaCode: string) => {
-    set({ mfaCode });
   },
 }));
 export default useNewMfaForm;
