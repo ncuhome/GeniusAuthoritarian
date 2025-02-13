@@ -61,7 +61,7 @@ export const LoginForm: FC = () => {
 
   const onGoFeishuLogin = () => onGoLogin("feishu");
   const onGoDingTalkLogin = () => onGoLogin("dingTalk");
-  const onPasskeyLogin = async () => {
+  const onPasskeyLogin = async (conditional?: boolean) => {
     try {
       const {
         data: { data: options },
@@ -69,7 +69,10 @@ export const LoginForm: FC = () => {
       options.publicKey.challenge = coerceToArrayBuffer(
         options.publicKey.challenge,
       );
-      const credential = await navigator.credentials.get(options);
+      const credential = await navigator.credentials.get({
+        ...options,
+        mediation: conditional && "conditional",
+      });
       if (credential?.type !== "public-key") {
         toast.error(`获取凭据失败，凭据类型不正确: ${credential?.type}`);
         return;
@@ -106,6 +109,8 @@ export const LoginForm: FC = () => {
       case navigator.userAgent.indexOf("Feishu") !== -1:
         onGoFeishuLogin();
         break;
+      default:
+        onPasskeyLogin(true);
     }
   });
 
