@@ -1,19 +1,20 @@
+import { lazy } from "react";
 import { RouteObject } from "react-router";
 
-import Authoritarian from "@/pages/Authoritarian";
-import Home from "@/pages/Authoritarian/Home";
-import Feishu from "@/pages/Authoritarian/Feishu";
-import DingTalk from "@/pages/Authoritarian/DingTalk";
-import Login from "@/pages/Authoritarian/Login";
+const Authoritarian = lazy(() => import("@/pages/Authoritarian"));
+const Home = lazy(() => import("@/pages/Authoritarian/Home"));
+const Feishu = lazy(() => import("@/pages/Authoritarian/Feishu"));
+const DingTalk = lazy(() => import("@/pages/Authoritarian/DingTalk"));
+const Login = lazy(() => import("@/pages/Authoritarian/Login"));
 
-import User from "@/pages/User";
-import Navigation from "@/pages/User/Navigation";
-import Profile from "@/pages/User/Profile";
-import Dev from "@/pages/User/Dev";
-import Admin from "@/pages/User/Admin";
+const User = lazy(() => import("@/pages/User"));
+const Navigation = lazy(() => import("@/pages/User/Navigation"));
+const Profile = lazy(() => import("@/pages/User/Profile"));
+const Dev = lazy(() => import("@/pages/User/Dev"));
+const Admin = lazy(() => import("@/pages/User/Admin"));
 
-import PageNotFound from "@components/PageNotFound";
-import Error from "@/pages/Error";
+const PageNotFound = lazy(() => import("@components/PageNotFound"));
+const Error = lazy(() => import("@/pages/Error"));
 
 const routes: RouteObject[] = [
   {
