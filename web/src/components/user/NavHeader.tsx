@@ -92,7 +92,7 @@ export const NavHeader: FC<Props> = ({
         height: "inherit",
       }}
       component={Paper}
-      elevation={6}
+      elevation={3}
       square
     >
       {isSmallScreen ? undefined : (
@@ -147,7 +147,7 @@ export const NavHeader: FC<Props> = ({
           alignItems={"center"}
           divider={<Divider orientation={"vertical"} variant="middle" />}
           sx={{
-            "& hr": {
+            "& .MuiDivider-root": {
               mx: 0.8,
               height: "1rem",
             },

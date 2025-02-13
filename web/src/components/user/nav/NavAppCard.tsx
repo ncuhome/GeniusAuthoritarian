@@ -8,14 +8,14 @@ interface Props {
 }
 
 export const NavAppCard: FC<Props> = ({ app }) => {
-  const [elevation, setElevation] = useState(5);
+  const [elevation, setElevation] = useState(3);
 
   return (
     <Card
       variant={"elevation"}
       elevation={elevation}
-      onMouseEnter={() => setElevation(7)}
-      onMouseLeave={() => setElevation(5)}
+      onMouseEnter={() => setElevation(5)}
+      onMouseLeave={() => setElevation(3)}
       onClick={() => window.open(app.callback, "_blank")}
       sx={{
         transition: "box-shadow .3s ease-in-out",

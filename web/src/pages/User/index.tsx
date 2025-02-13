@@ -15,6 +15,7 @@ import {
   DialogContent,
   DialogActions,
   Button,
+  Paper,
 } from "@mui/material";
 
 import { useShallow } from "zustand/react/shallow";
@@ -115,9 +116,9 @@ export const User: FC = () => {
       />
       <Stack
         id={"user"}
+        component={Paper}
+        elevation={0}
         sx={{
-          backgroundColor: isDarkTheme ? undefined : "#fff",
-          colorScheme: isDarkTheme ? undefined : "light",
           color: "text.primary",
         }}
       >

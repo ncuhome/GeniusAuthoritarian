@@ -18,7 +18,7 @@ export const ShowMusume: FC = () => {
         width: "100%",
       }}
       component={Paper}
-      elevation={5}
+      elevation={3}
     >
       <Box
         sx={{

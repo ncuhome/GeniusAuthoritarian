@@ -25,7 +25,7 @@ export const Block: FC<Props> = ({
     };
 
   return (
-    <Box component={Paper} elevation={5} sx={sx} className={"user-block"}>
+    <Box component={Paper} elevation={3} sx={sx} className={"user-block"}>
       {title ? <BlockTitle>{title}</BlockTitle> : null}
       {subtitle ? (
         <Typography variant={"subtitle2"} color={"text.secondary"}>

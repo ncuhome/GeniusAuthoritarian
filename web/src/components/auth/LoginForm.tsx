@@ -119,7 +119,7 @@ export const LoginForm: FC = () => {
         borderRadius: "0.4rem",
       }}
       component={Paper}
-      elevation={5}
+      elevation={3}
     >
       <Stack
         sx={{
