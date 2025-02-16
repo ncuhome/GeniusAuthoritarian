@@ -33,14 +33,14 @@ jobs:
     needs: build-docker-image
     runs-on: self-hosted
     steps:
-      - name: Update Dev Deployment
-        uses: MultiMx/K8sSetImageAction@v0.5
-        with:
-          backend: 'https://rancher.ncuhome.club'
-          token: ${{ secrets.CATTLE_TOKEN_LOCAL }}
-          namespace: 'genius-auth'
-          workload: 'ssh-server'
-          image: ${{ needs.build-docker-image.outputs.image_tag }}
+#      - name: Update Dev Deployment
+#        uses: MultiMx/K8sSetImageAction@v0.5
+#        with:
+#          backend: 'https://rancher.ncuhome.club'
+#          token: ${{ secrets.CATTLE_TOKEN_LOCAL }}
+#          namespace: 'genius-auth'
+#          workload: 'ssh-server'
+#          image: ${{ needs.build-docker-image.outputs.image_tag }}
 
       - name: Update Prod Deployment
         uses: MultiMx/K8sSetImageAction@v0.5
