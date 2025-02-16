@@ -61,7 +61,31 @@ export const LoginForm: FC = () => {
 
   const onGoFeishuLogin = () => onGoLogin("feishu");
   const onGoDingTalkLogin = () => onGoLogin("dingTalk");
+
+  const isWebauthnAvailable = () => {
+    return !!(
+      navigator.credentials &&
+      // @ts-expect-error
+      navigator.credentials.create &&
+      // @ts-expect-error
+      navigator.credentials.get &&
+      window.PublicKeyCredential
+    );
+  };
+
+  const isWebauthnConditionalAvailable = () => {
+    return !!window.PublicKeyCredential?.isConditionalMediationAvailable?.();
+  };
+
   const onPasskeyLogin = async (conditional?: boolean) => {
+    if (!isWebauthnAvailable()) {
+      if (!conditional) toast.error("当前浏览器不支持 webauthn");
+      return
+    }
+    if (conditional && !isWebauthnConditionalAvailable()) {
+      return
+    }
+
     try {
       const {
         data: { data: options },
