@@ -1,4 +1,4 @@
-import { FC, useCallback, useEffect, useState } from "react";
+import { FC, useCallback, useEffect, useRef, useState } from "react";
 import useInterval from "@hooks/useInterval";
 import useTimeout from "@hooks/useTimeout";
 import useKeyDown from "@hooks/useKeyDown";
@@ -96,6 +96,8 @@ const U2fDialog: FC = () => {
     if (states.reject) states.reject("user canceled");
   };
 
+  const refPasskey = useRef<null | AbortController>(null);
+
   const onSubmit = async (method: string = tabValue) => {
     if (tokenAvailable) {
       const states = useU2fDialog.getState();
@@ -103,58 +105,67 @@ const U2fDialog: FC = () => {
       states.closeDialog();
       return;
     }
-    let data: any;
-    switch (method) {
-      case "phone":
-        if (smsCode === "") {
-          toast.error("验证码不能为空");
-          return;
-        }
-        if (smsCode.length != 5) {
-          toast.error("短信验证码有误");
-          return;
-        }
-        data = { code: smsCode };
-        break;
-      case "mfa":
-        if (mfaCode === "") {
-          toast.error("校验码不能为空");
-          return;
-        }
-        if (mfaCode.length != 6) {
-          toast.error("校验码有误");
-          return;
-        }
-        data = { code: mfaCode };
-        break;
-      case "passkey":
-        const {
-          data: { data: options },
-        } = await apiV1User.get("passkey/options");
-        options.publicKey.challenge = coerceToArrayBuffer(
-          options.publicKey.challenge,
-        );
-        options.publicKey.allowCredentials =
-          options.publicKey.allowCredentials.map((cred: any) => {
-            cred.id = coerceToArrayBuffer(cred.id);
-            return cred;
-          });
-        const credential = await navigator.credentials.get(options);
-        if (credential?.type !== "public-key") {
-          toast.error(`获取凭据失败，凭据类型不正确: ${credential?.type}`);
-          return;
-        }
-        const pubKeyCred = credential as any;
-        data = {
-          id: pubKeyCred.id,
-          rawId: coerceToBase64Url(pubKeyCred.rawId),
-          response: coerceResponseToBase64Url(pubKeyCred.response),
-          type: pubKeyCred.type,
-        };
-        break;
-    }
-    setIsLoading(true);
     try {
+      setIsLoading(true);
+      let data: any;
+      switch (method) {
+        case "phone":
+          if (smsCode === "") {
+            toast.error("验证码不能为空");
+            break;
+          }
+          if (smsCode.length != 5) {
+            toast.error("短信验证码有误");
+            break;
+          }
+          data = { code: smsCode };
+          break;
+        case "mfa":
+          if (mfaCode === "") {
+            toast.error("校验码不能为空");
+            break;
+          }
+          if (mfaCode.length != 6) {
+            toast.error("校验码有误");
+            break;
+          }
+          data = { code: mfaCode };
+          break;
+        case "passkey":
+          if (refPasskey.current) refPasskey.current.abort();
+          const controller = new AbortController();
+          refPasskey.current = controller;
+          const {
+            data: { data: options },
+          } = await apiV1User.get("passkey/options", {
+            signal: controller.signal,
+          });
+          options.publicKey.challenge = coerceToArrayBuffer(
+            options.publicKey.challenge,
+          );
+          options.publicKey.allowCredentials =
+            options.publicKey.allowCredentials.map((cred: any) => {
+              cred.id = coerceToArrayBuffer(cred.id);
+              return cred;
+            });
+          const credential = await navigator.credentials.get({
+            ...options,
+            signal: controller.signal,
+          });
+          if (credential?.type !== "public-key") {
+            toast.error(`获取凭据失败，凭据类型不正确: ${credential?.type}`);
+            break;
+          }
+          const pubKeyCred = credential as any;
+          data = {
+            id: pubKeyCred.id,
+            rawId: coerceToBase64Url(pubKeyCred.rawId),
+            response: coerceResponseToBase64Url(pubKeyCred.response),
+            type: pubKeyCred.type,
+          };
+          break;
+      }
+      if (!data) return;
       const {
         data: { data: result },
       } = await apiV1User.post<{ data: User.U2F.Result }>(
@@ -166,7 +177,15 @@ const U2fDialog: FC = () => {
       if (states.resolve) states.resolve(result);
       states.closeDialog();
     } catch (err) {
-      if (err instanceof Error) toast.error(err.message);
+      if (err instanceof Error) {
+        switch (err.name) {
+          case "AbortError":
+            console.log("U2F bypass error", err);
+            break;
+          default:
+            toast.error(err.message);
+        }
+      }
     }
     setIsLoading(false);
   };

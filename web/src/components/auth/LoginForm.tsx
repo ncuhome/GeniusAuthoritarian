@@ -1,4 +1,4 @@
-import { FC } from "react";
+import { FC, useRef } from "react";
 import { createUseQuery } from "@hooks/useQuery";
 import useMount from "@hooks/useMount";
 import { useNavigate } from "react-router";
@@ -77,25 +77,33 @@ export const LoginForm: FC = () => {
     return !!window.PublicKeyCredential?.isConditionalMediationAvailable?.();
   };
 
+  const refPasskey = useRef<null | AbortController>(null);
   const onPasskeyLogin = async (conditional?: boolean) => {
     if (!isWebauthnAvailable()) {
       if (!conditional) toast.error("当前浏览器不支持 webauthn");
-      return
+      return;
     }
     if (conditional && !isWebauthnConditionalAvailable()) {
-      return
+      return;
     }
+
+    if (refPasskey.current) refPasskey.current.abort();
+    const controller = new AbortController();
+    refPasskey.current = controller;
 
     try {
       const {
         data: { data: options },
-      } = await apiV1.get("public/login/passkey/");
+      } = await apiV1.get("public/login/passkey/", {
+        signal: controller.signal,
+      });
       options.publicKey.challenge = coerceToArrayBuffer(
         options.publicKey.challenge,
       );
       const credential = await navigator.credentials.get({
         ...options,
         mediation: conditional && "conditional",
+        signal: controller.signal,
       });
       if (credential?.type !== "public-key") {
         toast.error(`获取凭据失败，凭据类型不正确: ${credential?.type}`);
@@ -115,6 +123,9 @@ export const LoginForm: FC = () => {
             type: pubKeyCred.type,
           },
         },
+        {
+          signal: controller.signal,
+        },
       );
       window.open(data.callback, "_self");
     } catch (err: any) {
@@ -122,7 +133,14 @@ export const LoginForm: FC = () => {
         err = err as ApiError<void>;
         if (err.msg) toast.error(err.msg);
       } else {
-        if (err.name != "NotAllowedError") toast.error(`创建凭据失败: ${err}`);
+        switch (err.name) {
+          case "AbortError":
+          case "NotAllowedError":
+            console.log("Passkey bypassed error", err)
+            break;
+          default:
+            toast.error(`Passkey 认证失败: ${err}`);
+        }
       }
     }
   };
